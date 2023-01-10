@@ -45,8 +45,7 @@ MainWindow::MainWindow( QWidget * parent ) : QMainWindow( parent )
                           return txt;
                       }.operator()());
     } );
-    QFileInfo f( "/Users/sr-71/Downloads/firebase_cpp_sdk_10.3.0.zip" );
     bar->setMaximum( 100 );
-    rc->upload( "/Users/sr-71/Downloads/firebase_cpp_sdk_10.3.0.zip", "" );
-    connect( rc, & Rclone::uploadData, this, [ = ]( const double & val ) { bar->setValue(( int ) val ); } );
+    rc->download( { "firebase_cpp_sdk_10.3.0.zip",RcloneFile::Distant }, {"./"} );
+    connect( rc, & Rclone::downloadData, this, [ = ]( const double & val ) { bar->setValue(( int ) val ); } );
 }

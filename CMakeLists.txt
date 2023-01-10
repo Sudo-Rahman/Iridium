@@ -14,7 +14,7 @@ find_package(Qt6 COMPONENTS
         Widgets
         REQUIRED)
 
-add_executable(Iridium src/main.cpp src/Rclone/Rclone.cpp src/Rclone/Rclone.hpp src/MainWindow/MainWindow.cpp src/MainWindow/MainWindow.hpp)
+add_executable(Iridium src/main.cpp src/Rclone/Rclone.cpp src/Rclone/Rclone.hpp src/MainWindow/MainWindow.cpp src/MainWindow/MainWindow.hpp src/Rclone/RcloneFile.cpp src/Rclone/RcloneFile.hpp)
 target_link_libraries(Iridium
         Qt::Core
         Qt::Gui

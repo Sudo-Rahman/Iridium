@@ -2,6 +2,10 @@
 // Created by sr-71 on 09/01/2023.
 //
 
+
+#ifndef IRIDIUM_RCLONE_HPP
+#define IRIDIUM_RCLONE_HPP
+
 #include <QString>
 #include <QObject>
 #include <QJsonDocument>
@@ -9,10 +13,7 @@
 #include <QJsonArray>
 #include <QProcess>
 #include <QThread>
-
-#ifndef IRIDIUM_RCLONE_HPP
-#define IRIDIUM_RCLONE_HPP
-
+#include "RcloneFile.hpp"
 
 class Rclone : public QObject
 {
@@ -35,15 +36,19 @@ public:
 
     void lsJson( const QString & path );
 
-    void upload( const QString & src, const QString & dest );
+    void upload( const RcloneFile & src, const RcloneFile & dest );
 
-    void download( const QString & src, const QString & dest );
+    void download( const RcloneFile & src, const RcloneFile & dest );
 
 signals:
 
     void lsJsonFinished( QJsonDocument doc );
 
     void uploadData( double value );
+
+    void downloadData( double value );
+
+    void exitCode(int exit);
 
 
 };
