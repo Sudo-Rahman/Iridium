@@ -8,7 +8,7 @@
 
 #include <QObject>
 #include <QDateTime>
-#include <Qfile>
+#include <QFile>
 #include <QDir>
 #include <QJsonDocument>
 
@@ -25,18 +25,19 @@ private:
     uint64_t size {};
     bool isDirectory {};
     QDateTime modTime {};
-    TypeFile typeFile{};
+    TypeFile typeFile {};
 
-    void init(const QString &path , TypeFile type = TypeFile::Local);
+    void init( const QString & path, TypeFile type = TypeFile::Local );
 
 public:
-    explicit RcloneFile( const QFile & file,TypeFile typeFile = TypeFile::Local );
+    explicit RcloneFile( const QFile & file, TypeFile typeFile = TypeFile::Local );
 
     RcloneFile( const QString & pathFile, TypeFile typeFile = TypeFile::Local );
 
-    explicit RcloneFile( const QDir & dir,TypeFile typeFile = TypeFile::Local );
+    explicit RcloneFile( const QDir & dir, TypeFile typeFile = TypeFile::Local );
 
-    RcloneFile( const QString& path, uint64_t size, bool isDir, QDateTime modTime,TypeFile typeFile = TypeFile::Local );
+    RcloneFile( const QString & path, uint64_t size, bool isDir, QDateTime modTime,
+                TypeFile typeFile = TypeFile::Local );
 
     const QString & getPath() const;
 

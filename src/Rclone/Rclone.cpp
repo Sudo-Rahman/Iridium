@@ -7,10 +7,7 @@
 #include <utility>
 #include <QFile>
 
-Rclone::Rclone( QString path, QString name ) : pathRclone( std::move( path ))
-{
-    setStorageName( name );
-}
+Rclone::Rclone( QString path ) : pathRclone( std::move( path )) { loadListRemotes(); }
 
 const QString & Rclone::getPathRclone() const
 {
@@ -22,17 +19,6 @@ void Rclone::setPathRclone( const QString & pathRclone )
     Rclone::pathRclone = pathRclone;
 }
 
-const QString & Rclone::getStorageName() const
-{
-    return storageName;
-}
-
-void Rclone::setStorageName( const QString & storageName )
-{
-    Rclone::storageName = storageName;
-    if ( ! storageName.endsWith( ':' ))
-        Rclone::storageName += ':';
-}
 
 /**
  * @brief Liste sous forme de json les fichiers dans le dossier path
@@ -41,7 +27,7 @@ void Rclone::setStorageName( const QString & storageName )
 void Rclone::lsJson( const QString & path )
 {
     auto * process = new QProcess;
-    QStringList arguments( { "lsjson", storageName + path } );
+    QStringList arguments( { "lsjson", path } );
     connect( process, & QProcess::finished, this, [ =, this ]( int exit )
     {
         if ( exit == 0 )
@@ -63,7 +49,7 @@ void Rclone::lsJson( const QString & path )
 void Rclone::upload( const RcloneFile & src, const RcloneFile & dest )
 {
     auto * process = new QProcess;
-    QStringList arguments( { "copyto", src.getPath(), storageName + dest.getPath() + src.getName(), "-P" } );
+    QStringList arguments( { "copyto", src.getPath(), dest.getPath() + src.getName(), "-P" } );
     connect( process, & QProcess::readyReadStandardOutput, this, [ &, process, this ]()
     {
         auto data = QString( process->readAll().data()).split( "\n" );
@@ -93,9 +79,8 @@ void Rclone::upload( const RcloneFile & src, const RcloneFile & dest )
  */
 void Rclone::download( const RcloneFile & src, const RcloneFile & dest )
 {
-
     auto * process = new QProcess;
-    QStringList arguments( { "copyto", storageName + src.getPath(), dest.getPath() + src.getName(), "-P" } );
+    QStringList arguments( { "copyto", src.getPath(), dest.getPath() + src.getName(), "-P" } );
     connect( process, & QProcess::readyReadStandardOutput, this, [ &, process, this ]()
     {
         auto data = QString( process->readAll().data()).split( "\n" );
@@ -115,4 +100,85 @@ void Rclone::download( const RcloneFile & src, const RcloneFile & dest )
         delete process;
     } );
     process->start( pathRclone, arguments );
+}
+
+void Rclone::config( Rclone::Config config, const QStringList & params )
+{
+    int * compteur = new int();
+    * compteur = 0;
+    auto * process = new QProcess;
+    connect( process, & QProcess::readyReadStandardOutput, this, [ = ]()
+    {
+        qDebug() << process->readAllStandardOutput() << * compteur;
+        switch ( * compteur )
+        {
+            case 0:
+                process->write( "n\n" );
+                break;
+            case 1:
+                process->write( params[0].toLatin1() + "\n" );
+                break;
+            case 2:
+                process->write( "drive\n" );
+            default:
+                process->write( "\n" );
+        }
+        * compteur += 1;
+        if ( * compteur >= 100 )
+            exit( - 1 );
+    } );
+    switch ( config )
+    {
+
+        case Drive:
+        {
+            if ( not params.isEmpty())
+            {
+//                process->start( pathRclone, { "config","create",params[0], "drive" } );
+                process->start( pathRclone, { "config" } );
+                process->waitForStarted();
+            }
+
+        }
+            break;
+    }
+    loadListRemotes();
+}
+
+void Rclone::loadListRemotes()
+{
+    auto * process = new QProcess;
+    connect( process, & QProcess::finished, this, [ = ]( int exit )
+    {
+        if ( exit == 0 )
+        {
+            auto data = QString( process->readAll()).split( "\n" );
+            erase_if( data, []( auto & str ) { return str == ""; } );
+            QMap < QString, QString > map;
+            for ( auto & str: data )
+            {
+                str.remove( " " );
+                map.insert( str.split( ":" )[0], str.split( ":" )[1] );
+            }
+            listRemotes = map;
+            emit listRemotesFinished( map );
+        }
+    } );
+    process->start( pathRclone, { "listremotes", "--long" } );
+
+}
+
+const QMap < QString, QString > & Rclone::getListRemotes()
+{
+    return listRemotes;
+}
+
+void Rclone::deleteRemote( const QString & remote )
+{
+    auto * process = new QProcess;
+    connect( process, & QProcess::finished, this, [ = ]( int exit )
+    {
+        emit exitCode( exit );
+    } );
+    process->start( pathRclone, { "config", "delete", remote } );
 }
