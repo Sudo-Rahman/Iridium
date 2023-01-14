@@ -8,7 +8,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS
+find_package(QT NAMES Qt6 REQUIRED COMPONENTS
         Core
         Gui
         Widgets
@@ -26,10 +26,9 @@ set(SRC
         src/Rclone/Rclone.cpp src/Rclone/Rclone.hpp
         src/MainWindow/MainWindow.cpp src/MainWindow/MainWindow.hpp
         src/Rclone/RcloneFile.cpp src/Rclone/RcloneFile.hpp
-        src/AddNewRemote/ChoseRemoteDialog.cpp src/AddNewRemote/ChoseRemoteDialog.hpp
-        src/AddNewRemote/RemoteFrame/RemoteFrame.cpp src/AddNewRemote/RemoteFrame/RemoteFrame.hpp
-        src/AddNewRemote/RemoteFrame/GoogleDriveRemoteFrame.cpp src/AddNewRemote/RemoteFrame/GoogleDriveRemoteFrame.hpp
-        )
+        src/Remote/AddNewRemote/ChoseRemoteDialog.cpp src/Remote/AddNewRemote/ChoseRemoteDialog.hpp
+        src/Remote/AddNewRemote/RemoteFrame/RemoteFrame.cpp src/Remote/AddNewRemote/RemoteFrame/RemoteFrame.hpp
+        src/Remote/AddNewRemote/RemoteFrame/RemoteConfigParamsFrame.cpp src/Remote/AddNewRemote/RemoteFrame/RemoteConfigParamsFrame.hpp src/Remote/Remote.h src/Remote/AddNewRemote/RemoteFrame/GoogleDrive/GoogleDriveRemoteConfigParamsFrame.cpp src/Remote/AddNewRemote/RemoteFrame/GoogleDrive/GoogleDriveRemoteConfigParamsFrame.hpp)
 
 SET(TRANSLATION
         languages/iridium_en.ts

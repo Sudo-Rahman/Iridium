@@ -7,11 +7,11 @@
 
 #include <QMainWindow>
 #include <QCoreApplication>
+#include "../Rclone/Rclone.hpp"
 
 class MainWindow : public QMainWindow
 {
 Q_OBJECT
-    const QString rclonePath = QCoreApplication::applicationDirPath().append( "/rclone" );
 public:
     explicit MainWindow( QWidget * parent = nullptr );
 

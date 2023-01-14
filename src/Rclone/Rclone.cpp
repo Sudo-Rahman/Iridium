@@ -5,9 +5,18 @@
 #include "Rclone.hpp"
 
 #include <utility>
-#include <QFile>
+#include <QCoreApplication>
 
-Rclone::Rclone( QString path ) : pathRclone( std::move( path )) { loadListRemotes(); }
+Rclone::Rclone( QString path ) : pathRclone( std::move( path )) { }
+
+Rclone::Rclone() : pathRclone( QCoreApplication::applicationDirPath().append( "/rclone" )) { }
+
+Rclone::Rclone(const Rclone &rclone)
+{
+    Rclone::pathRclone = rclone.getPathRclone();
+
+}
+
 
 const QString & Rclone::getPathRclone() const
 {
@@ -26,19 +35,17 @@ void Rclone::setPathRclone( const QString & pathRclone )
  */
 void Rclone::lsJson( const QString & path )
 {
-    auto * process = new QProcess;
     QStringList arguments( { "lsjson", path } );
-    connect( process, & QProcess::finished, this, [ =, this ]( int exit )
+    connect(this, & QProcess::finished, this, [ =, this ]( int exit )
     {
         if ( exit == 0 )
         {
-            auto doc = QJsonDocument::fromJson( process->readAllStandardOutput());
+            auto doc = QJsonDocument::fromJson( readAllStandardOutput());
             emit lsJsonFinished( doc );
         }
         emit exitCode( exit );
-        delete process;
     } );
-    process->start( pathRclone, arguments );
+    start( pathRclone, arguments );
 }
 
 /**
@@ -48,11 +55,10 @@ void Rclone::lsJson( const QString & path )
  */
 void Rclone::upload( const RcloneFile & src, const RcloneFile & dest )
 {
-    auto * process = new QProcess;
     QStringList arguments( { "copyto", src.getPath(), dest.getPath() + src.getName(), "-P" } );
-    connect( process, & QProcess::readyReadStandardOutput, this, [ &, process, this ]()
+    connect( this, & QProcess::readyReadStandardOutput, this, [ &, this ]()
     {
-        auto data = QString( process->readAll().data()).split( "\n" );
+        auto data = QString( readAll().data()).split( "\n" );
         if ( not data.isEmpty())
         {
             auto l1 = data[0].split( QRegularExpression( " |," ));
@@ -61,14 +67,13 @@ void Rclone::upload( const RcloneFile & src, const RcloneFile & dest )
                     emit downloadData( l1[6].remove( "%" ).toDouble());
         }
     } );
-    connect( process, & QProcess::finished, this, [ =, this ]( int exit )
+    connect(this, & QProcess::finished, this, [ =, this ]( int exit )
     {
         if ( exit == 0 )
                 emit uploadData( 100.0 );
         emit exitCode( exit );
-        delete process;
     } );
-    process->start( pathRclone, arguments );
+    start( pathRclone, arguments );
 
 }
 
@@ -79,11 +84,10 @@ void Rclone::upload( const RcloneFile & src, const RcloneFile & dest )
  */
 void Rclone::download( const RcloneFile & src, const RcloneFile & dest )
 {
-    auto * process = new QProcess;
     QStringList arguments( { "copyto", src.getPath(), dest.getPath() + src.getName(), "-P" } );
-    connect( process, & QProcess::readyReadStandardOutput, this, [ &, process, this ]()
+    connect(this, & QProcess::readyReadStandardOutput, this, [ &, this ]()
     {
-        auto data = QString( process->readAll().data()).split( "\n" );
+        auto data = QString( readAll().data()).split( "\n" );
         if ( not data.isEmpty())
         {
             auto l1 = data[0].split( QRegularExpression( " |," ));
@@ -92,67 +96,64 @@ void Rclone::download( const RcloneFile & src, const RcloneFile & dest )
                     emit downloadData( l1[6].remove( "%" ).toDouble());
         }
     } );
-    connect( process, & QProcess::finished, this, [ =, this ]( int exit )
+    connect(this, & QProcess::finished, this, [ =, this ]( int exit )
     {
         if ( exit == 0 )
                 emit downloadData( 100.0 );
         emit exitCode( exit );
-        delete process;
     } );
-    process->start( pathRclone, arguments );
+    start( pathRclone, arguments );
 }
 
-void Rclone::config( Rclone::Config config, const QStringList & params )
+void Rclone::config( RemoteType type, const QStringList & params )
 {
+    qDebug() << this;
+
     int * compteur = new int();
     * compteur = 0;
-    auto * process = new QProcess;
-    connect( process, & QProcess::readyReadStandardOutput, this, [ = ]()
+
+    connect( this, & QProcess::readyReadStandardOutput, this, [ = ]()
     {
-        qDebug() << process->readAllStandardOutput() << * compteur;
+        qDebug() << readAllStandardOutput() << * compteur;
         switch ( * compteur )
         {
             case 0:
-                process->write( "n\n" );
+                write( "n\n" );
                 break;
             case 1:
-                process->write( params[0].toLatin1() + "\n" );
+                write( params[0].toLatin1() + "\n" );
                 break;
             case 2:
-                process->write( "drive\n" );
+                write( "drive\n" );
             default:
-                process->write( "\n" );
+                write( "\n" );
         }
         * compteur += 1;
         if ( * compteur >= 100 )
             exit( - 1 );
     } );
-    switch ( config )
+    switch ( type )
     {
 
         case Drive:
         {
             if ( not params.isEmpty())
             {
-//                process->start( pathRclone, { "config","create",params[0], "drive" } );
-                process->start( pathRclone, { "config" } );
-                process->waitForStarted();
+                start( pathRclone, { "config","create",params[0], "drive" } );
             }
 
         }
             break;
     }
-    loadListRemotes();
 }
 
-void Rclone::loadListRemotes()
+void Rclone::listRemotes()
 {
-    auto * process = new QProcess;
-    connect( process, & QProcess::finished, this, [ = ]( int exit )
+    connect(this, & QProcess::finished, this, [ = ]( int exit )
     {
         if ( exit == 0 )
         {
-            auto data = QString( process->readAll()).split( "\n" );
+            auto data = QString( readAll()).split( "\n" );
             erase_if( data, []( auto & str ) { return str == ""; } );
             QMap < QString, QString > map;
             for ( auto & str: data )
@@ -160,25 +161,29 @@ void Rclone::loadListRemotes()
                 str.remove( " " );
                 map.insert( str.split( ":" )[0], str.split( ":" )[1] );
             }
-            listRemotes = map;
             emit listRemotesFinished( map );
         }
     } );
-    process->start( pathRclone, { "listremotes", "--long" } );
+    start( pathRclone, { "listremotes", "--long" } );
 
-}
-
-const QMap < QString, QString > & Rclone::getListRemotes()
-{
-    return listRemotes;
 }
 
 void Rclone::deleteRemote( const QString & remote )
 {
-    auto * process = new QProcess;
-    connect( process, & QProcess::finished, this, [ = ]( int exit )
+    connect(this, & QProcess::finished, this, [ = ]( int exit )
     {
         emit exitCode( exit );
     } );
-    process->start( pathRclone, { "config", "delete", remote } );
+   start( pathRclone, { "config", "delete", remote } );
+}
+
+Rclone &Rclone::operator=(Rclone &&rclone) noexcept
+{
+    qDebug() << this << &rclone;
+    if (this == &rclone)
+        return *this;
+    qDebug() << this << &rclone;
+
+    this->pathRclone = rclone.pathRclone;
+    return *this;
 }

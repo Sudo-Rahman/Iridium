@@ -7,28 +7,22 @@
 #define IRIDIUM_RCLONE_HPP
 
 #include <QString>
-#include <QObject>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <QJsonArray>
 #include <QProcess>
-#include <QThread>
 #include "RcloneFile.hpp"
+#include "../Remote/Remote.h"
 
-class Rclone : public QObject
+class Rclone : public QProcess
 {
 Q_OBJECT
 private:
     QString pathRclone {};
-    QMap < QString, QString > listRemotes;
 public:
 
     explicit Rclone( QString path );
-
-    enum Config
-    {
-        Drive, Sftp
-    };
+    explicit Rclone();
+    Rclone(const Rclone  &rclone);
 
 public:
 
@@ -36,7 +30,7 @@ public:
 
     void setPathRclone( const QString & pathRclone );
 
-    void config( Config config, const QStringList & params );
+    void config( RemoteType type, const QStringList & params );
 
     void lsJson( const QString & path );
 
@@ -46,10 +40,9 @@ public:
 
     void deleteRemote( const QString & remote );
 
-    [[nodiscard]] const QMap < QString, QString > & getListRemotes();
+    void listRemotes();
 
-private:
-    void loadListRemotes();
+    Rclone& operator=(Rclone&& rclone) noexcept;
 
 signals:
 
@@ -62,7 +55,6 @@ signals:
     void exitCode( int exit );
 
     void listRemotesFinished( QMap < QString, QString > map );
-
 
 };
 
