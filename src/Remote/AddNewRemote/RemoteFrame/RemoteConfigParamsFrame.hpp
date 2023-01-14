@@ -20,6 +20,7 @@ protected:
     QVBoxLayout *layout{};
     QLineEdit *remoteName{};
     Rclone *rclone{};
+    QMap<QString,QString> listRemotes{};
 public:
     explicit RemoteConfigParamsFrame(QWidget * parent =  nullptr);
 
