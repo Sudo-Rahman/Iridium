@@ -12,8 +12,8 @@
 #include <QStyle>
 #include <QPainter>
 
-RemoteFrame::RemoteFrame( RemoteType type, QWidget *parent) :
-        QFrame(parent),  type(type)
+RemoteFrame::RemoteFrame(RemoteType type, QWidget *parent) :
+        QFrame(parent), type(type)
 {
     setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
     setContentsMargins(10, 10, 10, 10);

@@ -17,17 +17,19 @@ class RemoteConfigParamsFrame : public QFrame
 Q_OBJECT
 protected:
     QPushButton *logInBtn{};
+    QPushButton *cancelBtn{};
+    QLabel *messageLabel{};
     QVBoxLayout *layout{};
     QLineEdit *remoteName{};
     Rclone *rclone{};
-    QMap<QString,QString> listRemotes{};
+    QMap<QString, QString> listRemotes{};
 public:
-    explicit RemoteConfigParamsFrame(QWidget * parent =  nullptr);
+    explicit RemoteConfigParamsFrame(QWidget *parent = nullptr);
 
 protected:
-     virtual void addRemote() =0 ;
+    virtual void addRemote() = 0;
 
-     virtual void createUi();
+    virtual void createUi();
 
 };
 

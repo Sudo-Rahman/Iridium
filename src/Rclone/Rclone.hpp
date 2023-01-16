@@ -17,44 +17,46 @@ class Rclone : public QProcess
 {
 Q_OBJECT
 private:
-    QString pathRclone {};
+    QString pathRclone{};
 public:
 
-    explicit Rclone( QString path );
+    explicit Rclone(QString path);
+
     explicit Rclone();
-    Rclone(const Rclone  &rclone);
+
+    Rclone(const Rclone &rclone);
 
 public:
 
-    [[nodiscard]] const QString & getPathRclone() const;
+    [[nodiscard]] const QString &getPathRclone() const;
 
-    void setPathRclone( const QString & pathRclone );
+    void setPathRclone(const QString &pathRclone);
 
-    void config( RemoteType type, const QStringList & params );
+    void config(RemoteType type, const QStringList &params);
 
-    void lsJson( const QString & path );
+    void lsJson(const QString &path);
 
-    void upload( const RcloneFile & src, const RcloneFile & dest );
+    void upload(const RcloneFile &src, const RcloneFile &dest);
 
-    void download( const RcloneFile & src, const RcloneFile & dest );
+    void download(const RcloneFile &src, const RcloneFile &dest);
 
-    void deleteRemote( const QString & remote );
+    void deleteRemote(const QString &remote);
 
     void listRemotes();
 
-    Rclone& operator=(Rclone&& rclone) noexcept;
+    Rclone &operator=(Rclone &&rclone) noexcept;
 
 signals:
 
-    void lsJsonFinished( QJsonDocument doc );
+    void lsJsonFinished(QJsonDocument doc);
 
-    void uploadData( double value );
+    void uploadData(double value);
 
-    void downloadData( double value );
+    void downloadData(double value);
 
-    void exitCode( int exit );
+    void exitCode(int exit);
 
-    void listRemotesFinished( QMap < QString, QString > map );
+    void listRemotesFinished(QMap<QString, QString> map);
 
 };
 

@@ -6,53 +6,53 @@
 
 #include <utility>
 
-void RcloneFile::init( const QString & path, TypeFile type )
+void RcloneFile::init(const QString &path, TypeFile type)
 {
-    QFileInfo info( path );
-    if ( info.exists() and type == TypeFile::Local )
+    QFileInfo info(path);
+    if (info.exists() and type == TypeFile::Local)
     {
-        setSize( info.size());
-        setModTime( info.lastModified());
+        setSize(info.size());
+        setModTime(info.lastModified());
     }
-    if ( type == TypeFile::Local )
-        setPath( info.absoluteFilePath());
+    if (type == TypeFile::Local)
+        setPath(info.absoluteFilePath());
     else
-        setPath( path );
-    setIsDir( info.isDir());
+        setPath(path);
+    setIsDir(info.isDir());
 }
 
 
-RcloneFile::RcloneFile( const QFile & file, TypeFile type )
+RcloneFile::RcloneFile(const QFile &file, TypeFile type)
 {
-    init( QFileInfo( file ).filePath(), type );
+    init(QFileInfo(file).filePath(), type);
 }
 
-RcloneFile::RcloneFile( const QString & path, TypeFile type )
+RcloneFile::RcloneFile(const QString &path, TypeFile type)
 {
-    init( path, type );
+    init(path, type);
 }
 
-RcloneFile::RcloneFile( const QDir & dir, TypeFile type )
+RcloneFile::RcloneFile(const QDir &dir, TypeFile type)
 {
-    init( dir.path(), type );
+    init(dir.path(), type);
 }
 
-RcloneFile::RcloneFile( const QString & path, uint64_t size, bool isDir, QDateTime modTime, TypeFile type )
-        : size( size ), isDirectory( isDir ), modTime( std::move( modTime )), typeFile( type )
+RcloneFile::RcloneFile(const QString &path, uint64_t size, bool isDir, QDateTime modTime, TypeFile type)
+        : size(size), isDirectory(isDir), modTime(std::move(modTime)), typeFile(type)
 {
-    setPath( path );
+    setPath(path);
 }
 
 
-const QString & RcloneFile::getPath() const
+const QString &RcloneFile::getPath() const
 {
     return path;
 }
 
-void RcloneFile::setPath( const QString & path )
+void RcloneFile::setPath(const QString &path)
 {
     RcloneFile::path = path;
-    if ( not path.endsWith( "/" ) and not path.isEmpty() and isDirectory )
+    if (not path.endsWith("/") and not path.isEmpty() and isDirectory)
         RcloneFile::path += "/";
 }
 
@@ -61,24 +61,24 @@ uint64_t RcloneFile::getSize() const
     return size;
 }
 
-void RcloneFile::setSize( uint64_t size )
+void RcloneFile::setSize(uint64_t size)
 {
     RcloneFile::size = size;
 }
 
-const QDateTime & RcloneFile::getModTime() const
+const QDateTime &RcloneFile::getModTime() const
 {
     return modTime;
 }
 
-void RcloneFile::setModTime( const QDateTime & modTime )
+void RcloneFile::setModTime(const QDateTime &modTime)
 {
     RcloneFile::modTime = modTime;
 }
 
 QString RcloneFile::getName() const
 {
-    return QFileInfo( path ).fileName();
+    return QFileInfo(path).fileName();
 }
 
 bool RcloneFile::isDir() const
@@ -86,7 +86,7 @@ bool RcloneFile::isDir() const
     return isDirectory;
 }
 
-void RcloneFile::setIsDir( bool isDir )
+void RcloneFile::setIsDir(bool isDir)
 {
     RcloneFile::isDirectory = isDir;
 }

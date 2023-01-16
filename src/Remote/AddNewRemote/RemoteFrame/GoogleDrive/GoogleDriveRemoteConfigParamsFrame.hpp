@@ -12,10 +12,11 @@ class GoogleDriveRemoteConfigParamsFrame : public RemoteConfigParamsFrame
 Q_OBJECT
 
 public:
-    explicit GoogleDriveRemoteConfigParamsFrame(QWidget * parent =  nullptr);
+    explicit GoogleDriveRemoteConfigParamsFrame(QWidget *parent = nullptr);
 
 protected:
     void addRemote() override;
+
     void createUi() override;
 
 };

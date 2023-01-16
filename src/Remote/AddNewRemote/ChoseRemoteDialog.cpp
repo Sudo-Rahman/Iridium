@@ -6,11 +6,11 @@
 #include <QScrollArea>
 #include "RemoteFrame/RemoteFrame.hpp"
 
-ChoseRemoteDialog::ChoseRemoteDialog( QWidget * parent ) :  QDialog( parent )
+ChoseRemoteDialog::ChoseRemoteDialog(QWidget *parent) : QDialog(parent)
 {
     layout = new QHBoxLayout(this);
 
-    setMinimumSize(500, 500);
+    setMinimumSize(600, 500);
 
     auto *scrollArea = new QScrollArea(this);
     scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -20,31 +20,33 @@ ChoseRemoteDialog::ChoseRemoteDialog( QWidget * parent ) :  QDialog( parent )
     scrollArea->setAlignment(Qt::AlignLeft);
 
     auto *scrollWidget = new QWidget(scrollArea);
-    scrollWidget->setContentsMargins(0,10,15,10);
-    auto * scrollWidgetLayout = new QVBoxLayout(scrollWidget);
+    scrollWidget->setContentsMargins(0, 10, 15, 10);
+    auto *scrollWidgetLayout = new QVBoxLayout(scrollWidget);
     scrollArea->setWidget(scrollWidget);
 
-    auto *t = new RemoteFrame(RemoteType::Drive );
-    connect(t, &RemoteFrame::clicked, this,& ChoseRemoteDialog::changeParamsFrame);
+    auto *t = new RemoteFrame(RemoteType::Drive);
+    connect(t, &RemoteFrame::clicked, this, &ChoseRemoteDialog::changeParamsFrame);
     scrollWidgetLayout->addWidget(t);
 
     for (int i = 0; i < 9; ++i)
     {
-        auto *t = new RemoteFrame(RemoteType::Drive );
-        connect(t, &RemoteFrame::clicked, this,& ChoseRemoteDialog::changeParamsFrame);
+        auto *t = new RemoteFrame(RemoteType::Drive);
+        connect(t, &RemoteFrame::clicked, this, &ChoseRemoteDialog::changeParamsFrame);
         scrollWidgetLayout->addWidget(t);
     }
 
     layout->addWidget(scrollArea);
-    layout->addWidget(t->getParamsFrame());
+    paramsFrame = t->getParamsFrame();
+    layout->addWidget(paramsFrame);
 
 }
 
 void ChoseRemoteDialog::changeParamsFrame(RemoteConfigParamsFrame *frame)
 {
-    if(frame == paramsFrame)
+    if (frame == paramsFrame)
         return;
-    if(paramsFrame not_eq  nullptr){
+    if (paramsFrame not_eq nullptr)
+    {
 
         layout->removeWidget(paramsFrame);
         paramsFrame->hide();

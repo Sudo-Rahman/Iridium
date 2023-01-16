@@ -10,15 +10,15 @@
 #include "../Remote/AddNewRemote/ChoseRemoteDialog.hpp"
 
 
-MainWindow::MainWindow( QWidget * parent ) : QMainWindow( parent )
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
-    setWindowTitle( "Iridium" );
-    setContentsMargins(0,0,0,0);
+    setWindowTitle("Iridium");
+    setContentsMargins(0, 0, 0, 0);
 
     auto *wid = new QWidget(this);
     wid->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     wid->setBackgroundRole(QPalette::Highlight);
-     auto  * lay = new QHBoxLayout(wid);
+    auto *lay = new QHBoxLayout(wid);
     setCentralWidget(wid);
 
     auto *t = new ChoseRemoteDialog();

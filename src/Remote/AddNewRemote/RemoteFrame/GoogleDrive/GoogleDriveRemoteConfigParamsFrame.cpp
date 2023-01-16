@@ -3,6 +3,7 @@
 //
 
 #include <QMessageBox>
+#include <utility>
 #include "GoogleDriveRemoteConfigParamsFrame.hpp"
 
 GoogleDriveRemoteConfigParamsFrame::GoogleDriveRemoteConfigParamsFrame(QWidget *parent)
@@ -19,7 +20,7 @@ GoogleDriveRemoteConfigParamsFrame::GoogleDriveRemoteConfigParamsFrame(QWidget *
     });
     connect(rclone, &Rclone::listRemotesFinished, this, [this](QMap<QString, QString> map)
     {
-        listRemotes = map;
+        listRemotes = std::move(map);
     });
     createUi();
 
@@ -27,6 +28,13 @@ GoogleDriveRemoteConfigParamsFrame::GoogleDriveRemoteConfigParamsFrame(QWidget *
 
 void GoogleDriveRemoteConfigParamsFrame::addRemote()
 {
+    if (remoteName->text().isEmpty())
+    {
+        remoteName->setStyleSheet("border: 1px solid red; border-radius: 5px;");
+        messageLabel->show();
+        messageLabel->setText(tr("Les champs en rouge sont obligatoires !"));
+        return;
+    }
     rclone->listRemotes();
     rclone->waitForFinished();
     if (listRemotes.contains(remoteName->text()))
@@ -41,6 +49,7 @@ void GoogleDriveRemoteConfigParamsFrame::addRemote()
         rclone->waitForFinished(10);
     }
     rclone->config(RemoteType::Drive, {remoteName->text()});
+    cancelBtn->show();
 }
 
 void GoogleDriveRemoteConfigParamsFrame::createUi()

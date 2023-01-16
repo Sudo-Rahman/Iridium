@@ -21,39 +21,39 @@ public:
         Local, Distant
     };
 private:
-    QString path {};
-    uint64_t size {};
-    bool isDirectory {};
-    QDateTime modTime {};
-    TypeFile typeFile {};
+    QString path{};
+    uint64_t size{};
+    bool isDirectory{};
+    QDateTime modTime{};
+    TypeFile typeFile{};
 
-    void init( const QString & path, TypeFile type = TypeFile::Local );
+    void init(const QString &path, TypeFile type = TypeFile::Local);
 
 public:
-    explicit RcloneFile( const QFile & file, TypeFile typeFile = TypeFile::Local );
+    explicit RcloneFile(const QFile &file, TypeFile typeFile = TypeFile::Local);
 
-    RcloneFile( const QString & pathFile, TypeFile typeFile = TypeFile::Local );
+    RcloneFile(const QString &pathFile, TypeFile typeFile = TypeFile::Local);
 
-    explicit RcloneFile( const QDir & dir, TypeFile typeFile = TypeFile::Local );
+    explicit RcloneFile(const QDir &dir, TypeFile typeFile = TypeFile::Local);
 
-    RcloneFile( const QString & path, uint64_t size, bool isDir, QDateTime modTime,
-                TypeFile typeFile = TypeFile::Local );
+    RcloneFile(const QString &path, uint64_t size, bool isDir, QDateTime modTime,
+               TypeFile typeFile = TypeFile::Local);
 
-    const QString & getPath() const;
+    const QString &getPath() const;
 
-    void setPath( const QString & path );
+    void setPath(const QString &path);
 
     [[nodiscard]] uint64_t getSize() const;
 
-    void setSize( uint64_t size );
+    void setSize(uint64_t size);
 
     [[nodiscard]] bool isDir() const;
 
-    void setIsDir( bool isDir );
+    void setIsDir(bool isDir);
 
-    [[nodiscard]] const QDateTime & getModTime() const;
+    [[nodiscard]] const QDateTime &getModTime() const;
 
-    void setModTime( const QDateTime & modTime );
+    void setModTime(const QDateTime &modTime);
 
     [[nodiscard]] QString getName() const;
 
