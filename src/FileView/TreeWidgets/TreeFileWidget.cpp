@@ -43,7 +43,7 @@ void TreeFileWidget::addItem(const QString &path, QTreeWidgetItem *parent)
             }
             c++;
         }
-//        qDebug() << c;
+        qDebug() << c;
         rclone->deleteLater();
     });
 }

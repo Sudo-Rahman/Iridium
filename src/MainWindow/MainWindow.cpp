@@ -8,11 +8,15 @@
 #include <QtGlobal>
 #include <QLayout>
 #include "../FileView/TreeWidgets/TreeFileWidget.hpp"
+#include <boost/process.hpp>
+
+
+#include <iostream>
+namespace bp = boost::process;
 
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
-    qDebug() << qVersion();
     setWindowTitle("Iridium");
     setContentsMargins(0, 0, 0, 0);
     setMinimumSize(1000, 500);
@@ -23,6 +27,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     auto *lay = new QHBoxLayout(wid);
     setCentralWidget(wid);
 
-    lay->addWidget(new TreeFileWidget("maison:"));
+    lay->addWidget(new TreeFileWidget("nass:"));
 
 }

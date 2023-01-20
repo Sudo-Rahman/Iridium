@@ -7,7 +7,9 @@
 #include <utility>
 #include <iostream>
 #include <QCoreApplication>
-#include <stdio.h>
+#include <thread>
+#include <boost/process.hpp>
+namespace bp = boost::process;
 
 
 Rclone::Rclone(QString path) : pathRclone(std::move(path))
@@ -45,31 +47,45 @@ void Rclone::setPathRclone(const QString &pathRclone)
 void Rclone::lsJson(const QString &path)
 {
 
-    QStringList arguments({"lsjson", "--fast-list", "--drive-skip-gdocs", path.toUtf8()});
+    new std::thread([=] {
+        bp::ipstream stream;
+        bp::child c("./rclone", bp::args({"lsjson", "--fast-list", "--drive-skip-gdocs",path.toStdString()}), bp::std_out > stream);
 
-    connect(this, &QProcess::finished, this, [=, this](int exit)
-    {
-        switch (exit)
-        {
-
-            case 0:
-            {
-                auto doc = QJsonDocument::fromJson(readAllStandardOutput());
-                emit lsJsonFinished(doc);
-            }
-                break;
-            case 3:
-            {
-                terminate();
-
-                qDebug() << path;
-
-            }
-                break;
+        std::string line;
+        std::string tmp;
+        while (getline(stream, line)) {
+            tmp += line+"\n";
         }
-        emit exitCode(exit);
+        c.wait();
+        auto doc = QJsonDocument::fromJson(QString::fromStdString(tmp).toUtf8());
+                emit lsJsonFinished(doc);
     });
-    start(pathRclone, arguments);
+
+//    QStringList arguments({"lsjson", "--fast-list", "--drive-skip-gdocs", path.toUtf8()});
+//
+//    connect(this, &QProcess::finished, this, [=, this](int exit)
+//    {
+//        switch (exit)
+//        {
+//
+//            case 0:
+//            {
+//                auto doc = QJsonDocument::fromJson(readAllStandardOutput());
+//                emit lsJsonFinished(doc);
+//            }
+//                break;
+//            case 3:
+//            {
+//                terminate();
+//
+//                qDebug() << path;
+//
+//            }
+//                break;
+//        }
+//        emit exitCode(exit);
+//    });
+//    start(pathRclone, arguments);
 }
 
 /**

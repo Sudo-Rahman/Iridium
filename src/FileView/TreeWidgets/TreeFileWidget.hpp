@@ -13,7 +13,7 @@ class TreeFileWidget : public QTreeWidget
 Q_OBJECT
     QString remoteName{};
     QList<Rclone *> list{};
-    int c;
+    int c{};
 
 public:
     explicit TreeFileWidget(QString remoteName, QWidget *parent = nullptr);
