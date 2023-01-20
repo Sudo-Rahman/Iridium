@@ -2,8 +2,8 @@
 // Created by sr-71 on 11/01/2023.
 //
 
-#ifndef IRIDIUM_CHOSEREMOTEDIALOG_HPP
-#define IRIDIUM_CHOSEREMOTEDIALOG_HPP
+#ifndef IRIDIUM_ADDNEWREMOTEDIALOG_HPP
+#define IRIDIUM_ADDNEWREMOTEDIALOG_HPP
 
 #include <QDialog>
 #include <QLayout>
@@ -11,14 +11,14 @@
 #include "RemoteFrame/RemoteConfigParamsFrame.hpp"
 
 
-class ChoseRemoteDialog : public QDialog
+class AddNewRemoteDialog : public QDialog
 {
 Q_OBJECT
     QHBoxLayout *layout{};
     RemoteConfigParamsFrame *paramsFrame{};
 
 public:
-    explicit ChoseRemoteDialog(QWidget *parent = nullptr);
+    explicit AddNewRemoteDialog(QWidget *parent = nullptr);
 
 private:
     void changeParamsFrame(RemoteConfigParamsFrame *);
@@ -27,4 +27,4 @@ private:
 };
 
 
-#endif //IRIDIUM_CHOSEREMOTEDIALOG_HPP
+#endif //IRIDIUM_ADDNEWREMOTEDIALOG_HPP

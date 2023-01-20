@@ -4,7 +4,7 @@
 
 #include "RcloneFile.hpp"
 
-#include <utility>
+#include <cmath>
 
 void RcloneFile::init(const QString &path, TypeFile type)
 {
@@ -78,7 +78,9 @@ void RcloneFile::setModTime(const QDateTime &modTime)
 
 QString RcloneFile::getName() const
 {
-    return QFileInfo(path).fileName();
+    QString name;
+    path.contains(":") ? name = QFileInfo(path.split(":")[1]).fileName() : name = QFileInfo(path).fileName();
+    return name;
 }
 
 bool RcloneFile::isDir() const
@@ -89,6 +91,41 @@ bool RcloneFile::isDir() const
 void RcloneFile::setIsDir(bool isDir)
 {
     RcloneFile::isDirectory = isDir;
+}
+
+QString RcloneFile::getSizeString() const
+{
+    if (isDirectory)
+        return "--";
+    if (size / pow(1024, 4.0) > 1)
+        return QString::number(int(size / pow(1024.0, 4.0) * 100) / 100.0) + " TiB";
+
+    if (size / pow(1024, 3.0) > 1)
+        return QString::number(int(size / pow(1024.0, 3.0) * 100) / 100.0) + " GiB";
+
+    if (size / pow(1024, 2.0) > 1)
+        return QString::number(int(size / pow(1024.0, 2.0) * 100) / 100.0) + " MiB";
+
+    if (size / 1024.0 > 1)
+        return QString::number(int(size / pow(1024.0, 1.0) * 100) / 100.0) + " KiB";
+
+
+    return QString::number(size) + " B";
+}
+
+QString RcloneFile::getPathString() const
+{
+    QString tmpPath;
+    if (isDirectory and typeFile == Distant and path.contains(":"))
+    {
+        tmpPath = path.split(":")[1];
+    }
+    return QDir(tmpPath).dirName();
+}
+
+QString RcloneFile::getModTimeString() const
+{
+    return modTime.toString(tr("dd MMM yyyy à hh:mm:ss"));
 }
 
 

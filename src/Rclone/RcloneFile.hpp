@@ -39,7 +39,7 @@ public:
     RcloneFile(const QString &path, uint64_t size, bool isDir, QDateTime modTime,
                TypeFile typeFile = TypeFile::Local);
 
-    const QString &getPath() const;
+    [[nodiscard]] const QString &getPath() const;
 
     void setPath(const QString &path);
 
@@ -56,6 +56,12 @@ public:
     void setModTime(const QDateTime &modTime);
 
     [[nodiscard]] QString getName() const;
+
+    [[nodiscard]] QString getSizeString() const;
+
+    [[nodiscard]] QString getPathString() const;
+
+    [[nodiscard]] QString getModTimeString() const;
 
 
 };

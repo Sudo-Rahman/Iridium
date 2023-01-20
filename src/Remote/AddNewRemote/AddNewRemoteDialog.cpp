@@ -2,36 +2,38 @@
 // Created by sr-71 on 11/01/2023.
 //
 
-#include "ChoseRemoteDialog.hpp"
+#include "AddNewRemoteDialog.hpp"
 #include <QScrollArea>
 #include "RemoteFrame/RemoteFrame.hpp"
 
-ChoseRemoteDialog::ChoseRemoteDialog(QWidget *parent) : QDialog(parent)
+AddNewRemoteDialog::AddNewRemoteDialog(QWidget *parent) : QDialog(parent)
 {
+    setWindowTitle(tr("Ajout d'un disque"));
     layout = new QHBoxLayout(this);
+    layout->setContentsMargins(5, 20, 5, 20);
 
     setMinimumSize(600, 500);
 
     auto *scrollArea = new QScrollArea(this);
+    scrollArea->setStyleSheet("QScrollArea{border:none;}");
     scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     scrollArea->setWidgetResizable(true);
     scrollArea->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
     scrollArea->setAlignment(Qt::AlignLeft);
 
     auto *scrollWidget = new QWidget(scrollArea);
-    scrollWidget->setContentsMargins(0, 10, 15, 10);
     auto *scrollWidgetLayout = new QVBoxLayout(scrollWidget);
     scrollArea->setWidget(scrollWidget);
 
     auto *t = new RemoteFrame(RemoteType::Drive);
-    connect(t, &RemoteFrame::clicked, this, &ChoseRemoteDialog::changeParamsFrame);
+    connect(t, &RemoteFrame::clicked, this, &AddNewRemoteDialog::changeParamsFrame);
     scrollWidgetLayout->addWidget(t);
 
     for (int i = 0; i < 9; ++i)
     {
         auto *t = new RemoteFrame(RemoteType::Drive);
-        connect(t, &RemoteFrame::clicked, this, &ChoseRemoteDialog::changeParamsFrame);
+        connect(t, &RemoteFrame::clicked, this, &AddNewRemoteDialog::changeParamsFrame);
         scrollWidgetLayout->addWidget(t);
     }
 
@@ -41,7 +43,7 @@ ChoseRemoteDialog::ChoseRemoteDialog(QWidget *parent) : QDialog(parent)
 
 }
 
-void ChoseRemoteDialog::changeParamsFrame(RemoteConfigParamsFrame *frame)
+void AddNewRemoteDialog::changeParamsFrame(RemoteConfigParamsFrame *frame)
 {
     if (frame == paramsFrame)
         return;

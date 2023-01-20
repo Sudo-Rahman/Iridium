@@ -5,18 +5,25 @@
 #include "Rclone.hpp"
 
 #include <utility>
+#include <iostream>
 #include <QCoreApplication>
+#include <stdio.h>
+
 
 Rclone::Rclone(QString path) : pathRclone(std::move(path))
-{}
+{
+    setProcessChannelMode(QProcess::MergedChannels);
+}
 
 Rclone::Rclone() : pathRclone(QCoreApplication::applicationDirPath().append("/rclone"))
-{}
+{
+    setProcessChannelMode(QProcess::MergedChannels);
+}
 
 Rclone::Rclone(const Rclone &rclone)
 {
     Rclone::pathRclone = rclone.getPathRclone();
-
+    setProcessChannelMode(QProcess::MergedChannels);
 }
 
 
@@ -37,13 +44,28 @@ void Rclone::setPathRclone(const QString &pathRclone)
  */
 void Rclone::lsJson(const QString &path)
 {
-    QStringList arguments({"lsjson", path});
+
+    QStringList arguments({"lsjson", "--fast-list", "--drive-skip-gdocs", path.toUtf8()});
+
     connect(this, &QProcess::finished, this, [=, this](int exit)
     {
-        if (exit == 0)
+        switch (exit)
         {
-            auto doc = QJsonDocument::fromJson(readAllStandardOutput());
-            emit lsJsonFinished(doc);
+
+            case 0:
+            {
+                auto doc = QJsonDocument::fromJson(readAllStandardOutput());
+                emit lsJsonFinished(doc);
+            }
+                break;
+            case 3:
+            {
+                terminate();
+
+                qDebug() << path;
+
+            }
+                break;
         }
         emit exitCode(exit);
     });

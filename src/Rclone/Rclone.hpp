@@ -9,6 +9,7 @@
 #include <QString>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QJsonArray>
 #include <QProcess>
 #include "RcloneFile.hpp"
 #include "../Remote/Remote.h"

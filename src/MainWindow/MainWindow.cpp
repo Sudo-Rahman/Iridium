@@ -3,17 +3,19 @@
 //
 
 #include "MainWindow.hpp"
-#include "../Rclone/Rclone.hpp"
 
 #include <QPushButton>
+#include <QtGlobal>
 #include <QLayout>
-#include "../Remote/AddNewRemote/ChoseRemoteDialog.hpp"
+#include "../FileView/TreeWidgets/TreeFileWidget.hpp"
 
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
+    qDebug() << qVersion();
     setWindowTitle("Iridium");
     setContentsMargins(0, 0, 0, 0);
+    setMinimumSize(1000, 500);
 
     auto *wid = new QWidget(this);
     wid->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -21,8 +23,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     auto *lay = new QHBoxLayout(wid);
     setCentralWidget(wid);
 
-    auto *t = new ChoseRemoteDialog();
-    t->exec();
-
+    lay->addWidget(new TreeFileWidget("maison:"));
 
 }

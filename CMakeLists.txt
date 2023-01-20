@@ -8,6 +8,9 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
+
+set(CMAKE_PREFIX_PATH "/Users/sr-71/Qt/6.2.4/macos/lib/cmake")
+
 find_package(QT NAMES Qt6 REQUIRED COMPONENTS
         Core
         Gui
@@ -18,7 +21,7 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS
         Gui
         Widgets
         Sql)
-qt_standard_project_setup()
+#qt_standard_project_setup()
 
 
 set(SRC
@@ -26,9 +29,9 @@ set(SRC
         src/Rclone/Rclone.cpp src/Rclone/Rclone.hpp
         src/MainWindow/MainWindow.cpp src/MainWindow/MainWindow.hpp
         src/Rclone/RcloneFile.cpp src/Rclone/RcloneFile.hpp
-        src/Remote/AddNewRemote/ChoseRemoteDialog.cpp src/Remote/AddNewRemote/ChoseRemoteDialog.hpp
+        src/Remote/AddNewRemote/AddNewRemoteDialog.cpp src/Remote/AddNewRemote/AddNewRemoteDialog.hpp
         src/Remote/AddNewRemote/RemoteFrame/RemoteFrame.cpp src/Remote/AddNewRemote/RemoteFrame/RemoteFrame.hpp
-        src/Remote/AddNewRemote/RemoteFrame/RemoteConfigParamsFrame.cpp src/Remote/AddNewRemote/RemoteFrame/RemoteConfigParamsFrame.hpp src/Remote/Remote.h src/Remote/AddNewRemote/RemoteFrame/GoogleDrive/GoogleDriveRemoteConfigParamsFrame.cpp src/Remote/AddNewRemote/RemoteFrame/GoogleDrive/GoogleDriveRemoteConfigParamsFrame.hpp)
+        src/Remote/AddNewRemote/RemoteFrame/RemoteConfigParamsFrame.cpp src/Remote/AddNewRemote/RemoteFrame/RemoteConfigParamsFrame.hpp src/Remote/Remote.h src/Remote/AddNewRemote/RemoteFrame/GoogleDrive/GoogleDriveRemoteConfigParamsFrame.cpp src/Remote/AddNewRemote/RemoteFrame/GoogleDrive/GoogleDriveRemoteConfigParamsFrame.hpp src/FileView/TreeWidgets/TreeFileWidget.cpp src/FileView/TreeWidgets/TreeFileWidget.hpp src/FileView/TreeWidgets/TreeFileItem.cpp src/FileView/TreeWidgets/TreeFileItem.hpp)
 
 SET(TRANSLATION
         languages/iridium_en.ts
