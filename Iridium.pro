@@ -32,6 +32,7 @@ HEADERS += \
 RESOURCES += \
     application.qrc
 
+CONFIG += boost
 CONFIG -= console
 
 

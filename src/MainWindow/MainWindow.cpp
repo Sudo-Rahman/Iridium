@@ -5,14 +5,11 @@
 #include "MainWindow.hpp"
 
 #include <QPushButton>
-#include <QtGlobal>
 #include <QLayout>
 #include "../FileView/TreeWidgets/TreeFileWidget.hpp"
-#include <boost/process.hpp>
+#include "../Remote/AddNewRemote/AddNewRemoteDialog.hpp"
 
 
-#include <iostream>
-namespace bp = boost::process;
 
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
@@ -27,6 +24,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     auto *lay = new QHBoxLayout(wid);
     setCentralWidget(wid);
 
-    lay->addWidget(new TreeFileWidget("nass:"));
+    lay->addWidget(new AddNewRemoteDialog);
 
 }

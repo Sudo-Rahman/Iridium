@@ -9,7 +9,9 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
 
-set(CMAKE_PREFIX_PATH "/Users/sr-71/Qt/6.2.4/macos/lib/cmake")
+set (Boost_USE_STATIC_LIBS OFF)
+find_package (Boost REQUIRED COMPONENTS unit_test_framework)
+include_directories (${Boost_INCLUDE_DIRS})
 
 find_package(QT NAMES Qt6 REQUIRED COMPONENTS
         Core
@@ -21,7 +23,6 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS
         Gui
         Widgets
         Sql)
-#qt_standard_project_setup()
 
 
 set(SRC

@@ -7,36 +7,33 @@
 #include <utility>
 #include <iostream>
 #include <QCoreApplication>
-#include <thread>
 #include <boost/process.hpp>
+
 namespace bp = boost::process;
+using namespace std;
 
 
-Rclone::Rclone(QString path) : pathRclone(std::move(path))
+Rclone::Rclone(string path) : pathRclone(std::move(path))
 {
-    setProcessChannelMode(QProcess::MergedChannels);
 }
 
-Rclone::Rclone() : pathRclone(QCoreApplication::applicationDirPath().append("/rclone"))
-{
-    setProcessChannelMode(QProcess::MergedChannels);
-}
+Rclone::Rclone() : pathRclone(qApp->applicationDirPath().append("/rclone").toStdString())
+{}
 
 Rclone::Rclone(const Rclone &rclone)
 {
-    Rclone::pathRclone = rclone.getPathRclone();
-    setProcessChannelMode(QProcess::MergedChannels);
+	Rclone::pathRclone = rclone.getPathRclone();
 }
 
 
-const QString &Rclone::getPathRclone() const
+const string &Rclone::getPathRclone() const
 {
-    return pathRclone;
+	return pathRclone;
 }
 
-void Rclone::setPathRclone(const QString &pathRclone)
+void Rclone::setPathRclone(const string &pathRclone)
 {
-    Rclone::pathRclone = pathRclone;
+	Rclone::pathRclone = pathRclone;
 }
 
 
@@ -44,48 +41,23 @@ void Rclone::setPathRclone(const QString &pathRclone)
  * @brief Liste sous forme de json les fichiers dans le dossier path
  * @param path
  */
-void Rclone::lsJson(const QString &path)
+void Rclone::lsJson(const string &path)
 {
 
-    new std::thread([=] {
-        bp::ipstream stream;
-        bp::child c("./rclone", bp::args({"lsjson", "--fast-list", "--drive-skip-gdocs",path.toStdString()}), bp::std_out > stream);
-
-        std::string line;
-        std::string tmp;
-        while (getline(stream, line)) {
-            tmp += line+"\n";
-        }
-        c.wait();
-        auto doc = QJsonDocument::fromJson(QString::fromStdString(tmp).toUtf8());
-                emit lsJsonFinished(doc);
-    });
-
-//    QStringList arguments({"lsjson", "--fast-list", "--drive-skip-gdocs", path.toUtf8()});
-//
-//    connect(this, &QProcess::finished, this, [=, this](int exit)
-//    {
-//        switch (exit)
-//        {
-//
-//            case 0:
-//            {
-//                auto doc = QJsonDocument::fromJson(readAllStandardOutput());
-//                emit lsJsonFinished(doc);
-//            }
-//                break;
-//            case 3:
-//            {
-//                terminate();
-//
-//                qDebug() << path;
-//
-//            }
-//                break;
-//        }
-//        emit exitCode(exit);
-//    });
-//    start(pathRclone, arguments);
+	mthread = new std::
+	thread([=]
+		   {
+			   finished.connect([=](const int exit)
+								{
+									if (exit == 0)
+									{
+										auto doc = QJsonDocument::fromJson(
+											QString::fromStdString(mdata).toUtf8());
+										lsJsonFinished(doc);
+									}
+								});
+			   execute({"lsjson", "--fast-list", "--drive-skip-gdocs", path});
+		   });
 }
 
 /**
@@ -95,26 +67,27 @@ void Rclone::lsJson(const QString &path)
  */
 void Rclone::upload(const RcloneFile &src, const RcloneFile &dest)
 {
-    QStringList arguments({"copyto", src.getPath(), dest.getPath() + src.getName(), "-P"});
-    connect(this, &QProcess::readyReadStandardOutput, this, [&, this]()
-    {
-        auto data = QString(readAll().data()).split("\n");
-        if (not data.isEmpty())
-        {
-            auto l1 = data[0].split(QRegularExpression(" |,"));
-            erase_if(l1, [](const auto &item)
-            { return item == "" or item == "\t" or item == ","; });
-            if (l1.size() > 6)
-                    emit downloadData(l1[6].remove("%").toDouble());
-        }
-    });
-    connect(this, &QProcess::finished, this, [=, this](int exit)
-    {
-        if (exit == 0)
-                emit uploadData(100.0);
-        emit exitCode(exit);
-    });
-    start(pathRclone, arguments);
+	vector<string> arguments(
+		{"copyto", src.getPath().toStdString(), dest.getPath().toStdString() + src.getName().toStdString(), "-P"});
+
+	mthread = new std::
+	thread([=]()
+		   {
+			   readyRead.connect([=](const string &data)
+								 {
+									 auto qdata = QString::fromStdString(data).split("\n");
+									 if (not qdata.isEmpty())
+									 {
+										 auto l1 = qdata[0].split(QRegularExpression(" |,"));
+										 erase_if(l1, [](const auto &item)
+										 { return item == "" or item == "\t" or item == ","; });
+										 if (l1.size() > 6)
+											 copyProgress(l1[6].remove("%").toDouble());
+									 }
+								 });
+			   execute(arguments);
+			   copyProgress(100.0);
+		   });
 
 }
 
@@ -125,103 +98,157 @@ void Rclone::upload(const RcloneFile &src, const RcloneFile &dest)
  */
 void Rclone::download(const RcloneFile &src, const RcloneFile &dest)
 {
-    QStringList arguments({"copyto", src.getPath(), dest.getPath() + src.getName(), "-P"});
-    connect(this, &QProcess::readyReadStandardOutput, this, [&, this]()
-    {
-        auto data = QString(readAll().data()).split("\n");
-        if (not data.isEmpty())
-        {
-            auto l1 = data[0].split(QRegularExpression(" |,"));
-            erase_if(l1, [](const auto &item)
-            { return item == "" or item == "\t" or item == ","; });
-            if (l1.size() > 6)
-                    emit downloadData(l1[6].remove("%").toDouble());
-        }
-    });
-    connect(this, &QProcess::finished, this, [=, this](int exit)
-    {
-        if (exit == 0)
-                emit downloadData(100.0);
-        emit exitCode(exit);
-    });
-    start(pathRclone, arguments);
+	vector<string> arguments(
+		{"copyto", src.getPath().toStdString(), dest.getPath().toStdString() + src.getName().toStdString(), "-P"});
+	mthread = new std::thread([=]()
+							  {
+								  readyRead.connect([=](const string &data)
+													{
+														auto qdata = QString::fromStdString(data).split("\n");
+														if (not qdata.isEmpty())
+														{
+															auto l1 = qdata[0].split(QRegularExpression(" |,"));
+															erase_if(l1, [](const auto &item)
+															{ return item == "" or item == "\t" or item == ","; });
+															if (l1.size() > 6)
+																copyProgress(l1[6].remove("%").toDouble());
+														}
+													});
+								  execute(arguments);
+								  copyProgress(100.0);
+							  });
 }
 
-void Rclone::config(RemoteType type, const QStringList &params)
+void Rclone::config(RemoteType type, const vector<string> &params)
 {
-    int *compteur = new int();
-    *compteur = 0;
+	terminate();
+	if (params.size() < 0)
+		return;
+	mstate = Running;
+	mthread = new std::thread([=]()
+							  {
+								  bp::child process;
+								  switch (type)
+								  {
+									  case Drive:
+									  {
+										  process = bp::child(pathRclone,
+															  bp::args({"config", "create", params[0], "drive"}));
+									  }
 
-    connect(this, &QProcess::readyReadStandardOutput, this, [=]()
-    {
-        switch (*compteur)
-        {
-            case 0:
-                write("n\n");
-                break;
-            case 1:
-                write(params[0].toLatin1() + "\n");
-                break;
-            case 2:
-                write("drive\n");
-            default:
-                write("\n");
-        }
-        *compteur += 1;
-        if (*compteur >= 100)
-            exit(-1);
-    });
-    switch (type)
-    {
 
-        case Drive:
-        {
-            if (not params.isEmpty())
-            {
-                start(pathRclone, {"config", "create", params[0], "drive"});
-            }
+									  case Sftp:
+										  break;
+								  }
+								  pid = process.id();
+								  process.wait();
+								  mstate = Finsished;
+							  });
 
-        }
-            break;
-    }
 }
 
 void Rclone::listRemotes()
 {
-    connect(this, &QProcess::finished, this, [=](int exit)
-    {
-        if (exit == 0)
-        {
-            auto data = QString(readAll()).split("\n");
-            erase_if(data, [](auto &str)
-            { return str == ""; });
-            QMap<QString, QString> map;
-            for (auto &str: data)
-            {
-                str.remove(" ");
-                map.insert(str.split(":")[0], str.split(":")[1]);
-            }
-            emit listRemotesFinished(map);
-        }
-    });
-    start(pathRclone, {"listremotes", "--long"});
-
+	mthread = new std::
+	thread([=]()
+		   {
+			   finished.connect([=](const int exit)
+								{
+									if (exit == 0)
+									{
+										auto data = QString::fromStdString(mdata).split("\n");
+										erase_if(data, [](auto &str)
+										{ return str == ""; });
+										QMap<QString, QString> map;
+										for (auto &str: data)
+										{
+											str.remove(" ");
+											map.insert(str.split(":")[0], str.split(":")[1]);
+										}
+										listRemotesFinished(map);
+									}
+								});
+			   execute({"listremotes", "--long"});
+		   });
 }
 
-void Rclone::deleteRemote(const QString &remote)
+void Rclone::deleteRemote(const string &remote)
 {
-    connect(this, &QProcess::finished, this, [=](int exit)
-    {
-        emit exitCode(exit);
-    });
-    start(pathRclone, {"config", "delete", remote});
+	mthread = new std::
+	thread([=]()
+		   {
+			   execute({"config", "delete", remote});
+		   });
 }
+
+void Rclone::execute(const vector<string> &args)
+{
+	std::unique_lock<std::mutex> lock(m);
+	starte = true;
+	v.notify_one();
+	mdata.clear();
+	terminate();
+	mstate = Running;
+	bp::ipstream ip;
+	auto process = bp::child(pathRclone, bp::args(args), bp::std_out > ip, bp::std_err > stderr);
+	pid = process.id();
+	string line;
+	while (getline(ip, line))
+	{
+		mdata += line + "\n";
+		readyRead(line);
+	}
+	process.wait();
+	finished(process.exit_code());
+	mstate = Finsished;
+}
+
 
 Rclone &Rclone::operator=(Rclone &&rclone) noexcept
 {
-    if (this == &rclone)
-        return *this;
+	if (this == &rclone)
+		return *this;
 
-    this->pathRclone = rclone.pathRclone;
-    return *this;
+	this->pathRclone = rclone.pathRclone;
+	return *this;
 }
+
+void Rclone::waitForFinished()
+{
+	if (mstate not_eq Running)
+		waitForStarted();
+	if (mstate == Running)
+		mthread->join();
+}
+
+Rclone::~Rclone()
+{
+	terminate();
+	mthread->join();
+	delete mthread;
+}
+
+void Rclone::terminate()
+{
+	cout << mstate << endl;
+	if (mstate == Running)
+	{
+		kill(pid, SIGKILL);
+		cout <<pid<< " kill" << endl;
+	}
+	mstate = Finsished;
+}
+
+Rclone::State Rclone::getState() const
+{
+	return mstate;
+}
+
+void Rclone::waitForStarted()
+{
+	std::unique_lock<std::mutex> lock(m);
+	v.wait(lock, [&]
+	{ return starte; });
+
+}
+

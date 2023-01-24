@@ -6,58 +6,83 @@
 #ifndef IRIDIUM_RCLONE_HPP
 #define IRIDIUM_RCLONE_HPP
 
-#include <QString>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
-#include <QProcess>
+#include <boost/signals2.hpp>
+#include <boost/process.hpp>
+#include <thread>
+#include <vector>
 #include "RcloneFile.hpp"
 #include "../Remote/Remote.h"
 
-class Rclone : public QProcess
+class Rclone
 {
-Q_OBJECT
+public:
+	explicit Rclone(std::string path);
+
+	explicit Rclone();
+
+	Rclone(const Rclone &rclone);
+
+	~Rclone();
+
+	enum State
+	{
+		NotLaunched, Running, Finsished
+	};
+
+
 private:
-    QString pathRclone{};
+	std::string pathRclone{};
+	std::thread *mthread{};
+	std::string mdata{};
+	pid_t pid{};
+	Rclone::State mstate{};
+
+	bool starte{};
+	std::mutex m;
+	std::condition_variable v;
+
 public:
 
-    explicit Rclone(QString path);
+	[[nodiscard]] const std::string &getPathRclone() const;
 
-    explicit Rclone();
+	void setPathRclone(const std::string &pathRclone);
 
-    Rclone(const Rclone &rclone);
+	void config(RemoteType type, const std::vector<std::string> &args);
 
+	void lsJson(const std::string &path);
+
+	void upload(const RcloneFile &src, const RcloneFile &dest);
+
+	void download(const RcloneFile &src, const RcloneFile &dest);
+
+	void deleteRemote(const std::string &remote);
+
+	void listRemotes();
+
+	void waitForFinished();
+
+	void terminate();
+
+	[[nodiscard]] State getState() const;
+
+	void waitForStarted();
+
+	Rclone &operator=(Rclone &&rclone) noexcept;
+
+
+private:
+	void execute(const std::vector<std::string> &args);
+
+	boost::signals2::signal<void(const std::string &)> readyRead{};
 public:
+	boost::signals2::signal<void(const int exit)> finished{};
+	boost::signals2::signal<void(const QMap<QString, QString>)> listRemotesFinished{};
+	boost::signals2::signal<void(const QJsonDocument)> lsJsonFinished{};
+	boost::signals2::signal<void(const double)> copyProgress{};
 
-    [[nodiscard]] const QString &getPathRclone() const;
-
-    void setPathRclone(const QString &pathRclone);
-
-    void config(RemoteType type, const QStringList &params);
-
-    void lsJson(const QString &path);
-
-    void upload(const RcloneFile &src, const RcloneFile &dest);
-
-    void download(const RcloneFile &src, const RcloneFile &dest);
-
-    void deleteRemote(const QString &remote);
-
-    void listRemotes();
-
-    Rclone &operator=(Rclone &&rclone) noexcept;
-
-signals:
-
-    void lsJsonFinished(QJsonDocument doc);
-
-    void uploadData(double value);
-
-    void downloadData(double value);
-
-    void exitCode(int exit);
-
-    void listRemotesFinished(QMap<QString, QString> map);
 
 };
 
