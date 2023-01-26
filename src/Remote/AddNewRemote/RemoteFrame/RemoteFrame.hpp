@@ -14,32 +14,32 @@ class RemoteFrame : public QFrame
 {
 Q_OBJECT
 private:
-    RemoteType type;
-    QPixmap image{};
-    bool clickRelease{};
-    RemoteConfigParamsFrame *paramsFrame{};
+	RemoteType type;
+	QPixmap image{};
+	bool clickRelease{};
+	RemoteConfigParamsFrame *paramsFrame{};
 
-    void initParamsFrame();
+	void initParamsFrame();
 
 public:
-    explicit RemoteFrame(RemoteType type, QWidget *parent = nullptr);
+	explicit RemoteFrame(RemoteType type, QWidget *parent = nullptr);
 
-    [[nodiscard]] RemoteType getType() const;
+	[[nodiscard]] RemoteType getType() const;
 
-    void setType(RemoteType type);
+	void setType(RemoteType type);
 
-    [[nodiscard]] RemoteConfigParamsFrame *getParamsFrame() const;
+	[[nodiscard]] RemoteConfigParamsFrame *getParamsFrame() const;
 
 protected:
-    void mousePressEvent(QMouseEvent *event) override;
+	void mousePressEvent(QMouseEvent *event) override;
 
-    void mouseReleaseEvent(QMouseEvent *event) override;
+	void mouseReleaseEvent(QMouseEvent *event) override;
 
-    void paintEvent(QPaintEvent *event) override;
+	void paintEvent(QPaintEvent *event) override;
 
 signals:
 
-    void clicked(RemoteConfigParamsFrame *);
+	void clicked(RemoteConfigParamsFrame *);
 };
 
 

@@ -13,9 +13,9 @@
 class MainWindow : public QMainWindow
 {
 Q_OBJECT
-QProgressBar *pr;
+	QProgressBar *pr;
 public:
-    explicit MainWindow(QWidget *parent = nullptr);
+	explicit MainWindow(QWidget *parent = nullptr);
 
 };
 

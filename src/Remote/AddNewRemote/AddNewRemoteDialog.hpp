@@ -14,14 +14,14 @@
 class AddNewRemoteDialog : public QDialog
 {
 Q_OBJECT
-    QHBoxLayout *layout{};
-    RemoteConfigParamsFrame *paramsFrame{};
+	QHBoxLayout *layout{};
+	RemoteConfigParamsFrame *paramsFrame{};
 
 public:
-    explicit AddNewRemoteDialog(QWidget *parent = nullptr);
+	explicit AddNewRemoteDialog(QWidget *parent = nullptr);
 
 private:
-    void changeParamsFrame(RemoteConfigParamsFrame *);
+	void changeParamsFrame(RemoteConfigParamsFrame *);
 
 
 };

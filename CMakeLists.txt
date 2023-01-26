@@ -9,9 +9,9 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
 
-set (Boost_USE_STATIC_LIBS OFF)
-find_package (Boost REQUIRED COMPONENTS unit_test_framework)
-include_directories (${Boost_INCLUDE_DIRS})
+set(Boost_USE_STATIC_LIBS OFF)
+find_package(Boost REQUIRED COMPONENTS unit_test_framework)
+include_directories(${Boost_INCLUDE_DIRS})
 
 find_package(QT NAMES Qt6 REQUIRED COMPONENTS
         Core

@@ -18,7 +18,7 @@
 
 class Rclone : public QObject
 {
-	Q_OBJECT
+Q_OBJECT
 public:
 	explicit Rclone(std::string path);
 
@@ -34,14 +34,13 @@ public:
 	};
 
 
-public:
+private:
 	std::string pathRclone{};
-	std::thread *mthread{};
+	std::shared_ptr<std::thread> mthread{};
 	std::string mdata{};
 	pid_t pid{};
 	Rclone::State mstate{};
 
-	bool starte{};
 	std::mutex m;
 	std::condition_variable v;
 
@@ -55,9 +54,7 @@ public:
 
 	void lsJson(const std::string &path);
 
-	void upload(const RcloneFile &src, const RcloneFile &dest);
-
-	void download(const RcloneFile &src, const RcloneFile &dest);
+	void copyTo(const RcloneFile &src, const RcloneFile &dest);
 
 	void deleteRemote(const std::string &remote);
 
@@ -71,8 +68,6 @@ public:
 
 	void waitForStarted();
 
-	Rclone &operator=(Rclone &&rclone) noexcept;
-
 
 private:
 	void execute(const std::vector<std::string> &args);
@@ -81,12 +76,16 @@ private:
 public:
 	boost::signals2::signal<void(const int exit)> finished{};
 	boost::signals2::signal<void(const QMap<QString, QString>)> listRemotesFinished{};
+	boost::signals2::signal<void(const QJsonDocument &)> lsJsonFinishedd{};
 
 
-	signals:
-	void lsJsonFinished(const QJsonDocument&);
+signals:
+
+	void lsJsonFinished(const QJsonDocument &);
+
 	void copyProgress(const int);
 
+	void configFinished(int exit);
 
 
 };

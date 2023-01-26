@@ -39,9 +39,17 @@ void TreeFileWidget::addItem(const QString &path, TreeFileItem *parent)
 			parent == nullptr ? addTopLevelItem(item) : parent->addChild(item);
 			if (item->getFile()->isDir())
 				addItem(item->getFile()->getPath(), item);
-			c++;
 		}
-			qDebug() << c;
+		for (auto *r: list)
+		{
+			if (r->getState() == Rclone::Finsished)
+			{
+				r->terminate();
+				list.removeOne(r);
+				delete r;
+			}
+		}
+
 	});
 	rclone->lsJson(path.toStdString());
 }

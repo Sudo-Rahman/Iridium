@@ -7,6 +7,6 @@
 
 enum RemoteType
 {
-    Drive, Sftp
+	Drive, Sftp
 };
 #endif //IRIDIUM_REMOTE_H

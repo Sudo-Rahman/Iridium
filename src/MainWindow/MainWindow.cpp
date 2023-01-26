@@ -24,14 +24,15 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	auto *lay = new QHBoxLayout(wid);
 	setCentralWidget(wid);
 
-	Rclone *rclone = new Rclone;
-	pr = new QProgressBar(this);
-	qDebug() <<pr;
-	pr->setMaximum(100);
-	lay->addWidget(new AddNewRemoteDialog);
-	auto t = [this](const int val)
-	{ pr->setValue(val);qDebug() <<val; };
-	rclone->download({"nas:firebase_cpp_sdk_10.3.0.zip", RcloneFile::Distant},{"/Users/sr-71/Downloads/"});
-	connect(rclone, &Rclone::copyProgress,this, t);
-
+//	Rclone *rclone = new Rclone;
+//	pr = new QProgressBar(this);
+//	qDebug() <<pr;
+//	pr->setMaximum(100);
+//	lay->addWidget(new AddNewRemoteDialog);
+//	auto t = [this](const int val)
+//	{ pr->setValue(val);qDebug() <<val; };
+//	rclone->download({"nas:firebase_cpp_sdk_10.3.0.zip", RcloneFile::Distant},{"/Users/sr-71/Downloads/"});
+//	connect(rclone, &Rclone::copyProgress,this, t);
+	lay->addWidget(new TreeFileWidget("nas2:"));
+//	lay->addWidget(new AddNewRemoteDialog);
 }
