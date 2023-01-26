@@ -16,8 +16,9 @@
 #include "RcloneFile.hpp"
 #include "../Remote/Remote.h"
 
-class Rclone
+class Rclone : public QObject
 {
+	Q_OBJECT
 public:
 	explicit Rclone(std::string path);
 
@@ -33,7 +34,7 @@ public:
 	};
 
 
-private:
+public:
 	std::string pathRclone{};
 	std::thread *mthread{};
 	std::string mdata{};
@@ -80,8 +81,12 @@ private:
 public:
 	boost::signals2::signal<void(const int exit)> finished{};
 	boost::signals2::signal<void(const QMap<QString, QString>)> listRemotesFinished{};
-	boost::signals2::signal<void(const QJsonDocument)> lsJsonFinished{};
-	boost::signals2::signal<void(const double)> copyProgress{};
+
+
+	signals:
+	void lsJsonFinished(const QJsonDocument&);
+	void copyProgress(const int);
+
 
 
 };

@@ -13,7 +13,8 @@ class TreeFileItem : public QTreeWidgetItem
     std::shared_ptr<RcloneFile> file{};
 
 public:
-    explicit TreeFileItem(const QString &path, const QJsonObject &data, QTreeWidgetItem *parent = nullptr);
+    explicit TreeFileItem(QString path,QJsonObject data, QTreeWidgetItem *parent = nullptr);
+	TreeFileItem(RcloneFile&, QTreeWidgetItem *parent = nullptr);
 
     const std::shared_ptr<RcloneFile> &getFile() const;
 

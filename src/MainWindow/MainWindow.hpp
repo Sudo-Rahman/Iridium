@@ -6,12 +6,14 @@
 #define IRIDIUM_MAINWINDOW_HPP
 
 #include <QMainWindow>
+#include <QProgressBar>
 #include <QCoreApplication>
 #include "../Rclone/Rclone.hpp"
 
 class MainWindow : public QMainWindow
 {
 Q_OBJECT
+QProgressBar *pr;
 public:
     explicit MainWindow(QWidget *parent = nullptr);
 

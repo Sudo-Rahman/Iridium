@@ -7,6 +7,7 @@
 
 #include <QTreeWidget>
 #include "../../Rclone/Rclone.hpp"
+#include "TreeFileItem.hpp"
 
 class TreeFileWidget : public QTreeWidget
 {
@@ -21,7 +22,7 @@ public:
     const QString &getRemoteName() const;
 
 private:
-    void addItem(const QString &path, QTreeWidgetItem *parent);
+    void addItem(const QString &path, TreeFileItem *parent);
 
 protected:
     void resizeEvent(QResizeEvent *event) override;

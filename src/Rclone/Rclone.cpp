@@ -53,10 +53,10 @@ void Rclone::lsJson(const string &path)
 									{
 										auto doc = QJsonDocument::fromJson(
 											QString::fromStdString(mdata).toUtf8());
-										lsJsonFinished(doc);
+										emit lsJsonFinished(doc);
 									}
 								});
-			   execute({"lsjson", "--fast-list", "--drive-skip-gdocs", path});
+			   execute({"lsjson", path});
 		   });
 }
 
@@ -82,11 +82,11 @@ void Rclone::upload(const RcloneFile &src, const RcloneFile &dest)
 										 erase_if(l1, [](const auto &item)
 										 { return item == "" or item == "\t" or item == ","; });
 										 if (l1.size() > 6)
-											 copyProgress(l1[6].remove("%").toDouble());
+											 emit copyProgress(l1[6].remove("%").toInt());
 									 }
 								 });
 			   execute(arguments);
-			   copyProgress(100.0);
+			   emit copyProgress(100);
 		   });
 
 }
@@ -104,18 +104,21 @@ void Rclone::download(const RcloneFile &src, const RcloneFile &dest)
 							  {
 								  readyRead.connect([=](const string &data)
 													{
+//														cout << data << endl;
 														auto qdata = QString::fromStdString(data).split("\n");
 														if (not qdata.isEmpty())
 														{
 															auto l1 = qdata[0].split(QRegularExpression(" |,"));
 															erase_if(l1, [](const auto &item)
 															{ return item == "" or item == "\t" or item == ","; });
-															if (l1.size() > 6)
-																copyProgress(l1[6].remove("%").toDouble());
+															if (l1.size() > 11)
+															{
+																emit copyProgress(l1[11].remove("%").toInt());
+															}
 														}
 													});
 								  execute(arguments);
-								  copyProgress(100.0);
+								  emit copyProgress(100);
 							  });
 }
 
@@ -230,13 +233,12 @@ Rclone::~Rclone()
 
 void Rclone::terminate()
 {
-	cout << mstate << endl;
 	if (mstate == Running)
 	{
+		cout << pid << " kill" << endl;
 		kill(pid, SIGKILL);
-		cout <<pid<< " kill" << endl;
+		mstate = Finsished;
 	}
-	mstate = Finsished;
 }
 
 Rclone::State Rclone::getState() const

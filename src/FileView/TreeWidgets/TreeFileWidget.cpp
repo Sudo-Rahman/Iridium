@@ -5,6 +5,7 @@
 
 #include "TreeFileWidget.hpp"
 #include "TreeFileItem.hpp"
+#include <thread>
 
 TreeFileWidget::TreeFileWidget(QString remoteName, QWidget *parent) : remoteName(std::move(remoteName)),
 																	  QTreeWidget(parent)
@@ -26,26 +27,23 @@ const QString &TreeFileWidget::getRemoteName() const
 	return remoteName;
 }
 
-void TreeFileWidget::addItem(const QString &path, QTreeWidgetItem *parent)
+void TreeFileWidget::addItem(const QString &path, TreeFileItem *parent)
 {
 	auto *rclone = new Rclone;
 	list << rclone;
+	connect(rclone, &Rclone::lsJsonFinished, this, [=](const QJsonDocument &doc)
+	{
+		for (const auto &file: doc.array())
+		{
+			auto *item = new TreeFileItem(path, file.toObject(), parent == nullptr ? nullptr : parent);
+			parent == nullptr ? addTopLevelItem(item) : parent->addChild(item);
+			if (item->getFile()->isDir())
+				addItem(item->getFile()->getPath(), item);
+			c++;
+		}
+			qDebug() << c;
+	});
 	rclone->lsJson(path.toStdString());
-	rclone->lsJsonFinished.connect([=](const QJsonDocument &doc)
-								   {
-									   for (const auto &file: doc.array())
-									   {
-										   auto *item = new TreeFileItem(path, file.toObject());
-										   parent == nullptr ? addTopLevelItem(item) : parent->addChild(item);
-										   if (item->getFile()->isDir())
-										   {
-											   addItem(item->getFile()->getPath(), item);
-										   }
-										   c++;
-									   }
-									   qDebug() << c;
-//									   delete rclone;
-								   });
 }
 
 void TreeFileWidget::resizeEvent(QResizeEvent *event)
