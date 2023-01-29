@@ -16,14 +16,15 @@
 #include <iostream>
 #include <memory>
 #include "RcloneFile.hpp"
-#include "RclonesManager.hpp"
 #include "../Remote/Remote.h"
+
+class RclonesManager;
 
 class Rclone : public QObject
 {
 Q_OBJECT
 public:
-	explicit Rclone(std::string path,RclonesManager * = nullptr);
+	explicit Rclone(std::string path, RclonesManager * = nullptr);
 
 	explicit Rclone(RclonesManager * = nullptr);
 
@@ -41,7 +42,7 @@ private:
 	std::string mdata{};
 	pid_t pid{};
 	Rclone::State mstate{};
-	RclonesManager * manager{};
+	std::shared_ptr<RclonesManager> manager{};
 
 	std::mutex m;
 	std::condition_variable v;
@@ -89,6 +90,30 @@ signals:
 
 	void configFinished(int exit);
 
+
+};
+
+class RclonesManager
+{
+	friend class Rclone;
+	std::atomic<unsigned> nb_rclones{};
+	unsigned nbMaxProcess{};
+	std::mutex mutex{};
+	std::condition_variable conditionVariable{};
+	std::vector<std::shared_ptr<Rclone>> rcloneVector{};
+
+public:
+	explicit RclonesManager(unsigned nbMaxProcess);
+
+	explicit RclonesManager();
+
+	std::shared_ptr<Rclone> get();
+
+	boost::signals2::signal<void ()> allFinished;
+
+private:
+	void start();
+	void finished();
 
 };
 

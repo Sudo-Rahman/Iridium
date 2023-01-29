@@ -6,11 +6,10 @@
 
 #include <QPushButton>
 #include <QLayout>
+#include <QTimer>
 #include <QProgressBar>
 #include "../FileView/TreeWidgets/TreeFileWidget.hpp"
-#include "../Remote/AddNewRemote/AddNewRemoteDialog.hpp"
-#include "../FileView/TreeWidgets/TreeFileItem.hpp"
-#include "../Rclone/RclonesManager.hpp"
+#include "../FileView/TreeWidgets/TreeFileLocalWidget.hpp"
 
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
@@ -25,16 +24,24 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	auto *lay = new QHBoxLayout(wid);
 	setCentralWidget(wid);
 
-//	Rclone *rclone = new Rclone;
-//	pr = new QProgressBar(this);
-//	qDebug() <<pr;
-//	pr->setMaximum(100);
+	auto *tree = new TreeFileLocalWidget(this);
+	lay->addWidget(tree);
+	pr = new QProgressBar(this);
+	lay->addWidget(pr);
+	auto *rclone = new Rclone;
+//	auto *timer = new QTimer(this);
+//	timer->setInterval(10);
+//	connect(timer, &QTimer::timeout, this, [=]()
+//	{
+//		if (pr->value() < 100)
+//			pr->setValue(pr->value() + 1);
+//		else
+//			pr->setValue(0);
+//	});
+//	timer->start();
+	rclone->copyTo({"nas:firebase_cpp_sdk_10.3.0.zip", RcloneFile::Distant},{"/Users/sr-71/Downloads/"});
+	connect(rclone, &Rclone::copyProgress,this, [=](const int val){
+		pr->setValue(val);
+	});
 //	lay->addWidget(new AddNewRemoteDialog);
-//	auto t = [this](const int val)
-//	{ pr->setValue(val);qDebug() <<val; };
-//	rclone->download({"nas:firebase_cpp_sdk_10.3.0.zip", RcloneFile::Distant},{"/Users/sr-71/Downloads/"});
-//	connect(rclone, &Rclone::copyProgress,this, t);
-//	lay->addWidget(new TreeFileWidget("nass:"));
-//	lay->addWidget(new AddNewRemoteDialog);
-RclonesManager rr(10);
 }

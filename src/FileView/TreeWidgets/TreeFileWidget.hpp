@@ -13,8 +13,7 @@ class TreeFileWidget : public QTreeWidget
 {
 Q_OBJECT
 	QString remoteName{};
-	QList<Rclone *> list{};
-	int c{};
+	RclonesManager manager{};
 
 public:
 	explicit TreeFileWidget(QString remoteName, QWidget *parent = nullptr);
@@ -26,6 +25,10 @@ private:
 
 protected:
 	void resizeEvent(QResizeEvent *event) override;
+
+signals:
+
+	void loadDataFinished();
 };
 
 

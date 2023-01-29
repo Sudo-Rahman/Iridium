@@ -12,11 +12,11 @@ namespace bp = boost::process;
 using namespace std;
 
 
-Rclone::Rclone(string path, RclonesManager * parent) : pathRclone(std::move(path)), manager(parent)
+Rclone::Rclone(string path, RclonesManager *parent) : pathRclone(std::move(path)), manager(parent)
 {
 }
 
-Rclone::Rclone(RclonesManager * parent) : pathRclone(
+Rclone::Rclone(RclonesManager *parent) : pathRclone(
 	qApp->applicationDirPath().append("/rclone").toStdString()), manager(parent)
 {}
 
@@ -138,6 +138,8 @@ void Rclone::execute(const vector<string> &args)
 	mthread = std::make_shared<std::thread>
 		([=]()
 		 {
+			 if (manager != nullptr)
+				 manager->start();
 			 mdata.clear();
 			 bp::ipstream ip;
 			 auto process = bp::child(pathRclone, bp::args(args), bp::std_out > ip,
@@ -156,6 +158,8 @@ void Rclone::execute(const vector<string> &args)
 			 process.wait();
 			 mstate = Finsished;
 			 finished(process.exit_code());
+			 if (manager != nullptr)
+				 manager->finished();
 		 });
 }
 
@@ -204,7 +208,32 @@ void Rclone::waitForStarted()
 	}
 }
 
-Rclone::Rclone()
+RclonesManager::RclonesManager(unsigned nbMaxProcess) : nbMaxProcess(nbMaxProcess)
+{}
+
+RclonesManager::RclonesManager() : nbMaxProcess(thread::hardware_concurrency())
+{}
+
+std::shared_ptr<Rclone> RclonesManager::get()
 {
+	rcloneVector.push_back(make_shared<Rclone>(this));
+	return rcloneVector.back();
 }
 
+void RclonesManager::start()
+{
+	while (nb_rclones >= nbMaxProcess)
+	{
+		std::unique_lock<std::mutex> lock(mutex);
+		conditionVariable.wait(lock);
+	}
+	nb_rclones++;
+}
+
+void RclonesManager::finished()
+{
+	nb_rclones--;
+	conditionVariable.notify_one();
+	if (nb_rclones == 0 and rcloneVector.size() > 1)
+		allFinished();
+}
