@@ -10,6 +10,7 @@
 #include "../FileView/TreeWidgets/TreeFileWidget.hpp"
 #include "../Remote/AddNewRemote/AddNewRemoteDialog.hpp"
 #include "../FileView/TreeWidgets/TreeFileItem.hpp"
+#include "../Rclone/RclonesManager.hpp"
 
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
@@ -33,6 +34,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 //	{ pr->setValue(val);qDebug() <<val; };
 //	rclone->download({"nas:firebase_cpp_sdk_10.3.0.zip", RcloneFile::Distant},{"/Users/sr-71/Downloads/"});
 //	connect(rclone, &Rclone::copyProgress,this, t);
-	lay->addWidget(new TreeFileWidget("nas2:"));
+//	lay->addWidget(new TreeFileWidget("nass:"));
 //	lay->addWidget(new AddNewRemoteDialog);
+RclonesManager rr(10);
 }

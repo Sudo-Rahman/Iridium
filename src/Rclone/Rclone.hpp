@@ -13,20 +13,21 @@
 #include <boost/process.hpp>
 #include <thread>
 #include <vector>
+#include <iostream>
+#include <memory>
 #include "RcloneFile.hpp"
+#include "RclonesManager.hpp"
 #include "../Remote/Remote.h"
 
 class Rclone : public QObject
 {
 Q_OBJECT
 public:
-	explicit Rclone(std::string path);
+	explicit Rclone(std::string path,RclonesManager * = nullptr);
 
-	explicit Rclone();
+	explicit Rclone(RclonesManager * = nullptr);
 
-	Rclone(const Rclone &rclone);
-
-	~Rclone();
+	~Rclone() override;
 
 	enum State
 	{
@@ -40,6 +41,7 @@ private:
 	std::string mdata{};
 	pid_t pid{};
 	Rclone::State mstate{};
+	RclonesManager * manager{};
 
 	std::mutex m;
 	std::condition_variable v;

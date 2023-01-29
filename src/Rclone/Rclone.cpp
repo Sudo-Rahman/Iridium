@@ -7,24 +7,18 @@
 #include <utility>
 #include <iostream>
 #include <QCoreApplication>
-#include <boost/process.hpp>
 
 namespace bp = boost::process;
 using namespace std;
 
 
-Rclone::Rclone(string path) : pathRclone(std::move(path))
+Rclone::Rclone(string path, RclonesManager * parent) : pathRclone(std::move(path)), manager(parent)
 {
 }
 
-Rclone::Rclone() : pathRclone(qApp->applicationDirPath().append("/rclone").toStdString())
+Rclone::Rclone(RclonesManager * parent) : pathRclone(
+	qApp->applicationDirPath().append("/rclone").toStdString()), manager(parent)
 {}
-
-Rclone::Rclone(const Rclone &rclone)
-{
-	Rclone::pathRclone = rclone.getPathRclone();
-}
-
 
 const string &Rclone::getPathRclone() const
 {
@@ -208,5 +202,9 @@ void Rclone::waitForStarted()
 		std::unique_lock<std::mutex> lock(m);
 		v.wait(lock);
 	}
+}
+
+Rclone::Rclone()
+{
 }
 
