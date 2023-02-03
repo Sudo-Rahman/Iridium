@@ -28,9 +28,16 @@ const std::shared_ptr<RcloneFile> &TreeFileItem::getFile() const
 	return file;
 }
 
-TreeFileItem::TreeFileItem(QString path): QStandardItem()
+TreeFileItem::TreeFileItem(QString path, const std::shared_ptr<RcloneFile> &file) : QStandardItem()
 {
 	setText(path);
+	if (file == nullptr)
+		TreeFileItem::file = std::make_shared<RcloneFile>(
+			path
+		);
+	else
+		TreeFileItem::file = file;
+
 }
 
 TreeFileItem::TreeFileItem(const RcloneFile &file)
@@ -40,7 +47,6 @@ TreeFileItem::TreeFileItem(const RcloneFile &file)
 		file.getSize(),
 		file.isDir(),
 		file.getModTime()
-		);
+	);
 	setText(file.getName());
 }
-

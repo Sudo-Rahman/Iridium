@@ -42,9 +42,9 @@ QList<QStandardItem *> getItemList(TreeFileItem *item)
 {
 	return {
 		item,
-		new QStandardItem(item->getFile()->getSizeString()),
-		new QStandardItem(item->getFile()->getModTimeString()),
-		new QStandardItem(item->getFile()->getIsDirString())
+		new TreeFileItem(item->getFile()->getSizeString(), item->getFile()),
+		new TreeFileItem(item->getFile()->getModTimeString(), item->getFile()),
+		new TreeFileItem(item->getFile()->getIsDirString(), item->getFile())
 	};
 }
 
@@ -66,28 +66,41 @@ void RcloneFileModel::addItemDistant(const QString &path, TreeFileItem *parent)
 
 void RcloneFileModel::initLocal()
 {
-	m_thread = std::make_shared<std::thread>(
-		[=]()
-		{
-			auto *drive = new TreeFileItem(path);
-			appendRow({
-						  drive,
-						  new QStandardItem("--"),
-						  new QStandardItem("--"),
-						  new QStandardItem(tr("Disque"))
-					  });
-		}
-	);
+	auto *drive = new TreeFileItem(path);
+	drive->appendRow({});
+	appendRow({
+				  drive,
+				  new QStandardItem("--"),
+				  new QStandardItem("--"),
+				  new QStandardItem(tr("Disque"))
+			  });
 
 }
 
 void RcloneFileModel::addItemLocal(const QString &path, TreeFileItem *parent)
 {
-	qDebug() << path;
-	for(const QFileInfo &info : QDir(path).entryInfoList(QDir::NoDotAndDotDot|QDir::AllEntries)){
-		auto *item = new TreeFileItem(RcloneFile(info.filePath()));
-		parent->appendRow(getItemList(item));
+	if (m_thread not_eq nullptr and m_thread->joinable())
+	{
+		m_thread->join();
 	}
+	m_thread = std::make_shared<std::thread>(
+		[=]()
+		{
+			if (parent->rowCount() == 1)
+			{
+				auto list_file = QDir(path).entryInfoList(QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs);
+				for (const QFileInfo &info: list_file)
+				{
+					auto *item = new TreeFileItem(RcloneFile(info.filePath()));
+					parent->appendRow(getItemList(item));
+					if (info.isDir())
+						item->appendRow({});
+				}
+				if(not list_file.isEmpty())
+					parent->removeRow(0);
+			}
+		});
 }
+
 
 

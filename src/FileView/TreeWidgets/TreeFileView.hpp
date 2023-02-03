@@ -2,15 +2,15 @@
 // Created by sr-71 on 18/01/2023.
 //
 
-#ifndef IRIDIUM_TREEFILEWIDGET_HPP
-#define IRIDIUM_TREEFILEWIDGET_HPP
+#ifndef IRIDIUM_TREEFILEVIEW_HPP
+#define IRIDIUM_TREEFILEVIEW_HPP
 
 #include <QTreeView>
 #include <QStandardItemModel>
 #include "../../Rclone/Rclone.hpp"
 #include "TreeFileItem.hpp"
 
-class TreeFileWidget : public QTreeView
+class TreeFileView : public QTreeView
 {
 Q_OBJECT
 	QString remoteName{};
@@ -19,7 +19,7 @@ Q_OBJECT
 	QList<QModelIndex> indexTop{};
 
 public:
-	explicit TreeFileWidget(QString remoteName, QWidget *parent = nullptr);
+	explicit TreeFileView(QString remoteName, QWidget *parent = nullptr);
 
 	const QString &getRemoteName() const;
 
@@ -32,4 +32,4 @@ protected:
 
 };
 
-#endif //IRIDIUM_TREEFILEWIDGET_HPP
+#endif //IRIDIUM_TREEFILEVIEW_HPP
