@@ -7,7 +7,7 @@
 #include <QDateTime>
 #include <QObject>
 
-TreeFileItem::TreeFileItem(QString path, QJsonObject data)
+TreeFileItem::TreeFileItem(QString path, QJsonObject data, TreeFileItem *parent) : parent(parent)
 {
 	if (path.contains(":"))
 		file = std::make_shared<RcloneFile>(
@@ -28,7 +28,8 @@ const std::shared_ptr<RcloneFile> &TreeFileItem::getFile() const
 	return file;
 }
 
-TreeFileItem::TreeFileItem(QString path, const std::shared_ptr<RcloneFile> &file) : QStandardItem()
+TreeFileItem::TreeFileItem(QString path, const std::shared_ptr<RcloneFile> &file, TreeFileItem *parent) : parent(
+	parent), QStandardItem()
 {
 	setText(path);
 	if (file == nullptr)
@@ -40,7 +41,7 @@ TreeFileItem::TreeFileItem(QString path, const std::shared_ptr<RcloneFile> &file
 
 }
 
-TreeFileItem::TreeFileItem(const RcloneFile &file)
+TreeFileItem::TreeFileItem(const RcloneFile &file, TreeFileItem *parent) : parent(parent)
 {
 	TreeFileItem::file = std::make_shared<RcloneFile>(
 		file.getPath(),
@@ -49,4 +50,9 @@ TreeFileItem::TreeFileItem(const RcloneFile &file)
 		file.getModTime()
 	);
 	setText(file.getName());
+}
+
+TreeFileItem *TreeFileItem::getParent() const
+{
+	return parent;
 }

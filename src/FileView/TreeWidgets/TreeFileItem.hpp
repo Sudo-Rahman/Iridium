@@ -11,14 +11,18 @@
 class TreeFileItem : public QStandardItem
 {
 	std::shared_ptr<RcloneFile> file{};
+	TreeFileItem *parent{};
 
 public:
-	explicit TreeFileItem(QString path, QJsonObject data);
+	explicit TreeFileItem(QString path, QJsonObject data, TreeFileItem * = nullptr);
 
-	explicit TreeFileItem(QString path, const std::shared_ptr<RcloneFile> & = nullptr);
-	explicit TreeFileItem(const RcloneFile &);
+	explicit TreeFileItem(QString path, const std::shared_ptr<RcloneFile> & = nullptr, TreeFileItem * = nullptr);
+
+	explicit TreeFileItem(const RcloneFile &, TreeFileItem * = nullptr);
 
 	[[nodiscard]] const std::shared_ptr<RcloneFile> &getFile() const;
+
+	TreeFileItem *getParent() const;
 
 
 };

@@ -27,6 +27,7 @@ RcloneFileModel::RcloneFileModel(RcloneFileModel::Type type, const QString &path
 void RcloneFileModel::initDistant()
 {
 	auto *drive = new TreeFileItem(path);
+	m_root_index = drive->index();
 	appendRow({
 				  drive,
 				  new QStandardItem("--"),
@@ -42,9 +43,9 @@ QList<QStandardItem *> getItemList(TreeFileItem *item)
 {
 	return {
 		item,
-		new TreeFileItem(item->getFile()->getSizeString(), item->getFile()),
-		new TreeFileItem(item->getFile()->getModTimeString(), item->getFile()),
-		new TreeFileItem(item->getFile()->getIsDirString(), item->getFile())
+		new TreeFileItem(item->getFile()->getSizeString(), item->getFile(), item),
+		new TreeFileItem(item->getFile()->getModTimeString(), item->getFile(), item),
+		new TreeFileItem(item->getFile()->getIsDirString(), item->getFile(), item)
 	};
 }
 
@@ -67,12 +68,13 @@ void RcloneFileModel::addItemDistant(const QString &path, TreeFileItem *parent)
 void RcloneFileModel::initLocal()
 {
 	auto *drive = new TreeFileItem(path);
+	m_root_index = drive->index();
 	drive->appendRow({});
 	appendRow({
 				  drive,
-				  new QStandardItem("--"),
-				  new QStandardItem("--"),
-				  new QStandardItem(tr("Disque"))
+				  new TreeFileItem("--", drive->getFile(), drive),
+				  new TreeFileItem("--", drive->getFile(), drive),
+				  new TreeFileItem(tr("Disque"), drive->getFile(), drive)
 			  });
 
 }
@@ -83,23 +85,29 @@ void RcloneFileModel::addItemLocal(const QString &path, TreeFileItem *parent)
 	{
 		m_thread->join();
 	}
+	auto *tree_item = (parent->getParent() == nullptr ? parent : parent->getParent());
 	m_thread = std::make_shared<std::thread>(
 		[=]()
 		{
-			if (parent->rowCount() == 1)
+			if (tree_item->rowCount() == 1)
 			{
 				auto list_file = QDir(path).entryInfoList(QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs);
 				for (const QFileInfo &info: list_file)
 				{
 					auto *item = new TreeFileItem(RcloneFile(info.filePath()));
-					parent->appendRow(getItemList(item));
+					tree_item->appendRow(getItemList(item));
 					if (info.isDir())
 						item->appendRow({});
 				}
-				if(not list_file.isEmpty())
-					parent->removeRow(0);
+				if (not list_file.isEmpty())
+					tree_item->removeRow(0);
 			}
 		});
+}
+
+const QModelIndex &RcloneFileModel::getRootIndex() const
+{
+	return m_root_index;
 }
 
 

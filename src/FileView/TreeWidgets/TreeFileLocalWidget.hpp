@@ -11,7 +11,6 @@
 #include <memory>
 
 
-
 class TreeFileLocalWidget : public QTreeWidget
 {
 Q_OBJECT

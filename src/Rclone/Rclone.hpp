@@ -96,6 +96,7 @@ signals:
 class RclonesManager
 {
 	friend class Rclone;
+
 	std::atomic<unsigned> nb_rclones{};
 	unsigned nbMaxProcess{};
 	std::mutex mutex{};
@@ -109,10 +110,11 @@ public:
 
 	std::shared_ptr<Rclone> get();
 
-	boost::signals2::signal<void ()> allFinished;
+	boost::signals2::signal<void()> allFinished;
 
 private:
 	void start();
+
 	void finished();
 
 };

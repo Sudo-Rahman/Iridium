@@ -24,11 +24,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	auto *lay = new QHBoxLayout(wid);
 	setCentralWidget(wid);
 
-	auto *tree = new TreeFileView("/");
+	auto *tree = new TreeFileView("nas2:");
 	lay->addWidget(tree);
 	auto *bt = new QPushButton("arrier");
 	lay->addWidget(bt);
-	connect(bt,&QPushButton::clicked,tree,&TreeFileView::back);
+	connect(bt, &QPushButton::clicked, tree, &TreeFileView::back);
 //	pr = new QProgressBar(this);
 //	lay->addWidget(pr);
 	auto *rclone = new Rclone;

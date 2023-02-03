@@ -130,7 +130,7 @@ QString RcloneFile::getModTimeString() const
 
 QString RcloneFile::getIsDirString() const
 {
-	if(isDirectory)
+	if (isDirectory)
 		return "Dossier";
 	else
 		return "Fichier";

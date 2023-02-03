@@ -18,15 +18,16 @@ TreeFileView::TreeFileView(QString remoteName, QWidget *parent) : remoteName(std
 	header()->setStretchLastSection(true);
 	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-	model = new RcloneFileModel(RcloneFileModel::Local, TreeFileView::remoteName);
+	model = new RcloneFileModel(RcloneFileModel::Distant, TreeFileView::remoteName);
 	QTreeView::setModel(model);
 
 	connect(this, &QTreeView::doubleClicked, this, [=](const QModelIndex &index)
 	{
 		auto *item = dynamic_cast<TreeFileItem *>(static_cast<QStandardItem *>(model->itemFromIndex(index)));
 		dynamic_cast<RcloneFileModel *>(model)->addItemLocal(item->getFile()->getPath(), item);
-		indexBack.push_back(index.parent());
-		QTreeView::setRootIndex(index);
+		auto id = item->getParent() == nullptr ? index.parent() : model->indexFromItem(item->getParent()).parent();
+		indexBack.push_back(id);
+		QTreeView::setRootIndex(item->getParent() == nullptr ? index : model->indexFromItem(item->getParent()));
 	});
 
 	connect(this, &QTreeView::expanded, this, [=](const QModelIndex &index)
@@ -59,6 +60,9 @@ void TreeFileView::back()
 	{
 		QTreeView::setRootIndex(indexBack.back());
 		indexBack.pop_back();
+	} else
+	{
+		QTreeView::setRootIndex(dynamic_cast<RcloneFileModel *>(model)->getRootIndex());
 	}
 }
 

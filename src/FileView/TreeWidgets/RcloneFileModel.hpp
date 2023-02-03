@@ -14,9 +14,10 @@
 class RcloneFileModel : public QStandardItemModel
 {
 Q_OBJECT
-	RclonesManager manager{1000};
+	RclonesManager manager{std::thread::hardware_concurrency() * 10};
 	QString path{};
 	std::shared_ptr<std::thread> m_thread{};
+	QModelIndex m_root_index{};
 
 public:
 	enum Type
@@ -33,8 +34,11 @@ private:
 	void addItemDistant(const QString &path, TreeFileItem *parent);
 
 	void initLocal();
+
 public:
 	void addItemLocal(const QString &path, TreeFileItem *parent);
+
+	const QModelIndex &getRootIndex() const;
 
 };
 
