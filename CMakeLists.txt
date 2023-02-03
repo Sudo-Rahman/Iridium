@@ -35,7 +35,7 @@ set(SRC
         src/Remote/AddNewRemote/RemoteFrame/RemoteConfigParamsFrame.cpp src/Remote/AddNewRemote/RemoteFrame/RemoteConfigParamsFrame.hpp
         src/Remote/Remote.h src/Remote/AddNewRemote/RemoteFrame/GoogleDrive/GoogleDriveRemoteConfigParamsFrame.cpp src/Remote/AddNewRemote/RemoteFrame/GoogleDrive/GoogleDriveRemoteConfigParamsFrame.hpp
         src/FileView/TreeWidgets/TreeFileWidget.cpp src/FileView/TreeWidgets/TreeFileWidget.hpp src/FileView/TreeWidgets/TreeFileItem.cpp src/FileView/TreeWidgets/TreeFileItem.hpp
-        src/FileView/TreeWidgets/TreeFileLocalWidget.cpp src/FileView/TreeWidgets/TreeFileLocalWidget.hpp)
+        src/FileView/TreeWidgets/TreeFileLocalWidget.cpp src/FileView/TreeWidgets/TreeFileLocalWidget.hpp src/FileView/TreeWidgets/RcloneFileModel.cpp src/FileView/TreeWidgets/RcloneFileModel.hpp)
 
 SET(TRANSLATION
         languages/iridium_en.ts

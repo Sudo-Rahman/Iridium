@@ -5,31 +5,31 @@
 #ifndef IRIDIUM_TREEFILEWIDGET_HPP
 #define IRIDIUM_TREEFILEWIDGET_HPP
 
-#include <QTreeWidget>
+#include <QTreeView>
+#include <QStandardItemModel>
 #include "../../Rclone/Rclone.hpp"
 #include "TreeFileItem.hpp"
 
-class TreeFileWidget : public QTreeWidget
+class TreeFileWidget : public QTreeView
 {
 Q_OBJECT
 	QString remoteName{};
-	RclonesManager manager{};
+	QStandardItemModel *model{};
+	QList<QModelIndex> indexBack{};
+	QList<QModelIndex> indexTop{};
 
 public:
 	explicit TreeFileWidget(QString remoteName, QWidget *parent = nullptr);
 
 	const QString &getRemoteName() const;
 
-private:
-	void addItem(const QString &path, TreeFileItem *parent);
+	void back();
+
 
 protected:
 	void resizeEvent(QResizeEvent *event) override;
 
-signals:
 
-	void loadDataFinished();
 };
-
 
 #endif //IRIDIUM_TREEFILEWIDGET_HPP

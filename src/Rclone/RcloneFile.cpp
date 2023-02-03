@@ -128,4 +128,12 @@ QString RcloneFile::getModTimeString() const
 	return modTime.toString(tr("dd MMM yyyy à hh:mm:ss"));
 }
 
+QString RcloneFile::getIsDirString() const
+{
+	if(isDirectory)
+		return "Dossier";
+	else
+		return "Fichier";
+}
+
 

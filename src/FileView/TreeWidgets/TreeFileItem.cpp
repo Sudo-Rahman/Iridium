@@ -7,8 +7,7 @@
 #include <QDateTime>
 #include <QObject>
 
-TreeFileItem::TreeFileItem(QString path, QJsonObject data, QTreeWidgetItem *parent)
-	: QTreeWidgetItem(parent)
+TreeFileItem::TreeFileItem(QString path, QJsonObject data)
 {
 	if (path.contains(":"))
 		file = std::make_shared<RcloneFile>(
@@ -21,11 +20,7 @@ TreeFileItem::TreeFileItem(QString path, QJsonObject data, QTreeWidgetItem *pare
 		file = std::make_shared<RcloneFile>(
 			path + data["Name"].toString(),
 			RcloneFile::Local);
-
-	setText(0, file->isDir() ? file->getPathString() : file->getName());
-	setText(1, file->getSizeString());
-	setText(2, file->getModTimeString());
-	setText(3, file->isDir() ? QObject::tr("Dossier") : QObject::tr("Ficher"));
+	setText(file->isDir() ? file->getPathString() : file->getName());
 }
 
 const std::shared_ptr<RcloneFile> &TreeFileItem::getFile() const
@@ -33,7 +28,19 @@ const std::shared_ptr<RcloneFile> &TreeFileItem::getFile() const
 	return file;
 }
 
-TreeFileItem::TreeFileItem(RcloneFile &rclone, QTreeWidgetItem *parent)
+TreeFileItem::TreeFileItem(QString path): QStandardItem()
 {
-//	file = std::make_shared<RcloneFile>({rclone});
+	setText(path);
 }
+
+TreeFileItem::TreeFileItem(const RcloneFile &file)
+{
+	TreeFileItem::file = std::make_shared<RcloneFile>(
+		file.getPath(),
+		file.getSize(),
+		file.isDir(),
+		file.getModTime()
+		);
+	setText(file.getName());
+}
+

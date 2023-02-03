@@ -5,24 +5,16 @@
 #ifndef IRIDIUM_TREEFILELOCALWIDGET_HPP
 #define IRIDIUM_TREEFILELOCALWIDGET_HPP
 
-#include <QTreeView>
+#include <QTreeWidget>
 #include <QFileSystemModel>
 #include <thread>
 #include <memory>
 
 
-class FileSystemModel : public QFileSystemModel
-{
-public:
-	explicit FileSystemModel(QWidget *parent = nullptr);
 
-	virtual bool setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role) override;
-};
-
-class TreeFileLocalWidget : public QTreeView
+class TreeFileLocalWidget : public QTreeWidget
 {
 Q_OBJECT
-	FileSystemModel *model{};
 	std::shared_ptr<std::thread> mthread{};
 
 public:

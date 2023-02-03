@@ -5,19 +5,21 @@
 #ifndef IRIDIUM_TREEFILEITEM_HPP
 #define IRIDIUM_TREEFILEITEM_HPP
 
-#include <QTreeWidgetItem>
+#include <QStandardItem>
 #include "../../Rclone/RcloneFile.hpp"
 
-class TreeFileItem : public QTreeWidgetItem
+class TreeFileItem : public QStandardItem
 {
 	std::shared_ptr<RcloneFile> file{};
 
 public:
-	explicit TreeFileItem(QString path, QJsonObject data, QTreeWidgetItem *parent = nullptr);
+	explicit TreeFileItem(QString path, QJsonObject data);
 
-	TreeFileItem(RcloneFile &, QTreeWidgetItem *parent = nullptr);
+	explicit TreeFileItem(QString path);
+	explicit TreeFileItem(const RcloneFile &);
 
-	const std::shared_ptr<RcloneFile> &getFile() const;
+	[[nodiscard]] const std::shared_ptr<RcloneFile> &getFile() const;
+
 
 };
 

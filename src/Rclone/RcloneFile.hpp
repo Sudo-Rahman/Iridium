@@ -63,6 +63,8 @@ public:
 
 	[[nodiscard]] QString getModTimeString() const;
 
+	[[nodiscard]] QString getIsDirString() const;
+
 
 };
 
