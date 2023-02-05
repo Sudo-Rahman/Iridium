@@ -9,25 +9,41 @@
 #include <QStandardItemModel>
 #include "../../Rclone/Rclone.hpp"
 #include "TreeFileItem.hpp"
+#include "RcloneFileModel.hpp"
+#include <QTreeWidgetItem>
+#include <thread>
+#include <QMessageBox>
 
 class TreeFileView : public QTreeView
 {
 Q_OBJECT
+
 	QString remoteName{};
 	QStandardItemModel *model{};
 	QList<QModelIndex> indexBack{};
 	QList<QModelIndex> indexTop{};
+	Remote type{};
 
 public:
-	explicit TreeFileView(QString remoteName, QWidget *parent = nullptr);
+	explicit TreeFileView(Remote type, QString remoteName, QWidget *parent = nullptr);
 
 	const QString &getRemoteName() const;
 
 	void back();
 
+	void front();
 
 protected:
 	void resizeEvent(QResizeEvent *event) override;
+
+protected slots:
+
+	void doubleClick(const QModelIndex &index);
+
+	virtual void expand(const QModelIndex &index);
+
+public:
+	void setModel(RcloneFileModel *model);
 
 
 };

@@ -37,7 +37,6 @@ void Rclone::setPathRclone(const string &pathRclone)
  */
 void Rclone::lsJson(const string &path)
 {
-
 	finished.connect(
 		[=](const int exit)
 		{

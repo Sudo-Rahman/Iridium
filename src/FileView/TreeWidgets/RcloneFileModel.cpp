@@ -4,7 +4,7 @@
 
 #include "RcloneFileModel.hpp"
 
-RcloneFileModel::RcloneFileModel(RcloneFileModel::Type type, const QString &path, QObject *parent) : QStandardItemModel(
+RcloneFileModel::RcloneFileModel(const QString &path, QObject *parent) : QStandardItemModel(
 	parent), path(path)
 {
 	setColumnCount(4);
@@ -12,34 +12,10 @@ RcloneFileModel::RcloneFileModel(RcloneFileModel::Type type, const QString &path
 
 	setHorizontalHeaderLabels({tr("Nom"), tr("Taille"), tr("Date de modification"), tr("Type")});
 
-	switch (type)
-	{
-		case Local:
-			initLocal();
-			break;
-		case Distant:
-			initDistant();
-
-	}
 
 }
 
-void RcloneFileModel::initDistant()
-{
-	auto *drive = new TreeFileItem(path);
-	m_root_index = drive->index();
-	appendRow({
-				  drive,
-				  new QStandardItem("--"),
-				  new QStandardItem("--"),
-				  new QStandardItem(tr("Disque"))
-			  });
-	addItemDistant(path, drive);
-
-
-}
-
-QList<QStandardItem *> getItemList(TreeFileItem *item)
+QList<QStandardItem *> RcloneFileModel::getItemList(TreeFileItem *item)
 {
 	return {
 		item,
@@ -49,21 +25,6 @@ QList<QStandardItem *> getItemList(TreeFileItem *item)
 	};
 }
 
-void RcloneFileModel::addItemDistant(const QString &path, TreeFileItem *parent)
-{
-	auto rclone = manager.get();
-	connect(rclone.get(), &Rclone::lsJsonFinished, this, [=](const QJsonDocument &doc)
-	{
-		for (const auto &file: doc.array())
-		{
-			auto *item = new TreeFileItem(path, file.toObject());
-			parent->appendRow(getItemList(item));
-			if (item->getFile()->isDir())
-				addItemDistant(item->getFile()->getPath(), item);
-		}
-	});
-	rclone->lsJson(path.toStdString());
-}
 
 void RcloneFileModel::initLocal()
 {
@@ -109,6 +70,5 @@ const QModelIndex &RcloneFileModel::getRootIndex() const
 {
 	return m_root_index;
 }
-
 
 

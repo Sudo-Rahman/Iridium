@@ -8,7 +8,6 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-
 set(Boost_USE_STATIC_LIBS OFF)
 find_package(Boost REQUIRED COMPONENTS unit_test_framework)
 include_directories(${Boost_INCLUDE_DIRS})
@@ -35,7 +34,7 @@ set(SRC
         src/Remote/AddNewRemote/RemoteFrame/RemoteConfigParamsFrame.cpp src/Remote/AddNewRemote/RemoteFrame/RemoteConfigParamsFrame.hpp
         src/Remote/Remote.h src/Remote/AddNewRemote/RemoteFrame/GoogleDrive/GoogleDriveRemoteConfigParamsFrame.cpp src/Remote/AddNewRemote/RemoteFrame/GoogleDrive/GoogleDriveRemoteConfigParamsFrame.hpp
         src/FileView/TreeWidgets/TreeFileView.cpp src/FileView/TreeWidgets/TreeFileView.hpp src/FileView/TreeWidgets/TreeFileItem.cpp src/FileView/TreeWidgets/TreeFileItem.hpp
-        src/FileView/TreeWidgets/TreeFileLocalWidget.cpp src/FileView/TreeWidgets/TreeFileLocalWidget.hpp src/FileView/TreeWidgets/RcloneFileModel.cpp src/FileView/TreeWidgets/RcloneFileModel.hpp)
+        src/FileView/TreeWidgets/RcloneFileModel.cpp src/FileView/TreeWidgets/RcloneFileModel.hpp src/FileView/TreeWidgets/RcloneFileModelDistant.cpp src/FileView/TreeWidgets/RcloneFileModelDistant.hpp)
 
 SET(TRANSLATION
         languages/iridium_en.ts

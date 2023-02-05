@@ -5,6 +5,11 @@
 #ifndef IRIDIUM_REMOTE_H
 #define IRIDIUM_REMOTE_H
 
+enum Remote
+{
+	Distant, Local
+};
+
 enum RemoteType
 {
 	Drive, Sftp

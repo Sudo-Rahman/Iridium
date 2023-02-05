@@ -6,38 +6,37 @@
 
 #include <cmath>
 
-void RcloneFile::init(const QString &path, TypeFile type)
+void RcloneFile::init(const QString &path, Remote type)
 {
 	QFileInfo info(path);
-	if (info.exists() and type == TypeFile::Local)
+	if (info.exists() and type == Remote::Local)
 	{
 		setSize(info.size());
 		setModTime(info.lastModified());
-	}
-	if (type == TypeFile::Local)
 		setPath(info.absoluteFilePath());
-	else
+
+	} else
 		setPath(path);
 	setIsDir(info.isDir());
 }
 
 
-RcloneFile::RcloneFile(const QFile &file, TypeFile type)
+RcloneFile::RcloneFile(const QFile &file, Remote type)
 {
 	init(QFileInfo(file).filePath(), type);
 }
 
-RcloneFile::RcloneFile(const QString &path, TypeFile type)
+RcloneFile::RcloneFile(const QString &path, Remote type)
 {
 	init(path, type);
 }
 
-RcloneFile::RcloneFile(const QDir &dir, TypeFile type)
+RcloneFile::RcloneFile(const QDir &dir, Remote type)
 {
 	init(dir.path(), type);
 }
 
-RcloneFile::RcloneFile(const QString &path, uint64_t size, bool isDir, QDateTime modTime, TypeFile type)
+RcloneFile::RcloneFile(const QString &path, uint64_t size, bool isDir, QDateTime modTime, Remote type)
 	: size(size), isDirectory(isDir), modTime(std::move(modTime)), typeFile(type)
 {
 	setPath(path);

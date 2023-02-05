@@ -15,11 +15,11 @@ TreeFileItem::TreeFileItem(QString path, QJsonObject data, TreeFileItem *parent)
 			static_cast<uint64_t>(data["Size"].toInteger()),
 			data["IsDir"].toBool(),
 			QDateTime::fromString(data["ModTime"].toString(), Qt::ISODateWithMs),
-			RcloneFile::Distant);
+			Remote::Distant);
 	else
 		file = std::make_shared<RcloneFile>(
 			path + data["Name"].toString(),
-			RcloneFile::Local);
+			Remote::Local);
 	setText(file->isDir() ? file->getPathString() : file->getName());
 }
 

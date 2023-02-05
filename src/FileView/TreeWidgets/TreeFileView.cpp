@@ -2,15 +2,11 @@
 // Created by sr-71 on 18/01/2023.
 //
 #include <QHeaderView>
-
 #include "TreeFileView.hpp"
-#include "RcloneFileModel.hpp"
-#include <QTreeWidgetItem>
-#include <thread>
-#include <QMessageBox>
+#include "RcloneFileModelDistant.hpp"
 
-TreeFileView::TreeFileView(QString remoteName, QWidget *parent) : remoteName(std::move(remoteName)),
-																  QTreeView(parent)
+TreeFileView::TreeFileView(Remote type, QString remoteName, QWidget *parent) : remoteName(std::move(remoteName)),
+																			   QTreeView(parent), type(type)
 {
 	setAlternatingRowColors(true);
 	header()->setSectionsMovable(true);
@@ -18,24 +14,13 @@ TreeFileView::TreeFileView(QString remoteName, QWidget *parent) : remoteName(std
 	header()->setStretchLastSection(true);
 	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-	model = new RcloneFileModel(RcloneFileModel::Distant, TreeFileView::remoteName);
-	QTreeView::setModel(model);
+	if (type == Distant)
+		TreeFileView::setModel(new RcloneFileModelDistant(TreeFileView::remoteName, RcloneFileModelDistant::Dynmic));
 
-	connect(this, &QTreeView::doubleClicked, this, [=](const QModelIndex &index)
-	{
-		auto *item = dynamic_cast<TreeFileItem *>(static_cast<QStandardItem *>(model->itemFromIndex(index)));
-		dynamic_cast<RcloneFileModel *>(model)->addItemLocal(item->getFile()->getPath(), item);
-		auto id = item->getParent() == nullptr ? index.parent() : model->indexFromItem(item->getParent()).parent();
-		indexBack.push_back(id);
-		QTreeView::setRootIndex(item->getParent() == nullptr ? index : model->indexFromItem(item->getParent()));
-	});
 
-	connect(this, &QTreeView::expanded, this, [=](const QModelIndex &index)
-	{
-		auto *item = dynamic_cast<TreeFileItem *>(static_cast<QStandardItem *>(model->itemFromIndex(index)));
-		dynamic_cast<RcloneFileModel *>(model)->addItemLocal(item->getFile()->getPath(), item);
+	connect(this, &QTreeView::doubleClicked, this, &TreeFileView::doubleClick);
 
-	});
+	connect(this, &QTreeView::expanded, this, &TreeFileView::expand);
 
 
 }
@@ -58,11 +43,44 @@ void TreeFileView::back()
 {
 	if (indexBack.length() > 0)
 	{
-		QTreeView::setRootIndex(indexBack.back());
+		auto index = indexBack.back();
 		indexBack.pop_back();
+		indexTop << index.sibling(1, 0);
+		QTreeView::setRootIndex(index);
 	} else
-	{
 		QTreeView::setRootIndex(dynamic_cast<RcloneFileModel *>(model)->getRootIndex());
+}
+
+void TreeFileView::front()
+{
+	if (indexTop.length() > 0)
+	{
+		auto index = indexTop.back();
+		indexTop.pop_back();
+		indexBack << index.parent();
+		QTreeView::setRootIndex(index);
 	}
+}
+
+void TreeFileView::expand(const QModelIndex &index)
+{
+	QTreeView::expand(index);
+	auto *item = dynamic_cast<TreeFileItem *>(static_cast<QStandardItem *>(model->itemFromIndex(index)));
+	dynamic_cast<RcloneFileModel *>(model)->addItem(item->getFile()->getPath(), item);
+}
+
+void TreeFileView::doubleClick(const QModelIndex &index)
+{
+	auto *item = dynamic_cast<TreeFileItem *>(static_cast<QStandardItem *>(model->itemFromIndex(index)));
+	dynamic_cast<RcloneFileModel *>(model)->addItem(item->getFile()->getPath(), item);
+	auto id = item->getParent() == nullptr ? index.parent() : model->indexFromItem(item->getParent()).parent();
+	indexBack.push_back(id);
+	QTreeView::setRootIndex(item->getParent() == nullptr ? index : model->indexFromItem(item->getParent()));
+}
+
+void TreeFileView::setModel(RcloneFileModel *model)
+{
+	TreeFileView::model = model;
+	QTreeView::setModel(TreeFileView::model);
 }
 

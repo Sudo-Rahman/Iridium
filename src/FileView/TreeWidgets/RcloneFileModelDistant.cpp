@@ -1,0 +1,73 @@
+//
+// Created by rahman on 05/02/23.
+//
+
+#include "RcloneFileModelDistant.hpp"
+
+RcloneFileModelDistant::RcloneFileModelDistant(const QString &path, Load load, QObject *parent) : RcloneFileModel(path,
+																												  parent),
+																								  load(load)
+{
+	RcloneFileModelDistant::init();
+}
+
+void RcloneFileModelDistant::init()
+{
+	auto *drive = new TreeFileItem(path);
+	m_root_index = drive->index();
+	if (load == Dynmic)
+		drive->appendRow({});
+	appendRow({
+				  drive,
+				  new QStandardItem("--"),
+				  new QStandardItem("--"),
+				  new QStandardItem(tr("Disque"))
+			  });
+	if (load == Static)
+		initStatic(path, drive);
+}
+
+void RcloneFileModelDistant::addItem(const QString &path, TreeFileItem *parent)
+{
+	if (load == Dynmic)
+	{
+		addItemDynamic(path, parent);
+	}
+}
+
+void RcloneFileModelDistant::addItemDynamic(const QString &path, TreeFileItem *parent)
+{
+	auto *tree_item = (parent->getParent() == nullptr ? parent : parent->getParent());
+	auto rclone = manager.get();
+	connect(rclone.get(), &Rclone::lsJsonFinished, this, [=](const QJsonDocument &doc)
+	{
+		for (const auto &file: doc.array())
+		{
+			auto *item = new TreeFileItem(path, file.toObject());
+			tree_item->appendRow(getItemList(item));
+			if (item->getFile()->isDir())
+				item->appendRow({});
+		}
+		if (not doc.array().isEmpty())
+			tree_item->removeRow(0);
+	});
+	if (tree_item->rowCount() == 1)
+		rclone->lsJson(path.toStdString());
+}
+
+void RcloneFileModelDistant::initStatic(const QString &path, TreeFileItem *parent)
+{
+	auto rclone = manager.get();
+	connect(rclone.get(), &Rclone::lsJsonFinished, this, [=](const QJsonDocument &doc)
+	{
+		for (const auto &file: doc.array())
+		{
+			auto *item = new TreeFileItem(path, file.toObject());
+			parent->appendRow(getItemList(item));
+			if (item->getFile()->isDir())
+				initStatic(item->getFile()->getPath(), item);
+		}
+	});
+	rclone->lsJson(path.toStdString());
+}
+

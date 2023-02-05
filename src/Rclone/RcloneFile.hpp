@@ -11,33 +11,29 @@
 #include <QFile>
 #include <QDir>
 #include <QJsonDocument>
+#include "../Remote/Remote.h"
 
 class RcloneFile : public QObject
 {
 Q_OBJECT
-public:
-	enum TypeFile
-	{
-		Local, Distant
-	};
-private:
+
 	QString path{};
 	uint64_t size{};
 	bool isDirectory{};
 	QDateTime modTime{};
-	TypeFile typeFile{};
+	Remote typeFile{};
 
-	void init(const QString &path, TypeFile type = TypeFile::Local);
+	void init(const QString &path, Remote type = Remote::Local);
 
 public:
-	explicit RcloneFile(const QFile &file, TypeFile typeFile = TypeFile::Local);
+	explicit RcloneFile(const QFile &file, Remote typeFile = Remote::Local);
 
-	RcloneFile(const QString &pathFile, TypeFile typeFile = TypeFile::Local);
+	RcloneFile(const QString &pathFile, Remote typeFile = Remote::Local);
 
-	explicit RcloneFile(const QDir &dir, TypeFile typeFile = TypeFile::Local);
+	explicit RcloneFile(const QDir &dir, Remote typeFile = Remote::Local);
 
 	RcloneFile(const QString &path, uint64_t size, bool isDir, QDateTime modTime,
-			   TypeFile typeFile = TypeFile::Local);
+			   Remote typeFile = Remote::Local);
 
 	[[nodiscard]] const QString &getPath() const;
 

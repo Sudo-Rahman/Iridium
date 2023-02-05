@@ -3,13 +3,12 @@
 //
 
 #include "MainWindow.hpp"
+#include "../FileView/TreeWidgets/TreeFileView.hpp"
 
 #include <QPushButton>
 #include <QLayout>
 #include <QTimer>
 #include <QProgressBar>
-#include "../FileView/TreeWidgets/TreeFileView.hpp"
-#include "../FileView/TreeWidgets/TreeFileLocalWidget.hpp"
 
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
@@ -24,11 +23,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	auto *lay = new QHBoxLayout(wid);
 	setCentralWidget(wid);
 
-	auto *tree = new TreeFileView("nas2:");
+	auto *tree = new TreeFileView(Remote::Distant, "nass:");
 	lay->addWidget(tree);
 	auto *bt = new QPushButton("arrier");
 	lay->addWidget(bt);
+	auto *bt1 = new QPushButton("avant");
+	lay->addWidget(bt1);
 	connect(bt, &QPushButton::clicked, tree, &TreeFileView::back);
+	connect(bt1, &QPushButton::clicked, tree, &TreeFileView::front);
 //	pr = new QProgressBar(this);
 //	lay->addWidget(pr);
 	auto *rclone = new Rclone;

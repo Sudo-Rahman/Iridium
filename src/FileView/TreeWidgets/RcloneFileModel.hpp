@@ -14,31 +14,29 @@
 class RcloneFileModel : public QStandardItemModel
 {
 Q_OBJECT
-	RclonesManager manager{std::thread::hardware_concurrency() * 10};
+
+protected:
 	QString path{};
 	std::shared_ptr<std::thread> m_thread{};
 	QModelIndex m_root_index{};
 
-public:
-	enum Type
-	{
-		Local, Distant
-	};
 
-	explicit RcloneFileModel(Type, const QString &path, QObject *parent = nullptr);
+	virtual void init() = 0;
 
+	explicit RcloneFileModel(const QString &path, QObject *parent = nullptr);
 
 private:
-	void initDistant();
-
-	void addItemDistant(const QString &path, TreeFileItem *parent);
 
 	void initLocal();
 
-public:
 	void addItemLocal(const QString &path, TreeFileItem *parent);
 
-	const QModelIndex &getRootIndex() const;
+public:
+	virtual void addItem(const QString &path, TreeFileItem *parent) = 0;
+
+	[[nodiscard]] const QModelIndex &getRootIndex() const;
+
+	static QList<QStandardItem *> getItemList(TreeFileItem *item);
 
 };
 
