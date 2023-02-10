@@ -47,7 +47,7 @@ set(RCLONE "${CMAKE_CURRENT_SOURCE_DIR}/rclone")
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     file(COPY ${RCLONE} DESTINATION Iridium.app/Contents/MacOS)
     set(MACOSX_BUNDLE_ICON_FILE app.icns)
-    set(myApp_ICON images/app.icns)
+    set(myApp_ICON ressources/app.icns)
     set_source_files_properties(${myApp_ICON} PROPERTIES
             MACOSX_PACKAGE_LOCATION "Resources")
     add_executable(Iridium MACOSX_BUNDLE application.qrc ${TRANSLATION} ${myApp_ICON} ${SRC})

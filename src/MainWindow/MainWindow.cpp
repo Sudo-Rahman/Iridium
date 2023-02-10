@@ -24,7 +24,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	auto *lay = new QHBoxLayout(wid);
 	setCentralWidget(wid);
 
-	auto *tree = new TreeFileView(Remote::Distant, "nass:");
+	auto *tree = new TreeFileView(Remote::Distant, "nas2:");
 	lay->addWidget(tree);
 	auto *bt = new QPushButton("arrier");
 	lay->addWidget(bt);

@@ -2,17 +2,22 @@
 // Created by sr-71 on 18/01/2023.
 //
 #include <QHeaderView>
+#include <QMouseEvent>
+#include <QMenu>
 #include "TreeFileView.hpp"
 #include "RcloneFileModelDistant.hpp"
 
 TreeFileView::TreeFileView(Remote type, QString remoteName, QWidget *parent) : remoteName(std::move(remoteName)),
 																			   QTreeView(parent), type(type)
 {
+	setEditTriggers(QAbstractItemView::NoEditTriggers);
+	setSelectionMode(QAbstractItemView::ExtendedSelection);
 	setFocusPolicy(Qt::NoFocus);
-	setIconSize(QSize(35, 38));
+	setIconSize(QSize(35, 35));
 	setAlternatingRowColors(true);
 	header()->setSectionsMovable(true);
 	header()->resizeSection(0, 300);
+	setUniformRowHeights(true);
 	header()->setStretchLastSection(true);
 	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
@@ -85,5 +90,21 @@ void TreeFileView::setModel(RcloneFileModel *model)
 {
 	TreeFileView::model = model;
 	QTreeView::setModel(TreeFileView::model);
+}
+
+void TreeFileView::mouseReleaseEvent(QMouseEvent *event)
+{
+	QTreeView::mouseReleaseEvent(event);
+	if(event->button() == Qt::RightButton)
+	{
+		qDebug() << reinterpret_cast<TreeFileItem *>(model->itemFromIndex(
+			QTreeView::selectedIndexes().first()))->getFile()->getPath();
+		QMenu menu;
+		QAction action(tr("Information"), &menu);
+		menu.addAction(&action);
+		menu.exec(event->globalPosition().toPoint());
+	}
+
+
 }
 

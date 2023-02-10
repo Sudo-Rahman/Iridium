@@ -42,6 +42,8 @@ protected slots:
 
 	virtual void expand(const QModelIndex &index);
 
+	virtual void mouseReleaseEvent(QMouseEvent *event) override;
+
 private:
 	void setModel(RcloneFileModel *model);
 
