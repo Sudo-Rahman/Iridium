@@ -8,6 +8,8 @@
 TreeFileView::TreeFileView(Remote type, QString remoteName, QWidget *parent) : remoteName(std::move(remoteName)),
 																			   QTreeView(parent), type(type)
 {
+	setFocusPolicy(Qt::NoFocus);
+	setIconSize(QSize(35, 38));
 	setAlternatingRowColors(true);
 	header()->setSectionsMovable(true);
 	header()->resizeSection(0, 300);
@@ -45,7 +47,7 @@ void TreeFileView::back()
 	{
 		auto index = indexBack.back();
 		indexBack.pop_back();
-		indexTop << index.sibling(1, 0);
+		indexTop << QTreeView::rootIndex();
 		QTreeView::setRootIndex(index);
 	} else
 		QTreeView::setRootIndex(dynamic_cast<RcloneFileModel *>(model)->getRootIndex());
@@ -75,6 +77,7 @@ void TreeFileView::doubleClick(const QModelIndex &index)
 	dynamic_cast<RcloneFileModel *>(model)->addItem(item->getFile()->getPath(), item);
 	auto id = item->getParent() == nullptr ? index.parent() : model->indexFromItem(item->getParent()).parent();
 	indexBack.push_back(id);
+	indexTop.clear();
 	QTreeView::setRootIndex(item->getParent() == nullptr ? index : model->indexFromItem(item->getParent()));
 }
 

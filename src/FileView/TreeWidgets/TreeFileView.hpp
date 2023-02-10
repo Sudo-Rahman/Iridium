@@ -27,7 +27,7 @@ Q_OBJECT
 public:
 	explicit TreeFileView(Remote type, QString remoteName, QWidget *parent = nullptr);
 
-	const QString &getRemoteName() const;
+	[[nodiscard]] const QString &getRemoteName() const;
 
 	void back();
 
@@ -42,7 +42,7 @@ protected slots:
 
 	virtual void expand(const QModelIndex &index);
 
-public:
+private:
 	void setModel(RcloneFileModel *model);
 
 

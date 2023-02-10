@@ -8,7 +8,6 @@
 #include <QPushButton>
 #include <QLayout>
 #include <QTimer>
-#include <QProgressBar>
 
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
@@ -16,6 +15,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	setWindowTitle("Iridium");
 	setContentsMargins(0, 0, 0, 0);
 	setMinimumSize(1000, 500);
+//	QIcon::setThemeName( "fluent" );
+
 
 	auto *wid = new QWidget(this);
 	wid->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);

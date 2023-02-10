@@ -1,8 +1,12 @@
 <RCC>
     <qresource prefix="/">
-        <file>images/app.ico</file>
-        <file>images/app.png</file>
-        <file>images/google_drive.png</file>
-        <file>images/sftp.png</file>
+        <file>ressources/app.ico</file>
+        <file>ressources/app.png</file>
+        <file>ressources/google_drive.png</file>
+        <file>ressources/sftp.png</file>
+<!--        <file>icons/fluent/index.theme</file>-->
+<!--        <file>icons/fluent/scalable/places</file>-->
+<!--        <file>icons/fluent/scalable/mimetypes</file>-->
+<!--        <file>icons/fluent/scalable/apps</file>-->
     </qresource>
 </RCC>
