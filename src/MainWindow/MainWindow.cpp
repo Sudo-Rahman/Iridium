@@ -15,7 +15,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	setWindowTitle("Iridium");
 	setContentsMargins(0, 0, 0, 0);
 	setMinimumSize(1000, 500);
-//	QIcon::setThemeName( "fluent" );
+	QIcon::setThemeName( "fluent" );
 
 
 	auto *wid = new QWidget(this);

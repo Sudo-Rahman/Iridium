@@ -14,14 +14,15 @@ RcloneFileModelDistant::RcloneFileModelDistant(const QString &path, Load load, Q
 void RcloneFileModelDistant::init()
 {
 	auto *drive = new TreeFileItem(path);
+	drive->setIcon(QIcon::fromTheme("drive-harddisk-solidstate"));
 	m_root_index = drive->index();
 	if (load == Dynmic)
 		drive->appendRow({});
 	appendRow({
 				  drive,
-				  new QStandardItem("--"),
-				  new QStandardItem("--"),
-				  new QStandardItem(tr("Disque"))
+				  new TreeFileItem("--", drive->getFile(), drive),
+				  new TreeFileItem("--", drive->getFile(), drive),
+				  new TreeFileItem(tr("Disque") ,drive->getFile(), drive),
 			  });
 	if (load == Static)
 		initStatic(path, drive);

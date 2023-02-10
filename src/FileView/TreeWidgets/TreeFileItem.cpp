@@ -25,10 +25,12 @@ TreeFileItem::TreeFileItem(QString path, QJsonObject data, TreeFileItem *parent)
 	setText(file->isDir() ? file->getPathString() : file->getName());
 	QIcon ico;
 	if(file->isDir())
-		ico = QIcon::fromTheme("folder");
+		ico = QIcon::fromTheme("default-folder");
 	else
 	{
-		 ico = QIcon::fromTheme(data["MimeType"].toString().replace("/","-"), QIcon::fromTheme("unknown"));
+		ico = QIcon::fromTheme(QMimeDatabase().mimeTypeForFile(file->getPath()).iconName());
+		if(ico.isNull())
+		 	ico = QIcon::fromTheme(QMimeDatabase().mimeTypeForFile(file->getPath()).genericIconName(), QIcon::fromTheme("unknown"));
 	}
 	setIcon(ico);
 
