@@ -6,6 +6,7 @@
 #include <QMenu>
 #include "TreeFileView.hpp"
 #include "RcloneFileModelDistant.hpp"
+#include "ItemMenu.hpp"
 
 TreeFileView::TreeFileView(Remote type, QString remoteName, QWidget *parent) : remoteName(std::move(remoteName)),
 																			   QTreeView(parent), type(type)
@@ -16,7 +17,9 @@ TreeFileView::TreeFileView(Remote type, QString remoteName, QWidget *parent) : r
 	setIconSize(QSize(35, 35));
 	setAlternatingRowColors(true);
 	header()->setSectionsMovable(true);
-	header()->resizeSection(0, 300);
+	header()->resizeSection(0, 400);
+	header()->setMinimumHeight(20);
+	header()->setFont(QFont("Arial", 15, QFont::Bold));
 	setUniformRowHeights(true);
 	header()->setStretchLastSection(true);
 	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -95,16 +98,18 @@ void TreeFileView::setModel(RcloneFileModel *model)
 void TreeFileView::mouseReleaseEvent(QMouseEvent *event)
 {
 	QTreeView::mouseReleaseEvent(event);
-	if(event->button() == Qt::RightButton)
+	if (event->button() == Qt::RightButton)
 	{
-		qDebug() << reinterpret_cast<TreeFileItem *>(model->itemFromIndex(
-			QTreeView::selectedIndexes().first()))->getFile()->getPath();
-		QMenu menu;
-		QAction action(tr("Information"), &menu);
-		menu.addAction(&action);
+		ItemMenu menu(this);
+		if (not QTreeView::selectedIndexes().isEmpty())
+		{
+			connect(&menu, &ItemMenu::info, this, [&menu, this]()
+			{
+				menu.m_info_click(
+					reinterpret_cast<TreeFileItem *>(model->itemFromIndex(QTreeView::selectedIndexes().first())));
+			});
+		}
 		menu.exec(event->globalPosition().toPoint());
 	}
-
-
 }
 

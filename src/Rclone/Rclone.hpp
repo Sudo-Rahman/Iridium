@@ -42,7 +42,7 @@ private:
 	std::string mdata{};
 	pid_t pid{};
 	Rclone::State mstate{};
-	std::shared_ptr<RclonesManager> manager{};
+	RclonesManager *manager{};
 
 	std::mutex m;
 	std::condition_variable v;
@@ -63,6 +63,8 @@ public:
 
 	void listRemotes();
 
+	void size(const std::string &path);
+
 	void waitForFinished();
 
 	void terminate();
@@ -70,6 +72,7 @@ public:
 	[[nodiscard]] State getState() const;
 
 	void waitForStarted();
+
 
 
 private:
@@ -90,6 +93,8 @@ signals:
 
 	void configFinished(int exit);
 
+	void sizeFinished(uint32_t objs, uint64_t size,QString strSize);
+
 
 };
 
@@ -108,7 +113,10 @@ public:
 
 	explicit RclonesManager();
 
+	~RclonesManager();
+
 	std::shared_ptr<Rclone> get();
+	void allTerminate();
 
 	boost::signals2::signal<void()> allFinished;
 

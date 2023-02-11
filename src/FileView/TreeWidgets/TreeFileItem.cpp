@@ -21,7 +21,7 @@ TreeFileItem::TreeFileItem(QString path, QJsonObject data, TreeFileItem *parent)
 		file = std::make_shared<RcloneFile>(
 			path + data["Name"].toString(),
 			Remote::Local);
-	setText(file->isDir() ? file->getPathString() : file->getName());
+	setText(file->getName());
 	QIcon ico;
 	if(file->isDir())
 		ico = QIcon::fromTheme("default-folder");

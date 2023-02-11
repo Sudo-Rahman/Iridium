@@ -5,6 +5,7 @@
 #include "RcloneFile.hpp"
 
 #include <cmath>
+#include <iterator>
 
 void RcloneFile::init(const QString &path, Remote type)
 {
@@ -78,6 +79,8 @@ void RcloneFile::setModTime(const QDateTime &modTime)
 QString RcloneFile::getName() const
 {
 	QString name;
+	if (isDirectory)
+		return getPathString();
 	path.contains(":") ? name = QFileInfo(path.split(":")[1]).fileName() : name = QFileInfo(path).fileName();
 	return name;
 }
@@ -124,15 +127,34 @@ QString RcloneFile::getPathString() const
 
 QString RcloneFile::getModTimeString() const
 {
-	return modTime.toString(tr("dd MMM yyyy à hh:mm:ss"));
+	return QLocale::system().toString(modTime,tr("dd MMM yyyy à hh:mm:ss"));
 }
 
 QString RcloneFile::getIsDirString() const
 {
 	if (isDirectory)
-		return "Dossier";
+		return tr("Dossier");
 	else
-		return "Fichier";
+		return tr("Fichier");
 }
 
+QString RcloneFile::getSizeStringSpace() const
+{
+	QString tmpSize;
+	auto str = QString::number(size).toStdString();
+
+	int i = 0;
+	for (std::string::iterator it = str.begin(); it != str.end(); ++it)
+	{
+		tmpSize+= *it;
+		if (i++ % 3 == 0)
+			tmpSize += " ";
+	}
+	return tmpSize;
+}
+
+Remote RcloneFile::getTypeFile() const
+{
+	return typeFile;
+}
 

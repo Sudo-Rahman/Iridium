@@ -173,10 +173,11 @@ void Rclone::waitForFinished()
 
 Rclone::~Rclone()
 {
+	terminate();
 	if (mstate == Running and mthread->joinable())
 	{
-		terminate();
 		mthread->join();
+		qDebug() << this;
 	}
 }
 
@@ -207,6 +208,27 @@ void Rclone::waitForStarted()
 	}
 }
 
+void Rclone::size(const string &path)
+{
+	finished.connect(
+		[=](const int exit)
+		{
+			if (exit == 0)
+			{
+				auto data = QString::fromStdString(mdata).split("\n");
+				if (data.size() > 1)
+				{
+					auto l1 = QRegularExpression("\\(\\d+\\)").match(data[0]).captured(0).remove("(").remove(")").toUInt();
+					auto l2 = QRegularExpression("\\d+.\\d+ \\w+").match(data[1]).captured(0);
+					auto l3 = QRegularExpression("\\(\\d+").match(data[1]).captured(0).remove("(").toULongLong();
+					emit sizeFinished(l1, l3, l2);
+				}
+			}
+		});
+	execute({"size", path});
+
+}
+
 RclonesManager::RclonesManager(unsigned nbMaxProcess) : nbMaxProcess(nbMaxProcess)
 {}
 
@@ -235,4 +257,9 @@ void RclonesManager::finished()
 	conditionVariable.notify_one();
 	if (nb_rclones == 0 and rcloneVector.size() > 1)
 		allFinished();
+}
+
+
+RclonesManager::~RclonesManager()
+{
 }

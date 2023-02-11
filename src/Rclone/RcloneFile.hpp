@@ -55,11 +55,16 @@ public:
 
 	[[nodiscard]] QString getSizeString() const;
 
+	[[nodiscard]] QString getSizeStringSpace() const;
+
 	[[nodiscard]] QString getPathString() const;
 
 	[[nodiscard]] QString getModTimeString() const;
 
 	[[nodiscard]] QString getIsDirString() const;
+
+	[[nodiscard]] Remote getTypeFile() const;
+
 
 
 };
