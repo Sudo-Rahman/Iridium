@@ -23,9 +23,12 @@ public:
 
 	void m_info_click(TreeFileItem *file);
 
-	signals:
+signals:
+
 	void copyed();
+
 	void pasted();
+
 	void info();
 
 };

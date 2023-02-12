@@ -70,7 +70,6 @@ void RemoteConfigParamsFrame::addRemote()
 {
 	if (remoteName->text().isEmpty())
 	{
-		qDebug() << "ici";
 		remoteName->setStyleSheet("border: 1px solid red; border-radius: 5px;");
 		messageLabel->show();
 		messageLabel->setText(tr("Les champs en rouge sont obligatoires !"));

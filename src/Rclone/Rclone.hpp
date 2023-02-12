@@ -74,7 +74,6 @@ public:
 	void waitForStarted();
 
 
-
 private:
 	void execute(const std::vector<std::string> &args);
 
@@ -93,7 +92,7 @@ signals:
 
 	void configFinished(int exit);
 
-	void sizeFinished(uint32_t objs, uint64_t size,QString strSize);
+	void sizeFinished(uint32_t objs, uint64_t size, QString strSize);
 
 
 };
@@ -113,9 +112,8 @@ public:
 
 	explicit RclonesManager();
 
-	~RclonesManager();
-
 	std::shared_ptr<Rclone> get();
+
 	void allTerminate();
 
 	boost::signals2::signal<void()> allFinished;

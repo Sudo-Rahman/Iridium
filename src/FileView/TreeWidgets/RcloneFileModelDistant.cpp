@@ -22,7 +22,7 @@ void RcloneFileModelDistant::init()
 				  drive,
 				  new TreeFileItem("--", drive->getFile(), drive),
 				  new TreeFileItem("--", drive->getFile(), drive),
-				  new TreeFileItem(tr("Disque") ,drive->getFile(), drive),
+				  new TreeFileItem(tr("Disque"), drive->getFile(), drive),
 			  });
 	if (load == Static)
 		initStatic(path, drive);

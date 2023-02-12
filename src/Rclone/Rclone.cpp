@@ -11,20 +11,35 @@
 namespace bp = boost::process;
 using namespace std;
 
-
+/**
+ * @brief Rclone::Rclone
+ * @param path
+ * @param parent
+ */
 Rclone::Rclone(string path, RclonesManager *parent) : pathRclone(std::move(path)), manager(parent)
 {
 }
 
+/**
+ * @brief Rclone::Rclone
+ * @param parent
+ */
 Rclone::Rclone(RclonesManager *parent) : pathRclone(
 	qApp->applicationDirPath().append("/rclone").toStdString()), manager(parent)
 {}
 
+/**
+ * @brief Rclone::getPathRclone
+ */
 const string &Rclone::getPathRclone() const
 {
 	return pathRclone;
 }
 
+/**
+ * @brief Rclone::setPathRclone
+ * @param pathRclone
+ */
 void Rclone::setPathRclone(const string &pathRclone)
 {
 	Rclone::pathRclone = pathRclone;
@@ -80,6 +95,11 @@ void Rclone::copyTo(const RcloneFile &src, const RcloneFile &dest)
 }
 
 
+/**
+ * @brief Rclone::config, permet de configurer un nouveau remote
+ * @param type
+ * @param params
+ */
 void Rclone::config(RemoteType type, const vector<string> &params)
 {
 	if (mstate == Running)
@@ -102,9 +122,11 @@ void Rclone::config(RemoteType type, const vector<string> &params)
 	}
 }
 
+/**
+ * @brief Rclone::listRemotes, permet de lister les remotes configurés
+ */
 void Rclone::listRemotes()
 {
-	qDebug() << "efefz";
 	finished.connect(
 		[=](const int exit)
 		{
@@ -125,11 +147,19 @@ void Rclone::listRemotes()
 	execute({"listremotes", "--long"});
 }
 
+/**
+ * @brief Rclone::deleteRemote, permet de supprimer un remote
+ * @param remote
+ */
 void Rclone::deleteRemote(const string &remote)
 {
 	execute({"config", "delete", remote});
 }
 
+/**
+ * @brief Rclone::execute, execute la commande rclone avec les arguments args
+ * @param args
+ */
 void Rclone::execute(const vector<string> &args)
 {
 	if (mstate == Running)
@@ -162,7 +192,9 @@ void Rclone::execute(const vector<string> &args)
 		 });
 }
 
-
+/**
+ * @brief Rclone::waitForFinished, attend que le processus rclone se termine
+ */
 void Rclone::waitForFinished()
 {
 	if (mstate not_eq Running)
@@ -171,16 +203,21 @@ void Rclone::waitForFinished()
 		mthread->join();
 }
 
+/**
+ * @brief destructeur
+ */
 Rclone::~Rclone()
 {
 	terminate();
 	if (mstate == Running and mthread->joinable())
 	{
 		mthread->join();
-		qDebug() << this;
 	}
 }
 
+/**
+ * @brief Rclone::terminate, termine le processus rclone
+ */
 void Rclone::terminate()
 {
 	if (pid != 0)
@@ -194,11 +231,18 @@ void Rclone::terminate()
 
 }
 
+/**
+ * @brief Rclone::getState, retourne l'état du processus rclone
+ * @return
+ */
 Rclone::State Rclone::getState() const
 {
 	return mstate;
 }
 
+/**
+ * @brief Rclone::waitForStarted, attend que le processus rclone démarre
+ */
 void Rclone::waitForStarted()
 {
 	while (mstate != Running)
@@ -208,6 +252,10 @@ void Rclone::waitForStarted()
 	}
 }
 
+/**
+ * @brief Rclone::size, retourne la taille d'un fichier ou d'un dossier
+ * @param path
+ */
 void Rclone::size(const string &path)
 {
 	finished.connect(
@@ -218,7 +266,8 @@ void Rclone::size(const string &path)
 				auto data = QString::fromStdString(mdata).split("\n");
 				if (data.size() > 1)
 				{
-					auto l1 = QRegularExpression("\\(\\d+\\)").match(data[0]).captured(0).remove("(").remove(")").toUInt();
+					auto l1 = QRegularExpression("\\(\\d+\\)").match(data[0]).captured(0).remove("(").remove(
+						")").toUInt();
 					auto l2 = QRegularExpression("\\d+.\\d+ \\w+").match(data[1]).captured(0);
 					auto l3 = QRegularExpression("\\(\\d+").match(data[1]).captured(0).remove("(").toULongLong();
 					emit sizeFinished(l1, l3, l2);
@@ -229,18 +278,32 @@ void Rclone::size(const string &path)
 
 }
 
+/**
+ * @brief RclonesManager::RclonesManager, constructeur
+ * @param nbMaxProcess nombre de processus rclone maximum
+ */
 RclonesManager::RclonesManager(unsigned nbMaxProcess) : nbMaxProcess(nbMaxProcess)
 {}
 
+/**
+ * @brief RclonesManager::RclonesManager, constructeur
+ */
 RclonesManager::RclonesManager() : nbMaxProcess(thread::hardware_concurrency())
 {}
 
+/**
+ * @brief RclonesManager::get, retourne un pointeur vers un rclone
+ * @return un pointeur vers un rclone
+ */
 std::shared_ptr<Rclone> RclonesManager::get()
 {
 	rcloneVector.push_back(make_shared<Rclone>(this));
 	return rcloneVector.back();
 }
 
+/**
+ * @brief RclonesManager::start, un processus rclone appel cette fonction pour notifier le manager qu'il démarre
+ */
 void RclonesManager::start()
 {
 	while (nb_rclones >= nbMaxProcess)
@@ -251,15 +314,13 @@ void RclonesManager::start()
 	nb_rclones++;
 }
 
+/**
+ * @brief RclonesManager::finished, un processus rclone appel cette fonction lorsqu'il se termine, pour notifier le manager
+ */
 void RclonesManager::finished()
 {
 	nb_rclones--;
 	conditionVariable.notify_one();
 	if (nb_rclones == 0 and rcloneVector.size() > 1)
 		allFinished();
-}
-
-
-RclonesManager::~RclonesManager()
-{
 }

@@ -19,6 +19,7 @@ Q_OBJECT
 
 	QString path{};
 	uint64_t size{};
+	uint32_t objs{};
 	bool isDirectory{};
 	QDateTime modTime{};
 	Remote typeFile{};
@@ -55,8 +56,6 @@ public:
 
 	[[nodiscard]] QString getSizeString() const;
 
-	[[nodiscard]] QString getSizeStringSpace() const;
-
 	[[nodiscard]] QString getPathString() const;
 
 	[[nodiscard]] QString getModTimeString() const;
@@ -65,6 +64,9 @@ public:
 
 	[[nodiscard]] Remote getTypeFile() const;
 
+	uint32_t getObjs() const;
+
+	void setObjs(uint32_t objs);
 
 
 };

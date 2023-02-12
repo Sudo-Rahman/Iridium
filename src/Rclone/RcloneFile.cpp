@@ -6,6 +6,7 @@
 
 #include <cmath>
 #include <iterator>
+#include "../Utility/Utility.hpp"
 
 void RcloneFile::init(const QString &path, Remote type)
 {
@@ -17,7 +18,10 @@ void RcloneFile::init(const QString &path, Remote type)
 		setPath(info.absoluteFilePath());
 
 	} else
+	{
 		setPath(path);
+		RcloneFile::typeFile = Distant;
+	}
 	setIsDir(info.isDir());
 }
 
@@ -92,27 +96,17 @@ bool RcloneFile::isDir() const
 
 void RcloneFile::setIsDir(bool isDir)
 {
-	RcloneFile::isDirectory = isDir;
+	if (path.endsWith(":"))
+		RcloneFile::isDirectory = true;
+	else
+		RcloneFile::isDirectory = isDir;
 }
 
 QString RcloneFile::getSizeString() const
 {
-	if (isDirectory)
+	if (size == 0)
 		return "--";
-	if (size / pow(1024, 4.0) > 1)
-		return QString::number(int(size / pow(1024.0, 4.0) * 100) / 100.0) + " TiB";
-
-	if (size / pow(1024, 3.0) > 1)
-		return QString::number(int(size / pow(1024.0, 3.0) * 100) / 100.0) + " GiB";
-
-	if (size / pow(1024, 2.0) > 1)
-		return QString::number(int(size / pow(1024.0, 2.0) * 100) / 100.0) + " MiB";
-
-	if (size / 1024.0 > 1)
-		return QString::number(int(size / pow(1024.0, 1.0) * 100) / 100.0) + " KiB";
-
-
-	return QString::number(size) + " B";
+	return QString::fromStdString(Utility::sizeToString(size));
 }
 
 QString RcloneFile::getPathString() const
@@ -127,7 +121,7 @@ QString RcloneFile::getPathString() const
 
 QString RcloneFile::getModTimeString() const
 {
-	return QLocale::system().toString(modTime,tr("dd MMM yyyy à hh:mm:ss"));
+	return QLocale::system().toString(modTime, tr("dd MMM yyyy à hh:mm:ss"));
 }
 
 QString RcloneFile::getIsDirString() const
@@ -138,23 +132,19 @@ QString RcloneFile::getIsDirString() const
 		return tr("Fichier");
 }
 
-QString RcloneFile::getSizeStringSpace() const
-{
-	QString tmpSize;
-	auto str = QString::number(size).toStdString();
-
-	int i = 0;
-	for (std::string::iterator it = str.begin(); it != str.end(); ++it)
-	{
-		tmpSize+= *it;
-		if (i++ % 3 == 0)
-			tmpSize += " ";
-	}
-	return tmpSize;
-}
 
 Remote RcloneFile::getTypeFile() const
 {
 	return typeFile;
+}
+
+uint32_t RcloneFile::getObjs() const
+{
+	return objs;
+}
+
+void RcloneFile::setObjs(uint32_t objs)
+{
+	RcloneFile::objs = objs;
 }
 

@@ -19,7 +19,7 @@ TreeFileView::TreeFileView(Remote type, QString remoteName, QWidget *parent) : r
 	header()->setSectionsMovable(true);
 	header()->resizeSection(0, 400);
 	header()->setMinimumHeight(20);
-	header()->setFont(QFont("Arial", 15, QFont::Bold));
+	header()->setFont(QFont("Arial", 13, QFont::DemiBold));
 	setUniformRowHeights(true);
 	header()->setStretchLastSection(true);
 	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);

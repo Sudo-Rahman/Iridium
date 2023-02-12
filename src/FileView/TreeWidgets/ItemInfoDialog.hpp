@@ -41,8 +41,12 @@ public:
 
 private:
 	void initSize();
+
 	void initType();
+
 	void loading();
+
+	void initLabel();
 
 };
 

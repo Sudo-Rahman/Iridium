@@ -23,13 +23,16 @@ TreeFileItem::TreeFileItem(QString path, QJsonObject data, TreeFileItem *parent)
 			Remote::Local);
 	setText(file->getName());
 	QIcon ico;
-	if(file->isDir())
+	if (file->isDir())
+	{
 		ico = QIcon::fromTheme("default-folder");
-	else
+		file->setSize(0);
+	} else
 	{
 		ico = QIcon::fromTheme(QMimeDatabase().mimeTypeForFile(file->getPath()).iconName());
-		if(ico.isNull())
-		 	ico = QIcon::fromTheme(QMimeDatabase().mimeTypeForFile(file->getPath()).genericIconName(), QIcon::fromTheme("unknown"));
+		if (ico.isNull())
+			ico = QIcon::fromTheme(QMimeDatabase().mimeTypeForFile(file->getPath()).genericIconName(),
+								   QIcon::fromTheme("unknown"));
 	}
 	setIcon(ico);
 

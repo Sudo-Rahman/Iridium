@@ -15,7 +15,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	setWindowTitle("Iridium");
 	setContentsMargins(0, 0, 0, 0);
 	setMinimumSize(1000, 500);
-	QIcon::setThemeName( "fluent" );
+	QIcon::setThemeName("fluent");
 
 
 	auto *wid = new QWidget(this);
@@ -24,7 +24,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	auto *lay = new QHBoxLayout(wid);
 	setCentralWidget(wid);
 
-	auto *tree = new TreeFileView(Remote::Distant, "nas2:");
+	auto *tree = new TreeFileView(Remote::Distant, "nass:");
 	lay->addWidget(tree);
 	auto *bt = new QPushButton("arrier");
 	lay->addWidget(bt);
