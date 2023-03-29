@@ -16,7 +16,7 @@ void RcloneFileModelDistant::init()
 	auto *drive = new TreeFileItem(path);
 	drive->setIcon(QIcon::fromTheme("drive-harddisk-solidstate"));
 	m_root_index = drive->index();
-	if (load == Dynmic)
+	if (load == Dynamic)
 		drive->appendRow({});
 	appendRow({
 				  drive,
@@ -30,7 +30,7 @@ void RcloneFileModelDistant::init()
 
 void RcloneFileModelDistant::addItem(const QString &path, TreeFileItem *parent)
 {
-	if (load == Dynmic)
+	if (load == Dynamic)
 	{
 		addItemDynamic(path, parent);
 	}

@@ -8,6 +8,9 @@
 #include <QPushButton>
 #include <QLayout>
 #include <QTimer>
+#include <QMenuBar>
+
+#include "../Remote/ListRemote/ListRemoteWidget.hpp"
 
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
@@ -20,11 +23,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
 	auto *wid = new QWidget(this);
 	wid->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-	wid->setBackgroundRole(QPalette::Highlight);
 	auto *lay = new QHBoxLayout(wid);
 	setCentralWidget(wid);
 
-	auto *tree = new TreeFileView(Remote::Distant, "nass:");
+	auto *listRemote = new ListRemoteWidget(this);
+	lay->addWidget(listRemote);
+
+	auto *tree = new TreeFileView(Remote::Distant, "nas:");
 	lay->addWidget(tree);
 	auto *bt = new QPushButton("arrier");
 	lay->addWidget(bt);

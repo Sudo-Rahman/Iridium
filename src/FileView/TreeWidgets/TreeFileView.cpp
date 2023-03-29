@@ -7,6 +7,7 @@
 #include "TreeFileView.hpp"
 #include "RcloneFileModelDistant.hpp"
 #include "ItemMenu.hpp"
+#include "RcloneProxy.hpp"
 
 TreeFileView::TreeFileView(Remote type, QString remoteName, QWidget *parent) : remoteName(std::move(remoteName)),
 																			   QTreeView(parent), type(type)
@@ -21,12 +22,24 @@ TreeFileView::TreeFileView(Remote type, QString remoteName, QWidget *parent) : r
 	header()->setMinimumHeight(20);
 	header()->setFont(QFont("Arial", 13, QFont::DemiBold));
 	setUniformRowHeights(true);
+	header()->setSectionsClickable(true);
+	header()->setSortIndicatorShown(true);
 	header()->setStretchLastSection(true);
 	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
+	RcloneFileModel *rcloneFileModel = nullptr;
 	if (type == Distant)
-		TreeFileView::setModel(new RcloneFileModelDistant(TreeFileView::remoteName, RcloneFileModelDistant::Dynmic));
+		rcloneFileModel = new RcloneFileModelDistant(TreeFileView::remoteName, RcloneFileModelDistant::Dynamic);
 
+	TreeFileView::setModel(rcloneFileModel);
+
+	auto *proxy = new RcloneProxy(this);
+	proxy->setSourceModel(rcloneFileModel);
+
+	connect(header(), &QHeaderView::sortIndicatorChanged, this, [=](int logicalIndex, Qt::SortOrder order)
+	{
+		sortByColumn(logicalIndex, order);
+	});
 
 	connect(this, &QTreeView::doubleClicked, this, &TreeFileView::doubleClick);
 

@@ -31,7 +31,7 @@ void GoogleDriveRemoteConfigParamsFrame::addRemote()
 	RemoteConfigParamsFrame::addRemote();
 	if (remoteName->text().isEmpty())
 		return;
-	if (listRemotes.contains(remoteName->text()))
+	if (listRemotes.contains(remoteName->text().toStdString()))
 	{
 		QMessageBox::warning(this, tr("Erreur"), tr("Un disk du même nom existe deja"));
 		remoteName->setText("");

@@ -35,13 +35,12 @@ RemoteFrame::RemoteFrame(RemoteType type, QWidget *parent) :
 	{
 		case Drive:
 			labelRemoteName->setText("Google Drive");
-			image = {":/images/google_drive.png"};
 			break;
 		case Sftp:
 			labelRemoteName->setText("Sftp");
-			image = {":/images/sftp.png"};
 			break;
 	}
+	image = {QString::fromStdString(remoteIco.find(RemoteFrame::type)->second)};
 	labelIcon->setPixmap(image.scaled(64, 64, Qt::KeepAspectRatio, Qt::SmoothTransformation));
 
 	update();

@@ -48,6 +48,8 @@ private:
 	void setModel(RcloneFileModel *model);
 
 
+
+
 };
 
 #endif //IRIDIUM_TREEFILEVIEW_HPP

@@ -5,6 +5,8 @@
 #include <QPainter>
 #include "RemoteConfigParamsFrame.hpp"
 
+using namespace std;
+
 RemoteConfigParamsFrame::RemoteConfigParamsFrame(QWidget *parent) : QFrame(parent)
 {
 	layout = new QVBoxLayout(this);
@@ -77,7 +79,7 @@ void RemoteConfigParamsFrame::addRemote()
 	}
 
 	Rclone rclone_liste_remote;
-	rclone_liste_remote.listRemotesFinished.connect([this](QMap<QString, QString> map)
+	rclone_liste_remote.listRemotesFinished.connect([this](map<string , string> map)
 													{
 														listRemotes = std::move(map);
 													});

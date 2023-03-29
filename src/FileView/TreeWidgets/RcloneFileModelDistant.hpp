@@ -16,7 +16,7 @@ Q_OBJECT
 public:
 	enum Load
 	{
-		Static, Dynmic
+		Static, Dynamic
 	};
 private:
 	Load load{};

@@ -10,6 +10,7 @@ RcloneFileModel::RcloneFileModel(const QString &path, QObject *parent) : QStanda
 	setColumnCount(4);
 	setRowCount(0);
 
+
 	setHorizontalHeaderLabels({tr("Nom"), tr("Taille"), tr("Date de modification"), tr("Type")});
 
 

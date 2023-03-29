@@ -62,7 +62,7 @@ void Rclone::lsJson(const string &path)
 				emit lsJsonFinished(doc);
 			}
 		});
-	execute({"lsjson", path});
+	execute({"lsjson", path,"--drive-skip-gdocs"});
 }
 
 /**
@@ -135,12 +135,13 @@ void Rclone::listRemotes()
 				auto data = QString::fromStdString(mdata).split("\n");
 				erase_if(data, [](auto &str)
 				{ return str == ""; });
-				QMap<QString, QString> map;
+				map<string , string> map;
 				for (auto &str: data)
 				{
 					str.remove(" ");
-					map.insert(str.split(":")[0], str.split(":")[1]);
+					map.insert({str.split(":")[0].toStdString(), str.split(":")[1].toStdString()});
 				}
+				m_mapData = map;
 				listRemotesFinished(map);
 			}
 		});

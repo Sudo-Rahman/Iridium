@@ -40,6 +40,7 @@ private:
 	std::string pathRclone{};
 	std::shared_ptr<std::thread> mthread{};
 	std::string mdata{};
+	std::map<std::string, std::string> m_mapData{};
 	pid_t pid{};
 	Rclone::State mstate{};
 	RclonesManager *manager{};
@@ -73,6 +74,11 @@ public:
 
 	void waitForStarted();
 
+	auto getData() const
+	{
+		return m_mapData;
+	}
+
 
 private:
 	void execute(const std::vector<std::string> &args);
@@ -80,7 +86,7 @@ private:
 	boost::signals2::signal<void(const std::string &)> readyRead{};
 public:
 	boost::signals2::signal<void(const int exit)> finished{};
-	boost::signals2::signal<void(const QMap<QString, QString>)> listRemotesFinished{};
+	boost::signals2::signal<void(const std::map<std::string, std::string>)> listRemotesFinished{};
 	boost::signals2::signal<void(const QJsonDocument &)> lsJsonFinishedd{};
 
 
