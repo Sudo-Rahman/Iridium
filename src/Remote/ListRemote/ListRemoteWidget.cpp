@@ -14,12 +14,15 @@ ListRemoteWidget::ListRemoteWidget(QWidget *parent) : QScrollArea(parent)
 	auto *widget = new QWidget(this);
 	setWidget(widget);
 
+	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+
 	m_layout = new QVBoxLayout(widget);
 	m_layout->setAlignment(Qt::AlignTop | Qt::AlignCenter);
 	m_layout->setSpacing(10);
 	setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 	// padding
-	m_layout->setContentsMargins(10, 10, 10, 10);
+	m_layout->setContentsMargins(10, 10, 15, 10);
 
 	m_recherche = new QLineEdit;
 	m_recherche->setPlaceholderText(tr("Rechercher un remote"));
@@ -53,10 +56,12 @@ void ListRemoteWidget::getAllRemote()
 	rclone->waitForFinished();
 	for (const auto &pair: rclone->getData())
 	{
-		auto *remote = new RemoteWidget(stringToRemoteType.find(pair.second)->second,
+		auto *remote = new RemoteWidget(stringToRemoteType.find(pair.second)->second, Remote::Distant,
 										QString::fromStdString(pair.first), this);
 		m_listRemote.append(remote);
 		m_remoteLayout->addWidget(remote);
+		connect(remote, &RemoteWidget::clicked, this, [this, remote]()
+		{ emit remoteClicked(remote); });
 	}
 
 }
@@ -69,7 +74,7 @@ void ListRemoteWidget::searchRemote(const QString &name)
 {
 	for (auto *remote: m_listRemote)
 	{
-		if (remote->getName().contains(name, Qt::CaseInsensitive))
+		if (toQString(remote->remoteInfo().name()).contains(name, Qt::CaseInsensitive))
 			remote->show();
 		else
 			remote->hide();

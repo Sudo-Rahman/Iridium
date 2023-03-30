@@ -62,7 +62,7 @@ void Rclone::lsJson(const string &path)
 				emit lsJsonFinished(doc);
 			}
 		});
-	execute({"lsjson", path,"--drive-skip-gdocs"});
+	execute({"lsjson", path, "--drive-skip-gdocs"});
 }
 
 /**
@@ -104,7 +104,7 @@ void Rclone::config(RemoteType type, const vector<string> &params)
 {
 	if (mstate == Running)
 		terminate();
-	if (params.size() < 0)
+	if (params.empty())
 		return;
 	finished.connect([=](int exit)
 					 {
@@ -113,11 +113,12 @@ void Rclone::config(RemoteType type, const vector<string> &params)
 					 });
 	switch (type)
 	{
-
 		case Drive:
 			execute({"config", "create", params[0], "drive"});
 			break;
 		case Sftp:
+			break;
+		default:
 			break;
 	}
 }
@@ -135,7 +136,7 @@ void Rclone::listRemotes()
 				auto data = QString::fromStdString(mdata).split("\n");
 				erase_if(data, [](auto &str)
 				{ return str == ""; });
-				map<string , string> map;
+				map<string, string> map;
 				for (auto &str: data)
 				{
 					str.remove(" ");

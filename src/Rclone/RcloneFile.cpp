@@ -5,7 +5,6 @@
 #include "RcloneFile.hpp"
 
 #include <cmath>
-#include <iterator>
 #include "../Utility/Utility.hpp"
 
 void RcloneFile::init(const QString &path, Remote type)
@@ -111,7 +110,7 @@ QString RcloneFile::getSizeString() const
 
 QString RcloneFile::getPathString() const
 {
-	QString tmpPath;
+	QString tmpPath = path;
 	if (isDirectory and typeFile == Distant and path.contains(":"))
 	{
 		tmpPath = path.split(":")[1];

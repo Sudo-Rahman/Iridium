@@ -22,7 +22,7 @@ private:
 	Load load{};
 
 public:
-	explicit RcloneFileModelDistant(const QString &path, Load = Static, QObject *parent = nullptr);
+	explicit RcloneFileModelDistant(QString path, Load = Static, QObject *parent = nullptr);
 
 protected:
 	void init() override;

@@ -6,6 +6,7 @@
 #include <QMenu>
 #include "TreeFileView.hpp"
 #include "RcloneFileModelDistant.hpp"
+#include "RcloneFileModelLocal.hpp"
 #include "ItemMenu.hpp"
 #include "RcloneProxy.hpp"
 
@@ -27,9 +28,11 @@ TreeFileView::TreeFileView(Remote type, QString remoteName, QWidget *parent) : r
 	header()->setStretchLastSection(true);
 	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-	RcloneFileModel *rcloneFileModel = nullptr;
+	RcloneFileModel *rcloneFileModel;
 	if (type == Distant)
 		rcloneFileModel = new RcloneFileModelDistant(TreeFileView::remoteName, RcloneFileModelDistant::Dynamic);
+	else
+		rcloneFileModel = new RcloneFileModelLocal(TreeFileView::remoteName);
 
 	TreeFileView::setModel(rcloneFileModel);
 
@@ -47,12 +50,6 @@ TreeFileView::TreeFileView(Remote type, QString remoteName, QWidget *parent) : r
 
 
 }
-
-const QString &TreeFileView::getRemoteName() const
-{
-	return remoteName;
-}
-
 
 void TreeFileView::resizeEvent(QResizeEvent *event)
 {
@@ -124,5 +121,16 @@ void TreeFileView::mouseReleaseEvent(QMouseEvent *event)
 		}
 		menu.exec(event->globalPosition().toPoint());
 	}
+}
+
+void TreeFileView::changeRemote(const RemoteInfo &info)
+{
+	m_remoteInfo = info;
+	delete model;
+	if (type == Distant)
+		model = new RcloneFileModelDistant(toQString(m_remoteInfo.name()), RcloneFileModelDistant::Dynamic);
+	else
+		model = new RcloneFileModelLocal(toQString(m_remoteInfo.name()));
+	QTreeView::setModel(model);
 }
 

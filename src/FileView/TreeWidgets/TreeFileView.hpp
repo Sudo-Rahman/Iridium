@@ -7,12 +7,13 @@
 
 #include <QTreeView>
 #include <QStandardItemModel>
-#include "../../Rclone/Rclone.hpp"
 #include "TreeFileItem.hpp"
 #include "RcloneFileModel.hpp"
 #include <QTreeWidgetItem>
 #include <thread>
 #include <QMessageBox>
+#include "../../Remote/Remote.h"
+
 
 class TreeFileView : public QTreeView
 {
@@ -23,15 +24,16 @@ Q_OBJECT
 	QList<QModelIndex> indexBack{};
 	QList<QModelIndex> indexTop{};
 	Remote type{};
+	RemoteInfo m_remoteInfo{};
 
 public:
 	explicit TreeFileView(Remote type, QString remoteName, QWidget *parent = nullptr);
 
-	[[nodiscard]] const QString &getRemoteName() const;
-
 	void back();
 
 	void front();
+
+	void changeRemote(const RemoteInfo &info);
 
 protected:
 	void resizeEvent(QResizeEvent *event) override;
@@ -42,12 +44,10 @@ protected slots:
 
 	virtual void expand(const QModelIndex &index);
 
-	virtual void mouseReleaseEvent(QMouseEvent *event) override;
+	void mouseReleaseEvent(QMouseEvent *event) override;
 
 private:
 	void setModel(RcloneFileModel *model);
-
-
 
 
 };

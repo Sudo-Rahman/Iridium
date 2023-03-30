@@ -23,13 +23,7 @@ protected:
 
 	virtual void init() = 0;
 
-	explicit RcloneFileModel(const QString &path, QObject *parent = nullptr);
-
-private:
-
-	void initLocal();
-
-	void addItemLocal(const QString &path, TreeFileItem *parent);
+	explicit RcloneFileModel(QString path, QObject *parent = nullptr);
 
 public:
 	virtual void addItem(const QString &path, TreeFileItem *parent) = 0;

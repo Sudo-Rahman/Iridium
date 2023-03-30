@@ -79,7 +79,7 @@ void RemoteConfigParamsFrame::addRemote()
 	}
 
 	Rclone rclone_liste_remote;
-	rclone_liste_remote.listRemotesFinished.connect([this](map<string , string> map)
+	rclone_liste_remote.listRemotesFinished.connect([this](map<string, string> map)
 													{
 														listRemotes = std::move(map);
 													});

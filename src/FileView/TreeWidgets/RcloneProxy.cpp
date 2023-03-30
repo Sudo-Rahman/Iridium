@@ -8,7 +8,6 @@ RcloneProxy::RcloneProxy(QObject *parent) : QSortFilterProxyModel(parent)
 {
 
 
-
 }
 
 bool RcloneProxy::lessThan(const QModelIndex &source_left, const QModelIndex &source_right) const

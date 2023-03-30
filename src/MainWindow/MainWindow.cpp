@@ -29,7 +29,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	auto *listRemote = new ListRemoteWidget(this);
 	lay->addWidget(listRemote);
 
-	auto *tree = new TreeFileView(Remote::Distant, "nas:");
+	auto *tree = new TreeFileView(Remote::Distant, "nas2:");
 	lay->addWidget(tree);
 	auto *bt = new QPushButton("arrier");
 	lay->addWidget(bt);
@@ -55,4 +55,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 //		pr->setValue(val);
 //	});
 //	lay->addWidget(new AddNewRemoteDialog);
+
+	connect(listRemote, &ListRemoteWidget::remoteClicked, this, [=](const RemoteWidget *widget)
+	{
+		tree->changeRemote(widget->remoteInfo());
+//		qDebug() << widget->getName();
+	});
 }

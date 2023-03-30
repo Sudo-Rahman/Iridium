@@ -4,13 +4,15 @@
 
 #include "RemoteWidget.hpp"
 
-#include <utility>
 #include <QPainter>
 #include <QEvent>
 #include <QPropertyAnimation>
 
-RemoteWidget::RemoteWidget(RemoteType type, QString name, QWidget *parent) : QGroupBox(parent), m_type(type),
-																			 m_name(std::move(name))
+RemoteWidget::RemoteWidget(RemoteType type, Remote remote, const QString &name, QWidget *parent) : QGroupBox(parent),
+																								   m_remoteInfo(
+																									   {toString(name),
+																										type, remote,
+																										""})
 {
 	m_layout = new QHBoxLayout(this);
 	m_layout->setContentsMargins(10, 10, 10, 10);
@@ -20,11 +22,11 @@ RemoteWidget::RemoteWidget(RemoteType type, QString name, QWidget *parent) : QGr
 	auto *labelIcon = new QLabel;
 	m_layout->addWidget(labelIcon);
 // create pixmap
-	QPixmap image = {QString::fromStdString(remoteIco.find(m_type)->second)};
+	QPixmap image = {toQString(m_remoteInfo.m_icon)};
 	labelIcon->setPixmap(image.scaled(32, 32, Qt::KeepAspectRatio, Qt::SmoothTransformation));
 
 
-	auto *labelRemoteName = new QLabel(m_name);
+	auto *labelRemoteName = new QLabel(toQString(m_remoteInfo.name()));
 	m_layout->addWidget(labelRemoteName);
 
 }
@@ -66,6 +68,7 @@ bool RemoteWidget::event(QEvent *event)
 		case QEvent::MouseButtonRelease:
 			// change cursor
 			setCursor(Qt::ArrowCursor);
+			emit clicked(this);
 			break;
 		default:
 			break;
@@ -73,13 +76,7 @@ bool RemoteWidget::event(QEvent *event)
 	return QGroupBox::event(event);
 }
 
-RemoteType RemoteWidget::getType() const
+const RemoteInfo &RemoteWidget::remoteInfo() const
 {
-	return m_type;
+	return m_remoteInfo;
 }
-
-QString RemoteWidget::getName() const
-{
-	return m_name;
-}
-

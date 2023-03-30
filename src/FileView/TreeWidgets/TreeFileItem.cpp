@@ -7,7 +7,7 @@
 #include <QDateTime>
 #include <QMimeDatabase>
 
-TreeFileItem::TreeFileItem(QString path, QJsonObject data, TreeFileItem *parent) : parent(parent)
+TreeFileItem::TreeFileItem(const QString &path, QJsonObject data, TreeFileItem *parent) : parent(parent)
 {
 	setSizeHint(QSize(35, 40));
 	if (path.contains(":"))
@@ -22,20 +22,7 @@ TreeFileItem::TreeFileItem(QString path, QJsonObject data, TreeFileItem *parent)
 			path + data["Name"].toString(),
 			Remote::Local);
 	setText(file->getName());
-	QIcon ico;
-	if (file->isDir())
-	{
-		ico = QIcon::fromTheme("default-folder");
-		file->setSize(0);
-	} else
-	{
-		ico = QIcon::fromTheme(QMimeDatabase().mimeTypeForFile(file->getPath()).iconName());
-		if (ico.isNull())
-			ico = QIcon::fromTheme(QMimeDatabase().mimeTypeForFile(file->getPath()).genericIconName(),
-								   QIcon::fromTheme("unknown"));
-	}
-	setIcon(ico);
-
+	initIcon();
 }
 
 const std::shared_ptr<RcloneFile> &TreeFileItem::getFile() const
@@ -54,7 +41,6 @@ TreeFileItem::TreeFileItem(QString path, const std::shared_ptr<RcloneFile> &file
 		);
 	else
 		TreeFileItem::file = file;
-
 }
 
 TreeFileItem::TreeFileItem(const RcloneFile &file, TreeFileItem *parent) : parent(parent)
@@ -67,9 +53,27 @@ TreeFileItem::TreeFileItem(const RcloneFile &file, TreeFileItem *parent) : paren
 		file.getModTime()
 	);
 	setText(file.getName());
+	initIcon();
 }
 
 TreeFileItem *TreeFileItem::getParent() const
 {
 	return parent;
+}
+
+void TreeFileItem::initIcon()
+{
+	QIcon ico;
+	if (file->isDir())
+	{
+		ico = QIcon::fromTheme("default-folder");
+		file->setSize(0);
+	} else
+	{
+		ico = QIcon::fromTheme(QMimeDatabase().mimeTypeForFile(file->getPath()).iconName());
+		if (ico.isNull())
+			ico = QIcon::fromTheme(QMimeDatabase().mimeTypeForFile(file->getPath()).genericIconName(),
+								   QIcon::fromTheme("unknown"));
+	}
+	setIcon(ico);
 }

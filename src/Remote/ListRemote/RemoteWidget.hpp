@@ -14,26 +14,27 @@
 class RemoteWidget : public QGroupBox
 {
 Q_OBJECT
+
+private:
+	QHBoxLayout *m_layout{};
+
+	RemoteInfo m_remoteInfo{};
+
+	bool m_hover{};
+
 protected:
 	void paintEvent(QPaintEvent *event) override;
 
 	virtual bool event(QEvent *event) override;
 
-
 public:
-	explicit RemoteWidget(RemoteType type,QString name, QWidget *parent = nullptr);
+	explicit RemoteWidget(RemoteType type, Remote remote, const QString &name, QWidget *parent = nullptr);
 
-	[[nodiscard]] RemoteType getType() const;
+	[[nodiscard]] const RemoteInfo &remoteInfo() const;
 
-	[[nodiscard]] QString getName() const;
+signals:
 
-private:
-	QHBoxLayout *m_layout{};
-
-	RemoteType m_type{};
-	QString m_name{};
-
-	bool m_hover{};
+	void clicked(RemoteWidget *);
 };
 
 

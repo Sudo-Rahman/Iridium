@@ -36,7 +36,12 @@ public:
 
 private:
 	void getAllRemote();
+
 	void searchRemote(const QString &name);
+
+signals:
+
+	void remoteClicked(RemoteWidget *);
 };
 
 

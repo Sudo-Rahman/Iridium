@@ -4,9 +4,11 @@
 
 #include "RcloneFileModelDistant.hpp"
 
-RcloneFileModelDistant::RcloneFileModelDistant(const QString &path, Load load, QObject *parent) : RcloneFileModel(path,
-																												  parent),
-																								  load(load)
+#include <utility>
+
+RcloneFileModelDistant::RcloneFileModelDistant(QString path, Load load, QObject *parent) : RcloneFileModel(
+	std::move(path),
+	parent), load(load)
 {
 	RcloneFileModelDistant::init();
 }
@@ -14,7 +16,7 @@ RcloneFileModelDistant::RcloneFileModelDistant(const QString &path, Load load, Q
 void RcloneFileModelDistant::init()
 {
 	auto *drive = new TreeFileItem(path);
-	drive->setIcon(QIcon::fromTheme("drive-harddisk-solidstate"));
+	drive->setIcon(QIcon::fromTheme(toQString(HARDDRIVEICON)));
 	m_root_index = drive->index();
 	if (load == Dynamic)
 		drive->appendRow({});

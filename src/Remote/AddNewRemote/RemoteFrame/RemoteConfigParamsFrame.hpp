@@ -22,7 +22,7 @@ protected:
 	QVBoxLayout *layout{};
 	QLineEdit *remoteName{};
 	Rclone *rclone{};
-	std::map<std::string , std::string> listRemotes{};
+	std::map<std::string, std::string> listRemotes{};
 public:
 	explicit RemoteConfigParamsFrame(QWidget *parent = nullptr);
 
