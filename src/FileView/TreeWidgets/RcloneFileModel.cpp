@@ -6,8 +6,8 @@
 
 #include <utility>
 
-RcloneFileModel::RcloneFileModel(QString path, QObject *parent) : QStandardItemModel(
-	parent), path(std::move(path))
+RcloneFileModel::RcloneFileModel(const RemoteInfo &remoteInfo, QObject *parent) : QStandardItemModel(
+	parent), m_remoteInfo(remoteInfo)
 {
 	setColumnCount(4);
 	setRowCount(0);

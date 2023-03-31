@@ -19,15 +19,13 @@ class TreeFileView : public QTreeView
 {
 Q_OBJECT
 
-	QString remoteName{};
 	QStandardItemModel *model{};
 	QList<QModelIndex> indexBack{};
 	QList<QModelIndex> indexTop{};
-	Remote type{};
 	RemoteInfo m_remoteInfo{};
 
 public:
-	explicit TreeFileView(Remote type, QString remoteName, QWidget *parent = nullptr);
+	explicit TreeFileView(RemoteInfo remoteInfo, QWidget *parent = nullptr);
 
 	void back();
 

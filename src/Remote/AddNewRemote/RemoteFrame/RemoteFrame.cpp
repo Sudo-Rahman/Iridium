@@ -39,6 +39,8 @@ RemoteFrame::RemoteFrame(RemoteType type, QWidget *parent) :
 		case Sftp:
 			labelRemoteName->setText("Sftp");
 			break;
+		default:
+			break;
 	}
 	image = {QString::fromStdString(remoteIco.find(RemoteFrame::type)->second)};
 	labelIcon->setPixmap(image.scaled(64, 64, Qt::KeepAspectRatio, Qt::SmoothTransformation));

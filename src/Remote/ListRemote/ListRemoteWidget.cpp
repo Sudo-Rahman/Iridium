@@ -3,6 +3,7 @@
 //
 
 #include "ListRemoteWidget.hpp"
+#include "../AddNewRemote/AddNewRemoteDialog.hpp"
 
 /**
  * @brief constructeur
@@ -24,18 +25,26 @@ ListRemoteWidget::ListRemoteWidget(QWidget *parent) : QScrollArea(parent)
 	// padding
 	m_layout->setContentsMargins(10, 10, 15, 10);
 
+	auto *toplayout = new QHBoxLayout;
+
+	m_add = new QPushButton("+");
+	m_add->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	connect(m_add, &QPushButton::clicked, this, [this]()
+	{
+		auto *addRemote = new AddNewRemoteDialog(this);
+		addRemote->exec();
+	});
+	toplayout->addWidget(m_add);
+
 	m_recherche = new QLineEdit;
 	m_recherche->setPlaceholderText(tr("Rechercher un remote"));
 	connect(m_recherche, &QLineEdit::textChanged, this, &ListRemoteWidget::searchRemote);
-	m_layout->addWidget(m_recherche);
+	toplayout->addWidget(m_recherche);
+
+	m_layout->addLayout(toplayout);
 
 	m_remoteLayout = new QVBoxLayout;
 	m_layout->addLayout(m_remoteLayout);
-
-	m_add = new QPushButton(tr("Ajouter un remote"));
-	// m_add bottom in layout
-	m_layout->addStretch();
-	m_layout->addWidget(m_add);
 
 	getAllRemote();
 
@@ -56,8 +65,8 @@ void ListRemoteWidget::getAllRemote()
 	rclone->waitForFinished();
 	for (const auto &pair: rclone->getData())
 	{
-		auto *remote = new RemoteWidget(stringToRemoteType.find(pair.second)->second, Remote::Distant,
-										QString::fromStdString(pair.first), this);
+		auto *remote = new RemoteWidget({pair.first, stringToRemoteType.find(pair.second)->second,
+										 }, this);
 		m_listRemote.append(remote);
 		m_remoteLayout->addWidget(remote);
 		connect(remote, &RemoteWidget::clicked, this, [this, remote]()

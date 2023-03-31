@@ -3,7 +3,7 @@
 //
 
 #include "MainWindow.hpp"
-#include "../FileView/TreeWidgets/TreeFileView.hpp"
+#include "../FileView/FileViewWidget.hpp"
 
 #include <QPushButton>
 #include <QLayout>
@@ -29,14 +29,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	auto *listRemote = new ListRemoteWidget(this);
 	lay->addWidget(listRemote);
 
-	auto *tree = new TreeFileView(Remote::Distant, "nas2:");
+	auto *tree = new FileViewWidget(RemoteInfo("nas2:",RemoteType::Drive), this);
 	lay->addWidget(tree);
-	auto *bt = new QPushButton("arrier");
-	lay->addWidget(bt);
-	auto *bt1 = new QPushButton("avant");
-	lay->addWidget(bt1);
-	connect(bt, &QPushButton::clicked, tree, &TreeFileView::back);
-	connect(bt1, &QPushButton::clicked, tree, &TreeFileView::front);
+
 //	pr = new QProgressBar(this);
 //	lay->addWidget(pr);
 	auto *rclone = new Rclone;
@@ -56,9 +51,4 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 //	});
 //	lay->addWidget(new AddNewRemoteDialog);
 
-	connect(listRemote, &ListRemoteWidget::remoteClicked, this, [=](const RemoteWidget *widget)
-	{
-		tree->changeRemote(widget->remoteInfo());
-//		qDebug() << widget->getName();
-	});
 }

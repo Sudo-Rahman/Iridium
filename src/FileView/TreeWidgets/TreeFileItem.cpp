@@ -9,7 +9,6 @@
 
 TreeFileItem::TreeFileItem(const QString &path, QJsonObject data, TreeFileItem *parent) : parent(parent)
 {
-	setSizeHint(QSize(35, 40));
 	if (path.contains(":"))
 		file = std::make_shared<RcloneFile>(
 			path + data["Path"].toString(),
@@ -33,7 +32,6 @@ const std::shared_ptr<RcloneFile> &TreeFileItem::getFile() const
 TreeFileItem::TreeFileItem(QString path, const std::shared_ptr<RcloneFile> &file, TreeFileItem *parent) : parent(
 	parent), QStandardItem()
 {
-	setSizeHint(QSize(35, 40));
 	setText(path);
 	if (file == nullptr)
 		TreeFileItem::file = std::make_shared<RcloneFile>(
@@ -45,7 +43,6 @@ TreeFileItem::TreeFileItem(QString path, const std::shared_ptr<RcloneFile> &file
 
 TreeFileItem::TreeFileItem(const RcloneFile &file, TreeFileItem *parent) : parent(parent)
 {
-	setSizeHint(QSize(35, 40));
 	TreeFileItem::file = std::make_shared<RcloneFile>(
 		file.getPath(),
 		file.getSize(),

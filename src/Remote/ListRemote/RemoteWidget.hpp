@@ -28,7 +28,7 @@ protected:
 	virtual bool event(QEvent *event) override;
 
 public:
-	explicit RemoteWidget(RemoteType type, Remote remote, const QString &name, QWidget *parent = nullptr);
+	explicit RemoteWidget(RemoteInfo remoteInfo, QWidget *parent = nullptr);
 
 	[[nodiscard]] const RemoteInfo &remoteInfo() const;
 

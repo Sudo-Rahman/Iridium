@@ -10,29 +10,30 @@
 #include "ItemMenu.hpp"
 #include "RcloneProxy.hpp"
 
-TreeFileView::TreeFileView(Remote type, QString remoteName, QWidget *parent) : remoteName(std::move(remoteName)),
-																			   QTreeView(parent), type(type)
+TreeFileView::TreeFileView(RemoteInfo remoteInfo, QWidget *parent) : m_remoteInfo(std::move(remoteInfo)),
+																			   QTreeView(parent)
 {
 	setEditTriggers(QAbstractItemView::NoEditTriggers);
 	setSelectionMode(QAbstractItemView::ExtendedSelection);
 	setFocusPolicy(Qt::NoFocus);
-	setIconSize(QSize(35, 35));
+	setIconSize(QSize(25, 25));
 	setAlternatingRowColors(true);
 	header()->setSectionsMovable(true);
-	header()->resizeSection(0, 400);
-	header()->setMinimumHeight(20);
 	header()->setFont(QFont("Arial", 13, QFont::DemiBold));
 	setUniformRowHeights(true);
 	header()->setSectionsClickable(true);
 	header()->setSortIndicatorShown(true);
 	header()->setStretchLastSection(true);
 	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+	header()->resizeSection(0, 200);
 
 	RcloneFileModel *rcloneFileModel;
-	if (type == Distant)
-		rcloneFileModel = new RcloneFileModelDistant(TreeFileView::remoteName, RcloneFileModelDistant::Dynamic);
+	if (!m_remoteInfo.isLocal())
+		rcloneFileModel = new RcloneFileModelDistant(m_remoteInfo, RcloneFileModelDistant::Dynamic);
 	else
-		rcloneFileModel = new RcloneFileModelLocal(TreeFileView::remoteName);
+		rcloneFileModel = new RcloneFileModelLocal(m_remoteInfo);
+
+	qDebug() << "TreeFileView::TreeFileView: " << m_remoteInfo.m_path;
 
 	TreeFileView::setModel(rcloneFileModel);
 
@@ -127,10 +128,10 @@ void TreeFileView::changeRemote(const RemoteInfo &info)
 {
 	m_remoteInfo = info;
 	delete model;
-	if (type == Distant)
-		model = new RcloneFileModelDistant(toQString(m_remoteInfo.name()), RcloneFileModelDistant::Dynamic);
+	if (!m_remoteInfo.isLocal())
+		model = new RcloneFileModelDistant(m_remoteInfo, RcloneFileModelDistant::Dynamic);
 	else
-		model = new RcloneFileModelLocal(toQString(m_remoteInfo.name()));
+		model = new RcloneFileModelLocal(m_remoteInfo);
 	QTreeView::setModel(model);
 }
 

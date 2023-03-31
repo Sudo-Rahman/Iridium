@@ -6,7 +6,7 @@
 
 #include <utility>
 
-RcloneFileModelLocal::RcloneFileModelLocal(QString path, QObject *parent) : RcloneFileModel(std::move(path), parent)
+RcloneFileModelLocal::RcloneFileModelLocal(const RemoteInfo &remoteInfo, QObject *parent) : RcloneFileModel(remoteInfo, parent)
 {
 	RcloneFileModelLocal::init();
 }
@@ -37,7 +37,7 @@ void RcloneFileModelLocal::addItem(const QString &path, TreeFileItem *parent)
 
 void RcloneFileModelLocal::init()
 {
-	auto *drive = new TreeFileItem(path);
+	auto *drive = new TreeFileItem(toQString(m_remoteInfo.name()));
 	drive->setIcon(QIcon::fromTheme(toQString(HARDDRIVEICON)));
 	m_root_index = drive->index();
 	drive->appendRow({});

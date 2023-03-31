@@ -11,10 +11,9 @@ const std::string DRIVEICON = ":/ressources/google_drive.png";
 const std::string SFTPICON = ":/ressources/sftp.png";
 const std::string HARDDRIVEICON = "drive-harddisk-solidstate";
 
-
 enum Remote
 {
-	Distant, Local
+	Local,Distant
 };
 
 enum RemoteType
@@ -39,12 +38,11 @@ private:
 	std::string m_name;
 public:
 	RemoteType m_type;
-	Remote m_remote;
 	std::string m_icon;
 	std::string m_path;
 
-	RemoteInfo(std::string name, RemoteType type, Remote remote, std::string path)
-		: m_name(std::move(name)), m_type(type), m_remote(remote), m_path(std::move(path))
+	RemoteInfo(std::string name, RemoteType type, std::string path = "")
+		: m_name(std::move(name)), m_type(type), m_path(std::move(path))
 	{
 		m_icon = [&]() -> std::string
 		{
@@ -56,13 +54,29 @@ public:
 				return HARDDRIVEICON;
 			}
 		}();
+		m_path = [=]() -> auto
+		{
+			if (isLocal())
+				return m_path;
+			else
+			{
+				if (m_path.find(':') == std::string::npos)
+					return m_path + ":";
+				else
+					return m_path;
+			}
+		}();
 	}
 
 	RemoteInfo() = default;
+	[[nodiscard]] bool isLocal() const
+	{
+		return m_type == RemoteType::LocalHardDrive;
+	}
 
 	[[nodiscard]] std::string name() const
 	{
-		if (m_remote == Remote::Local)
+		if (isLocal())
 			return m_name;
 		else
 		{

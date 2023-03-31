@@ -17,6 +17,7 @@ class RcloneFile : public QObject
 {
 Q_OBJECT
 
+	RemoteInfo m_remoteInfo{};
 	QString path{};
 	uint64_t size{};
 	uint32_t objs{};

@@ -7,12 +7,10 @@
 #include <QPainter>
 #include <QEvent>
 #include <QPropertyAnimation>
+#include <utility>
 
-RemoteWidget::RemoteWidget(RemoteType type, Remote remote, const QString &name, QWidget *parent) : QGroupBox(parent),
-																								   m_remoteInfo(
-																									   {toString(name),
-																										type, remote,
-																										""})
+RemoteWidget::RemoteWidget(RemoteInfo remoteInfo, QWidget *parent) : QGroupBox(parent),
+																								   m_remoteInfo(std::move(remoteInfo))
 {
 	m_layout = new QHBoxLayout(this);
 	m_layout->setContentsMargins(10, 10, 10, 10);
