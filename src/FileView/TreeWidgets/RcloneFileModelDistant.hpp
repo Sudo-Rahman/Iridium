@@ -11,6 +11,7 @@
 class RcloneFileModelDistant : public RcloneFileModel
 {
 Q_OBJECT
+
 	RclonesManager manager{std::thread::hardware_concurrency() * 10};
 
 public:
@@ -21,19 +22,25 @@ public:
 private:
 	Load load{};
 
+	QTimer m_timer{};
+	int cpt{};
+	QStandardItem *m_itemLoading{};
+
 public:
 	explicit RcloneFileModelDistant(const RemoteInfo &remoteInfo, Load = Static, QObject *parent = nullptr);
 
 protected:
 	void init() override;
 
-	void addItem(const QString &path, TreeFileItem *parent) override;
+	void addItem(const RcloneFilePtr &file, TreeFileItem *parent) override;
 
 private:
 	void addItemDynamic(const QString &path, TreeFileItem *parent);
 
 
 	void initStatic(const QString &path, TreeFileItem *parent);
+
+	void loading();
 };
 
 

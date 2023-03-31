@@ -16,7 +16,7 @@ public:
 
 
 public:
-	void addItem(const QString &path, TreeFileItem *parent) override;
+	void addItem(const RcloneFilePtr &file, TreeFileItem *parent) override;
 
 protected:
 	void init() override;

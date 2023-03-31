@@ -7,8 +7,10 @@
 #include <utility>
 
 RcloneFileModel::RcloneFileModel(const RemoteInfo &remoteInfo, QObject *parent) : QStandardItemModel(
-	parent), m_remoteInfo(remoteInfo)
+	parent)
 {
+	m_remoteInfo = std::make_shared<RemoteInfo>(remoteInfo);
+
 	setColumnCount(4);
 	setRowCount(0);
 

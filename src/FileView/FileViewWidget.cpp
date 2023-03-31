@@ -16,7 +16,7 @@ FileViewWidget::FileViewWidget(RemoteInfo remoteInfo, QWidget *parent) : QWidget
 	m_treeFileView2 = new TreeFileView(RemoteInfo(), this);
 	m_layout->addWidget(m_treeFileView2);
 
-	changeRemote2(RemoteInfo("maison",RemoteType::LocalHardDrive,"/"));
+	changeRemote2(RemoteInfo("/",RemoteType::LocalHardDrive));
 
 }
 

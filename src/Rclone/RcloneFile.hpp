@@ -17,25 +17,21 @@ class RcloneFile : public QObject
 {
 Q_OBJECT
 
-	RemoteInfo m_remoteInfo{};
+	RemoteInfoPtr m_remoteInfo{};
 	QString path{};
 	uint64_t size{};
 	uint32_t objs{};
 	bool isDirectory{};
 	QDateTime modTime{};
-	Remote typeFile{};
 
-	void init(const QString &path, Remote type = Remote::Local);
+	void init();
 
 public:
-	explicit RcloneFile(const QFile &file, Remote typeFile = Remote::Local);
 
-	RcloneFile(const QString &pathFile, Remote typeFile = Remote::Local);
+	RcloneFile(const QString &pathFile, const RemoteInfoPtr &remoteInfo);
 
-	explicit RcloneFile(const QDir &dir, Remote typeFile = Remote::Local);
-
-	RcloneFile(const QString &path, uint64_t size, bool isDir, QDateTime modTime,
-			   Remote typeFile = Remote::Local);
+	RcloneFile(const QString &pathFile, uint64_t size, bool isDir, QDateTime modTime,
+			   const RemoteInfoPtr &remoteInfo);
 
 	[[nodiscard]] const QString &getPath() const;
 
@@ -63,14 +59,14 @@ public:
 
 	[[nodiscard]] QString getIsDirString() const;
 
-	[[nodiscard]] Remote getTypeFile() const;
+	[[nodiscard]] std::shared_ptr<RemoteInfo> getRemoteInfo() const;
 
 	uint32_t getObjs() const;
 
 	void setObjs(uint32_t objs);
-
-
 };
+
+typedef std::shared_ptr<RcloneFile> RcloneFilePtr;
 
 
 #endif //IRIDIUM_RCLONEFILE_HPP

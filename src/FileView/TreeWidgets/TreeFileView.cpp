@@ -33,8 +33,6 @@ TreeFileView::TreeFileView(RemoteInfo remoteInfo, QWidget *parent) : m_remoteInf
 	else
 		rcloneFileModel = new RcloneFileModelLocal(m_remoteInfo);
 
-	qDebug() << "TreeFileView::TreeFileView: " << m_remoteInfo.m_path;
-
 	TreeFileView::setModel(rcloneFileModel);
 
 	auto *proxy = new RcloneProxy(this);
@@ -87,13 +85,13 @@ void TreeFileView::expand(const QModelIndex &index)
 {
 	QTreeView::expand(index);
 	auto *item = dynamic_cast<TreeFileItem *>(static_cast<QStandardItem *>(model->itemFromIndex(index)));
-	dynamic_cast<RcloneFileModel *>(model)->addItem(item->getFile()->getPath(), item);
+	dynamic_cast<RcloneFileModel *>(model)->addItem(item->getFile(), item);
 }
 
 void TreeFileView::doubleClick(const QModelIndex &index)
 {
 	auto *item = dynamic_cast<TreeFileItem *>(static_cast<QStandardItem *>(model->itemFromIndex(index)));
-	dynamic_cast<RcloneFileModel *>(model)->addItem(item->getFile()->getPath(), item);
+	dynamic_cast<RcloneFileModel *>(model)->addItem(item->getFile(), item);
 	auto id = item->getParent() == nullptr ? index.parent() : model->indexFromItem(item->getParent()).parent();
 	indexBack.push_back(id);
 	indexTop.clear();

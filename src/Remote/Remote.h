@@ -13,7 +13,7 @@ const std::string HARDDRIVEICON = "drive-harddisk-solidstate";
 
 enum Remote
 {
-	Local,Distant
+	Local, Distant
 };
 
 enum RemoteType
@@ -41,7 +41,12 @@ public:
 	std::string m_icon;
 	std::string m_path;
 
-	RemoteInfo(std::string name, RemoteType type, std::string path = "")
+	auto setName(std::string name)
+	{
+		m_name = std::move(name);
+	}
+
+	RemoteInfo(std::string path, RemoteType type, std::string name = "")
 		: m_name(std::move(name)), m_type(type), m_path(std::move(path))
 	{
 		m_icon = [&]() -> std::string
@@ -54,21 +59,22 @@ public:
 				return HARDDRIVEICON;
 			}
 		}();
-		m_path = [=]() -> auto
+		m_name = [=]() -> auto
 		{
 			if (isLocal())
 				return m_path;
 			else
 			{
-				if (m_path.find(':') == std::string::npos)
-					return m_path + ":";
+				if (m_path.find(':') != std::string::npos)
+					return m_path.substr(0,m_path.find(':'));
 				else
-					return m_path;
+					return m_name;
 			}
 		}();
 	}
 
 	RemoteInfo() = default;
+
 	[[nodiscard]] bool isLocal() const
 	{
 		return m_type == RemoteType::LocalHardDrive;
@@ -76,22 +82,20 @@ public:
 
 	[[nodiscard]] std::string name() const
 	{
-		if (isLocal())
-			return m_name;
-		else
-		{
-			return [=]() -> auto
-			{
-				if (m_name.find(':') == std::string::npos)
-					return m_name + ":";
-				else
-					return m_name;
-			}();
-		}
+		return m_name;
 	}
 };
 
-//typedef std::shared_ptr<RemoteInfo> RemoteInfoPtr;
+typedef std::shared_ptr<RemoteInfo> RemoteInfoPtr;
+
+struct FileInfo {
+	std::string name;
+	std::string path;
+	uint64_t size;
+	uint64_t date;
+	RemoteInfo remote;
+	bool isDir;
+};
 
 
 auto toQString = [](const std::string &str) -> QString

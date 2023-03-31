@@ -16,7 +16,7 @@ class RcloneFileModel : public QStandardItemModel
 Q_OBJECT
 
 protected:
-	RemoteInfo m_remoteInfo{};
+	RemoteInfoPtr m_remoteInfo{};
 	std::shared_ptr<std::thread> m_thread{};
 	QModelIndex m_root_index{};
 
@@ -26,7 +26,7 @@ protected:
 	explicit RcloneFileModel(const RemoteInfo &remoteInfo, QObject *parent = nullptr);
 
 public:
-	virtual void addItem(const QString &path, TreeFileItem *parent) = 0;
+	virtual void addItem(const RcloneFilePtr &file, TreeFileItem *parent) = 0;
 
 	[[nodiscard]] const QModelIndex &getRootIndex() const;
 

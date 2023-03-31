@@ -86,7 +86,7 @@ void ItemInfoDialog::initSize()
 
 	m_layout->addWidget(new QLabel(tr("Taille: ")), row, 0, 1, 1);
 	m_size = new QLabel("", this);
-	if (m_file->getTypeFile() == Remote::Distant and m_file->getSize() == 0)
+	if (!m_file->getRemoteInfo()->isLocal() and m_file->getSize() == 0)
 	{
 		loading();
 		auto rclone = m_manager.get();
@@ -137,8 +137,6 @@ void ItemInfoDialog::loading()
 		m_size->setFont(font);
 	});
 	m_timer.start();
-
-
 }
 
 void ItemInfoDialog::initType()

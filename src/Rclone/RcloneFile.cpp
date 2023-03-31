@@ -7,43 +7,33 @@
 #include <cmath>
 #include "../Utility/Utility.hpp"
 
-void RcloneFile::init(const QString &path, Remote type)
+void RcloneFile::init()
 {
 	QFileInfo info(path);
-	if (info.exists() and type == Remote::Local)
+	if (m_remoteInfo->isLocal())
 	{
 		setSize(info.size());
 		setModTime(info.lastModified());
 		setPath(info.absoluteFilePath());
 
-	} else
-	{
-		setPath(path);
-		RcloneFile::typeFile = Distant;
 	}
+	setPath(path);
 	setIsDir(info.isDir());
 }
 
 
-RcloneFile::RcloneFile(const QFile &file, Remote type)
+RcloneFile::RcloneFile(const QString &pathFile,const RemoteInfoPtr &remoteInfo)
 {
-	init(QFileInfo(file).filePath(), type);
+	m_remoteInfo = remoteInfo;
+	setPath(pathFile);
+	init();
 }
 
-RcloneFile::RcloneFile(const QString &path, Remote type)
+RcloneFile::RcloneFile(const QString &pathFile, uint64_t size, bool isDir, QDateTime modTime, const RemoteInfoPtr &remoteInfo)
+	: size(size), isDirectory(isDir), modTime(std::move(modTime))
 {
-	init(path, type);
-}
-
-RcloneFile::RcloneFile(const QDir &dir, Remote type)
-{
-	init(dir.path(), type);
-}
-
-RcloneFile::RcloneFile(const QString &path, uint64_t size, bool isDir, QDateTime modTime, Remote type)
-	: size(size), isDirectory(isDir), modTime(std::move(modTime)), typeFile(type)
-{
-	setPath(path);
+	m_remoteInfo = remoteInfo;
+	setPath(pathFile);
 }
 
 
@@ -111,7 +101,7 @@ QString RcloneFile::getSizeString() const
 QString RcloneFile::getPathString() const
 {
 	QString tmpPath = path;
-	if (isDirectory and typeFile == Distant and path.contains(":"))
+	if (isDirectory and !m_remoteInfo->isLocal() and path.contains(":"))
 	{
 		tmpPath = path.split(":")[1];
 	}
@@ -132,11 +122,6 @@ QString RcloneFile::getIsDirString() const
 }
 
 
-Remote RcloneFile::getTypeFile() const
-{
-	return typeFile;
-}
-
 uint32_t RcloneFile::getObjs() const
 {
 	return objs;
@@ -145,5 +130,10 @@ uint32_t RcloneFile::getObjs() const
 void RcloneFile::setObjs(uint32_t objs)
 {
 	RcloneFile::objs = objs;
+}
+
+std::shared_ptr<RemoteInfo> RcloneFile::getRemoteInfo() const
+{
+	return m_remoteInfo;
 }
 
