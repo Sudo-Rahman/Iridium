@@ -26,5 +26,4 @@ void ItemMenu::m_info_click(TreeFileItem *file)
 {
 	ItemInfoDialog dialog(file, this);
 	dialog.exec();
-
 }

@@ -4,6 +4,7 @@
 #include <QHeaderView>
 #include <QMouseEvent>
 #include <QMenu>
+#include <QPainter>
 #include "TreeFileView.hpp"
 #include "RcloneFileModelDistant.hpp"
 #include "RcloneFileModelLocal.hpp"
@@ -13,6 +14,11 @@
 TreeFileView::TreeFileView(RemoteInfo remoteInfo, QWidget *parent) : m_remoteInfo(std::move(remoteInfo)),
 																			   QTreeView(parent)
 {
+	setIndentation(15);
+	// recursive collapse
+	setSortingEnabled(true);
+	setRootIsDecorated(true);
+	setAnimated(true);
 	setEditTriggers(QAbstractItemView::NoEditTriggers);
 	setSelectionMode(QAbstractItemView::ExtendedSelection);
 	setFocusPolicy(Qt::NoFocus);
@@ -46,6 +52,16 @@ TreeFileView::TreeFileView(RemoteInfo remoteInfo, QWidget *parent) : m_remoteInf
 	connect(this, &QTreeView::doubleClicked, this, &TreeFileView::doubleClick);
 
 	connect(this, &QTreeView::expanded, this, &TreeFileView::expand);
+
+	connect(this,&QTreeView::collapsed,[=](const QModelIndex &index)
+	{
+		// collapse all children
+		for(int i = 0; i < model->rowCount(index); i++)
+		{
+			auto child = model->index(i,0,index);
+			collapse(child);
+		}
+	});
 
 
 }
@@ -132,4 +148,3 @@ void TreeFileView::changeRemote(const RemoteInfo &info)
 		model = new RcloneFileModelLocal(m_remoteInfo);
 	QTreeView::setModel(model);
 }
-

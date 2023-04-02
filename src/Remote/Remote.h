@@ -66,9 +66,9 @@ public:
 			else
 			{
 				if (m_path.find(':') != std::string::npos)
-					return m_path.substr(0,m_path.find(':'));
+					return m_path.substr(m_path.find(':') + 1);
 				else
-					return m_name;
+					return m_path;
 			}
 		}();
 	}

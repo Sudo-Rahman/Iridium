@@ -36,6 +36,9 @@ public:
 protected:
 	void resizeEvent(QResizeEvent *event) override;
 
+
+
+
 protected slots:
 
 	void doubleClick(const QModelIndex &index);

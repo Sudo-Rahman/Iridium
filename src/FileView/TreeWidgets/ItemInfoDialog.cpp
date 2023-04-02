@@ -4,6 +4,11 @@
 
 #include "ItemInfoDialog.hpp"
 #include "../../Utility/Utility.hpp"
+#include <QDirIterator>
+#include <QThread>
+#include <boost/filesystem.hpp>
+
+namespace fs = boost::filesystem;
 
 ItemInfoDialog::ItemInfoDialog(TreeFileItem *item, QWidget *parent) : QDialog(parent), m_item(item)
 {
@@ -86,6 +91,45 @@ void ItemInfoDialog::initSize()
 
 	m_layout->addWidget(new QLabel(tr("Taille: ")), row, 0, 1, 1);
 	m_size = new QLabel("", this);
+	if (m_file->getRemoteInfo()->isLocal() and m_file->isDir())
+	{
+		loading();
+		QThread *thread;
+		auto *size = new uint64_t(0);
+		auto *objs = new uint64_t(0);
+		auto func = [=]()
+		{
+//			 qDirIerator recursive
+			QDirIterator it(m_file->getPath(),   QDir::NoSymLinks | QDir::NoDotAndDotDot | QDir::AllEntries,
+							QDirIterator::Subdirectories);
+			for (; it.hasNext(); it.next())
+			{
+				QFileInfo info(it.fileInfo());
+				if (!info.isDir())
+				{
+					(*size) += info.size();
+					(*objs)++;
+				}
+			}
+
+		};
+
+		thread = QThread::create(func);
+		thread->start();
+		connect(thread, &QThread::finished, this, [=]()
+		{
+			m_timer.stop();
+			m_objs->setText(QString::fromStdString(Utility::numberToString((uint64_t) *objs)));
+			m_size->setText(QString::fromStdString(Utility::numberToString(*size)) + " octets" + " ("
+							+ QString::fromStdString(Utility::sizeToString(*size)) + ")");
+			m_file->setSize(*size);
+			m_file->setObjs(*objs);
+			m_objs->setFont({});
+			m_size->setFont({});
+			delete size;
+			delete objs;
+		});
+	}
 	if (!m_file->getRemoteInfo()->isLocal() and m_file->getSize() == 0)
 	{
 		loading();
