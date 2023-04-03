@@ -9,8 +9,8 @@
 #include <QPropertyAnimation>
 #include <utility>
 
-RemoteWidget::RemoteWidget(RemoteInfo remoteInfo, QWidget *parent) : QGroupBox(parent),
-																								   m_remoteInfo(std::move(remoteInfo))
+RemoteWidget::RemoteWidget(const RemoteInfo& remoteInfo, QWidget *parent) : QGroupBox(parent),
+																								   m_remoteInfo(std::move(std::make_shared<RemoteInfo>(remoteInfo)))
 {
 	m_layout = new QHBoxLayout(this);
 	m_layout->setContentsMargins(10, 10, 10, 10);
@@ -20,11 +20,11 @@ RemoteWidget::RemoteWidget(RemoteInfo remoteInfo, QWidget *parent) : QGroupBox(p
 	auto *labelIcon = new QLabel;
 	m_layout->addWidget(labelIcon);
 // create pixmap
-	QPixmap image = {toQString(m_remoteInfo.m_icon)};
+	QPixmap image = {toQString(m_remoteInfo->m_icon)};
 	labelIcon->setPixmap(image.scaled(32, 32, Qt::KeepAspectRatio, Qt::SmoothTransformation));
 
 
-	auto *labelRemoteName = new QLabel(toQString(m_remoteInfo.name()));
+	auto *labelRemoteName = new QLabel(toQString(m_remoteInfo->name()));
 	m_layout->addWidget(labelRemoteName);
 
 }
@@ -74,7 +74,7 @@ bool RemoteWidget::event(QEvent *event)
 	return QGroupBox::event(event);
 }
 
-const RemoteInfo &RemoteWidget::remoteInfo() const
+const RemoteInfoPtr &RemoteWidget::remoteInfo() const
 {
 	return m_remoteInfo;
 }

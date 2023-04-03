@@ -83,7 +83,7 @@ void ListRemoteWidget::searchRemote(const QString &name)
 {
 	for (auto *remote: m_listRemote)
 	{
-		if (toQString(remote->remoteInfo().name()).contains(name, Qt::CaseInsensitive))
+		if (toQString(remote->remoteInfo()->name()).contains(name, Qt::CaseInsensitive))
 			remote->show();
 		else
 			remote->hide();

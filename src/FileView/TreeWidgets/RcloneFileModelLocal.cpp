@@ -6,7 +6,7 @@
 #include "TreeFileItemLocal.hpp"
 
 
-RcloneFileModelLocal::RcloneFileModelLocal(const RemoteInfo &remoteInfo, QObject *parent) : RcloneFileModel(remoteInfo, parent)
+RcloneFileModelLocal::RcloneFileModelLocal(const RemoteInfoPtr &remoteInfo, QObject *parent) : RcloneFileModel(remoteInfo, parent)
 {
 	RcloneFileModelLocal::init();
 }

@@ -4,30 +4,32 @@
 
 #include "FileViewWidget.hpp"
 
-FileViewWidget::FileViewWidget(RemoteInfo remoteInfo, QWidget *parent) : QWidget(parent), m_remoteInfo1(std::move(remoteInfo))
+FileViewWidget::FileViewWidget(const RemoteInfo& remoteInfo, QWidget *parent) : QWidget(parent)
 {
 	m_layout = new QHBoxLayout(this);
 	setContentsMargins(0, 0, 0, 0);
 	m_layout->setContentsMargins(0, 0, 0, 0);
 
-	m_treeFileView1 = new TreeFileView(m_remoteInfo1, this);
+	m_treeFileView1 = new TreeFileViewContainer(std::make_shared<RemoteInfo>(remoteInfo), this);
 	m_layout->addWidget(m_treeFileView1);
 
-	m_treeFileView2 = new TreeFileView(RemoteInfo(), this);
+	m_treeFileView2 = new TreeFileViewContainer(std::make_shared<RemoteInfo>(RemoteInfo()), this);
 	m_layout->addWidget(m_treeFileView2);
 
-	changeRemote2(RemoteInfo("/",RemoteType::LocalHardDrive));
+	changeRemote(std::make_shared<RemoteInfo>(RemoteInfo("/", RemoteType::LocalHardDrive)));
 
 }
 
-void FileViewWidget::changeRemote1(RemoteInfo info)
+void FileViewWidget::changeRemote(const RemoteInfoPtr & remoteInfo)
 {
-	m_remoteInfo1 = std::move(info);
-	m_treeFileView1->changeRemote(m_remoteInfo1);
-}
-
-void FileViewWidget::changeRemote2(RemoteInfo info)
-{
-	m_remoteInfo2 = std::move(info);
-	m_treeFileView2->changeRemote(m_remoteInfo2);
+	if (m_currentView == 0)
+	{
+		m_treeFileView2->changeRemote(remoteInfo);
+		m_currentView = 1;
+	}
+	else
+	{
+		m_treeFileView1->changeRemote(remoteInfo);
+		m_currentView = 0;
+	}
 }

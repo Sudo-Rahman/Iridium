@@ -18,7 +18,7 @@ Q_OBJECT
 private:
 	QHBoxLayout *m_layout{};
 
-	RemoteInfo m_remoteInfo{};
+	RemoteInfoPtr m_remoteInfo{};
 
 	bool m_hover{};
 
@@ -28,9 +28,9 @@ protected:
 	virtual bool event(QEvent *event) override;
 
 public:
-	explicit RemoteWidget(RemoteInfo remoteInfo, QWidget *parent = nullptr);
+	explicit RemoteWidget(const RemoteInfo& remoteInfo, QWidget *parent = nullptr);
 
-	[[nodiscard]] const RemoteInfo &remoteInfo() const;
+	[[nodiscard]] const RemoteInfoPtr &remoteInfo() const;
 
 signals:
 

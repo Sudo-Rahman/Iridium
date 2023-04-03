@@ -6,7 +6,7 @@
 #include "TreeFileItemDistant.hpp"
 
 
-RcloneFileModelDistant::RcloneFileModelDistant(const RemoteInfo &remoteInfo, Load load, QObject *parent)
+RcloneFileModelDistant::RcloneFileModelDistant(const RemoteInfoPtr &remoteInfo, Load load, QObject *parent)
 	: RcloneFileModel(
 	remoteInfo,
 	parent), load(load)

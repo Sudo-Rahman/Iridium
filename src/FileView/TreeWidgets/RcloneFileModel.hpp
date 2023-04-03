@@ -23,7 +23,7 @@ protected:
 
 	virtual void init() = 0;
 
-	explicit RcloneFileModel(const RemoteInfo &remoteInfo, QObject *parent = nullptr);
+	explicit RcloneFileModel(const RemoteInfoPtr &remoteInfo, QObject *parent = nullptr);
 
 public:
 	virtual void addItem(const RcloneFilePtr &file, TreeFileItem *parent) = 0;

@@ -22,22 +22,19 @@ Q_OBJECT
 	QStandardItemModel *model{};
 	QList<QModelIndex> indexBack{};
 	QList<QModelIndex> indexTop{};
-	RemoteInfo m_remoteInfo{};
+	RemoteInfoPtr m_remoteInfo{};
 
 public:
-	explicit TreeFileView(RemoteInfo remoteInfo, QWidget *parent = nullptr);
+	explicit TreeFileView(const RemoteInfoPtr &remoteInfo, QWidget *parent = nullptr);
 
 	void back();
 
 	void front();
 
-	void changeRemote(const RemoteInfo &info);
+	void changeRemote(const RemoteInfoPtr &info);
 
 protected:
 	void resizeEvent(QResizeEvent *event) override;
-
-
-
 
 protected slots:
 
@@ -49,6 +46,11 @@ protected slots:
 
 private:
 	void setModel(RcloneFileModel *model);
+	QString getPath();
+
+signals:
+
+	void pathChanged(const QString &path);
 
 
 };

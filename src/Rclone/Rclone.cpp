@@ -140,7 +140,7 @@ void Rclone::listRemotes()
 				for (auto &str: data)
 				{
 					str.remove(" ");
-					map.insert({str.split(":")[0].toStdString(), str.split(":")[1].toStdString()});
+					map.insert({str.split(":")[0].toStdString() +":", str.split(":")[1].toStdString()});
 				}
 				m_mapData = map;
 				listRemotesFinished(map);

@@ -6,15 +6,12 @@
 #define IRIDIUM_REMOTE_H
 
 #include <map>
+#include <iostream>
+
 
 const std::string DRIVEICON = ":/ressources/google_drive.png";
 const std::string SFTPICON = ":/ressources/sftp.png";
 const std::string HARDDRIVEICON = "drive-harddisk-solidstate";
-
-enum Remote
-{
-	Local, Distant
-};
 
 enum RemoteType
 {
@@ -66,7 +63,7 @@ public:
 			else
 			{
 				if (m_path.find(':') != std::string::npos)
-					return m_path.substr(m_path.find(':') + 1);
+					return m_path.substr(0, m_path.find(':') );
 				else
 					return m_path;
 			}

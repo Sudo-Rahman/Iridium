@@ -11,9 +11,9 @@
 #include "ItemMenu.hpp"
 #include "RcloneProxy.hpp"
 
-TreeFileView::TreeFileView(RemoteInfo remoteInfo, QWidget *parent) : m_remoteInfo(std::move(remoteInfo)),
-																			   QTreeView(parent)
+TreeFileView::TreeFileView(const RemoteInfoPtr &remoteInfo, QWidget *parent) :QTreeView(parent)
 {
+	m_remoteInfo = remoteInfo;
 	setIndentation(15);
 	// recursive collapse
 	setSortingEnabled(true);
@@ -34,7 +34,7 @@ TreeFileView::TreeFileView(RemoteInfo remoteInfo, QWidget *parent) : m_remoteInf
 	header()->resizeSection(0, 200);
 
 	RcloneFileModel *rcloneFileModel;
-	if (!m_remoteInfo.isLocal())
+	if (!m_remoteInfo->isLocal())
 		rcloneFileModel = new RcloneFileModelDistant(m_remoteInfo, RcloneFileModelDistant::Dynamic);
 	else
 		rcloneFileModel = new RcloneFileModelLocal(m_remoteInfo);
@@ -84,6 +84,7 @@ void TreeFileView::back()
 		QTreeView::setRootIndex(index);
 	} else
 		QTreeView::setRootIndex(dynamic_cast<RcloneFileModel *>(model)->getRootIndex());
+	emit pathChanged(getPath());
 }
 
 void TreeFileView::front()
@@ -95,6 +96,7 @@ void TreeFileView::front()
 		indexBack << index.parent();
 		QTreeView::setRootIndex(index);
 	}
+		emit pathChanged(getPath());
 }
 
 void TreeFileView::expand(const QModelIndex &index)
@@ -112,6 +114,7 @@ void TreeFileView::doubleClick(const QModelIndex &index)
 	indexBack.push_back(id);
 	indexTop.clear();
 	QTreeView::setRootIndex(item->getParent() == nullptr ? index : model->indexFromItem(item->getParent()));
+	emit pathChanged(getPath());
 }
 
 void TreeFileView::setModel(RcloneFileModel *model)
@@ -138,13 +141,23 @@ void TreeFileView::mouseReleaseEvent(QMouseEvent *event)
 	}
 }
 
-void TreeFileView::changeRemote(const RemoteInfo &info)
+void TreeFileView::changeRemote(const RemoteInfoPtr &info)
 {
 	m_remoteInfo = info;
 	delete model;
-	if (!m_remoteInfo.isLocal())
+	if (!m_remoteInfo->isLocal())
 		model = new RcloneFileModelDistant(m_remoteInfo, RcloneFileModelDistant::Dynamic);
 	else
 		model = new RcloneFileModelLocal(m_remoteInfo);
 	QTreeView::setModel(model);
+}
+
+// get path of selected item
+QString TreeFileView::getPath()
+{
+	auto index = QTreeView::rootIndex();
+	if (!index.isValid())
+		return "";
+	auto *item = dynamic_cast<TreeFileItem *>(static_cast<QStandardItem *>(model->itemFromIndex(index)));
+	return item->getFile()->getPath();
 }

@@ -12,7 +12,7 @@ class RcloneFileModelLocal : public RcloneFileModel
 Q_OBJECT
 
 public:
-	explicit RcloneFileModelLocal(const RemoteInfo &remoteInfo, QObject *parent = nullptr);
+	explicit RcloneFileModelLocal(const RemoteInfoPtr &remoteInfo, QObject *parent = nullptr);
 
 
 public:

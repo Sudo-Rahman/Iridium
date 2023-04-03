@@ -51,4 +51,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 //	});
 //	lay->addWidget(new AddNewRemoteDialog);
 
+	connect(listRemote, &ListRemoteWidget::remoteClicked, this, [=](RemoteWidget *remote)
+	{
+		tree->changeRemote(remote->remoteInfo());
+	});
+
 }

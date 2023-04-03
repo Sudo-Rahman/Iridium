@@ -6,10 +6,10 @@
 
 #include <utility>
 
-RcloneFileModel::RcloneFileModel(const RemoteInfo &remoteInfo, QObject *parent) : QStandardItemModel(
+RcloneFileModel::RcloneFileModel(const RemoteInfoPtr &remoteInfo, QObject *parent) : QStandardItemModel(
 	parent)
 {
-	m_remoteInfo = std::make_shared<RemoteInfo>(remoteInfo);
+	m_remoteInfo = remoteInfo;
 
 	setColumnCount(4);
 	setRowCount(0);

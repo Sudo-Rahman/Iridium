@@ -27,7 +27,7 @@ private:
 	QStandardItem *m_itemLoading{};
 
 public:
-	explicit RcloneFileModelDistant(const RemoteInfo &remoteInfo, Load = Static, QObject *parent = nullptr);
+	explicit RcloneFileModelDistant(const RemoteInfoPtr &remoteInfo, Load = Static, QObject *parent = nullptr);
 
 protected:
 	void init() override;

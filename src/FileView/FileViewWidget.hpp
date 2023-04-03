@@ -5,7 +5,7 @@
 #ifndef IRIDIUM_FILEVIEWWIDGET_HPP
 #define IRIDIUM_FILEVIEWWIDGET_HPP
 
-#include "TreeWidgets/TreeFileView.hpp"
+#include "TreeWidgets/TreeFileViewContainer.hpp"
 #include <QLayout>
 
 class FileViewWidget : public QWidget
@@ -13,19 +13,16 @@ class FileViewWidget : public QWidget
 Q_OBJECT
 
 private:
-	TreeFileView *m_treeFileView1{};
-	TreeFileView *m_treeFileView2{};
+	TreeFileViewContainer *m_treeFileView1{};
+	TreeFileViewContainer *m_treeFileView2{};
 	QHBoxLayout *m_layout{};
 
-	RemoteInfo m_remoteInfo1{};
-	RemoteInfo m_remoteInfo2{};
+	uint8_t m_currentView{};
 
 public:
-	explicit FileViewWidget(RemoteInfo remoteInfo,QWidget *parent = nullptr);
+	explicit FileViewWidget(const RemoteInfo& remoteInfo,QWidget *parent = nullptr);
 
-	void changeRemote1(RemoteInfo info);
-
-	void changeRemote2(RemoteInfo info);
+	void changeRemote(const RemoteInfoPtr &);
 
 };
 
