@@ -5,6 +5,7 @@
 #include <QPropertyAnimation>
 #include "ListRemoteWidget.hpp"
 #include "../AddNewRemote/AddNewRemoteDialog.hpp"
+#include "../../Config/Settings.hpp"
 
 /**
  * @brief constructeur
@@ -77,6 +78,13 @@ void ListRemoteWidget::getAllRemote()
 	// ajout du local
 	auto *local = new RemoteWidget({"/", RemoteType::LocalHardDrive, "local"}, this);
 	m_listRemote.push_front(local);
+
+	for (const auto &localRemote: Settings::getLocalRemotes())
+	{
+		auto *remote = new RemoteWidget(localRemote, this);
+		m_listRemote << remote;
+	}
+
 
 	for (auto *remote: m_listRemote)
 	{

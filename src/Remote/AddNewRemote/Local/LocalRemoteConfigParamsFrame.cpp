@@ -5,6 +5,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include "LocalRemoteConfigParamsFrame.hpp"
+#include "../../../Config/Settings.hpp"
 
 LocalRemoteConfigParamsFrame::LocalRemoteConfigParamsFrame(QWidget *parent) : RemoteConfigParamsFrame(parent)
 {
@@ -44,8 +45,7 @@ void LocalRemoteConfigParamsFrame::createUi()
 		{
 			path->setStyleSheet("border: 1px solid gray; border-radius: 5px;");
 			path->setToolTip("");
-		}
-		else
+		} else
 		{
 			path->setStyleSheet("border: 1px solid red; border-radius: 5px;");
 			path->setToolTip(tr("Le chemin n’existe pas !"));
@@ -59,12 +59,12 @@ void LocalRemoteConfigParamsFrame::createUi()
 
 void LocalRemoteConfigParamsFrame::addRemote()
 {
-	if(QFileInfo::exists(m_path))
+	if (QFileInfo::exists(m_path))
 	{
+		Settings::addLocalRemote({m_path.toStdString(), RemoteType::LocalHardDrive, remoteName->text().toStdString()});
 		QMessageBox::information(this, tr("Ajout d’un nouveau remote local"),
 								 tr("Le remote %1 a été ajouté avec succès !").QString::arg(remoteName->text()));
-	}
-	else
+	} else
 	{
 		messageLabel->setText(tr("Le chemin n’existe pas !"));
 		messageLabel->show();

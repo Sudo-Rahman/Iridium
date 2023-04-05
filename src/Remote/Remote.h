@@ -58,12 +58,14 @@ public:
 		}();
 		m_name = [=]() -> auto
 		{
+			if (!m_name.empty())
+				return m_name;
 			if (isLocal())
 				return m_path;
 			else
 			{
 				if (m_path.find(':') != std::string::npos)
-					return m_path.substr(0, m_path.find(':') );
+					return m_path.substr(0, m_path.find(':'));
 				else
 					return m_path;
 			}
@@ -85,7 +87,8 @@ public:
 
 typedef std::shared_ptr<RemoteInfo> RemoteInfoPtr;
 
-struct FileInfo {
+struct FileInfo
+{
 	std::string name;
 	std::string path;
 	uint64_t size;

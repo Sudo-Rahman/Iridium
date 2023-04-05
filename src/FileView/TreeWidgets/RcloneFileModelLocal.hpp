@@ -11,6 +11,8 @@ class RcloneFileModelLocal : public RcloneFileModel
 {
 Q_OBJECT
 
+	QThread *m_thread{};
+
 public:
 	explicit RcloneFileModelLocal(const RemoteInfoPtr &remoteInfo, QObject *parent = nullptr);
 
@@ -19,6 +21,7 @@ public:
 	void addItem(const RcloneFilePtr &file, TreeFileItem *parent) override;
 
 protected:
+
 	void init() override;
 };
 

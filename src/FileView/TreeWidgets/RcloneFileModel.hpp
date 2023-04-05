@@ -8,7 +8,7 @@
 #include <QStandardItemModel>
 #include "TreeFileItem.hpp"
 #include "../../Rclone/Rclone.hpp"
-#include <thread>
+#include <QThread>
 
 
 class RcloneFileModel : public QStandardItemModel
@@ -17,13 +17,12 @@ Q_OBJECT
 
 protected:
 	RemoteInfoPtr m_remoteInfo{};
-	std::shared_ptr<std::thread> m_thread{};
 	QModelIndex m_root_index{};
-
 
 	virtual void init() = 0;
 
 	explicit RcloneFileModel(const RemoteInfoPtr &remoteInfo, QObject *parent = nullptr);
+
 
 public:
 	virtual void addItem(const RcloneFilePtr &file, TreeFileItem *parent) = 0;

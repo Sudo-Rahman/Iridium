@@ -28,9 +28,7 @@ TreeFileView::TreeFileView(const RemoteInfoPtr &remoteInfo, QWidget *parent) :QT
 	setUniformRowHeights(true);
 	header()->setSectionsClickable(true);
 	header()->setSortIndicatorShown(true);
-//	header()->setStretchLastSection(true);
-//	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-	header()->resizeSection(0, 200);
+	header()->setStretchLastSection(false);
 
 	RcloneFileModel *rcloneFileModel;
 	if (!m_remoteInfo->isLocal())
@@ -62,6 +60,10 @@ TreeFileView::TreeFileView(const RemoteInfoPtr &remoteInfo, QWidget *parent) :QT
 		}
 	});
 
+	//	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+	header()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
+	header()->setSectionResizeMode(2, QHeaderView::Interactive);
+	header()->setSectionResizeMode(3, QHeaderView::ResizeToContents);
 
 }
 

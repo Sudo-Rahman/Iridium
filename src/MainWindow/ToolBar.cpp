@@ -4,6 +4,7 @@
 
 #include "ToolBar.hpp"
 #include "../Remote/Remote.h"
+#include "../Config/Settings.hpp"
 #include <QStyle>
 
 ToolBar::ToolBar(QWidget *parent) : QToolBar(parent)
@@ -12,8 +13,8 @@ ToolBar::ToolBar(QWidget *parent) : QToolBar(parent)
 	setMaximumHeight(30);
 	setOrientation(Qt::Vertical);
 
-	m_hideListeRemotes = new QAction(QIcon::fromTheme(QString::fromStdString(HARDDRIVEICON)),
-									 tr("Afficher les remotes"), this);
+	m_hideListeRemotes = new QAction(Settings::HARDDRIVE_ICON,
+		tr("Afficher les remotes"), this);
 	m_hideListeRemotes->setCheckable(true);
 	m_hideListeRemotes->setChecked(false);
 	addAction(m_hideListeRemotes);

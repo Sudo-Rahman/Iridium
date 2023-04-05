@@ -32,5 +32,3 @@ const QModelIndex &RcloneFileModel::getRootIndex() const
 {
 	return m_root_index;
 }
-
-

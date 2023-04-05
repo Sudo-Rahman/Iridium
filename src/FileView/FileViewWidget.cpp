@@ -20,7 +20,7 @@ FileViewWidget::FileViewWidget(const RemoteInfo &remoteInfo, QWidget *parent) : 
 
 }
 
-uint8_t FileViewWidget::changeRemote(const RemoteInfoPtr &remoteInfo)
+void FileViewWidget::changeRemote(const RemoteInfoPtr &remoteInfo)
 {
 	if (m_currentView == 0)
 	{
@@ -31,5 +31,4 @@ uint8_t FileViewWidget::changeRemote(const RemoteInfoPtr &remoteInfo)
 		m_treeFileView1->changeRemote(remoteInfo);
 		m_currentView = 0;
 	}
-	return m_currentView + 1;
 }

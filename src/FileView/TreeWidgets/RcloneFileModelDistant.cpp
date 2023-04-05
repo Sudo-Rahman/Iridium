@@ -100,4 +100,3 @@ void RcloneFileModelDistant::loading()
 	});
 	m_timer.start();
 }
-

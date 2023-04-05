@@ -4,19 +4,27 @@
 
 #include "RcloneFileModelLocal.hpp"
 #include "TreeFileItemLocal.hpp"
+#include "../../Config/Settings.hpp"
 
 
-RcloneFileModelLocal::RcloneFileModelLocal(const RemoteInfoPtr &remoteInfo, QObject *parent) : RcloneFileModel(remoteInfo, parent)
+RcloneFileModelLocal::RcloneFileModelLocal(const RemoteInfoPtr &remoteInfo, QObject *parent) : RcloneFileModel(
+	remoteInfo, parent)
 {
 	RcloneFileModelLocal::init();
 }
 
 void RcloneFileModelLocal::addItem(const RcloneFilePtr &file, TreeFileItem *parent)
 {
-	if (m_thread not_eq nullptr and m_thread->joinable())
-		m_thread->join();
+	if (m_thread not_eq nullptr)
+	{
+		m_thread->quit();
+		m_thread->wait();
+		delete m_thread;
+	}
 	auto *tree_item = (parent->getParent() == nullptr ? parent : parent->getParent());
-	m_thread = std::make_shared<std::thread>(
+	m_thread = QThread::create(
+
+//	m_thread = std::make_shared<std::thread>(
 		[=]()
 		{
 			if (tree_item->rowCount() == 1)
@@ -33,12 +41,13 @@ void RcloneFileModelLocal::addItem(const RcloneFilePtr &file, TreeFileItem *pare
 					tree_item->removeRow(0);
 			}
 		});
+	m_thread->start(QThread::HighestPriority);
 }
 
 void RcloneFileModelLocal::init()
 {
 	auto *drive = new TreeFileItem(QString::fromStdString(m_remoteInfo->m_path), m_remoteInfo);
-	drive->setIcon(QIcon::fromTheme(QString::fromStdString(HARDDRIVEICON)));
+	drive->setIcon(Settings::HARDDRIVE_ICON);
 	m_root_index = drive->index();
 	drive->appendRow({});
 	appendRow({

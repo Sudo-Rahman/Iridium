@@ -7,6 +7,7 @@
 
 #include "GoogleDrive/GoogleDriveRemoteConfigParamsFrame.hpp"
 #include "Local/LocalRemoteConfigParamsFrame.hpp"
+#include "../../Config/Settings.hpp"
 
 #include <QLayout>
 #include <QLabel>
@@ -47,7 +48,7 @@ RemoteWidgetParam::RemoteWidgetParam(RemoteType type, QWidget *parent) :
 			break;
 	}
 	if (type == RemoteType::LocalHardDrive)
-		m_icon = style()->standardPixmap(QStyle::SP_DriveHDIcon);
+		m_icon = Settings::HARDDRIVE_ICON;
 	else
 		m_icon = QIcon(QString::fromStdString(remoteIco.find(RemoteWidgetParam::type)->second));
 	labelIcon->setPixmap(m_icon.pixmap(32, 32, QIcon::Normal, QIcon::On));

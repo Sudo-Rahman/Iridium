@@ -3,6 +3,8 @@
 //
 
 #include "TreeFileItem.hpp"
+#include "../../Config/Settings.hpp"
+//#include "../../Config/Settings.hpp"
 #include <QMimeDatabase>
 
 
@@ -11,7 +13,7 @@ const std::shared_ptr<RcloneFile> &TreeFileItem::getFile() const
 	return file;
 }
 
-TreeFileItem::TreeFileItem(const QString& path, const RemoteInfoPtr &remoteInfo, TreeFileItem *parent) : parent(
+TreeFileItem::TreeFileItem(const QString &path, const RemoteInfoPtr &remoteInfo, TreeFileItem *parent) : parent(
 	parent), QStandardItem()
 {
 	TreeFileItem::file = std::make_shared<RcloneFile>(
@@ -22,7 +24,8 @@ TreeFileItem::TreeFileItem(const QString& path, const RemoteInfoPtr &remoteInfo,
 	initIcon();
 }
 
-TreeFileItem::TreeFileItem(const QString& path, const std::shared_ptr<RcloneFile> &file, TreeFileItem *parent) : parent(parent)
+TreeFileItem::TreeFileItem(const QString &path, const std::shared_ptr<RcloneFile> &file, TreeFileItem *parent) : parent(
+	parent)
 {
 	TreeFileItem::file = file;
 	setText(path);
@@ -38,14 +41,14 @@ void TreeFileItem::initIcon()
 	QIcon ico;
 	if (file->isDir())
 	{
-		ico = QIcon::fromTheme("yellow-folder");
+		ico = Settings::DIR_ICON;
 		file->setSize(0);
 	} else
 	{
-		ico = QIcon::fromTheme(QMimeDatabase().mimeTypeForFile(file->getPath()).iconName());
+		ico = QIcon::fromTheme(QMimeDatabase().mimeTypeForFile(file->getPath()).iconName()
+			,QIcon::fromTheme(QMimeDatabase().mimeTypeForFile(file->getPath()).genericIconName()));
 		if (ico.isNull())
-			ico = QIcon::fromTheme(QMimeDatabase().mimeTypeForFile(file->getPath()).genericIconName(),
-								   QIcon::fromTheme("unknown"));
+			ico = QIcon::fromTheme("unknown");
 	}
 	setIcon(ico);
 }
