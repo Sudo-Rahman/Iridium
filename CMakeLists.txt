@@ -13,7 +13,7 @@ set(CMAKE_AUTOUIC ON)
 #set qt path
 
 set(Boost_USE_STATIC_LIBS ON)
-find_package(Boost COMPONENTS unit_test_framework system filesystem REQUIRED)
+find_package(Boost COMPONENTS unit_test_framework REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 
 find_package(QT NAMES Qt6 REQUIRED COMPONENTS
@@ -72,7 +72,5 @@ target_link_libraries(Iridium PRIVATE
         Qt::Core
         Qt::Gui
         Qt::Widgets
-        ${Boost_FILESYSTEM_LIBRARY}
-        ${Boost_SYSTEM_LIBRARY}
         )
 

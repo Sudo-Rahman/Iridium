@@ -29,7 +29,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	auto *listRemote = new ListRemoteWidget(this);
 	lay->addWidget(listRemote);
 
-	auto *tree = new FileViewWidget(RemoteInfo("nas2:",RemoteType::Drive), this);
+
+	auto *tree = new FileViewWidget(RemoteInfo("nas2:", RemoteType::Drive), this);
 	lay->addWidget(tree);
 
 //	pr = new QProgressBar(this);
@@ -55,5 +56,4 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	{
 		tree->changeRemote(remote->remoteInfo());
 	});
-
 }

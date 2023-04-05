@@ -8,12 +8,15 @@
 #include <QMainWindow>
 #include <QProgressBar>
 #include <QCoreApplication>
+#include <QSettings>
 #include "../Rclone/Rclone.hpp"
+#include "../Remote/ListRemote/ListRemoteWidget.hpp"
+
 
 class MainWindow : public QMainWindow
 {
 Q_OBJECT
-	QProgressBar *pr;
+	QList<RemoteWidget *> m_listRemote{};
 public:
 	explicit MainWindow(QWidget *parent = nullptr);
 

@@ -38,7 +38,7 @@ void TreeFileItem::initIcon()
 	QIcon ico;
 	if (file->isDir())
 	{
-		ico = QIcon::fromTheme("default-folder");
+		ico = QIcon::fromTheme("yellow-folder");
 		file->setSize(0);
 	} else
 	{

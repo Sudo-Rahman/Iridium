@@ -93,16 +93,4 @@ struct FileInfo {
 	RemoteInfo remote;
 	bool isDir;
 };
-
-
-auto toQString = [](const std::string &str) -> QString
-{
-	return QString::fromStdString(str);
-};
-
-auto toString = [](const QString &str) -> std::string
-{
-	return str.toStdString();
-};
-
 #endif //IRIDIUM_REMOTE_H

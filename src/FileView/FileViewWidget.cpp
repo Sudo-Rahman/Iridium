@@ -4,7 +4,7 @@
 
 #include "FileViewWidget.hpp"
 
-FileViewWidget::FileViewWidget(const RemoteInfo& remoteInfo, QWidget *parent) : QWidget(parent)
+FileViewWidget::FileViewWidget(const RemoteInfo &remoteInfo, QWidget *parent) : QWidget(parent)
 {
 	m_layout = new QHBoxLayout(this);
 	setContentsMargins(0, 0, 0, 0);
@@ -20,16 +20,16 @@ FileViewWidget::FileViewWidget(const RemoteInfo& remoteInfo, QWidget *parent) : 
 
 }
 
-void FileViewWidget::changeRemote(const RemoteInfoPtr & remoteInfo)
+uint8_t FileViewWidget::changeRemote(const RemoteInfoPtr &remoteInfo)
 {
 	if (m_currentView == 0)
 	{
 		m_treeFileView2->changeRemote(remoteInfo);
 		m_currentView = 1;
-	}
-	else
+	} else
 	{
 		m_treeFileView1->changeRemote(remoteInfo);
 		m_currentView = 0;
 	}
+	return m_currentView + 1;
 }

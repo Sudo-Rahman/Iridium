@@ -22,7 +22,7 @@ private:
 public:
 	explicit FileViewWidget(const RemoteInfo& remoteInfo,QWidget *parent = nullptr);
 
-	void changeRemote(const RemoteInfoPtr &);
+	uint8_t changeRemote(const RemoteInfoPtr &);
 
 };
 

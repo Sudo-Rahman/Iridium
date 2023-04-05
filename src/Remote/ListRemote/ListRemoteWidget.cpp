@@ -66,13 +66,14 @@ void ListRemoteWidget::getAllRemote()
 	for (const auto &pair: rclone->getData())
 	{
 		auto *remote = new RemoteWidget({pair.first, stringToRemoteType.find(pair.second)->second,
-										 }, this);
+										}, this);
 		m_listRemote.append(remote);
 		m_remoteLayout->addWidget(remote);
 		connect(remote, &RemoteWidget::clicked, this, [this, remote]()
-		{ emit remoteClicked(remote); });
+		{
+			emit remoteClicked(remote);
+		});
 	}
-
 }
 
 /**
@@ -83,7 +84,7 @@ void ListRemoteWidget::searchRemote(const QString &name)
 {
 	for (auto *remote: m_listRemote)
 	{
-		if (toQString(remote->remoteInfo()->name()).contains(name, Qt::CaseInsensitive))
+		if (QString::fromStdString(remote->remoteInfo()->name()).contains(name, Qt::CaseInsensitive))
 			remote->show();
 		else
 			remote->hide();

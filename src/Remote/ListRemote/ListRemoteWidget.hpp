@@ -31,6 +31,7 @@ private:
 
 	RclonesManager m_manager{};
 
+
 public:
 	explicit ListRemoteWidget(QWidget *parent = nullptr);
 
@@ -38,6 +39,8 @@ private:
 	void getAllRemote();
 
 	void searchRemote(const QString &name);
+
+	void remoteClick(RemoteWidget *remote);
 
 signals:
 

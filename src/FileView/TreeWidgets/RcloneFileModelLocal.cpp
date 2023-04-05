@@ -37,8 +37,8 @@ void RcloneFileModelLocal::addItem(const RcloneFilePtr &file, TreeFileItem *pare
 
 void RcloneFileModelLocal::init()
 {
-	auto *drive = new TreeFileItem(toQString(m_remoteInfo->m_path), m_remoteInfo);
-	drive->setIcon(QIcon::fromTheme(toQString(HARDDRIVEICON)));
+	auto *drive = new TreeFileItem(QString::fromStdString(m_remoteInfo->m_path), m_remoteInfo);
+	drive->setIcon(QIcon::fromTheme(QString::fromStdString(HARDDRIVEICON)));
 	m_root_index = drive->index();
 	drive->appendRow({});
 	appendRow({

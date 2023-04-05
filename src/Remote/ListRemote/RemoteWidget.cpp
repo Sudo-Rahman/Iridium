@@ -9,23 +9,33 @@
 #include <QPropertyAnimation>
 #include <utility>
 
-RemoteWidget::RemoteWidget(const RemoteInfo& remoteInfo, QWidget *parent) : QGroupBox(parent),
-																								   m_remoteInfo(std::move(std::make_shared<RemoteInfo>(remoteInfo)))
+RemoteWidget::RemoteWidget(const RemoteInfo &remoteInfo, QWidget *parent) : QGroupBox(parent),
+																			m_remoteInfo(std::move(
+																				std::make_shared<RemoteInfo>(
+																					remoteInfo)))
 {
 	m_layout = new QHBoxLayout(this);
 	m_layout->setContentsMargins(10, 10, 10, 10);
 	m_layout->setSpacing(15);
-	m_layout->setAlignment(Qt::AlignLeft | Qt::AlignCenter);
 
 	auto *labelIcon = new QLabel;
 	m_layout->addWidget(labelIcon);
 // create pixmap
-	QPixmap image = {toQString(m_remoteInfo->m_icon)};
+	QPixmap image = {QString::fromStdString(m_remoteInfo->m_icon)};
 	labelIcon->setPixmap(image.scaled(32, 32, Qt::KeepAspectRatio, Qt::SmoothTransformation));
 
 
-	auto *labelRemoteName = new QLabel(toQString(m_remoteInfo->name()));
+	auto *labelRemoteName = new QLabel(QString::fromStdString(m_remoteInfo->name()));
+	// set auto size font
+	QFont font = labelRemoteName->font();
+	font.setPointSize(15);
+	labelRemoteName->setFont(font);
 	m_layout->addWidget(labelRemoteName);
+
+	m_selected = new QLabel(this);
+//	m_selected->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	m_selected->setAlignment(Qt::AlignRight | Qt::AlignBottom);
+	m_layout->addWidget(m_selected);
 
 }
 
@@ -34,9 +44,9 @@ void RemoteWidget::paintEvent(QPaintEvent *event)
 	QPainter painter(this);
 	painter.setRenderHint(QPainter::Antialiasing);
 
-	painter.setPen(QGroupBox::palette().color(QPalette::Midlight));
-	m_hover ? painter.setBrush(QGroupBox::palette().color(QPalette::Mid)) : painter.setBrush(
-		QGroupBox::palette().color(QPalette::Midlight));
+	painter.setPen(QGroupBox::palette().color(QPalette::Light));
+	m_hover ? painter.setBrush(QGroupBox::palette().color(QPalette::Window)) : painter.setBrush(
+		QGroupBox::palette().color(QPalette::Light));
 
 	// draw rounded rect
 	QRect rect = this->rect().marginsRemoved(QMargins(5, 5, 5, 5));
@@ -77,4 +87,15 @@ bool RemoteWidget::event(QEvent *event)
 const RemoteInfoPtr &RemoteWidget::remoteInfo() const
 {
 	return m_remoteInfo;
+}
+
+void RemoteWidget::setSelected(uint8_t selected)
+{
+	if (!selected)
+		m_selected->clear();
+	else
+		if(selected ==3)
+			m_selected->setText("1-2");
+		else
+			m_selected->setText(QString::number(selected));
 }

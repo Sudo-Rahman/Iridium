@@ -18,8 +18,8 @@ RcloneFileModelDistant::RcloneFileModelDistant(const RemoteInfoPtr &remoteInfo, 
 
 void RcloneFileModelDistant::init()
 {
-	auto *drive = new TreeFileItem(toQString(m_remoteInfo->m_path), m_remoteInfo);
-	drive->setIcon(QIcon::fromTheme(toQString(HARDDRIVEICON)));
+	auto *drive = new TreeFileItem(QString::fromStdString(m_remoteInfo->m_path), m_remoteInfo);
+	drive->setIcon(QIcon::fromTheme(QString::fromStdString(HARDDRIVEICON)));
 	m_root_index = drive->index();
 	if (load == Dynamic)
 		drive->appendRow({new QStandardItem, new QStandardItem, new QStandardItem, new QStandardItem});
@@ -30,7 +30,7 @@ void RcloneFileModelDistant::init()
 				  new TreeFileItem(tr("Disque"), drive->getFile(), drive),
 			  });
 	if (load == Static)
-		initStatic(toQString(m_remoteInfo->m_path), drive);
+		initStatic(QString::fromStdString(m_remoteInfo->m_path), drive);
 }
 
 void RcloneFileModelDistant::addItem(const RcloneFilePtr &file, TreeFileItem *parent)

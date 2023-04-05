@@ -20,6 +20,8 @@ private:
 
 	RemoteInfoPtr m_remoteInfo{};
 
+	QLabel *m_selected{};
+
 	bool m_hover{};
 
 protected:
@@ -31,6 +33,8 @@ public:
 	explicit RemoteWidget(const RemoteInfo& remoteInfo, QWidget *parent = nullptr);
 
 	[[nodiscard]] const RemoteInfoPtr &remoteInfo() const;
+
+	void setSelected(uint8_t);
 
 signals:
 
