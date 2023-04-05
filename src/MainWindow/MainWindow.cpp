@@ -3,14 +3,11 @@
 //
 
 #include "MainWindow.hpp"
-#include "../FileView/FileViewWidget.hpp"
 
 #include <QPushButton>
 #include <QLayout>
 #include <QTimer>
 #include <QMenuBar>
-
-#include "../Remote/ListRemote/ListRemoteWidget.hpp"
 
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
@@ -20,40 +17,34 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	setMinimumSize(1000, 500);
 	QIcon::setThemeName("fluent");
 
+	// set tool bar
+	m_toolBar = new ToolBar(this);
+	addToolBar(m_toolBar);
 
 	auto *wid = new QWidget(this);
 	wid->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	auto *lay = new QHBoxLayout(wid);
 	setCentralWidget(wid);
 
-	auto *listRemote = new ListRemoteWidget(this);
-	lay->addWidget(listRemote);
+	m_listRemoteWidget = new ListRemoteWidget(this);
+	lay->addWidget(m_listRemoteWidget);
 
 
-	auto *tree = new FileViewWidget(RemoteInfo("nas2:", RemoteType::Drive), this);
-	lay->addWidget(tree);
+	m_fileViewWidget = new FileViewWidget(RemoteInfo("nas2:", RemoteType::Drive), this);
+	lay->addWidget(m_fileViewWidget);
 
-//	pr = new QProgressBar(this);
-//	lay->addWidget(pr);
-	auto *rclone = new Rclone;
-//	auto *timer = new QTimer(this);
-//	timer->setInterval(10);
-//	connect(timer, &QTimer::timeout, this, [=]()
-//	{
-//		if (pr->value() < 100)
-//			pr->setValue(pr->value() + 1);
-//		else
-//			pr->setValue(0);
-//	});
-//	timer->start();
-//	rclone->copyTo({"nas:firebase_cpp_sdk_10.3.0.zip", RcloneFile::Distant},{"/Users/sr-71/Downloads/"});
-//	connect(rclone, &Rclone::copyProgress,this, [=](const int val){
-//		pr->setValue(val);
-//	});
-//	lay->addWidget(new AddNewRemoteDialog);
+	connectSignals();
+}
 
-	connect(listRemote, &ListRemoteWidget::remoteClicked, this, [=](RemoteWidget *remote)
+void MainWindow::connectSignals()
+{
+	connect(m_toolBar, &ToolBar::hideListeRemotes, this, [=]()
 	{
-		tree->changeRemote(remote->remoteInfo());
+		m_listRemoteWidget->expand();
+	});
+
+	connect(m_listRemoteWidget, &ListRemoteWidget::remoteClicked, this, [=](RemoteWidget *remote)
+	{
+		m_fileViewWidget->changeRemote(remote->remoteInfo());
 	});
 }

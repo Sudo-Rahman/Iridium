@@ -26,14 +26,19 @@ private:
 
 	QLineEdit *m_recherche{};
 	QPushButton *m_add{};
+	QAction *m_expand{};
 
 	QList<RemoteWidget *> m_listRemote{};
 
 	RclonesManager m_manager{};
 
+	int m_width{};
+	bool m_isExpand{};
 
 public:
 	explicit ListRemoteWidget(QWidget *parent = nullptr);
+
+	void expand();
 
 private:
 	void getAllRemote();

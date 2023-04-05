@@ -8,7 +8,7 @@
 #include <QDialog>
 #include <QLayout>
 #include "../../Rclone/Rclone.hpp"
-#include "RemoteFrame/RemoteConfigParamsFrame.hpp"
+#include "RemoteConfigParamsFrame.hpp"
 
 
 class AddNewRemoteDialog : public QDialog

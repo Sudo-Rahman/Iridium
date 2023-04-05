@@ -4,11 +4,11 @@
 
 #include "AddNewRemoteDialog.hpp"
 #include <QScrollArea>
-#include "RemoteFrame/RemoteFrame.hpp"
+#include "RemoteWidgetParam.hpp"
 
 AddNewRemoteDialog::AddNewRemoteDialog(QWidget *parent) : QDialog(parent)
 {
-	setWindowTitle(tr("Ajout d'un disque"));
+	setWindowTitle(tr("Ajout d’un remote"));
 	layout = new QHBoxLayout(this);
 	layout->setContentsMargins(5, 20, 5, 20);
 
@@ -24,21 +24,19 @@ AddNewRemoteDialog::AddNewRemoteDialog(QWidget *parent) : QDialog(parent)
 
 	auto *scrollWidget = new QWidget(scrollArea);
 	auto *scrollWidgetLayout = new QVBoxLayout(scrollWidget);
+	scrollWidgetLayout->setAlignment(Qt::AlignTop);
 	scrollArea->setWidget(scrollWidget);
 
-	auto *t = new RemoteFrame(RemoteType::Drive);
-	connect(t, &RemoteFrame::clicked, this, &AddNewRemoteDialog::changeParamsFrame);
-	scrollWidgetLayout->addWidget(t);
+	auto *tt = new RemoteWidgetParam(RemoteType::Drive);
+	connect(tt, &RemoteWidgetParam::clicked, this, &AddNewRemoteDialog::changeParamsFrame);
+	scrollWidgetLayout->addWidget(tt);
 
-	for (int i = 0; i < 9; ++i)
-	{
-		auto *t = new RemoteFrame(RemoteType::Drive);
-		connect(t, &RemoteFrame::clicked, this, &AddNewRemoteDialog::changeParamsFrame);
-		scrollWidgetLayout->addWidget(t);
-	}
+	auto *ttt = new RemoteWidgetParam(RemoteType::LocalHardDrive);
+	connect(ttt, &RemoteWidgetParam::clicked, this, &AddNewRemoteDialog::changeParamsFrame);
+	scrollWidgetLayout->addWidget(ttt);
 
 	layout->addWidget(scrollArea);
-	paramsFrame = t->getParamsFrame();
+	paramsFrame = tt->getParamsFrame();
 	layout->addWidget(paramsFrame);
 
 }

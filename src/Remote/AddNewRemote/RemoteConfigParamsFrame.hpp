@@ -10,7 +10,7 @@
 #include <QLayout>
 #include <QLabel>
 #include <QLineEdit>
-#include "../../../Rclone/Rclone.hpp"
+#include "../../Rclone/Rclone.hpp"
 
 class RemoteConfigParamsFrame : public QFrame
 {
@@ -19,7 +19,7 @@ protected:
 	QPushButton *logInBtn{};
 	QPushButton *cancelBtn{};
 	QLabel *messageLabel{};
-	QVBoxLayout *layout{};
+	QVBoxLayout *m_layout{};
 	QLineEdit *remoteName{};
 	Rclone *rclone{};
 	std::map<std::string, std::string> listRemotes{};
@@ -30,6 +30,10 @@ protected:
 	virtual void addRemote();
 
 	virtual void createUi();
+
+signals:
+
+	void remoteAdded();
 
 };
 

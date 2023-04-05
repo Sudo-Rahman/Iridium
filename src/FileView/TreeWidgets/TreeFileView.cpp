@@ -20,17 +20,16 @@ TreeFileView::TreeFileView(const RemoteInfoPtr &remoteInfo, QWidget *parent) :QT
 	setRootIsDecorated(true);
 	setAnimated(true);
 	setEditTriggers(QAbstractItemView::NoEditTriggers);
-	setSelectionMode(QAbstractItemView::ExtendedSelection);
 	setFocusPolicy(Qt::NoFocus);
-	setIconSize(QSize(25, 25));
+	setIconSize(QSize(24, 24));
 	setAlternatingRowColors(true);
 	header()->setSectionsMovable(true);
 	header()->setFont(QFont("Arial", 13, QFont::DemiBold));
 	setUniformRowHeights(true);
 	header()->setSectionsClickable(true);
 	header()->setSortIndicatorShown(true);
-	header()->setStretchLastSection(true);
-	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+//	header()->setStretchLastSection(true);
+//	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	header()->resizeSection(0, 200);
 
 	RcloneFileModel *rcloneFileModel;
@@ -110,6 +109,8 @@ void TreeFileView::doubleClick(const QModelIndex &index)
 {
 	auto *item = dynamic_cast<TreeFileItem *>(static_cast<QStandardItem *>(model->itemFromIndex(index)));
 	dynamic_cast<RcloneFileModel *>(model)->addItem(item->getFile(), item);
+	if(!item->getFile()->isDir())
+		return;
 	auto id = item->getParent() == nullptr ? index.parent() : model->indexFromItem(item->getParent()).parent();
 	indexBack.push_back(id);
 	indexTop.clear();

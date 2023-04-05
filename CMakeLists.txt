@@ -33,14 +33,14 @@ set(SRC
         src/MainWindow/MainWindow.cpp src/MainWindow/MainWindow.hpp
         src/Rclone/RcloneFile.cpp src/Rclone/RcloneFile.hpp
         src/Remote/AddNewRemote/AddNewRemoteDialog.cpp src/Remote/AddNewRemote/AddNewRemoteDialog.hpp
-        src/Remote/AddNewRemote/RemoteFrame/RemoteFrame.cpp src/Remote/AddNewRemote/RemoteFrame/RemoteFrame.hpp
-        src/Remote/AddNewRemote/RemoteFrame/RemoteConfigParamsFrame.cpp src/Remote/AddNewRemote/RemoteFrame/RemoteConfigParamsFrame.hpp
-        src/Remote/Remote.h src/Remote/AddNewRemote/RemoteFrame/GoogleDrive/GoogleDriveRemoteConfigParamsFrame.cpp src/Remote/AddNewRemote/RemoteFrame/GoogleDrive/GoogleDriveRemoteConfigParamsFrame.hpp
+        src/Remote/AddNewRemote/RemoteWidgetParam.cpp src/Remote/AddNewRemote/RemoteWidgetParam.hpp
+        src/Remote/AddNewRemote/RemoteConfigParamsFrame.cpp src/Remote/AddNewRemote/RemoteConfigParamsFrame.hpp
+        src/Remote/Remote.h src/Remote/AddNewRemote/GoogleDrive/GoogleDriveRemoteConfigParamsFrame.cpp src/Remote/AddNewRemote/GoogleDrive/GoogleDriveRemoteConfigParamsFrame.hpp
         src/FileView/TreeWidgets/TreeFileView.cpp src/FileView/TreeWidgets/TreeFileView.hpp src/FileView/TreeWidgets/TreeFileItem.cpp src/FileView/TreeWidgets/TreeFileItem.hpp
         src/FileView/TreeWidgets/RcloneFileModel.cpp src/FileView/TreeWidgets/RcloneFileModel.hpp src/FileView/TreeWidgets/RcloneFileModelDistant.cpp src/FileView/TreeWidgets/RcloneFileModelDistant.hpp src/FileView/TreeWidgets/ItemMenu.cpp src/FileView/TreeWidgets/ItemMenu.hpp
         src/FileView/TreeWidgets/ItemInfoDialog.cpp src/FileView/TreeWidgets/ItemInfoDialog.hpp src/Utility/Utility.cpp src/Utility/Utility.hpp src/FileView/TreeWidgets/RcloneProxy.cpp src/FileView/TreeWidgets/RcloneProxy.hpp src/Remote/ListRemote/ListRemoteWidget.cpp src/Remote/ListRemote/ListRemoteWidget.hpp
         src/Remote/ListRemote/RemoteWidget.cpp src/Remote/ListRemote/RemoteWidget.hpp src/FileView/TreeWidgets/RcloneFileModelLocal.cpp src/FileView/TreeWidgets/RcloneFileModelLocal.hpp src/FileView/FileViewWidget.cpp src/FileView/FileViewWidget.hpp src/FileView/TreeWidgets/TreeFileItemLocal.cpp src/FileView/TreeWidgets/TreeFileItemLocal.hpp src/FileView/TreeWidgets/TreeFileItemDistant.cpp src/FileView/TreeWidgets/TreeFileItemDistant.hpp
-        src/FileView/TreeWidgets/TreeFileViewContainer.cpp src/FileView/TreeWidgets/TreeFileViewContainer.hpp)
+        src/FileView/TreeWidgets/TreeFileViewContainer.cpp src/FileView/TreeWidgets/TreeFileViewContainer.hpp src/Remote/AddNewRemote/Local/LocalRemoteConfigParamsFrame.cpp src/Remote/AddNewRemote/Local/LocalRemoteConfigParamsFrame.hpp src/MainWindow/ToolBar.cpp src/MainWindow/ToolBar.hpp)
 
 SET(TRANSLATION
         languages/iridium_en.ts

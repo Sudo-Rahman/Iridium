@@ -11,15 +11,24 @@
 #include <QSettings>
 #include "../Rclone/Rclone.hpp"
 #include "../Remote/ListRemote/ListRemoteWidget.hpp"
+#include "../FileView/FileViewWidget.hpp"
+#include "ToolBar.hpp"
 
 
 class MainWindow : public QMainWindow
 {
 Q_OBJECT
 	QList<RemoteWidget *> m_listRemote{};
+	ToolBar *m_toolBar{};
+	ListRemoteWidget *m_listRemoteWidget{};
+	FileViewWidget *m_fileViewWidget{};
+
+
 public:
 	explicit MainWindow(QWidget *parent = nullptr);
 
+private:
+	void connectSignals();
 };
 
 

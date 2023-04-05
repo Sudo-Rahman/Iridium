@@ -21,8 +21,12 @@ RemoteWidget::RemoteWidget(const RemoteInfo &remoteInfo, QWidget *parent) : QGro
 	auto *labelIcon = new QLabel;
 	m_layout->addWidget(labelIcon);
 // create pixmap
-	QPixmap image = {QString::fromStdString(m_remoteInfo->m_icon)};
-	labelIcon->setPixmap(image.scaled(32, 32, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+	QIcon icon;
+	if(m_remoteInfo->isLocal())
+		icon = QIcon::fromTheme(QString::fromStdString(HARDDRIVEICON));
+	else
+		icon = QIcon(QString::fromStdString(m_remoteInfo->m_icon));
+	labelIcon->setPixmap(icon.pixmap(32, 32, QIcon::Normal, QIcon::On));
 
 
 	auto *labelRemoteName = new QLabel(QString::fromStdString(m_remoteInfo->name()));

@@ -20,9 +20,7 @@ GoogleDriveRemoteConfigParamsFrame::GoogleDriveRemoteConfigParamsFrame(QWidget *
 			cancelBtn->hide();
 		}
 	});
-
-	createUi();
-
+	GoogleDriveRemoteConfigParamsFrame::createUi();
 }
 
 void GoogleDriveRemoteConfigParamsFrame::addRemote()
@@ -31,7 +29,7 @@ void GoogleDriveRemoteConfigParamsFrame::addRemote()
 	RemoteConfigParamsFrame::addRemote();
 	if (remoteName->text().isEmpty())
 		return;
-	if (listRemotes.contains(remoteName->text().toStdString()))
+	if (listRemotes.contains(remoteName->text().toStdString() + ":"))
 	{
 		QMessageBox::warning(this, tr("Erreur"), tr("Un disk du même nom existe deja"));
 		remoteName->setText("");
@@ -40,12 +38,9 @@ void GoogleDriveRemoteConfigParamsFrame::addRemote()
 	rclone->config(RemoteType::Drive, {remoteName->text().toStdString()});
 	rclone->waitForStarted();
 	cancelBtn->show();
-
 }
 
 void GoogleDriveRemoteConfigParamsFrame::createUi()
 {
-
 	RemoteConfigParamsFrame::createUi();
-
 }

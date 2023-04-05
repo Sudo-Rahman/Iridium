@@ -22,7 +22,7 @@ TreeFileItem::TreeFileItem(const QString& path, const RemoteInfoPtr &remoteInfo,
 	initIcon();
 }
 
-TreeFileItem::TreeFileItem(QString path, const std::shared_ptr<RcloneFile> &file, TreeFileItem *parent) : parent(parent)
+TreeFileItem::TreeFileItem(const QString& path, const std::shared_ptr<RcloneFile> &file, TreeFileItem *parent) : parent(parent)
 {
 	TreeFileItem::file = file;
 	setText(path);

@@ -20,7 +20,7 @@ public:
 
 	explicit TreeFileItem(const QString& path, const RemoteInfoPtr  &remoteInfo, TreeFileItem * = nullptr);
 
-	explicit TreeFileItem(QString path,const std::shared_ptr<RcloneFile> &file , TreeFileItem * = nullptr);
+	explicit TreeFileItem(const QString& path,const std::shared_ptr<RcloneFile> &file , TreeFileItem * = nullptr);
 
 	[[nodiscard]] const std::shared_ptr<RcloneFile> &getFile() const;
 

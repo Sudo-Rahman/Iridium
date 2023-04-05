@@ -9,7 +9,7 @@ using namespace std;
 
 RemoteConfigParamsFrame::RemoteConfigParamsFrame(QWidget *parent) : QFrame(parent)
 {
-	layout = new QVBoxLayout(this);
+	m_layout = new QVBoxLayout(this);
 
 	auto *tmpLayout = new QHBoxLayout;
 	tmpLayout->addWidget(new QLabel(tr("Nom : "), this));
@@ -25,7 +25,7 @@ RemoteConfigParamsFrame::RemoteConfigParamsFrame(QWidget *parent) : QFrame(paren
 	});
 	tmpLayout->addWidget(remoteName);
 
-	layout->addLayout(tmpLayout);
+	m_layout->addLayout(tmpLayout);
 
 
 }
@@ -47,7 +47,7 @@ void RemoteConfigParamsFrame::createUi()
 	tmpwidlay->addWidget(cancelBtn, Qt::AlignTop);
 	tmpwidlay->setAlignment(cancelBtn, Qt::AlignTop);
 
-	layout->addLayout(tmpwidlay);
+	m_layout->addLayout(tmpwidlay);
 
 	connect(logInBtn, &QPushButton::clicked, this, &RemoteConfigParamsFrame::addRemote);
 
@@ -64,8 +64,8 @@ void RemoteConfigParamsFrame::createUi()
 	QPalette p;
 	p.setColor(QPalette::WindowText, Qt::red);
 	messageLabel->setPalette(p);
-	layout->addWidget(messageLabel, Qt::AlignTop);
-	layout->setAlignment(messageLabel, Qt::AlignTop);
+	m_layout->addWidget(messageLabel, Qt::AlignTop);
+	m_layout->setAlignment(messageLabel, Qt::AlignTop);
 }
 
 void RemoteConfigParamsFrame::addRemote()
@@ -74,7 +74,7 @@ void RemoteConfigParamsFrame::addRemote()
 	{
 		remoteName->setStyleSheet("border: 1px solid red; border-radius: 5px;");
 		messageLabel->show();
-		messageLabel->setText(tr("Les champs en rouge sont obligatoires !"));
+		messageLabel->setText(tr("Les champs en rouge sont obligatoires !"));
 		return;
 	}
 

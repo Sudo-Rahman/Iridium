@@ -2,6 +2,7 @@
 // Created by sr-71 on 29/03/2023.
 //
 
+#include <QPropertyAnimation>
 #include "ListRemoteWidget.hpp"
 #include "../AddNewRemote/AddNewRemoteDialog.hpp"
 
@@ -19,7 +20,7 @@ ListRemoteWidget::ListRemoteWidget(QWidget *parent) : QScrollArea(parent)
 	setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
 
 	m_layout = new QVBoxLayout(widget);
-	m_layout->setAlignment(Qt::AlignTop | Qt::AlignCenter);
+	m_layout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
 	m_layout->setSpacing(10);
 	setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 	// padding
@@ -46,12 +47,15 @@ ListRemoteWidget::ListRemoteWidget(QWidget *parent) : QScrollArea(parent)
 	m_remoteLayout = new QVBoxLayout;
 	m_layout->addLayout(m_remoteLayout);
 
+
 	getAllRemote();
 
 	// no border
 	setFrameShape(QFrame::NoFrame);
 
+	m_width = QScrollArea::sizeHint().width();
 
+	setMaximumWidth(0);
 }
 
 /**
@@ -67,12 +71,18 @@ void ListRemoteWidget::getAllRemote()
 	{
 		auto *remote = new RemoteWidget({pair.first, stringToRemoteType.find(pair.second)->second,
 										}, this);
-		m_listRemote.append(remote);
-		m_remoteLayout->addWidget(remote);
+		m_listRemote << remote;
+	}
+
+	// ajout du local
+	auto *local = new RemoteWidget({"/", RemoteType::LocalHardDrive, "local"}, this);
+	m_listRemote.push_front(local);
+
+	for (auto *remote: m_listRemote)
+	{
 		connect(remote, &RemoteWidget::clicked, this, [this, remote]()
-		{
-			emit remoteClicked(remote);
-		});
+		{ emit remoteClicked(remote); });
+		m_remoteLayout->addWidget(remote);
 	}
 }
 
@@ -89,4 +99,15 @@ void ListRemoteWidget::searchRemote(const QString &name)
 		else
 			remote->hide();
 	}
+}
+
+void ListRemoteWidget::expand()
+{
+	auto animation = new QPropertyAnimation(this, "maximumWidth");
+	animation->setDuration(300);
+	animation->setStartValue(width());
+	animation->setEndValue(m_isExpand ? 0 : m_width);
+	animation->setEasingCurve(QEasingCurve::InOutQuad);
+	animation->start(QAbstractAnimation::DeleteWhenStopped);
+	m_isExpand = !m_isExpand;
 }
