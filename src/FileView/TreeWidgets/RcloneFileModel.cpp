@@ -32,3 +32,9 @@ const QModelIndex &RcloneFileModel::getRootIndex() const
 {
 	return m_root_index;
 }
+
+void RcloneFileModel::transferTo(const RcloneFilePtr &file, TreeFileItem *parent)
+{
+	auto newFile = std::make_shared<RcloneFile>(file->getName(), m_remoteInfo);
+
+}

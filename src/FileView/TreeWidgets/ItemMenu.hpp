@@ -16,6 +16,8 @@ private:
 	QAction *m_info{};
 	QAction *m_copy{};
 	QAction *m_paste{};
+	QAction *m_delete{};
+	QAction *m_newFolder{};
 
 
 public:
@@ -30,6 +32,10 @@ signals:
 	void pasted();
 
 	void info();
+
+	void deleted();
+
+	void newFolder();
 
 };
 

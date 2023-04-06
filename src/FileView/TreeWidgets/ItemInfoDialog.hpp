@@ -21,7 +21,6 @@ private:
 
 	RclonesManager m_manager{};
 
-	TreeFileItem *m_item{};
 	std::shared_ptr<RcloneFile> m_file{};
 	QLabel *m_icon{};
 	QLabel *m_name{};

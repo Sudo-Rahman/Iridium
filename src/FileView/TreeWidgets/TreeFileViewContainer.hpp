@@ -23,9 +23,18 @@ private:
 	QLabel *m_pathLabel{};
 
 public:
-	explicit TreeFileViewContainer(const RemoteInfoPtr &remoteInfo,QWidget *parent = nullptr);
+	explicit TreeFileViewContainer(const RemoteInfoPtr &remoteInfo, QWidget *parent = nullptr);
 
 	void changeRemote(const RemoteInfoPtr &remoteInfo);
+
+	void paste(TreeFileItem *item){ m_treeFileView->paste(item); }
+
+signals:
+
+	void fileCopied(TreeFileItem *);
+
+	void pasted(RcloneFilePtr);
+
 
 };
 

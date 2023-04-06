@@ -62,6 +62,8 @@ public:
 
 	void deleteRemote(const std::string &remote);
 
+	void deleteFile(const RcloneFile &file);
+
 	void listRemotes();
 
 	void size(const std::string &path);
@@ -100,8 +102,11 @@ signals:
 
 	void sizeFinished(uint32_t objs, uint64_t size, QString strSize);
 
+	void fileDeleted(int exit);
+
 
 };
+typedef std::shared_ptr<Rclone> RclonePtr;
 
 class RclonesManager
 {
@@ -111,16 +116,16 @@ class RclonesManager
 	unsigned nbMaxProcess{};
 	std::mutex mutex{};
 	std::condition_variable conditionVariable{};
-	std::vector<std::shared_ptr<Rclone>> rcloneVector{};
+	std::vector<RclonePtr> rcloneVector{};
 
 public:
 	explicit RclonesManager(unsigned nbMaxProcess);
 
 	explicit RclonesManager();
 
-	std::shared_ptr<Rclone> get();
+	RclonePtr get();
 
-	void allTerminate();
+	void release(RclonePtr rclone);
 
 	boost::signals2::signal<void()> allFinished;
 
@@ -130,6 +135,6 @@ private:
 	void finished();
 
 };
-
+typedef std::shared_ptr<RclonesManager> RclonesManagerPtr;
 
 #endif //IRIDIUM_RCLONE_HPP

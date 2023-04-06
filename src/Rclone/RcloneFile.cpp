@@ -22,14 +22,15 @@ void RcloneFile::init()
 }
 
 
-RcloneFile::RcloneFile(const QString &pathFile,const RemoteInfoPtr &remoteInfo)
+RcloneFile::RcloneFile(const QString &pathFile, const RemoteInfoPtr &remoteInfo)
 {
 	m_remoteInfo = remoteInfo;
 	setPath(pathFile);
 	init();
 }
 
-RcloneFile::RcloneFile(const QString &pathFile, uint64_t size, bool isDir, QDateTime modTime, const RemoteInfoPtr &remoteInfo)
+RcloneFile::RcloneFile(const QString &pathFile, uint64_t size, bool isDir, QDateTime modTime,
+					   const RemoteInfoPtr &remoteInfo)
 	: size(size), isDirectory(isDir), modTime(std::move(modTime))
 {
 	m_remoteInfo = remoteInfo;

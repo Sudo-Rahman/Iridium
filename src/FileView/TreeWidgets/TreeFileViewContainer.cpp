@@ -43,10 +43,13 @@ TreeFileViewContainer::TreeFileViewContainer(const RemoteInfoPtr &remoteInfo, QW
 	{
 		m_pathLabel->setToolTip(path);
 		QFontMetrics metrix(m_pathLabel->font());
-		int width = m_pathLabel->width()-5;
+		int width = m_pathLabel->width() - 5;
 		auto clippedText = metrix.elidedText(path, Qt::ElideRight, width);
 		m_pathLabel->setText(clippedText);
 	});
+
+	connect(m_treeFileView, &TreeFileView::fileCopied, this, [this](TreeFileItem *item)
+	{emit fileCopied(item);});
 
 }
 

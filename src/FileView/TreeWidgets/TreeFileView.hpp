@@ -24,6 +24,8 @@ Q_OBJECT
 	QList<QModelIndex> indexTop{};
 	RemoteInfoPtr m_remoteInfo{};
 
+	RclonesManager m_rclonesManager{};
+
 public:
 	explicit TreeFileView(const RemoteInfoPtr &remoteInfo, QWidget *parent = nullptr);
 
@@ -33,8 +35,18 @@ public:
 
 	void changeRemote(const RemoteInfoPtr &info);
 
+	void paste(TreeFileItem *item);
+
+	void deleteFile(const QList<TreeFileItem *> &items);
+
+	void removeItem(TreeFileItem *item);
+
+
 protected:
 	void resizeEvent(QResizeEvent *event) override;
+
+	virtual void keyPressEvent(QKeyEvent *event) override;
+
 
 protected slots:
 
@@ -46,12 +58,20 @@ protected slots:
 
 private:
 	void setModel(RcloneFileModel *model);
+
 	QString getPath();
+
+	QList<TreeFileItem *> getSelectedItems();
+
+	void connectSignals();
 
 signals:
 
-	void pathChanged(const QString &path);
+	void pathChanged(const QString &);
 
+	void fileCopied(TreeFileItem *);
+
+	void pasted(const RcloneFilePtr &);
 
 };
 

@@ -23,9 +23,10 @@ protected:
 
 	explicit RcloneFileModel(const RemoteInfoPtr &remoteInfo, QObject *parent = nullptr);
 
-
 public:
 	virtual void addItem(const RcloneFilePtr &file, TreeFileItem *parent) = 0;
+
+	void transferTo(const RcloneFilePtr &file, TreeFileItem *parent);
 
 	[[nodiscard]] const QModelIndex &getRootIndex() const;
 

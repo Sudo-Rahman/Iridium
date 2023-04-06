@@ -12,21 +12,30 @@
 class TreeFileItem : public QStandardItem
 {
 protected:
-	std::shared_ptr<RcloneFile> file{};
+	RcloneFilePtr file{};
 	TreeFileItem *parent{};
+	QList<TreeFileItem *> children{};
 
 public:
 	explicit TreeFileItem(TreeFileItem * = nullptr);
 
-	explicit TreeFileItem(const QString& path, const RemoteInfoPtr  &remoteInfo, TreeFileItem * = nullptr);
+	explicit TreeFileItem(const QString &path, const RemoteInfoPtr &remoteInfo, TreeFileItem * = nullptr);
 
-	explicit TreeFileItem(const QString& path,const std::shared_ptr<RcloneFile> &file , TreeFileItem * = nullptr);
+	explicit TreeFileItem(const QString &path, const std::shared_ptr<RcloneFile> &file, TreeFileItem * = nullptr,
+						  bool initIco = false);
 
 	[[nodiscard]] const std::shared_ptr<RcloneFile> &getFile() const;
 
 	[[nodiscard]] TreeFileItem *getParent() const;
 
+	[[nodiscard]] const QList<TreeFileItem *> &getChildren() const
+	{ return children; }
+
+	void addChild(TreeFileItem *child)
+	{ children << child; }
+
 protected:
+
 	void initIcon();
 
 };

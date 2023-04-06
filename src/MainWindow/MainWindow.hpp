@@ -6,9 +6,9 @@
 #define IRIDIUM_MAINWINDOW_HPP
 
 #include <QMainWindow>
-#include <QProgressBar>
 #include <QCoreApplication>
 #include <QSettings>
+#include <QLayout>
 #include "../Rclone/Rclone.hpp"
 #include "../Remote/ListRemote/ListRemoteWidget.hpp"
 #include "../FileView/FileViewWidget.hpp"
@@ -18,11 +18,13 @@
 class MainWindow : public QMainWindow
 {
 Q_OBJECT
+
 	QList<RemoteWidget *> m_listRemote{};
 	ToolBar *m_toolBar{};
 	ListRemoteWidget *m_listRemoteWidget{};
 	FileViewWidget *m_fileViewWidget{};
-
+	QHBoxLayout *m_layout{};
+	QVBoxLayout *m_mainLayout{};
 
 public:
 	explicit MainWindow(QWidget *parent = nullptr);

@@ -66,14 +66,15 @@ void Rclone::lsJson(const string &path)
 }
 
 /**
- * @brief upload d'un fichier local src vers la destination dest.
+ * @brief Upload d'un fichier local src vers la destination dest.
  * @param src
  * @param dest
  */
 void Rclone::copyTo(const RcloneFile &src, const RcloneFile &dest)
 {
 	vector<string> arguments(
-		{"copyto", src.getPath().toStdString(), dest.getPath().toStdString() + src.getName().toStdString(), "-P"});
+		{"copyto", src.getPath().toStdString(), dest.getPath().toStdString() + "/" + src.getName().toStdString(),
+		 "-P"});
 
 	readyRead.connect(
 		[=](const string &data)
@@ -85,13 +86,29 @@ void Rclone::copyTo(const RcloneFile &src, const RcloneFile &dest)
 				erase_if(l1, [](const auto &item)
 				{ return item == "" or item == "\t" or item == ","; });
 				if (l1.size() > 11)
-					emit copyProgress(l1[11].remove("%").toInt());
+				{
+					if (l1[11].remove("%").toInt() != 100)
+						emit copyProgress(l1[11].remove("%").toInt());
+				}
 			}
 		});
 	execute(arguments);
 	finished.connect([=](int ex)
 					 { emit copyProgress(100); });
+}
 
+
+/**
+ * @brief Rclone::deleteFile, supprime un fichier
+ * @param file
+ */
+void Rclone::deleteFile(const RcloneFile &file)
+{
+	finished.connect(
+		[=](const int exit)
+		{ emit fileDeleted(exit); });
+	if (!file.isDir())
+		execute({"deletefile", file.getPath().toStdString() ,"-v"});
 }
 
 
@@ -140,7 +157,7 @@ void Rclone::listRemotes()
 				for (auto &str: data)
 				{
 					str.remove(" ");
-					map.insert({str.split(":")[0].toStdString() +":", str.split(":")[1].toStdString()});
+					map.insert({str.split(":")[0].toStdString() + ":", str.split(":")[1].toStdString()});
 				}
 				m_mapData = map;
 				listRemotesFinished(map);
@@ -297,7 +314,7 @@ RclonesManager::RclonesManager() : nbMaxProcess(thread::hardware_concurrency())
  * @brief RclonesManager::get, retourne un pointeur vers un rclone
  * @return un pointeur vers un rclone
  */
-std::shared_ptr<Rclone> RclonesManager::get()
+RclonePtr RclonesManager::get()
 {
 	rcloneVector.push_back(make_shared<Rclone>(this));
 	return rcloneVector.back();
@@ -325,4 +342,12 @@ void RclonesManager::finished()
 	conditionVariable.notify_one();
 	if (nb_rclones == 0 and rcloneVector.size() > 1)
 		allFinished();
+}
+
+/**
+ * @brief RclonesManager::finished, un processus rclone appel cette fonction lorsqu'il se termine, pour notifier le manager
+ */
+void RclonesManager::release(RclonePtr rclone)
+{
+	rcloneVector.erase(std::remove(rcloneVector.begin(), rcloneVector.end(), rclone), rcloneVector.end());
 }

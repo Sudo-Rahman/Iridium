@@ -7,11 +7,14 @@
 #include <QDirIterator>
 #include <QThread>
 #include <boost/filesystem.hpp>
+#include <QPropertyAnimation>
 
 namespace fs = boost::filesystem;
 
-ItemInfoDialog::ItemInfoDialog(TreeFileItem *item, QWidget *parent) : QDialog(parent), m_item(item)
+ItemInfoDialog::ItemInfoDialog(TreeFileItem *item, QWidget *parent) : QDialog(parent)
 {
+	// delete on close
+	setAttribute(Qt::WA_DeleteOnClose);
 	m_file = item->getFile();
 	setMaximumSize(500, 600);
 	setMinimumWidth(300);
@@ -193,4 +196,3 @@ void ItemInfoDialog::initType()
 	row++;
 
 }
-

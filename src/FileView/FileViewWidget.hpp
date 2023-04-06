@@ -7,6 +7,7 @@
 
 #include "TreeWidgets/TreeFileViewContainer.hpp"
 #include <QLayout>
+#include <QProgressBar>
 
 class FileViewWidget : public QWidget
 {
@@ -17,12 +18,24 @@ private:
 	TreeFileViewContainer *m_treeFileView2{};
 	QHBoxLayout *m_layout{};
 
+	RclonesManager m_rclonesManager{};
+
 	uint8_t m_currentView{};
 
+	TreeFileItem *m_currentFile{};
+
 public:
-	explicit FileViewWidget(const RemoteInfo& remoteInfo,QWidget *parent = nullptr);
+	explicit FileViewWidget(const RemoteInfo &remoteInfo, QWidget *parent = nullptr);
 
 	void changeRemote(const RemoteInfoPtr &);
+
+private:
+	void copyTo(const QList<QPair<RcloneFilePtr, RcloneFilePtr>> &lst, TreeFileViewContainer *view);
+
+
+signals:
+
+	void progressBarCreated(QProgressBar *progressBar);
 
 };
 
