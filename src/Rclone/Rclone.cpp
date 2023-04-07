@@ -109,6 +109,8 @@ void Rclone::deleteFile(const RcloneFile &file)
 		{ emit fileDeleted(exit); });
 	if (!file.isDir())
 		execute({"deletefile", file.getPath().toStdString() ,"-v"});
+	else
+		execute({"purge", file.getPath().toStdString() ,"-v"});
 }
 
 

@@ -22,7 +22,7 @@ private:
 
 	uint8_t m_currentView{};
 
-	TreeFileItem *m_currentFile{};
+	QList<TreeFileItem *> m_currentFileList{};
 
 public:
 	explicit FileViewWidget(const RemoteInfo &remoteInfo, QWidget *parent = nullptr);
@@ -30,7 +30,7 @@ public:
 	void changeRemote(const RemoteInfoPtr &);
 
 private:
-	void copyTo(const QList<QPair<RcloneFilePtr, RcloneFilePtr>> &lst, TreeFileViewContainer *view);
+	void copyTo(const QPair<QList<RcloneFilePtr>, RcloneFilePtr> &lst, TreeFileViewContainer *view);
 
 
 signals:

@@ -12,7 +12,18 @@
 #include "RcloneProxy.hpp"
 #include "ItemInfoDialog.hpp"
 #include <QEvent>
+#include <QItemDelegate>
+#include <QPainter>
 
+class MyItemDelegate : public QItemDelegate
+{
+public:
+	MyItemDelegate(QObject *parent = nullptr) : QItemDelegate(parent)
+	{}
+
+	[[nodiscard]] QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override
+	{ return {30, 30}; }
+};
 
 TreeFileView::TreeFileView(const RemoteInfoPtr &remoteInfo, QWidget *parent) : QTreeView(parent)
 {
@@ -33,7 +44,8 @@ TreeFileView::TreeFileView(const RemoteInfoPtr &remoteInfo, QWidget *parent) : Q
 	header()->setSortIndicatorShown(true);
 	header()->setStretchLastSection(false);
 
-
+	// set row height
+	setItemDelegateForColumn(0, new MyItemDelegate(this));
 	//set focus only window
 	setFocusPolicy(Qt::StrongFocus);
 
@@ -146,6 +158,8 @@ void TreeFileView::mouseReleaseEvent(QMouseEvent *event)
 	{
 		ItemMenu menu(this);
 		auto lisItem = getSelectedItems();
+		if(getSelectedItems(true).isEmpty() and getPath().isEmpty())
+			return;
 
 		connect(&menu, &ItemMenu::info, this, [&menu, lisItem, this]()
 		{
@@ -159,12 +173,12 @@ void TreeFileView::mouseReleaseEvent(QMouseEvent *event)
 
 		connect(&menu, &ItemMenu::copyed, this, [this, lisItem]()
 		{
-			qDebug() << lisItem.first()->getFile()->getName();
-			emit fileCopied(lisItem.first());
+//			qDebug() << lisItem.first()->getFile()->getName();
+			emit fileCopied(lisItem);
 		});
 		connect(&menu, &ItemMenu::pasted, this, [this, lisItem]()
 		{
-			qDebug() << lisItem.first()->getFile()->getPath();
+//			qDebug() << lisItem.first()->getFile()->getPath();
 			emit pasted(lisItem.first()->getFile());
 		});
 		connect(&menu, &ItemMenu::deleted, this, [this, lisItem]()
@@ -176,7 +190,7 @@ void TreeFileView::mouseReleaseEvent(QMouseEvent *event)
 				auto *item = dynamic_cast<TreeFileItem *>(static_cast<QStandardItem *>(model->itemFromIndex(
 					index)));
 				lst << item;
-				qDebug() << item->getFile()->getPath();
+//				qDebug() << item->getFile()->getPath();
 			}
 			deleteFile(lst);
 		});
@@ -205,26 +219,31 @@ QString TreeFileView::getPath()
 	return item->getFile()->getPath();
 }
 
-void TreeFileView::paste(TreeFileItem *item)
+void TreeFileView::paste(const QList<TreeFileItem *> &items)
 {
-	if (item == nullptr)
-		return;
-	auto treePaste = getSelectedItems().first();
-	if (!treePaste->getFile()->isDir())
-		return;
-	RcloneFilePtr newFile = std::make_shared<RcloneFile>(
-		treePaste->getFile()->getPath() + "/" + item->getFile()->getName(),
-		item->getFile()->getSize(),
-		item->getFile()->isDir(),
-		item->getFile()->getModTime(),
-		m_remoteInfo
-	);
-	auto *treeItem = new TreeFileItem(newFile->getName(), newFile, treePaste, true);
-	auto list = RcloneFileModel::getItemList(treeItem);
-	treePaste->appendRow(list);
+	for (const auto item: items)
+	{
+		if (item == nullptr)
+			return;
+		auto treePaste = getSelectedItems().first();
+		if (!treePaste->getFile()->isDir())
+			return;
+		RcloneFilePtr newFile = std::make_shared<RcloneFile>(
+			treePaste->getFile()->getPath() + "/" + item->getFile()->getName(),
+			item->getFile()->getSize(),
+			item->getFile()->isDir(),
+			item->getFile()->getModTime(),
+			m_remoteInfo
+		);
+		auto *treeItem = new TreeFileItem(newFile->getName(), newFile, nullptr, true);
+		auto list = RcloneFileModel::getItemList(treeItem);
+		if (newFile->isDir())
+			treeItem->appendRow({});
+		treePaste->appendRow(list);
+	}
 }
 
-QList<TreeFileItem *> TreeFileView::getSelectedItems()
+QList<TreeFileItem *> TreeFileView::getSelectedItems(bool can_be_empty)
 {
 	QList<TreeFileItem *> lst;
 	for (int i = 0; i < QTreeView::selectedIndexes().length(); i = i + 4)
@@ -233,6 +252,8 @@ QList<TreeFileItem *> TreeFileView::getSelectedItems()
 		auto *item = dynamic_cast<TreeFileItem *>(static_cast<QStandardItem *>(model->itemFromIndex(index)));
 		lst << item;
 	}
+	if (can_be_empty)
+		return lst;
 	if (lst.isEmpty())
 	{
 		auto index = QTreeView::rootIndex();
@@ -252,6 +273,15 @@ QList<TreeFileItem *> TreeFileView::getSelectedItems()
 
 void TreeFileView::keyPressEvent(QKeyEvent *event)
 {
+	if(getSelectedItems(true).isEmpty() and getPath().isEmpty())
+		return;
+	if (QKeySequence(event->modifiers() | event->key()).matches(QKeySequence::Copy))
+		emit fileCopied(getSelectedItems());
+	if (QKeySequence(event->modifiers() | event->key()).matches(QKeySequence::Paste))
+		emit pasted(getSelectedItems().first()->getFile());
+	if (QKeySequence(event->modifiers() | event->key()).matches(Qt::CTRL + Qt::Key_Backspace))
+		deleteFile(getSelectedItems(true));
+
 	switch (event->key())
 	{
 		case Qt::Key_Space:
@@ -265,38 +295,12 @@ void TreeFileView::keyPressEvent(QKeyEvent *event)
 			}
 		}
 			break;
-		case Qt::Key_C:
-		{
-			emit fileCopied(getSelectedItems().first());
-		}
-			break;
-		case Qt::Key_V:
-			emit pasted(getSelectedItems().first()->getFile());
-			break;
-		case Qt::Key_Delete:
-			deleteFile(
-				[=]()
-				{
-					QList<TreeFileItem *> lst;
-					for (int i = 0; i < QTreeView::selectedIndexes().length(); i = i + 4)
-					{
-						auto index = QTreeView::selectedIndexes().at(i);
-						auto *item = dynamic_cast<TreeFileItem *>(static_cast<QStandardItem *>(model->itemFromIndex(
-							index)));
-						lst << item;
-					}
-					return lst;
-				}()
-			);
-			break;
 		case Qt::Key_Left:
 			back();
 			break;
 		case Qt::Key_Right:
 			front();
 			break;
-		default:
-			QTreeView::keyPressEvent(event);
 	}
 }
 
@@ -309,7 +313,22 @@ void TreeFileView::deleteFile(const QList<TreeFileItem *> &items)
 			lst << item->getFile()->getName();
 		return lst;
 	}();
+	if (files.isEmpty())
+		return;
+	auto *msgb = new QMessageBox(QMessageBox::Question, tr("Suppression"),
+								 tr("Suppression de ") + QString::number(files.size()) + tr(" fichiers"),
+								 QMessageBox::Yes | QMessageBox::No, this);
 
+	msgb->setDefaultButton(QMessageBox::No);
+	msgb->setDetailedText(files.join("\n"));
+	msgb->setInformativeText(tr("Cette action est irréversible"));
+	msgb->exec();
+	if (msgb->result() == QMessageBox::No)
+	{
+		msgb->deleteLater();
+		return;
+	}
+	msgb->deleteLater();
 	for (auto item: items)
 	{
 		auto rclone = m_rclonesManager.get();

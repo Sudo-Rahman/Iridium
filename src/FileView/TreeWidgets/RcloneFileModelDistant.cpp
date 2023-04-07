@@ -54,10 +54,7 @@ void RcloneFileModelDistant::addItemDynamic(const QString &path, TreeFileItem *p
 			if (item->getFile()->isDir())
 				item->appendRow({new QStandardItem, new QStandardItem, new QStandardItem, new QStandardItem});
 		}
-		if (not doc.array().isEmpty())
-			tree_item->removeRow(0);
-		else
-			tree_item->child(0, 0)->setText("∅");
+		tree_item->removeRow(0);
 	});
 	if (tree_item->rowCount() == 1)
 	{

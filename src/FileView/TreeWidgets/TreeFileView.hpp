@@ -35,7 +35,7 @@ public:
 
 	void changeRemote(const RemoteInfoPtr &info);
 
-	void paste(TreeFileItem *item);
+	void paste(const QList<TreeFileItem *> &);
 
 	void deleteFile(const QList<TreeFileItem *> &items);
 
@@ -61,7 +61,7 @@ private:
 
 	QString getPath();
 
-	QList<TreeFileItem *> getSelectedItems();
+	QList<TreeFileItem *> getSelectedItems(bool can_be_empty = false);
 
 	void connectSignals();
 
@@ -69,7 +69,7 @@ signals:
 
 	void pathChanged(const QString &);
 
-	void fileCopied(TreeFileItem *);
+	void fileCopied(const QList<TreeFileItem *> &);
 
 	void pasted(const RcloneFilePtr &);
 

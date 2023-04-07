@@ -27,14 +27,8 @@ public:
 
 	void changeRemote(const RemoteInfoPtr &remoteInfo);
 
-	void paste(TreeFileItem *item){ m_treeFileView->paste(item); }
-
-signals:
-
-	void fileCopied(TreeFileItem *);
-
-	void pasted(RcloneFilePtr);
-
+	[[nodiscard]] TreeFileView *treeFileView() const
+	{ return m_treeFileView; }
 
 };
 

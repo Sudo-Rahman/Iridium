@@ -37,8 +37,7 @@ void RcloneFileModelLocal::addItem(const RcloneFilePtr &file, TreeFileItem *pare
 					if (info.isDir())
 						item->appendRow({});
 				}
-				if (not list_file.isEmpty())
-					tree_item->removeRow(0);
+				tree_item->removeRow(0);
 			}
 		});
 	m_thread->start(QThread::HighestPriority);

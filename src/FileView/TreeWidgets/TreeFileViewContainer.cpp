@@ -48,8 +48,6 @@ TreeFileViewContainer::TreeFileViewContainer(const RemoteInfoPtr &remoteInfo, QW
 		m_pathLabel->setText(clippedText);
 	});
 
-	connect(m_treeFileView, &TreeFileView::fileCopied, this, [this](TreeFileItem *item)
-	{emit fileCopied(item);});
 
 }
 

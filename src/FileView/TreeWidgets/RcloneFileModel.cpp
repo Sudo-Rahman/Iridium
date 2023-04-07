@@ -24,7 +24,7 @@ QList<QStandardItem *> RcloneFileModel::getItemList(TreeFileItem *item)
 		item,
 		new TreeFileItem(item->getFile()->getSizeString(), item->getFile(), item),
 		new TreeFileItem(item->getFile()->getModTimeString(), item->getFile(), item),
-		new TreeFileItem(item->getFile()->getIsDirString(), item->getFile(), item)
+		new TreeFileItem(item->getFile()->getFileType(), item->getFile(), item)
 	};
 }
 

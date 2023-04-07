@@ -5,6 +5,7 @@
 #include "RcloneFile.hpp"
 
 #include <cmath>
+#include <QMimeDatabase>
 #include "../Utility/Utility.hpp"
 
 void RcloneFile::init()
@@ -136,5 +137,19 @@ void RcloneFile::setObjs(uint32_t objs)
 std::shared_ptr<RemoteInfo> RcloneFile::getRemoteInfo() const
 {
 	return m_remoteInfo;
+}
+
+QString RcloneFile::getFileType() const
+{
+	if (isDirectory)
+		return tr("Dossier");
+	auto mime = QMimeDatabase().mimeTypeForFile(getPath());
+	if (mime.name() != "application/octet-stream")
+	{
+		auto type = mime.comment();
+		type.front() = type.front().toUpper();
+		return type;
+	} else
+		return tr("Document ") + QFileInfo(getPath()).suffix().toUpper();
 }
 

@@ -18,23 +18,28 @@ FileViewWidget::FileViewWidget(const RemoteInfo &remoteInfo, QWidget *parent) : 
 
 	changeRemote(std::make_shared<RemoteInfo>(RemoteInfo("/", RemoteType::LocalHardDrive)));
 
-	connect(m_treeFileView1, &TreeFileViewContainer::fileCopied, this, [this](TreeFileItem *item)
-	{m_currentFile = item;});
-	connect(m_treeFileView2, &TreeFileViewContainer::fileCopied, this, [this](TreeFileItem *item)
-	{ m_currentFile = item; });
-	connect(m_treeFileView1, &TreeFileViewContainer::pasted, this, [this](const RcloneFilePtr &file)
+	connect(m_treeFileView1->treeFileView(), &TreeFileView::fileCopied, this, [this](const QList<TreeFileItem *> &lst)
+	{ m_currentFileList = lst; });
+	connect(m_treeFileView2->treeFileView(), &TreeFileView::fileCopied, this, [this](const QList<TreeFileItem *> &lst)
+	{ m_currentFileList = lst; });
+	connect(m_treeFileView1->treeFileView(), &TreeFileView::pasted, this, [this](const RcloneFilePtr &file)
 	{
-		if (m_currentFile == nullptr)
+		if (m_currentFileList.empty())
 			return;
-		copyTo({{m_currentFile->getFile(), file}}, m_treeFileView1);
+		QList<RcloneFilePtr> lst;
+		for (auto item: m_currentFileList)
+			lst << item->getFile();
+		copyTo({lst, file}, m_treeFileView1);
 	});
-	connect(m_treeFileView2, &TreeFileViewContainer::pasted, this, [this](const RcloneFilePtr &file)
+	connect(m_treeFileView2->treeFileView(), &TreeFileView::pasted, this, [this](const RcloneFilePtr &file)
 	{
-		if (m_currentFile == nullptr)
+		if (m_currentFileList.empty())
 			return;
-		copyTo({{m_currentFile->getFile(), file}}, m_treeFileView2);
+		QList<RcloneFilePtr> lst;
+		for (auto item: m_currentFileList)
+			lst << item->getFile();
+		copyTo({lst, file}, m_treeFileView2);
 	});
-
 }
 
 void FileViewWidget::changeRemote(const RemoteInfoPtr &remoteInfo)
@@ -50,9 +55,9 @@ void FileViewWidget::changeRemote(const RemoteInfoPtr &remoteInfo)
 	}
 }
 
-void FileViewWidget::copyTo(const QList<QPair<RcloneFilePtr, RcloneFilePtr>> &lst, TreeFileViewContainer *view)
+void FileViewWidget::copyTo(const QPair<QList<RcloneFilePtr>, RcloneFilePtr> &pair, TreeFileViewContainer *view)
 {
-	for (const auto &pair: lst)
+	for (const auto &file: pair.first)
 	{
 		auto progress = new QProgressBar;
 		progress->setRange(0, 100);
@@ -63,11 +68,11 @@ void FileViewWidget::copyTo(const QList<QPair<RcloneFilePtr, RcloneFilePtr>> &ls
 			progress->setValue(p);
 			if (p == 100)
 			{
-				view->paste(m_currentFile);
+				view->treeFileView()->paste(m_currentFileList);
 				m_rclonesManager.release(rclone);
 			}
 		});
-		rclone->copyTo(pair.first.operator*(), pair.second.operator*());
+		rclone->copyTo(file.operator*(), pair.second.operator*());
 		emit progressBarCreated(progress);
 	}
 }
