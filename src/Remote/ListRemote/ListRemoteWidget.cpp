@@ -29,7 +29,7 @@ ListRemoteWidget::ListRemoteWidget(QWidget *parent) : QScrollArea(parent)
 
 	auto *toplayout = new QHBoxLayout;
 
-	m_add = new QPushButton("+");
+	m_add = new RoundedButton("+");
 	m_add->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	connect(m_add, &QPushButton::clicked, this, [this]()
 	{
@@ -89,7 +89,7 @@ void ListRemoteWidget::getAllRemote()
 	for (auto *remote: m_listRemote)
 	{
 		connect(remote, &RemoteWidget::clicked, this, [this, remote]()
-		{ emit remoteClicked(remote); });
+		{ emit remoteClicked(remote);});
 		m_remoteLayout->addWidget(remote);
 	}
 }

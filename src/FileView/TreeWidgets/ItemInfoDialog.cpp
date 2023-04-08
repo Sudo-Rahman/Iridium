@@ -6,10 +6,7 @@
 #include "../../Utility/Utility.hpp"
 #include <QDirIterator>
 #include <QThread>
-#include <boost/filesystem.hpp>
 #include <QPropertyAnimation>
-
-namespace fs = boost::filesystem;
 
 ItemInfoDialog::ItemInfoDialog(TreeFileItem *item, QWidget *parent) : QDialog(parent)
 {
@@ -189,7 +186,7 @@ void ItemInfoDialog::loading()
 void ItemInfoDialog::initType()
 {
 	m_layout->addWidget(new QLabel(tr("Type: ")), row, 0, 1, 1);
-	m_type = new QLabel(m_file->getIsDirString(), this);
+	m_type = new QLabel(m_file->getFileType(), this);
 	m_type->setWordWrap(true);
 	m_type->setAlignment(Qt::AlignLeft);
 	m_layout->addWidget(m_type, row, 1, 1, 1);

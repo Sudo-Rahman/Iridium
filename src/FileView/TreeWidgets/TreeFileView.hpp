@@ -37,16 +37,13 @@ public:
 
 	void paste(const QList<TreeFileItem *> &);
 
-	void deleteFile(const QList<TreeFileItem *> &items);
-
-	void removeItem(TreeFileItem *item);
+	void reload();
 
 
 protected:
 	void resizeEvent(QResizeEvent *event) override;
 
 	virtual void keyPressEvent(QKeyEvent *event) override;
-
 
 protected slots:
 
@@ -64,6 +61,12 @@ private:
 	QList<TreeFileItem *> getSelectedItems(bool can_be_empty = false);
 
 	void connectSignals();
+
+	void deleteFile(const QList<TreeFileItem *> &items);
+
+	void removeItem(TreeFileItem *item);
+
+	bool fileIsInFolder(const RcloneFilePtr &, TreeFileItem *folder);
 
 signals:
 

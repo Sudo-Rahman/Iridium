@@ -9,6 +9,7 @@
 #include <QEvent>
 #include <QPropertyAnimation>
 #include <utility>
+#include <QGraphicsDropShadowEffect>
 
 RemoteWidget::RemoteWidget(const RemoteInfo &remoteInfo, QWidget *parent) : QGroupBox(parent),
 																			m_remoteInfo(std::move(
@@ -24,7 +25,7 @@ void RemoteWidget::paintEvent(QPaintEvent *event)
 	painter.setRenderHint(QPainter::Antialiasing);
 
 	painter.setPen(QGroupBox::palette().color(QPalette::Light));
-	m_hover ? painter.setBrush(QGroupBox::palette().color(QPalette::Window)) : painter.setBrush(
+	m_click ? painter.setBrush(QGroupBox::palette().color(QPalette::Window)) : painter.setBrush(
 		QGroupBox::palette().color(QPalette::Light));
 
 	// draw rounded rect
@@ -42,18 +43,22 @@ bool RemoteWidget::event(QEvent *event)
 		// mouse hover repaint
 		case QEvent::Enter:
 			m_hover = true;
-			repaint();
+			addBlur();
 			break;
 		case QEvent::Leave:
 			m_hover = false;
-			repaint();
+			addBlur();
 			break;
 		case QEvent::MouseButtonPress:
 			// change cursor
+			m_click = true;
+			repaint();
 			setCursor(Qt::PointingHandCursor);
 			break;
 		case QEvent::MouseButtonRelease:
 			// change cursor
+			m_click = false;
+			repaint();
 			setCursor(Qt::ArrowCursor);
 			emit clicked(this);
 			break;
@@ -61,6 +66,22 @@ bool RemoteWidget::event(QEvent *event)
 			break;
 	}
 	return QGroupBox::event(event);
+}
+
+void RemoteWidget::addBlur()
+{
+	// if not hover remove effect
+	if (!m_hover)
+	{
+		this->setGraphicsEffect(nullptr);
+		return;
+	}
+	// resize effect
+	auto effect = new QGraphicsDropShadowEffect(this);
+	effect->setBlurRadius(20);
+	effect->setOffset(0, 0);
+	effect->setColor(QWidget::palette().color(QPalette::Dark));
+	this->setGraphicsEffect(effect);
 }
 
 const RemoteInfoPtr &RemoteWidget::remoteInfo() const

@@ -23,6 +23,7 @@ protected:
 	QLabel *m_selected{};
 
 	bool m_hover{};
+	bool m_click{};
 
 protected:
 	void paintEvent(QPaintEvent *event) override;
@@ -31,6 +32,8 @@ protected:
 
 private:
 	void init();
+
+	void addBlur();
 
 public:
 	explicit RemoteWidget(const RemoteInfo& remoteInfo, QWidget *parent = nullptr);

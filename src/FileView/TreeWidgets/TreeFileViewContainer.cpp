@@ -4,6 +4,11 @@
 
 #include "TreeFileViewContainer.hpp"
 
+/**
+ * @brief Construct a new Tree File View Container:: Tree File View Container object
+ * @param remoteInfo
+ * @param parent
+ */
 TreeFileViewContainer::TreeFileViewContainer(const RemoteInfoPtr &remoteInfo, QWidget *parent)
 {
 	m_layout = new QVBoxLayout(this);
@@ -15,23 +20,29 @@ TreeFileViewContainer::TreeFileViewContainer(const RemoteInfoPtr &remoteInfo, QW
 	btnLayout->setContentsMargins(0, 0, 0, 0);
 	m_layout->addLayout(btnLayout);
 
-	m_backButton = new QPushButton("<", this);
+	m_backButton = new RoundedButton("<", this);
 	m_backButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	btnLayout->addWidget(m_backButton);
 
-	m_frontButton = new QPushButton(">", this);
+	m_frontButton = new RoundedButton(">", this);
 	m_frontButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	btnLayout->addWidget(m_frontButton);
+
+	m_refreshButton = new RoundedButton("↻", this);
+	m_refreshButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	btnLayout->addWidget(m_refreshButton);
+
 
 	m_pathLabel = new QLabel(this);
 	m_pathLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 	m_pathLabel->setAlignment(Qt::AlignLeft);
+	m_pathLabel->setContentsMargins(10, 0, 0, 0);
 	// toolTip is used to show the full path
 	m_pathLabel->setMouseTracking(true);
 	btnLayout->addWidget(m_pathLabel);
 
 	btnLayout->setAlignment(Qt::AlignLeft);
-	btnLayout->setSpacing(10);
+	btnLayout->setSpacing(0);
 
 	m_treeFileView = new TreeFileView(remoteInfo, this);
 	m_layout->addWidget(m_treeFileView);
@@ -48,10 +59,6 @@ TreeFileViewContainer::TreeFileViewContainer(const RemoteInfoPtr &remoteInfo, QW
 		m_pathLabel->setText(clippedText);
 	});
 
+	connect(m_refreshButton, &QPushButton::clicked, m_treeFileView, &TreeFileView::reload);
 
-}
-
-void TreeFileViewContainer::changeRemote(const RemoteInfoPtr &remoteInfo)
-{
-	m_treeFileView->changeRemote(remoteInfo);
 }

@@ -10,6 +10,8 @@
 #include <QPushButton>
 #include <QLabel>
 
+#include "../../Other/RoundedButton.hpp"
+
 
 class TreeFileViewContainer : public QWidget
 {
@@ -18,18 +20,14 @@ Q_OBJECT
 private:
 	TreeFileView *m_treeFileView{};
 	QVBoxLayout *m_layout{};
-	QPushButton *m_backButton{};
-	QPushButton *m_frontButton{};
+	RoundedButton *m_backButton{}, *m_frontButton{}, *m_refreshButton{};
 	QLabel *m_pathLabel{};
 
 public:
 	explicit TreeFileViewContainer(const RemoteInfoPtr &remoteInfo, QWidget *parent = nullptr);
 
-	void changeRemote(const RemoteInfoPtr &remoteInfo);
-
 	[[nodiscard]] TreeFileView *treeFileView() const
 	{ return m_treeFileView; }
-
 };
 
 

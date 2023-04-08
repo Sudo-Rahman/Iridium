@@ -46,11 +46,11 @@ void FileViewWidget::changeRemote(const RemoteInfoPtr &remoteInfo)
 {
 	if (m_currentView == 0)
 	{
-		m_treeFileView2->changeRemote(remoteInfo);
+		m_treeFileView2->treeFileView()->changeRemote(remoteInfo);
 		m_currentView = 1;
 	} else
 	{
-		m_treeFileView1->changeRemote(remoteInfo);
+		m_treeFileView1->treeFileView()->changeRemote(remoteInfo);
 		m_currentView = 0;
 	}
 }
