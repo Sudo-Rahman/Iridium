@@ -50,11 +50,11 @@ TreeFileViewContainer::TreeFileViewContainer(const RemoteInfoPtr &remoteInfo, QW
 
 	connect(m_backButton, &QPushButton::clicked, m_treeFileView, &TreeFileView::back);
 	connect(m_frontButton, &QPushButton::clicked, m_treeFileView, &TreeFileView::front);
-	connect(m_treeFileView, &TreeFileView::pathChanged, this, [=](const QString &path)
+	connect(m_treeFileView, &TreeFileView::pathChanged, this, [this](const QString &path)
 	{
 		m_pathLabel->setToolTip(path);
 		QFontMetrics metrix(m_pathLabel->font());
-		int width = m_pathLabel->width() - 5;
+		int width = m_pathLabel->width() - 10;
 		auto clippedText = metrix.elidedText(path, Qt::ElideRight, width);
 		m_pathLabel->setText(clippedText);
 	});

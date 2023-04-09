@@ -1,4 +1,4 @@
-# <img src="https://github.com/Sudo-Rahman/Iridium/blob/main/ressources/app.ico" width="50" height="50" align="center" /> Iridium
+# <img src="https://github.com/Sudo-Rahman/Iridium/blob/main/ressources/app.png" width="50" height="50" align="center" /> Iridium
 
 Application graphique de gestion de remote type google drive, dropbox, one drive, etc...
 

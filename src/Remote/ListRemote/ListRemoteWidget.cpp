@@ -23,7 +23,7 @@ ListRemoteWidget::ListRemoteWidget(QWidget *parent) : QScrollArea(parent)
 	m_layout = new QVBoxLayout(widget);
 	m_layout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
 	m_layout->setSpacing(10);
-	setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum);
+	setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 	// padding
 	m_layout->setContentsMargins(10, 10, 15, 10);
 

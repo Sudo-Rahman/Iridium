@@ -39,10 +39,6 @@ void RoundedLineEdit::paintEvent(QPaintEvent *event)
 	painter.setBrush(QLineEdit::palette().color(QPalette::Light));
 	painter.drawRoundedRect(QLineEdit::rect().marginsRemoved(QMargins(5, 5, 5, 5)), 10, 10);
 
-	// draw text
-	painter.setPen(QLineEdit::palette().color(QPalette::Text));
-	painter.drawText(QLineEdit::rect().marginsRemoved(QMargins(10, 10, 10, 10)), QLineEdit::alignment(),
-					 QLineEdit::text());
 
 	// draw placeholder text
 	if (QLineEdit::text().isEmpty())
@@ -60,11 +56,31 @@ void RoundedLineEdit::paintEvent(QPaintEvent *event)
 		int textWidth = fm.horizontalAdvance(QLineEdit::text());
 
 		// draw line
-		painter.drawLine(QLineEdit::rect().marginsRemoved(QMargins(10, 10, 10, 10)).x() + textWidth +2,
-						 QLineEdit::rect().marginsRemoved(QMargins(10, 10, 10, 10)).y() +2,
-						 QLineEdit::rect().marginsRemoved(QMargins(10, 10, 10, 10)).x() + textWidth +2,
+		painter.drawLine(QLineEdit::rect().marginsRemoved(QMargins(10, 10, 10, 10)).x() + textWidth + 2,
+						 QLineEdit::rect().marginsRemoved(QMargins(10, 10, 10, 10)).y() + 2,
+						 QLineEdit::rect().marginsRemoved(QMargins(10, 10, 10, 10)).x() + textWidth + 2,
 						 QLineEdit::rect().marginsRemoved(QMargins(10, 10, 10, 10)).y() + 18);
 	}
+
+	// draw text selection
+	if (QLineEdit::hasSelectedText())
+	{
+		painter.setPen(QLineEdit::palette().color(QPalette::Text));
+		QFontMetrics fm(QLineEdit::font());
+		int selectionStart = fm.horizontalAdvance(QLineEdit::text().left(QLineEdit::selectionStart()));
+		int selectionEnd = fm.horizontalAdvance(QLineEdit::text().left(QLineEdit::selectionEnd()));
+
+		// draw selection
+		painter.fillRect(QLineEdit::rect().marginsRemoved(QMargins(10, 10, 10, 10)).x() + selectionStart,
+						 QLineEdit::rect().marginsRemoved(QMargins(10, 10, 10, 10)).y() + 2,
+						 selectionEnd - selectionStart,
+						 18,
+						 QLineEdit::palette().color(QPalette::Highlight));
+	}
+	// draw text
+	painter.setPen(QLineEdit::palette().color(QPalette::Text));
+	painter.drawText(QLineEdit::rect().marginsRemoved(QMargins(10, 10, 10, 10)), QLineEdit::alignment(),
+					 QLineEdit::text());
 
 //	QLineEdit::paintEvent(event);
 }
