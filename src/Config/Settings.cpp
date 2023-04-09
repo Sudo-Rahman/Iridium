@@ -3,9 +3,15 @@
 //
 
 #include "Settings.hpp"
+#include "../Rclone/Rclone.hpp"
+
+using namespace std;
+
 
 QIcon Settings::DIR_ICON;
 QIcon Settings::HARDDRIVE_ICON;
+string Rclone::m_pathRclone;
+
 
 void Settings::changeDirIcon(const Settings::ThemeColor &color)
 {
@@ -83,6 +89,8 @@ void Settings::addLocalRemote(const RemoteInfo &remoteInfo)
 
 void Settings::init()
 {
+	Rclone::setPathRclone(qApp->applicationDirPath().append("/rclone").toStdString());
+
 	Settings::HARDDRIVE_ICON = QIcon::fromTheme("drive-harddisk-solidstate");
 
 	auto *settings = new QSettings(QSettings::IniFormat, QSettings::UserScope, "Iridium", "Iridium");

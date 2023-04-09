@@ -15,6 +15,7 @@
 #include "RemoteWidget.hpp"
 #include "../../Rclone/Rclone.hpp"
 #include "../../Other/RoundedButton.hpp"
+#include "../../Other/RoundedLineEdit.hpp"
 
 
 class ListRemoteWidget : public QScrollArea
@@ -24,9 +25,8 @@ Q_OBJECT
 private:
 	QVBoxLayout *m_layout{}, *m_remoteLayout{};
 
-	QLineEdit *m_recherche{};
+	RoundedLineEdit *m_recherche{};
 	RoundedButton *m_add{};
-	QAction *m_expand{};
 
 	QList<RemoteWidget *> m_listRemote{};
 
@@ -44,8 +44,6 @@ private:
 	void getAllRemote();
 
 	void searchRemote(const QString &name);
-
-	void remoteClick(RemoteWidget *remote);
 
 signals:
 

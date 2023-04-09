@@ -16,10 +16,12 @@ Q_OBJECT
 private:
 	RemoteType type;
 	QIcon m_icon{};
-	bool m_hover{};
+	bool m_hover{}, m_click{};
 	RemoteConfigParamsFrame *paramsFrame{};
 
 	void initParamsFrame();
+
+	void addBlur();
 
 public:
 	explicit RemoteWidgetParam(RemoteType type, QWidget *parent = nullptr);
@@ -35,6 +37,8 @@ protected:
 signals:
 
 	void clicked(RemoteConfigParamsFrame *);
+
+	void newRemoteAdded();
 };
 
 

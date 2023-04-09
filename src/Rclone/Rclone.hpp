@@ -28,6 +28,9 @@ public:
 
 	explicit Rclone(RclonesManager * = nullptr);
 
+	static std::shared_ptr<Rclone> instance(RclonesManager * = nullptr)
+	{ return std::make_shared<Rclone>(); };
+
 	~Rclone() override;
 
 	enum State
@@ -37,9 +40,10 @@ public:
 
 
 private:
-	std::string pathRclone{};
+	static std::string m_pathRclone;
 	std::shared_ptr<std::thread> mthread{};
 	std::string mdata{};
+	std::string m_error{};
 	std::map<std::string, std::string> m_mapData{};
 	pid_t pid{};
 	Rclone::State mstate{};
@@ -50,11 +54,11 @@ private:
 
 public:
 
-	[[nodiscard]] const std::string &getPathRclone() const;
+	[[nodiscard]] static const std::string &getPathRclone() ;
 
-	void setPathRclone(const std::string &pathRclone);
+	static void setPathRclone(const std::string &pathRclone);
 
-	void config(RemoteType type, const std::vector<std::string> &args);
+	void config(RemoteType type, const std::string &name, const std::vector<std::string> &args = {});
 
 	void lsJson(const std::string &path);
 
@@ -76,10 +80,9 @@ public:
 
 	void waitForStarted();
 
-	auto getData() const
-	{
-		return m_mapData;
-	}
+	[[nodiscard]] std::map<std::string,std::string> getData() const;
+
+	[[nodiscard]] std::string readAllError() const;
 
 
 private:
@@ -106,6 +109,7 @@ signals:
 
 
 };
+
 typedef std::shared_ptr<Rclone> RclonePtr;
 
 class RclonesManager
@@ -135,6 +139,7 @@ private:
 	void finished();
 
 };
+
 typedef std::shared_ptr<RclonesManager> RclonesManagerPtr;
 
 #endif //IRIDIUM_RCLONE_HPP

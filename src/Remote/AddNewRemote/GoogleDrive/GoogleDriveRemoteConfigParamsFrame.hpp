@@ -19,6 +19,8 @@ protected:
 
 	void createUi() override;
 
+	bool checkFields() override;
+
 };
 
 

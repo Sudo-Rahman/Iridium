@@ -23,6 +23,8 @@ void LocalRemoteConfigParamsFrame::createUi()
 	layout->addWidget(btn);
 
 	auto *path = new QLineEdit(this);
+	path->setPlaceholderText("/user/home");
+	connecLineEdit(path);
 	layout->addWidget(path);
 
 	connect(btn, &QPushButton::clicked, this, [this, path]()
@@ -61,9 +63,9 @@ void LocalRemoteConfigParamsFrame::addRemote()
 {
 	if (QFileInfo::exists(m_path))
 	{
-		Settings::addLocalRemote({m_path.toStdString(), RemoteType::LocalHardDrive, remoteName->text().toStdString()});
+		Settings::addLocalRemote({m_path.toStdString(), RemoteType::LocalHardDrive, m_remoteName->text().toStdString()});
 		QMessageBox::information(this, tr("Ajout d’un nouveau remote local"),
-								 tr("Le remote %1 a été ajouté avec succès !").QString::arg(remoteName->text()));
+								 tr("Le remote %1 a été ajouté avec succès !").QString::arg(m_remoteName->text()));
 	} else
 	{
 		messageLabel->setText(tr("Le chemin n’existe pas !"));

@@ -57,7 +57,7 @@ TreeFileView::TreeFileView(const RemoteInfoPtr &remoteInfo, QWidget *parent) : Q
 	header()->setStretchLastSection(false);
 
 	// set row height
-	setItemDelegateForColumn(0, new MyItemDelegate(this));
+	setItemDelegate(new MyItemDelegate(this));
 	//set focus only window
 	setFocusPolicy(Qt::StrongFocus);
 

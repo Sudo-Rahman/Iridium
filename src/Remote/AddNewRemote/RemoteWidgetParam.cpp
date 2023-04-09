@@ -7,6 +7,7 @@
 
 #include "GoogleDrive/GoogleDriveRemoteConfigParamsFrame.hpp"
 #include "Local/LocalRemoteConfigParamsFrame.hpp"
+#include "Sftp/SftpRemoteConfigParamsFrame.hpp"
 #include "../../Config/Settings.hpp"
 
 #include <QLayout>
@@ -14,6 +15,7 @@
 #include <QStyle>
 #include <QPainter>
 #include <QEvent>
+#include <QGraphicsDropShadowEffect>
 
 RemoteWidgetParam::RemoteWidgetParam(RemoteType type, QWidget *parent) :
 	QGroupBox(parent), type(type)
@@ -27,11 +29,11 @@ RemoteWidgetParam::RemoteWidgetParam(RemoteType type, QWidget *parent) :
 	layout->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
 	layout->setSpacing(15);
 
-	auto *labelIcon = new QLabel;
+	auto *labelIcon = new QLabel(this);
 	layout->addWidget(labelIcon);
 
 
-	auto *labelRemoteName = new QLabel;
+	auto *labelRemoteName = new QLabel(this);
 	layout->addWidget(labelRemoteName);
 	switch (RemoteWidgetParam::type)
 	{
@@ -62,7 +64,7 @@ void RemoteWidgetParam::paintEvent(QPaintEvent *event)
 	painter.setRenderHint(QPainter::Antialiasing);
 
 	painter.setPen(QGroupBox::palette().color(QPalette::Light));
-	m_hover ? painter.setBrush(QGroupBox::palette().color(QPalette::Window)) : painter.setBrush(
+	m_click ? painter.setBrush(QGroupBox::palette().color(QPalette::Window)) : painter.setBrush(
 		QGroupBox::palette().color(QPalette::Light));
 
 	// draw rounded rect
@@ -78,13 +80,15 @@ void RemoteWidgetParam::initParamsFrame()
 	{
 		case Drive:
 			paramsFrame = new GoogleDriveRemoteConfigParamsFrame();
+			break;
 		case Sftp:
+			paramsFrame = new SftpRemoteConfigParamsFrame();
 			break;
 		case LocalHardDrive:
 			paramsFrame = new LocalRemoteConfigParamsFrame();
 			break;
 	}
-
+	connect(paramsFrame, &RemoteConfigParamsFrame::remoteAdded, this, &RemoteWidgetParam::newRemoteAdded);
 }
 
 RemoteConfigParamsFrame *RemoteWidgetParam::getParamsFrame() const
@@ -99,18 +103,22 @@ bool RemoteWidgetParam::event(QEvent *event)
 		// mouse hover repaint
 		case QEvent::Enter:
 			m_hover = true;
-			repaint();
+			addBlur();
 			break;
 		case QEvent::Leave:
 			m_hover = false;
-			repaint();
+			addBlur();
 			break;
 		case QEvent::MouseButtonPress:
 			// change cursor
+			m_click = true;
+			repaint();
 			setCursor(Qt::PointingHandCursor);
 			break;
 		case QEvent::MouseButtonRelease:
 			// change cursor
+			m_click = false;
+			repaint();
 			setCursor(Qt::ArrowCursor);
 			emit clicked(paramsFrame);
 			break;
@@ -118,4 +126,20 @@ bool RemoteWidgetParam::event(QEvent *event)
 			break;
 	}
 	return QGroupBox::event(event);
+}
+
+void RemoteWidgetParam::addBlur()
+{
+	// if not hover remove effect
+	if (!m_hover)
+	{
+		this->setGraphicsEffect(nullptr);
+		return;
+	}
+	// resize effect
+	auto effect = new QGraphicsDropShadowEffect(this);
+	effect->setBlurRadius(20);
+	effect->setOffset(0, 0);
+	effect->setColor(QWidget::palette().color(QPalette::Dark));
+	this->setGraphicsEffect(effect);
 }

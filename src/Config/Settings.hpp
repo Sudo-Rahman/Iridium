@@ -7,6 +7,7 @@
 
 #include <QSettings>
 #include <QIcon>
+#include <QApplication>
 #include "../Remote/Remote.h"
 
 

@@ -8,18 +8,6 @@
 GoogleDriveRemoteConfigParamsFrame::GoogleDriveRemoteConfigParamsFrame(QWidget *parent)
 	: RemoteConfigParamsFrame(parent)
 {
-	rclone = new Rclone;
-	connect(rclone, &Rclone::configFinished, this, [=](int exit)
-	{
-		if (exit == 0)
-		{
-			QMessageBox::information(this, tr("Succès"),
-									 tr("Le disque %1 a été ajouté avec succès").arg(
-										 remoteName->text()));
-			remoteName->setText("");
-			cancelBtn->hide();
-		}
-	});
 	GoogleDriveRemoteConfigParamsFrame::createUi();
 }
 
@@ -27,20 +15,20 @@ void GoogleDriveRemoteConfigParamsFrame::addRemote()
 {
 
 	RemoteConfigParamsFrame::addRemote();
-	if (remoteName->text().isEmpty())
+	if (not checkFields())
 		return;
-	if (listRemotes.contains(remoteName->text().toStdString() + ":"))
-	{
-		QMessageBox::warning(this, tr("Erreur"), tr("Un disk du même nom existe deja"));
-		remoteName->setText("");
-		return;
-	}
-	rclone->config(RemoteType::Drive, {remoteName->text().toStdString()});
-	rclone->waitForStarted();
+	m_rclone->config(RemoteType::Drive, m_remoteName->text().toStdString());
+	m_rclone->waitForStarted();
+	logInBtn->hide();
 	cancelBtn->show();
 }
 
 void GoogleDriveRemoteConfigParamsFrame::createUi()
 {
 	RemoteConfigParamsFrame::createUi();
+}
+
+bool GoogleDriveRemoteConfigParamsFrame::checkFields()
+{
+	return RemoteConfigParamsFrame::checkFields();
 }

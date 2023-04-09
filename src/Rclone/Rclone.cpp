@@ -6,7 +6,6 @@
 
 #include <utility>
 #include <iostream>
-#include <QCoreApplication>
 
 namespace bp = boost::process;
 using namespace std;
@@ -16,24 +15,25 @@ using namespace std;
  * @param path
  * @param parent
  */
-Rclone::Rclone(string path, RclonesManager *parent) : pathRclone(std::move(path)), manager(parent)
+Rclone::Rclone(string path, RclonesManager *parent) : manager(parent)
 {
+	Rclone::m_pathRclone = std::move(path);
 }
 
 /**
  * @brief Rclone::Rclone
  * @param parent
  */
-Rclone::Rclone(RclonesManager *parent) : pathRclone(
-	qApp->applicationDirPath().append("/rclone").toStdString()), manager(parent)
-{}
+Rclone::Rclone(RclonesManager *parent) : manager(parent)
+{
+}
 
 /**
  * @brief Rclone::getPathRclone
  */
-const string &Rclone::getPathRclone() const
+const string &Rclone::getPathRclone()
 {
-	return pathRclone;
+	return m_pathRclone;
 }
 
 /**
@@ -42,7 +42,7 @@ const string &Rclone::getPathRclone() const
  */
 void Rclone::setPathRclone(const string &pathRclone)
 {
-	Rclone::pathRclone = pathRclone;
+	Rclone::m_pathRclone = pathRclone;
 }
 
 
@@ -108,9 +108,9 @@ void Rclone::deleteFile(const RcloneFile &file)
 		[=](const int exit)
 		{ emit fileDeleted(exit); });
 	if (!file.isDir())
-		execute({"deletefile", file.getPath().toStdString() ,"-v"});
+		execute({"deletefile", file.getPath().toStdString(), "-v"});
 	else
-		execute({"purge", file.getPath().toStdString() ,"-v"});
+		execute({"purge", file.getPath().toStdString(), "-v"});
 }
 
 
@@ -119,27 +119,30 @@ void Rclone::deleteFile(const RcloneFile &file)
  * @param type
  * @param params
  */
-void Rclone::config(RemoteType type, const vector<string> &params)
+void Rclone::config(RemoteType type, const string &name, const vector<string> &params)
 {
 	if (mstate == Running)
 		terminate();
-	if (params.empty())
-		return;
 	finished.connect([=](int exit)
 					 {
 						 emit
 							 configFinished(exit);
 					 });
+
+	vector<string> args = {"config", "create", name};
 	switch (type)
 	{
 		case Drive:
-			execute({"config", "create", params[0], "drive"});
+			args.emplace_back("drive");
 			break;
 		case Sftp:
+			args.emplace_back("sftp");
 			break;
 		default:
 			break;
 	}
+	args.insert(args.end(), params.begin(), params.end());
+	execute(args);
 }
 
 /**
@@ -178,7 +181,7 @@ void Rclone::deleteRemote(const string &remote)
 }
 
 /**
- * @brief Rclone::execute, execute la commande rclone avec les arguments args
+ * @brief Rclone::execute, execute la commande m_rclone avec les arguments args
  * @param args
  */
 void Rclone::execute(const vector<string> &args)
@@ -191,20 +194,23 @@ void Rclone::execute(const vector<string> &args)
 			 if (manager != nullptr)
 				 manager->start();
 			 mdata.clear();
-			 bp::ipstream ip;
-			 auto process = bp::child(pathRclone, bp::args(args), bp::std_out > ip,
-									  bp::std_err > stderr);
+			 bp::ipstream out;
+			 bp::ipstream err;
+			 auto process = bp::child(m_pathRclone, bp::args(args), bp::std_out > out,
+									  bp::std_err > err);
 			 mstate = Running;
 
 			 v.notify_one();
 
 			 pid = process.id();
 			 string line;
-			 while (getline(ip, line))
+			 while (getline(out, line))
 			 {
 				 mdata += line + "\n";
 				 readyRead(line);
 			 }
+			 while (getline(err, line))
+			 { m_error += line + "\n"; }
 			 process.wait();
 			 mstate = Finsished;
 			 finished(process.exit_code());
@@ -214,7 +220,7 @@ void Rclone::execute(const vector<string> &args)
 }
 
 /**
- * @brief Rclone::waitForFinished, attend que le processus rclone se termine
+ * @brief Rclone::waitForFinished, attend que le processus m_rclone se termine
  */
 void Rclone::waitForFinished()
 {
@@ -237,7 +243,7 @@ Rclone::~Rclone()
 }
 
 /**
- * @brief Rclone::terminate, termine le processus rclone
+ * @brief Rclone::terminate, termine le processus m_rclone
  */
 void Rclone::terminate()
 {
@@ -253,7 +259,7 @@ void Rclone::terminate()
 }
 
 /**
- * @brief Rclone::getState, retourne l'état du processus rclone
+ * @brief Rclone::getState, retourne l'état du processus m_rclone
  * @return
  */
 Rclone::State Rclone::getState() const
@@ -262,7 +268,7 @@ Rclone::State Rclone::getState() const
 }
 
 /**
- * @brief Rclone::waitForStarted, attend que le processus rclone démarre
+ * @brief Rclone::waitForStarted, attend que le processus m_rclone démarre
  */
 void Rclone::waitForStarted()
 {
@@ -299,9 +305,19 @@ void Rclone::size(const string &path)
 
 }
 
+map<string, string> Rclone::getData() const
+{
+	return m_mapData;
+}
+
+string Rclone::readAllError() const
+{
+	return m_error;
+}
+
 /**
  * @brief RclonesManager::RclonesManager, constructeur
- * @param nbMaxProcess nombre de processus rclone maximum
+ * @param nbMaxProcess nombre de processus m_rclone maximum
  */
 RclonesManager::RclonesManager(unsigned nbMaxProcess) : nbMaxProcess(nbMaxProcess)
 {}
@@ -313,8 +329,8 @@ RclonesManager::RclonesManager() : nbMaxProcess(thread::hardware_concurrency())
 {}
 
 /**
- * @brief RclonesManager::get, retourne un pointeur vers un rclone
- * @return un pointeur vers un rclone
+ * @brief RclonesManager::get, retourne un pointeur vers un m_rclone
+ * @return un pointeur vers un m_rclone
  */
 RclonePtr RclonesManager::get()
 {
@@ -323,7 +339,7 @@ RclonePtr RclonesManager::get()
 }
 
 /**
- * @brief RclonesManager::start, un processus rclone appel cette fonction pour notifier le manager qu'il démarre
+ * @brief RclonesManager::start, un processus m_rclone appel cette fonction pour notifier le manager qu'il démarre
  */
 void RclonesManager::start()
 {
@@ -336,7 +352,7 @@ void RclonesManager::start()
 }
 
 /**
- * @brief RclonesManager::finished, un processus rclone appel cette fonction lorsqu'il se termine, pour notifier le manager
+ * @brief RclonesManager::finished, un processus m_rclone appel cette fonction lorsqu'il se termine, pour notifier le manager
  */
 void RclonesManager::finished()
 {
@@ -347,7 +363,7 @@ void RclonesManager::finished()
 }
 
 /**
- * @brief RclonesManager::finished, un processus rclone appel cette fonction lorsqu'il se termine, pour notifier le manager
+ * @brief RclonesManager::finished, un processus m_rclone appel cette fonction lorsqu'il se termine, pour notifier le manager
  */
 void RclonesManager::release(RclonePtr rclone)
 {

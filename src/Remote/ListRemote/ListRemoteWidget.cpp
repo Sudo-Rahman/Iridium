@@ -23,22 +23,23 @@ ListRemoteWidget::ListRemoteWidget(QWidget *parent) : QScrollArea(parent)
 	m_layout = new QVBoxLayout(widget);
 	m_layout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
 	m_layout->setSpacing(10);
-	setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+	setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum);
 	// padding
 	m_layout->setContentsMargins(10, 10, 15, 10);
 
 	auto *toplayout = new QHBoxLayout;
 
 	m_add = new RoundedButton("+");
-	m_add->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	connect(m_add, &QPushButton::clicked, this, [this]()
 	{
 		auto *addRemote = new AddNewRemoteDialog(this);
+		connect(addRemote, &AddNewRemoteDialog::newRemoteAdded, this, [this]()
+		{ getAllRemote(); });
 		addRemote->exec();
 	});
 	toplayout->addWidget(m_add);
 
-	m_recherche = new QLineEdit;
+	m_recherche = new RoundedLineEdit(this);
 	m_recherche->setPlaceholderText(tr("Rechercher un remote"));
 	connect(m_recherche, &QLineEdit::textChanged, this, &ListRemoteWidget::searchRemote);
 	toplayout->addWidget(m_recherche);
@@ -57,6 +58,7 @@ ListRemoteWidget::ListRemoteWidget(QWidget *parent) : QScrollArea(parent)
 	m_width = QScrollArea::sizeHint().width();
 
 	setMaximumWidth(0);
+
 }
 
 /**
@@ -65,6 +67,13 @@ ListRemoteWidget::ListRemoteWidget(QWidget *parent) : QScrollArea(parent)
 void ListRemoteWidget::getAllRemote()
 {
 	m_listRemote.clear();
+	for (int i = m_remoteLayout->count() - 1; i >= 0; --i)
+	{
+		auto *item = m_remoteLayout->itemAt(i);
+		m_remoteLayout->removeItem(item);
+		delete item->widget();
+		delete item;
+	}
 	auto rclone = m_manager.get();
 	rclone->listRemotes();
 	rclone->waitForFinished();
@@ -85,11 +94,10 @@ void ListRemoteWidget::getAllRemote()
 		m_listRemote << remote;
 	}
 
-
 	for (auto *remote: m_listRemote)
 	{
 		connect(remote, &RemoteWidget::clicked, this, [this, remote]()
-		{ emit remoteClicked(remote);});
+		{ emit remoteClicked(remote); });
 		m_remoteLayout->addWidget(remote);
 	}
 }

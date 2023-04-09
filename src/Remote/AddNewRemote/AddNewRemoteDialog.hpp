@@ -23,6 +23,9 @@ public:
 private:
 	void changeParamsFrame(RemoteConfigParamsFrame *);
 
+signals:
+
+	void newRemoteAdded();
 
 };
 

@@ -27,17 +27,28 @@ AddNewRemoteDialog::AddNewRemoteDialog(QWidget *parent) : QDialog(parent)
 	scrollWidgetLayout->setAlignment(Qt::AlignTop);
 	scrollArea->setWidget(scrollWidget);
 
-	auto *tt = new RemoteWidgetParam(RemoteType::Drive);
-	connect(tt, &RemoteWidgetParam::clicked, this, &AddNewRemoteDialog::changeParamsFrame);
-	scrollWidgetLayout->addWidget(tt);
+	auto drive = new RemoteWidgetParam(RemoteType::Drive);
+	connect(drive, &RemoteWidgetParam::clicked, this, &AddNewRemoteDialog::changeParamsFrame);
+	scrollWidgetLayout->addWidget(drive);
 
-	auto *ttt = new RemoteWidgetParam(RemoteType::LocalHardDrive);
-	connect(ttt, &RemoteWidgetParam::clicked, this, &AddNewRemoteDialog::changeParamsFrame);
-	scrollWidgetLayout->addWidget(ttt);
+	auto local = new RemoteWidgetParam(RemoteType::LocalHardDrive);
+	connect(local, &RemoteWidgetParam::clicked, this, &AddNewRemoteDialog::changeParamsFrame);
+	scrollWidgetLayout->addWidget(local);
+
+	auto sftp = new RemoteWidgetParam(RemoteType::Sftp);
+	connect(sftp, &RemoteWidgetParam::clicked, this, &AddNewRemoteDialog::changeParamsFrame);
+	scrollWidgetLayout->addWidget(sftp);
 
 	layout->addWidget(scrollArea);
-	paramsFrame = tt->getParamsFrame();
+	paramsFrame = drive->getParamsFrame();
 	layout->addWidget(paramsFrame);
+
+	for (auto *widget: scrollWidget->findChildren<RemoteWidgetParam *>())
+	{
+		widget->setMinimumWidth(200);
+		connect(widget, &RemoteWidgetParam::newRemoteAdded, this, [this, widget]()
+		{ emit newRemoteAdded(); });
+	}
 
 }
 
