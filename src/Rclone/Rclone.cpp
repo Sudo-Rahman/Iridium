@@ -52,7 +52,7 @@ void Rclone::setPathRclone(const string &pathRclone)
  */
 void Rclone::lsJson(const string &path)
 {
-	finished.connect(
+	m_finished.connect(
 		[=](const int exit)
 		{
 			if (exit == 0)
@@ -76,7 +76,7 @@ void Rclone::copyTo(const RcloneFile &src, const RcloneFile &dest)
 		{"copyto", src.getPath().toStdString(), dest.getPath().toStdString() + "/" + src.getName().toStdString(),
 		 "-P"});
 
-	readyRead.connect(
+	m_readyRead.connect(
 		[=](const string &data)
 		{
 			auto qdata = QString::fromStdString(data).split("\n");
@@ -93,8 +93,8 @@ void Rclone::copyTo(const RcloneFile &src, const RcloneFile &dest)
 			}
 		});
 	execute(arguments);
-	finished.connect([=](int ex)
-					 { emit copyProgress(100); });
+	m_finished.connect([=](int ex)
+					   { emit copyProgress(100); });
 }
 
 
@@ -104,7 +104,7 @@ void Rclone::copyTo(const RcloneFile &src, const RcloneFile &dest)
  */
 void Rclone::deleteFile(const RcloneFile &file)
 {
-	finished.connect(
+	m_finished.connect(
 		[=](const int exit)
 		{ emit fileDeleted(exit); });
 	if (!file.isDir())
@@ -123,11 +123,11 @@ void Rclone::config(RemoteType type, const string &name, const vector<string> &p
 {
 	if (mstate == Running)
 		terminate();
-	finished.connect([=](int exit)
-					 {
-						 emit
-							 configFinished(exit);
-					 });
+	m_finished.connect([=](int exit)
+					   {
+						   emit
+							   configFinished(exit);
+					   });
 
 	vector<string> args = {"config", "create", name};
 	switch (type)
@@ -150,8 +150,8 @@ void Rclone::config(RemoteType type, const string &name, const vector<string> &p
  */
 void Rclone::listRemotes()
 {
-	finished.connect(
-		[=](const int exit)
+	m_finished.connect(
+		[this](const int exit)
 		{
 			if (exit == 0)
 			{
@@ -161,11 +161,12 @@ void Rclone::listRemotes()
 				map<string, string> map;
 				for (auto &str: data)
 				{
-					str.remove(" ");
-					map.insert({str.split(":")[0].toStdString() + ":", str.split(":")[1].toStdString()});
+					auto name = str.split(":")[0].toStdString();
+					auto type = str.split(":")[1].toStdString();
+					type.erase(remove(type.begin(), type.end(), ' '), type.end());
+					map.insert({name, type});
 				}
 				m_mapData = map;
-				listRemotesFinished(map);
 			}
 		});
 	execute({"listremotes", "--long"});
@@ -207,15 +208,16 @@ void Rclone::execute(const vector<string> &args)
 			 while (getline(out, line))
 			 {
 				 mdata += line + "\n";
-				 readyRead(line);
+				 m_readyRead(line);
 			 }
 			 while (getline(err, line))
 			 { m_error += line + "\n"; }
 			 process.wait();
 			 mstate = Finsished;
-			 finished(process.exit_code());
+			 m_finished(process.exit_code());
 			 if (manager != nullptr)
 				 manager->finished();
+			 emit finished(process.exit_code());
 		 });
 }
 
@@ -285,7 +287,7 @@ void Rclone::waitForStarted()
  */
 void Rclone::size(const string &path)
 {
-	finished.connect(
+	m_finished.connect(
 		[=](const int exit)
 		{
 			if (exit == 0)
@@ -352,7 +354,7 @@ void RclonesManager::start()
 }
 
 /**
- * @brief RclonesManager::finished, un processus m_rclone appel cette fonction lorsqu'il se termine, pour notifier le manager
+ * @brief RclonesManager::m_finished, un processus m_rclone appel cette fonction lorsqu'il se termine, pour notifier le manager
  */
 void RclonesManager::finished()
 {
@@ -363,7 +365,7 @@ void RclonesManager::finished()
 }
 
 /**
- * @brief RclonesManager::finished, un processus m_rclone appel cette fonction lorsqu'il se termine, pour notifier le manager
+ * @brief RclonesManager::m_finished, un processus m_rclone appel cette fonction lorsqu'il se termine, pour notifier le manager
  */
 void RclonesManager::release(RclonePtr rclone)
 {

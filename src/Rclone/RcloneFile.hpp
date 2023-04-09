@@ -61,11 +61,11 @@ public:
 
 	[[nodiscard]] std::shared_ptr<RemoteInfo> getRemoteInfo() const;
 
-	uint32_t getObjs() const;
+	[[nodiscard]] uint32_t getObjs() const;
 
 	void setObjs(uint32_t objs);
 
-	QString getFileType() const;
+	[[nodiscard]] QString getFileType() const;
 };
 
 typedef std::shared_ptr<RcloneFile> RcloneFilePtr;

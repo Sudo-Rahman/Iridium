@@ -56,7 +56,7 @@ public:
 				return HARDDRIVEICON;
 			}
 		}();
-		m_name = [=]() -> auto
+		m_name = [this]() -> auto
 		{
 			if (!m_name.empty())
 				return m_name;
@@ -66,6 +66,19 @@ public:
 			{
 				if (m_path.find(':') != std::string::npos)
 					return m_path.substr(0, m_path.find(':'));
+				else
+					return m_path;
+			}
+		}();
+
+		m_path = [this]() -> auto
+		{
+			if (isLocal())
+				return m_path;
+			else
+			{
+				if (m_path.find(':') == std::string::npos)
+					return m_path + ":";
 				else
 					return m_path;
 			}

@@ -88,14 +88,12 @@ public:
 private:
 	void execute(const std::vector<std::string> &args);
 
-	boost::signals2::signal<void(const std::string &)> readyRead{};
-public:
-	boost::signals2::signal<void(const int exit)> finished{};
-	boost::signals2::signal<void(const std::map<std::string, std::string>)> listRemotesFinished{};
-	boost::signals2::signal<void(const QJsonDocument &)> lsJsonFinishedd{};
-
+	boost::signals2::signal<void(const std::string &)> m_readyRead{};
+	boost::signals2::signal<void(const int exit)> m_finished{};
 
 signals:
+
+	void finished(int exit);
 
 	void lsJsonFinished(const QJsonDocument &);
 

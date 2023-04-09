@@ -22,15 +22,16 @@
 class MyItemDelegate : public QItemDelegate
 {
 public:
-	MyItemDelegate(QObject *parent = nullptr) : QItemDelegate(parent)
+	explicit MyItemDelegate(QObject *parent = nullptr) : QItemDelegate(parent)
 	{}
 
-	void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
+	void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override
 	{ QItemDelegate::paint(painter, option, index); }
 
 	[[nodiscard]] QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override
 	{ return {30, 30}; }
 };
+
 
 /**
  * @brief Constructeur
@@ -49,17 +50,16 @@ TreeFileView::TreeFileView(const RemoteInfoPtr &remoteInfo, QWidget *parent) : Q
 //	setFocusPolicy(Qt::NoFocus);
 	setIconSize(QSize(24, 24));
 	setAlternatingRowColors(true);
+	setUniformRowHeights(true);
+
 	header()->setSectionsMovable(true);
 	header()->setFont(QFont("Arial", 13, QFont::DemiBold));
-	setUniformRowHeights(true);
-	header()->setSectionsClickable(true);
 	header()->setSortIndicatorShown(true);
+	header()->setSectionsClickable(true);
 	header()->setStretchLastSection(false);
 
 	// set row height
 	setItemDelegate(new MyItemDelegate(this));
-	//set focus only window
-	setFocusPolicy(Qt::StrongFocus);
 
 	RcloneFileModel *rcloneFileModel;
 	if (!m_remoteInfo->isLocal())
@@ -72,11 +72,6 @@ TreeFileView::TreeFileView(const RemoteInfoPtr &remoteInfo, QWidget *parent) : Q
 	auto *proxy = new RcloneProxy(this);
 	proxy->setSourceModel(rcloneFileModel);
 
-	//	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-	header()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
-	header()->setSectionResizeMode(2, QHeaderView::Interactive);
-	header()->setSectionResizeMode(3, QHeaderView::ResizeToContents);
-
 	connectSignals();
 }
 
@@ -85,7 +80,7 @@ TreeFileView::TreeFileView(const RemoteInfoPtr &remoteInfo, QWidget *parent) : Q
  */
 void TreeFileView::connectSignals()
 {
-	connect(header(), &QHeaderView::sortIndicatorChanged, this, [=](int logicalIndex, Qt::SortOrder order)
+	connect(header(), &QHeaderView::sortIndicatorChanged, this, [this](int logicalIndex, Qt::SortOrder order)
 	{
 		sortByColumn(logicalIndex, order);
 	});
@@ -94,7 +89,7 @@ void TreeFileView::connectSignals()
 
 	connect(this, &QTreeView::expanded, this, &TreeFileView::expand);
 
-	connect(this, &QTreeView::collapsed, [=](const QModelIndex &index)
+	connect(this, &QTreeView::collapsed, [this](const QModelIndex &index)
 	{
 		// collapse all children
 		for (int i = 0; i < model->rowCount(index); i++)
@@ -102,6 +97,27 @@ void TreeFileView::connectSignals()
 			auto child = model->index(i, 0, index);
 			collapse(child);
 		}
+	});
+
+	connect(header(), &QHeaderView::sectionResized, this, [this](int logicalIndex, int oldSize, int newSize)
+	{
+		if (logicalIndex == 0 and newSize < 200)
+			setColumnWidth(0, 200);
+		if (logicalIndex == 1 and newSize < 100)
+			setColumnWidth(1, 100);
+		if (logicalIndex == 2 and newSize < 100)
+			setColumnWidth(2, 100);
+		if (logicalIndex == 3 and newSize < 100)
+		{
+			setColumnWidth(3, 100);
+			return;
+		}
+		// get size of all columns
+		int size = 0;
+		for (int i = 0; i < header()->count(); i++)
+			size += header()->sectionSize(i);
+		if (size < header()->size().width())
+			setColumnWidth(3, header()->size().width() - size + header()->sectionSize(3));
 	});
 }
 

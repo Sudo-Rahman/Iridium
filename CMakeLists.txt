@@ -4,14 +4,15 @@ project(Iridium)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++2b -D NDEBUG -O3 ")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++2b -D NDEBUG -Wno-deprecated-declarations -O3 ")
+
+
+# set qt path
+set(CMAKE_PREFIX_PATH "/Users/sr-71/Qt/6.6.0/macos/lib/cmake")
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
-
-#find jthread
-find_package(jthread REQUIRED)
 
 set(Boost_USE_STATIC_LIBS ON)
 find_package(Boost COMPONENTS unit_test_framework REQUIRED)
@@ -26,7 +27,6 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS
         Gui
         Widgets)
 
-message(STATUS "Qt version: ${Qt${QT_VERSION_MAJOR}_VERSION}")
 
 set(SRC
         src/main.cpp
@@ -40,8 +40,9 @@ set(SRC
         src/FileView/TreeWidgets/TreeFileView.cpp src/FileView/TreeWidgets/TreeFileView.hpp src/FileView/TreeWidgets/TreeFileItem.cpp src/FileView/TreeWidgets/TreeFileItem.hpp
         src/FileView/TreeWidgets/RcloneFileModel.cpp src/FileView/TreeWidgets/RcloneFileModel.hpp src/FileView/TreeWidgets/RcloneFileModelDistant.cpp src/FileView/TreeWidgets/RcloneFileModelDistant.hpp src/FileView/TreeWidgets/ItemMenu.cpp src/FileView/TreeWidgets/ItemMenu.hpp
         src/FileView/TreeWidgets/ItemInfoDialog.cpp src/FileView/TreeWidgets/ItemInfoDialog.hpp src/Utility/Utility.cpp src/Utility/Utility.hpp src/FileView/TreeWidgets/RcloneProxy.cpp src/FileView/TreeWidgets/RcloneProxy.hpp src/Remote/ListRemote/ListRemoteWidget.cpp src/Remote/ListRemote/ListRemoteWidget.hpp
-        src/Remote/ListRemote/RemoteWidget.cpp src/Remote/ListRemote/RemoteWidget.hpp src/FileView/TreeWidgets/RcloneFileModelLocal.cpp src/FileView/TreeWidgets/RcloneFileModelLocal.hpp src/FileView/FileViewWidget.cpp src/FileView/FileViewWidget.hpp src/FileView/TreeWidgets/TreeFileItemLocal.cpp src/FileView/TreeWidgets/TreeFileItemLocal.hpp src/FileView/TreeWidgets/TreeFileItemDistant.cpp src/FileView/TreeWidgets/TreeFileItemDistant.hpp
-        src/FileView/TreeWidgets/TreeFileViewContainer.cpp src/FileView/TreeWidgets/TreeFileViewContainer.hpp src/Remote/AddNewRemote/Local/LocalRemoteConfigParamsFrame.cpp src/Remote/AddNewRemote/Local/LocalRemoteConfigParamsFrame.hpp src/MainWindow/ToolBar.cpp src/MainWindow/ToolBar.hpp src/Config/Settings.cpp src/Config/Settings.hpp src/Other/RoundedButton.cpp src/Other/RoundedButton.hpp src/Remote/AddNewRemote/Sftp/SftpRemoteConfigParamsFrame.cpp src/Remote/AddNewRemote/Sftp/SftpRemoteConfigParamsFrame.hpp src/Other/RoundedLineEdit.cpp src/Other/RoundedLineEdit.hpp)
+        src/Remote/ListRemote/RemoteWidget.cpp src/Remote/ListRemote/RemoteWidget.hpp src/FileView/TreeWidgets/RcloneFileModelLocal.cpp src/FileView/TreeWidgets/RcloneFileModelLocal.hpp src/FileView/FileViewWidget.cpp src/FileView/FileViewWidget.hpp src/FileView/TreeWidgets/TreeFileItemLocal.cpp src/FileView/TreeWidgets/TreeFileItemLocal.hpp
+        src/FileView/TreeWidgets/TreeFileItemDistant.cpp src/FileView/TreeWidgets/TreeFileItemDistant.hpp src/FileView/TreeWidgets/TreeFileViewContainer.cpp src/FileView/TreeWidgets/TreeFileViewContainer.hpp src/Remote/AddNewRemote/Local/LocalRemoteConfigParamsFrame.cpp src/Remote/AddNewRemote/Local/LocalRemoteConfigParamsFrame.hpp src/MainWindow/ToolBar.cpp
+        src/MainWindow/ToolBar.hpp src/Config/Settings.cpp src/Config/Settings.hpp src/Other/RoundedButton.cpp src/Other/RoundedButton.hpp src/Remote/AddNewRemote/Sftp/SftpRemoteConfigParamsFrame.cpp src/Remote/AddNewRemote/Sftp/SftpRemoteConfigParamsFrame.hpp src/Other/RoundedLineEdit.cpp src/Other/RoundedLineEdit.hpp)
 
 SET(TRANSLATION
         languages/iridium_en.ts
@@ -52,13 +53,13 @@ set(RCLONE "${CMAKE_CURRENT_SOURCE_DIR}/rclone")
 
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    find_library(COCOA_LIBRARY Cocoa)
     file(COPY ${RCLONE} DESTINATION Iridium.app/Contents/MacOS)
     set(MACOSX_BUNDLE_ICON_FILE app.icns)
     set(myApp_ICON ressources/app.icns)
     set_source_files_properties(${myApp_ICON} PROPERTIES
             MACOSX_PACKAGE_LOCATION "Resources")
-#    qt_add_executable(Iridium MACOSX_BUNDLE application.qrc ${TRANSLATION} ${myApp_ICON} ${SRC})
-        add_executable(Iridium MACOSX_BUNDLE application.qrc ${TRANSLATION} ${myApp_ICON} ${SRC})
+    add_executable(Iridium MACOSX_BUNDLE application.qrc ${TRANSLATION} ${myApp_ICON} ${SRC})
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     file(COPY ${RCLONE}.exe DESTINATION Iridium/../)
     enable_language("RC")
@@ -74,4 +75,3 @@ target_link_libraries(Iridium PRIVATE
         Qt::Gui
         Qt::Widgets
         )
-
