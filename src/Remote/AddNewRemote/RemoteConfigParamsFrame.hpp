@@ -37,6 +37,8 @@ protected:
 
 	void connecLineEdit(QLineEdit *lineEdit);
 
+	void clearAllFields();
+
 signals:
 
 	void remoteAdded();

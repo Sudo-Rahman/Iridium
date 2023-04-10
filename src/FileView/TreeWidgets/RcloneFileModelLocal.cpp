@@ -17,7 +17,7 @@ void RcloneFileModelLocal::addItem(const RcloneFilePtr &file, TreeFileItem *pare
 {
 	if (m_thread not_eq nullptr)
 	{
-#if Q_OS_WIN32
+#ifdef Q_OS_WIN32
 		TerminateThread(m_thread->native_handle(), 0);
 #else
 		pthread_kill(m_thread->native_handle(), SIGKILL);

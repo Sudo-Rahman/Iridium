@@ -81,7 +81,6 @@ void Settings::addLocalRemote(const RemoteInfoPtr &remoteInfo)
 
 void Settings::addLocalRemote(const RemoteInfo &remoteInfo)
 {
-	std::cout << remoteInfo.name() << remoteInfo.m_path << std::endl;
 	auto *settings = new QSettings(QSettings::IniFormat, QSettings::UserScope, "Iridium", "Iridium");
 	settings->beginGroup("LocalRemotes");
 	settings->setValue(QString::fromStdString(remoteInfo.name()), QString::fromStdString(remoteInfo.m_path));

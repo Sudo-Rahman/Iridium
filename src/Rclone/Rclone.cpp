@@ -246,7 +246,7 @@ void Rclone::terminate()
 	{
 		mthread->detach();
 		cout << pid << " kill" << endl;
-#if Q_OS_WIN32
+#ifdef Q_OS_WIN32
 		TerminateThread(mthread->native_handle(), 0);
 #else
 		pthread_kill(mthread->native_handle(), SIGKILL);

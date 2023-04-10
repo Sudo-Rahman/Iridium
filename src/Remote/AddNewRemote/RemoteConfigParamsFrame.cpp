@@ -18,7 +18,7 @@ RemoteConfigParamsFrame::RemoteConfigParamsFrame(QWidget *parent) : QFrame(paren
 
 	m_remoteName = new QLineEdit(this);
 	m_remoteName->setStyleSheet("border: 1px solid gray; border-radius: 5px;");
-	connect(m_remoteName, &QLineEdit::textChanged, this, [=](const QString &text)
+	connect(m_remoteName, &QLineEdit::textChanged, this, [this](const QString &text)
 	{
 		if (not text.isEmpty())
 			m_remoteName->setStyleSheet("border: 1px solid gray; border-radius: 5px;");
@@ -37,6 +37,7 @@ RemoteConfigParamsFrame::RemoteConfigParamsFrame(QWidget *parent) : QFrame(paren
 			emit remoteAdded();
 			QMessageBox::information(this, tr("Succès"),
 									 tr("Le disque %1 a été ajouté avec succès").arg(m_remoteName->text()));
+			clearAllFields();
 		} else
 		{
 			auto *msgBox = new QMessageBox();
@@ -70,7 +71,7 @@ void RemoteConfigParamsFrame::createUi()
 
 	connect(logInBtn, &QPushButton::clicked, this, &RemoteConfigParamsFrame::addRemote);
 
-	connect(cancelBtn, &QPushButton::clicked, this, [=]()
+	connect(cancelBtn, &QPushButton::clicked, this, [this]()
 	{
 		if (m_rclone->getState() == Rclone::Running)
 			m_rclone->terminate();
@@ -128,4 +129,13 @@ void RemoteConfigParamsFrame::connecLineEdit(QLineEdit *lineEdit)
 		else
 			lineEdit->setStyleSheet("border: 1px solid red; border-radius: 5px;");
 	});
+}
+
+void RemoteConfigParamsFrame::clearAllFields()
+{
+	for (auto &field: findChildren<QLineEdit *>())
+	{
+		field->clear();
+		field->setStyleSheet("border: 1px solid gray; border-radius: 5px;");
+	}
 }

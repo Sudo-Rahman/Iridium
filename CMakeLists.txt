@@ -15,7 +15,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
 set(Boost_USE_STATIC_LIBS ON)
-find_package(Boost COMPONENTS system filesystem unit_test_framework thread REQUIRED)
+find_package(Boost COMPONENTS system filesystem thread REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 
 find_package(QT NAMES Qt6 REQUIRED COMPONENTS
@@ -75,7 +75,6 @@ target_link_libraries(Iridium PRIVATE
         Qt::Widgets
         Boost::system
         Boost::filesystem
-        Boost::unit_test_framework
         Boost::thread
         )
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")

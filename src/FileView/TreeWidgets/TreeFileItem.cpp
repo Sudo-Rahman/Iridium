@@ -47,13 +47,14 @@ void TreeFileItem::initIcon()
 	if (file->isDir())
 	{
 		if (QFileInfo(file->getName()).suffix() == "app")
-			ico = QIcon::fromTheme(file->getName().toLower().remove(".app").remove(".exe").replace(" ", "-"),
+			ico = QIcon::fromTheme(file->getName().toLower().remove(".app").replace(" ", "-"),
 								   QIcon::fromTheme("application-default-icon"));
 		else ico = Settings::DIR_ICON;
 		file->setSize(0);
 	} else
 	{
-		ico = QIcon::fromTheme(file->getName());
+		if (QFileInfo(file->getName()).suffix() == "exe")
+			ico = QIcon::fromTheme(file->getName().toLower().remove(".exe").replace(" ", "-"));
 		if (ico.isNull())
 			ico = QIcon::fromTheme(QMimeDatabase().mimeTypeForFile(file->getPath()).iconName(),
 								   QIcon::fromTheme(
