@@ -89,7 +89,10 @@ void Settings::addLocalRemote(const RemoteInfo &remoteInfo)
 
 void Settings::init()
 {
-	Rclone::setPathRclone(qApp->applicationDirPath().append("/rclone").toStdString());
+	if (QSysInfo::productType() == "windows")
+		Rclone::setPathRclone(qApp->applicationDirPath().append("/rclone.exe").toStdString());
+	else
+		Rclone::setPathRclone(qApp->applicationDirPath().append("/rclone").toStdString());
 
 	Settings::HARDDRIVE_ICON = QIcon::fromTheme("drive-harddisk-solidstate");
 

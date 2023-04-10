@@ -6,11 +6,16 @@
 #ifndef IRIDIUM_RCLONE_HPP
 #define IRIDIUM_RCLONE_HPP
 
+#ifndef __kernel_entry
+#define __kernel_entry
+#endif
+
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
 #include <boost/signals2.hpp>
 #include <boost/process.hpp>
+#include <boost/thread.hpp>
 #include <thread>
 #include <vector>
 #include <iostream>
@@ -23,6 +28,7 @@ class RclonesManager;
 class Rclone : public QObject
 {
 Q_OBJECT
+
 public:
 	explicit Rclone(std::string path, RclonesManager * = nullptr);
 
@@ -41,11 +47,11 @@ public:
 
 private:
 	static std::string m_pathRclone;
-	std::shared_ptr<std::thread> mthread{};
+	std::shared_ptr<boost::thread> mthread{};
 	std::string mdata{};
 	std::string m_error{};
 	std::map<std::string, std::string> m_mapData{};
-	pid_t pid{};
+	uint32_t pid{};
 	Rclone::State mstate{};
 	RclonesManager *manager{};
 
@@ -54,7 +60,7 @@ private:
 
 public:
 
-	[[nodiscard]] static const std::string &getPathRclone() ;
+	[[nodiscard]] static const std::string &getPathRclone();
 
 	static void setPathRclone(const std::string &pathRclone);
 
@@ -80,7 +86,7 @@ public:
 
 	void waitForStarted();
 
-	[[nodiscard]] std::map<std::string,std::string> getData() const;
+	[[nodiscard]] std::map<std::string, std::string> getData() const;
 
 	[[nodiscard]] std::string readAllError() const;
 

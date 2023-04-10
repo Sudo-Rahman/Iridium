@@ -14,7 +14,7 @@ ToolBar::ToolBar(QWidget *parent) : QToolBar(parent)
 	setOrientation(Qt::Vertical);
 
 	m_hideListeRemotes = new QAction(Settings::HARDDRIVE_ICON,
-		tr("Afficher les remotes"), this);
+									 tr("Afficher les remotes"), this);
 	m_hideListeRemotes->setCheckable(true);
 	m_hideListeRemotes->setChecked(false);
 	addAction(m_hideListeRemotes);

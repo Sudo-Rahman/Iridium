@@ -49,9 +49,7 @@ ListRemoteWidget::ListRemoteWidget(QWidget *parent) : QScrollArea(parent)
 	m_remoteLayout = new QVBoxLayout;
 	m_layout->addLayout(m_remoteLayout);
 
-
 	getAllRemote();
-
 	// no border
 	setFrameShape(QFrame::NoFrame);
 

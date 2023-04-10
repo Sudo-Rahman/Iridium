@@ -15,7 +15,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
 set(Boost_USE_STATIC_LIBS ON)
-find_package(Boost COMPONENTS unit_test_framework REQUIRED)
+find_package(Boost COMPONENTS system filesystem unit_test_framework thread REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 
 find_package(QT NAMES Qt6 REQUIRED COMPONENTS
@@ -53,7 +53,6 @@ set(RCLONE "${CMAKE_CURRENT_SOURCE_DIR}/rclone")
 
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    find_library(COCOA_LIBRARY Cocoa)
     file(COPY ${RCLONE} DESTINATION Iridium.app/Contents/MacOS)
     set(MACOSX_BUNDLE_ICON_FILE app.icns)
     set(myApp_ICON ressources/app.icns)
@@ -64,9 +63,9 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     file(COPY ${RCLONE}.exe DESTINATION Iridium/../)
     enable_language("RC")
     set(WIN32_ICO ${CMAKE_CURRENT_SOURCE_DIR}/MyApp.rc)
-    add_executable(Iridium WIN32 application.qrc ${WIN32_ICO} ${IMAGES} ${SRC})
+    add_executable(Iridium WIN32 application.qrc ${WIN32_ICO} ${SRC})
 else ()
-    add_executable(Iridium application.qrc ${IMAGES} ${SRC})
+    add_executable(Iridium application.qrc ${SRC})
 endif ()
 
 
@@ -74,4 +73,11 @@ target_link_libraries(Iridium PRIVATE
         Qt::Core
         Qt::Gui
         Qt::Widgets
+        Boost::system
+        Boost::filesystem
+        Boost::unit_test_framework
+        Boost::thread
         )
+if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+    target_link_libraries(Iridium PRIVATE ws2_32)
+endif ()

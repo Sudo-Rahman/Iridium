@@ -17,6 +17,7 @@
 class RemoteConfigParamsFrame : public QFrame
 {
 Q_OBJECT
+
 protected:
 	QPushButton *logInBtn{}, *cancelBtn{};
 	QLabel *messageLabel{};

@@ -25,8 +25,7 @@ Rclone::Rclone(string path, RclonesManager *parent) : manager(parent)
  * @param parent
  */
 Rclone::Rclone(RclonesManager *parent) : manager(parent)
-{
-}
+{}
 
 /**
  * @brief Rclone::getPathRclone
@@ -53,7 +52,7 @@ void Rclone::setPathRclone(const string &pathRclone)
 void Rclone::lsJson(const string &path)
 {
 	m_finished.connect(
-		[=](const int exit)
+		[this](const int exit)
 		{
 			if (exit == 0)
 			{
@@ -77,7 +76,7 @@ void Rclone::copyTo(const RcloneFile &src, const RcloneFile &dest)
 		 "-P"});
 
 	m_readyRead.connect(
-		[=](const string &data)
+		[this](const string &data)
 		{
 			auto qdata = QString::fromStdString(data).split("\n");
 			if (not qdata.isEmpty())
@@ -93,7 +92,7 @@ void Rclone::copyTo(const RcloneFile &src, const RcloneFile &dest)
 			}
 		});
 	execute(arguments);
-	m_finished.connect([=](int ex)
+	m_finished.connect([this](int ex)
 					   { emit copyProgress(100); });
 }
 
@@ -105,7 +104,7 @@ void Rclone::copyTo(const RcloneFile &src, const RcloneFile &dest)
 void Rclone::deleteFile(const RcloneFile &file)
 {
 	m_finished.connect(
-		[=](const int exit)
+		[this](const int exit)
 		{ emit fileDeleted(exit); });
 	if (!file.isDir())
 		execute({"deletefile", file.getPath().toStdString(), "-v"});
@@ -121,9 +120,7 @@ void Rclone::deleteFile(const RcloneFile &file)
  */
 void Rclone::config(RemoteType type, const string &name, const vector<string> &params)
 {
-	if (mstate == Running)
-		terminate();
-	m_finished.connect([=](int exit)
+	m_finished.connect([this](int exit)
 					   {
 						   emit
 							   configFinished(exit);
@@ -187,38 +184,38 @@ void Rclone::deleteRemote(const string &remote)
  */
 void Rclone::execute(const vector<string> &args)
 {
-	if (mstate == Running)
-		terminate();
-	mthread = std::make_shared<std::thread>
-		([=]()
-		 {
-			 if (manager != nullptr)
-				 manager->start();
-			 mdata.clear();
-			 bp::ipstream out;
-			 bp::ipstream err;
-			 auto process = bp::child(m_pathRclone, bp::args(args), bp::std_out > out,
-									  bp::std_err > err);
-			 mstate = Running;
+	mthread = std::make_shared<boost::thread>(
+		[this, args]
+		{
+			if (manager != nullptr)
+				manager->start();
+			mdata.clear();
+			bp::ipstream out;
+			bp::ipstream err;
+			auto process = bp::child(m_pathRclone, bp::args(args),
+									 bp::std_out > out,
+									 bp::std_err > err);
+			mstate = Running;
 
-			 v.notify_one();
+			v.notify_one();
 
-			 pid = process.id();
-			 string line;
-			 while (getline(out, line))
-			 {
-				 mdata += line + "\n";
-				 m_readyRead(line);
-			 }
-			 while (getline(err, line))
-			 { m_error += line + "\n"; }
-			 process.wait();
-			 mstate = Finsished;
-			 m_finished(process.exit_code());
-			 if (manager != nullptr)
-				 manager->finished();
-			 emit finished(process.exit_code());
-		 });
+			pid = process.id();
+			string line;
+			while (getline(out, line))
+			{
+				mdata += line + "\n";
+				m_readyRead(line);
+			}
+			while (getline(err, line))
+			{ m_error += line + "\n"; }
+			process.wait();
+			mstate = Finsished;
+			m_finished(process.exit_code());
+			if (manager != nullptr)
+				manager->finished();
+			emit finished(process.exit_code());
+			terminate();
+		});
 }
 
 /**
@@ -238,10 +235,6 @@ void Rclone::waitForFinished()
 Rclone::~Rclone()
 {
 	terminate();
-	if (mstate == Running and mthread->joinable())
-	{
-		mthread->join();
-	}
 }
 
 /**
@@ -249,15 +242,19 @@ Rclone::~Rclone()
  */
 void Rclone::terminate()
 {
-	if (pid != 0)
+	if (pid not_eq 0 and mstate == Running)
 	{
-//		cout << pid << " kill" << endl;
-		kill(pid, SIGKILL);
+		mthread->detach();
+		cout << pid << " kill" << endl;
+#if Q_OS_WIN32
+		TerminateThread(mthread->native_handle(), 0);
+#else
+		pthread_kill(mthread->native_handle(), SIGKILL);
+#endif
 		if (mthread->joinable())
 			mthread->join();
 		mstate = Finsished;
 	}
-
 }
 
 /**

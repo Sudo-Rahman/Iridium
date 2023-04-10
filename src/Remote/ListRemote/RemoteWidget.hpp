@@ -36,8 +36,9 @@ private:
 	void addBlur();
 
 public:
-	explicit RemoteWidget(const RemoteInfo& remoteInfo, QWidget *parent = nullptr);
-	explicit RemoteWidget(const RemoteInfoPtr & remoteInfo, QWidget *parent = nullptr);
+	explicit RemoteWidget(const RemoteInfo &remoteInfo, QWidget *parent = nullptr);
+
+	explicit RemoteWidget(const RemoteInfoPtr &remoteInfo, QWidget *parent = nullptr);
 
 	[[nodiscard]] const RemoteInfoPtr &remoteInfo() const;
 

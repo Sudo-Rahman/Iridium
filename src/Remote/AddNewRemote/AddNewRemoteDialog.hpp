@@ -14,6 +14,7 @@
 class AddNewRemoteDialog : public QDialog
 {
 Q_OBJECT
+
 	QHBoxLayout *layout{};
 	RemoteConfigParamsFrame *paramsFrame{};
 

@@ -63,7 +63,8 @@ void LocalRemoteConfigParamsFrame::addRemote()
 {
 	if (QFileInfo::exists(m_path))
 	{
-		Settings::addLocalRemote({m_path.toStdString(), RemoteType::LocalHardDrive, m_remoteName->text().toStdString()});
+		Settings::addLocalRemote(
+			{m_path.toStdString(), RemoteType::LocalHardDrive, m_remoteName->text().toStdString()});
 		QMessageBox::information(this, tr("Ajout d’un nouveau remote local"),
 								 tr("Le remote %1 a été ajouté avec succès !").QString::arg(m_remoteName->text()));
 	} else

@@ -8,7 +8,6 @@
 #include <QStandardItemModel>
 #include "TreeFileItem.hpp"
 #include "../../Rclone/Rclone.hpp"
-#include <QThread>
 
 
 class RcloneFileModel : public QStandardItemModel

@@ -46,12 +46,18 @@ void TreeFileItem::initIcon()
 	QIcon ico;
 	if (file->isDir())
 	{
-		ico = Settings::DIR_ICON;
+		if (QFileInfo(file->getName()).suffix() == "app")
+			ico = QIcon::fromTheme(file->getName().toLower().remove(".app").remove(".exe").replace(" ", "-"),
+								   QIcon::fromTheme("application-default-icon"));
+		else ico = Settings::DIR_ICON;
 		file->setSize(0);
 	} else
 	{
-		ico = QIcon::fromTheme(QMimeDatabase().mimeTypeForFile(file->getPath()).iconName(),
-							   QIcon::fromTheme(QMimeDatabase().mimeTypeForFile(file->getPath()).genericIconName()));
+		ico = QIcon::fromTheme(file->getName());
+		if (ico.isNull())
+			ico = QIcon::fromTheme(QMimeDatabase().mimeTypeForFile(file->getPath()).iconName(),
+								   QIcon::fromTheme(
+									   QMimeDatabase().mimeTypeForFile(file->getPath()).genericIconName()));
 		if (ico.isNull())
 			ico = QIcon::fromTheme("unknown");
 	}

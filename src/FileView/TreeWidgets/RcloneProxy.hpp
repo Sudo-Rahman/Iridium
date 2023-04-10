@@ -10,6 +10,7 @@
 class RcloneProxy : public QSortFilterProxyModel
 {
 Q_OBJECT
+
 public:
 	explicit RcloneProxy(QObject *parent = nullptr);
 

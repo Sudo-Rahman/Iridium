@@ -8,6 +8,7 @@
 #include <QDialog>
 #include <QLabel>
 #include <QGridLayout>
+#include <boost/thread.hpp>
 #include <QTimer>
 #include "TreeFileItem.hpp"
 #include "../../Rclone/Rclone.hpp"
@@ -35,6 +36,8 @@ private:
 
 	int row{};
 
+	boost::shared_ptr<boost::thread> m_thread{};
+
 public:
 	explicit ItemInfoDialog(TreeFileItem *item, QWidget *parent = nullptr);
 
@@ -46,6 +49,10 @@ private:
 	void loading();
 
 	void initLabel();
+
+signals:
+
+	void m_threadFinished();
 
 };
 

@@ -6,12 +6,13 @@
 #define IRIDIUM_RCLONEFILEMODELLOCAL_HPP
 
 #include "RcloneFileModel.hpp"
+#include <boost/thread.hpp>
 
 class RcloneFileModelLocal : public RcloneFileModel
 {
 Q_OBJECT
 
-	QThread *m_thread{};
+	boost::shared_ptr<boost::thread> m_thread{};
 
 public:
 	explicit RcloneFileModelLocal(const RemoteInfoPtr &remoteInfo, QObject *parent = nullptr);

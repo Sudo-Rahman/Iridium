@@ -17,15 +17,17 @@ void RcloneFileModelLocal::addItem(const RcloneFilePtr &file, TreeFileItem *pare
 {
 	if (m_thread not_eq nullptr)
 	{
-		m_thread->quit();
-		m_thread->wait();
-		delete m_thread;
+#if Q_OS_WIN32
+		TerminateThread(m_thread->native_handle(), 0);
+#else
+		pthread_kill(m_thread->native_handle(), SIGKILL);
+#endif
 	}
 	auto *tree_item = (parent->getParent() == nullptr ? parent : parent->getParent());
-	m_thread = QThread::create(
+	m_thread = boost::make_shared<boost::thread>(
 
 //	m_thread = std::make_shared<std::thread>(
-		[=]()
+		[this, tree_item, file]()
 		{
 			if (tree_item->rowCount() == 1)
 			{
@@ -40,7 +42,6 @@ void RcloneFileModelLocal::addItem(const RcloneFilePtr &file, TreeFileItem *pare
 				tree_item->removeRow(0);
 			}
 		});
-	m_thread->start(QThread::HighestPriority);
 }
 
 void RcloneFileModelLocal::init()

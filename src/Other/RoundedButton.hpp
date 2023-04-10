@@ -9,7 +9,7 @@
 
 class RoundedButton : public QPushButton
 {
-	Q_OBJECT
+Q_OBJECT
 
 	bool m_hover{};
 	bool m_click{};

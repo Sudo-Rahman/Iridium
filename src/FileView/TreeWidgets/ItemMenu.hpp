@@ -12,6 +12,7 @@
 class ItemMenu : public QMenu
 {
 Q_OBJECT
+
 private:
 	QAction *m_info{};
 	QAction *m_copy{};

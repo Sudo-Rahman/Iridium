@@ -12,7 +12,8 @@
 class TreeFileItemDistant : public TreeFileItem
 {
 public:
-	explicit TreeFileItemDistant(const QString &path,const RemoteInfoPtr  &remoteInfo,const QJsonObject &data , TreeFileItem * = nullptr);
+	explicit TreeFileItemDistant(const QString &path, const RemoteInfoPtr &remoteInfo, const QJsonObject &data,
+								 TreeFileItem * = nullptr);
 
 };
 

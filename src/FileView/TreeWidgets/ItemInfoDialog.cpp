@@ -5,7 +5,6 @@
 #include "ItemInfoDialog.hpp"
 #include "../../Utility/Utility.hpp"
 #include <QDirIterator>
-#include <QThread>
 #include <QPropertyAnimation>
 
 ItemInfoDialog::ItemInfoDialog(TreeFileItem *item, QWidget *parent) : QDialog(parent)
@@ -52,9 +51,7 @@ ItemInfoDialog::ItemInfoDialog(TreeFileItem *item, QWidget *parent) : QDialog(pa
 
 
 	for (auto const &lab: findChildren<QLabel *>())
-	{
 		lab->setTextInteractionFlags(Qt::TextSelectableByMouse);
-	}
 
 }
 
@@ -94,29 +91,29 @@ void ItemInfoDialog::initSize()
 	if (m_file->getRemoteInfo()->isLocal() and m_file->isDir())
 	{
 		loading();
-		QThread *thread;
 		auto *size = new uint64_t(0);
 		auto *objs = new uint64_t(0);
-		auto func = [=]()
-		{
-//			 qDirIerator recursive
-			QDirIterator it(m_file->getPath(),   QDir::NoSymLinks | QDir::NoDotAndDotDot | QDir::AllEntries,
-							QDirIterator::Subdirectories);
-			for (; it.hasNext(); it.next())
+		m_thread = boost::make_shared<boost::thread>(
+			[this, objs, size]
 			{
-				QFileInfo info(it.fileInfo());
-				if (!info.isDir())
+//			 qDirIerator recursive
+				QDirIterator it(m_file->getPath(),
+								QDir::NoSymLinks | QDir::NoDotAndDotDot |
+								QDir::AllEntries,
+								QDirIterator::Subdirectories);
+				for (; it.hasNext(); it.next())
 				{
-					(*size) += info.size();
-					(*objs)++;
+					QFileInfo info(it.fileInfo());
+					if (!info.isDir())
+					{
+						(*size) += info.size();
+						(*objs)++;
+					}
 				}
-			}
+				emit m_threadFinished();
+			});
 
-		};
-
-		thread = QThread::create(func);
-		thread->start();
-		connect(thread, &QThread::finished, this, [=]()
+		connect(this, &ItemInfoDialog::m_threadFinished, this, [this, objs, size]()
 		{
 			m_timer.stop();
 			m_objs->setText(QString::fromStdString(Utility::numberToString((uint64_t) *objs)));
@@ -134,7 +131,7 @@ void ItemInfoDialog::initSize()
 	{
 		loading();
 		auto rclone = m_manager.get();
-		connect(rclone.get(), &Rclone::sizeFinished, this, [=](uint32_t objs, uint64_t size, QString strSize)
+		connect(rclone.get(), &Rclone::sizeFinished, this, [this](uint32_t objs, uint64_t size, QString strSize)
 		{
 			m_timer.stop();
 			m_size->setText(
@@ -164,7 +161,7 @@ void ItemInfoDialog::initSize()
 void ItemInfoDialog::loading()
 {
 	m_timer.setInterval(125);
-	connect(&m_timer, &QTimer::timeout, this, [=]()
+	connect(&m_timer, &QTimer::timeout, this, [this]()
 	{
 		QString str = QList{"∙∙∙",
 							"●∙∙",

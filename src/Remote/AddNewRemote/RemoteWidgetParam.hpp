@@ -13,6 +13,7 @@
 class RemoteWidgetParam : public QGroupBox
 {
 Q_OBJECT
+
 private:
 	RemoteType type;
 	QIcon m_icon{};
