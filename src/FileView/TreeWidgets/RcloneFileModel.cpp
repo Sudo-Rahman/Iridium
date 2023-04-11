@@ -4,7 +4,6 @@
 
 #include "RcloneFileModel.hpp"
 
-#include <utility>
 
 RcloneFileModel::RcloneFileModel(const RemoteInfoPtr &remoteInfo, QObject *parent) : QStandardItemModel(
 	parent)
@@ -13,7 +12,6 @@ RcloneFileModel::RcloneFileModel(const RemoteInfoPtr &remoteInfo, QObject *paren
 
 	setColumnCount(4);
 	setRowCount(0);
-
 
 	setHorizontalHeaderLabels({tr("Nom"), tr("Taille"), tr("Date de modification"), tr("Type")});
 }
@@ -31,10 +29,4 @@ QList<QStandardItem *> RcloneFileModel::getItemList(TreeFileItem *item)
 const QModelIndex &RcloneFileModel::getRootIndex() const
 {
 	return m_root_index;
-}
-
-void RcloneFileModel::transferTo(const RcloneFilePtr &file, TreeFileItem *parent)
-{
-	auto newFile = std::make_shared<RcloneFile>(file->getName(), m_remoteInfo);
-
 }

@@ -5,8 +5,8 @@
 #include <QPropertyAnimation>
 #include <QMessageBox>
 #include "ListRemoteWidget.hpp"
-#include "../AddNewRemote/AddNewRemoteDialog.hpp"
-#include "../../Config/Settings.hpp"
+#include <AddNewRemoteDialog.hpp>
+#include <Settings.hpp>
 
 /**
  * @brief constructeur

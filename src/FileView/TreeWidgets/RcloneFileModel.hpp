@@ -7,7 +7,7 @@
 
 #include <QStandardItemModel>
 #include "TreeFileItem.hpp"
-#include "../../Rclone/Rclone.hpp"
+#include <Rclone.hpp>
 
 
 class RcloneFileModel : public QStandardItemModel
@@ -24,8 +24,6 @@ protected:
 
 public:
 	virtual void addItem(const RcloneFilePtr &file, TreeFileItem *parent) = 0;
-
-	void transferTo(const RcloneFilePtr &file, TreeFileItem *parent);
 
 	[[nodiscard]] const QModelIndex &getRootIndex() const;
 

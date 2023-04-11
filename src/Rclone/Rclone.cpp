@@ -184,6 +184,7 @@ void Rclone::deleteRemote(const string &remote)
  */
 void Rclone::execute(const vector<string> &args)
 {
+	qDebug() << args;
 	mthread = std::make_shared<boost::thread>(
 		[this, args]
 		{
@@ -319,10 +320,20 @@ uint8_t Rclone::exitCode() const
 	return exit;
 }
 
+/**
+ * @brief mkdir, crée un dossier
+ * @param dir
+ */
 void Rclone::mkdir(const RcloneFile &dir)
 {
 	execute({"mkdir", dir.getPath().toStdString()});
 }
+
+void Rclone::moveto(const RcloneFile &src, const RcloneFile &dest)
+{
+	execute({"moveto", src.getPath().toStdString(), dest.getPath().toStdString()});
+}
+
 
 /**
  * @brief RclonesManager::RclonesManager, constructeur

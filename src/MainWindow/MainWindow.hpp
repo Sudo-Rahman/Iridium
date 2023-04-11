@@ -9,9 +9,9 @@
 #include <QCoreApplication>
 #include <QSettings>
 #include <QLayout>
-#include "../Rclone/Rclone.hpp"
-#include "../Remote/ListRemote/ListRemoteWidget.hpp"
-#include "../FileView/FileViewWidget.hpp"
+#include <Rclone.hpp>
+#include <ListRemoteWidget.hpp>
+#include <FileViewWidget.hpp>
 #include "ToolBar.hpp"
 
 

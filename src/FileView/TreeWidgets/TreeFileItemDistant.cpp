@@ -8,7 +8,7 @@ TreeFileItemDistant::TreeFileItemDistant(const QString &path, const RemoteInfoPt
 										 TreeFileItem *parent) : TreeFileItem(parent)
 {
 	file = std::make_shared<RcloneFile>(
-		path +"/"+ data["Name"].toString(),
+		path + data["Name"].toString(),
 		static_cast<uint64_t>(data["Size"].toInteger()),
 		data["IsDir"].toBool(),
 		QDateTime::fromString(data["ModTime"].toString(), Qt::ISODateWithMs),

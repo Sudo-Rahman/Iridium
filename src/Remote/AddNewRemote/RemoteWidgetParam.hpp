@@ -6,9 +6,9 @@
 #define IRIDIUM_REMOTEWIDGETPARAM_HPP
 
 #include <QGroupBox>
-#include "../Remote.h"
+#include <Remote.h>
 #include "RemoteConfigParamsFrame.hpp"
-#include "../../Rclone/Rclone.hpp"
+#include <Rclone.hpp>
 
 class RemoteWidgetParam : public QGroupBox
 {

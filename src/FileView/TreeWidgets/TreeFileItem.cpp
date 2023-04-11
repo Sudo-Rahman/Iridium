@@ -3,7 +3,7 @@
 //
 
 #include "TreeFileItem.hpp"
-#include "../../Config/Settings.hpp"
+#include <Settings.hpp>
 #include <QMimeDatabase>
 
 

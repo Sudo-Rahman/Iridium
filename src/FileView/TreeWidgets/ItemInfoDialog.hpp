@@ -11,7 +11,7 @@
 #include <boost/thread.hpp>
 #include <QTimer>
 #include "TreeFileItem.hpp"
-#include "../../Rclone/Rclone.hpp"
+#include <Rclone.hpp>
 
 class ItemInfoDialog : public QDialog
 {

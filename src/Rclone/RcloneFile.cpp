@@ -4,9 +4,8 @@
 
 #include "RcloneFile.hpp"
 
-#include <cmath>
 #include <QMimeDatabase>
-#include "../Utility/Utility.hpp"
+#include <Utility/Utility.hpp>
 
 void RcloneFile::init()
 {
@@ -25,7 +24,7 @@ void RcloneFile::init()
 
 RcloneFile::RcloneFile(const QString &pathFile, const RemoteInfoPtr &remoteInfo)
 {
-	path = pathFile;
+	setPath(pathFile);
 	m_remoteInfo = remoteInfo;
 	init();
 }
@@ -35,7 +34,7 @@ RcloneFile::RcloneFile(const QString &pathFile, uint64_t size, bool isDir, QDate
 	: size(size), isDirectory(isDir), modTime(std::move(modTime))
 {
 	m_remoteInfo = remoteInfo;
-	path = pathFile;
+	setPath(pathFile);
 }
 
 
@@ -47,7 +46,8 @@ const QString &RcloneFile::getPath() const
 void RcloneFile::setPath(const QString &path)
 {
 	RcloneFile::path = path;
-}
+	if (not path.endsWith("/") and not path.isEmpty() and isDirectory)
+		RcloneFile::path += "/";}
 
 uint64_t RcloneFile::getSize() const
 {
@@ -149,5 +149,15 @@ QString RcloneFile::getFileType() const
 		return type;
 	} else
 		return tr("Document ") + QFileInfo(getPath()).suffix().toUpper();
+}
+
+/**
+ * @brief Change the name of the file
+ * @param newName
+ */
+void RcloneFile::changeName(const QString &newName)
+{
+	path.remove(getName());
+	path.append(newName);
 }
 

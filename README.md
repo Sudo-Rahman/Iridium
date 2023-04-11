@@ -9,8 +9,7 @@ Graphical application for managing remote storage services such as Google Drive,
 - [C++](https://isocpp.org/)
 - [CMake](https://cmake.org/)
 - [Boost](https://www.boost.org/)
-
-<br>
+- [rclone](https://rclone.org/)
 
 ## Features
 
@@ -46,7 +45,7 @@ Graphical application for managing remote storage services such as Google Drive,
 git clone https://github.com/Sudo-Rahman/Iridium.git
 cd Iridium
 ```
-- Install rclone binary and add it to Iridium path (see [rclone download page](https://rclone.org/downloads/))
+- Install rclone binary and add it to Iridium directory (see [rclone download page](https://rclone.org/downloads/))
 
 ```bash
 mkdir build
@@ -67,4 +66,4 @@ make
 
 ### Licence
 
-[LGPG](https://www.gnu.org/licenses/lgpl-3.0.fr.html)
+- [LGPG](https://www.gnu.org/licenses/lgpl-3.0.fr.html)

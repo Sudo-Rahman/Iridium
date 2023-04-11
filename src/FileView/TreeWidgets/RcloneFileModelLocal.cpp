@@ -4,7 +4,7 @@
 
 #include "RcloneFileModelLocal.hpp"
 #include "TreeFileItemLocal.hpp"
-#include "../../Config/Settings.hpp"
+#include <Settings.hpp>
 
 
 RcloneFileModelLocal::RcloneFileModelLocal(const RemoteInfoPtr &remoteInfo, QObject *parent) : RcloneFileModel(
@@ -17,6 +17,7 @@ void RcloneFileModelLocal::addItem(const RcloneFilePtr &file, TreeFileItem *pare
 {
 	if (m_thread not_eq nullptr)
 	{
+		m_thread->detach();
 #ifdef Q_OS_WIN32
 		TerminateThread(m_thread->native_handle(), 0);
 #else
@@ -31,7 +32,7 @@ void RcloneFileModelLocal::addItem(const RcloneFilePtr &file, TreeFileItem *pare
 		{
 			if (tree_item->rowCount() == 1)
 			{
-				auto list_file = QDir(file->getPath()).entryInfoList(QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs);
+				auto list_file = QDir(file->getPath()).entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries);
 				for (const QFileInfo &info: list_file)
 				{
 					auto *item = new TreeFileItemLocal(info.filePath(), m_remoteInfo);
@@ -49,7 +50,7 @@ void RcloneFileModelLocal::init()
 	auto *drive = new TreeFileItem(QString::fromStdString(m_remoteInfo->m_path), m_remoteInfo);
 	drive->setIcon(Settings::HARDDRIVE_ICON);
 	m_root_index = drive->index();
-	drive->appendRow({});
+	drive->appendRow({new QStandardItem, new QStandardItem, new QStandardItem, new QStandardItem});
 	appendRow({
 				  drive,
 				  new TreeFileItem("--", drive->getFile(), drive),

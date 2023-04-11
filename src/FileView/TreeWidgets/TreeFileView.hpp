@@ -6,13 +6,14 @@
 #define IRIDIUM_TREEFILEVIEW_HPP
 
 #include <QTreeView>
+#include <QTimer>
 #include <QStandardItemModel>
 #include "TreeFileItem.hpp"
 #include "RcloneFileModel.hpp"
 #include <QTreeWidgetItem>
 #include <thread>
 #include <QMessageBox>
-#include "../../Remote/Remote.h"
+#include <Rclone.hpp>
 
 
 class TreeFileView : public QTreeView
@@ -25,6 +26,9 @@ Q_OBJECT
 	RemoteInfoPtr m_remoteInfo{};
 
 	RclonesManager m_rclonesManager{};
+
+	uint64_t m_clickTime{};
+	QModelIndex m_clickIndex{};
 
 public:
 	explicit TreeFileView(const RemoteInfoPtr &remoteInfo, QWidget *parent = nullptr);
@@ -42,7 +46,7 @@ public:
 	void reload();
 
 	RemoteInfoPtr remoteInfo() const
-	{return m_remoteInfo;};
+	{ return m_remoteInfo; };
 
 
 protected:
@@ -50,19 +54,20 @@ protected:
 
 	void keyPressEvent(QKeyEvent *event) override;
 
+	void mousePressEvent(QMouseEvent *event) override;
+
+	void mouseReleaseEvent(QMouseEvent *event) override;
+
 protected slots:
 
 	void doubleClick(const QModelIndex &index);
 
 	void expand(const QModelIndex &index);
 
-	void mouseReleaseEvent(QMouseEvent *event) override;
 
 private:
 
 	void initUI();
-
-	void setModel(RcloneFileModel *model);
 
 	QString getPath();
 
@@ -74,11 +79,15 @@ private:
 
 	void removeItem(TreeFileItem *item);
 
-	static bool fileIsInFolder(const RcloneFilePtr &, TreeFileItem *folder);
+	static bool fileIsInFolder(const QString &name, TreeFileItem *folder);
 
 	void mkdir();
 
 	QDialog *mkdirDialog();
+
+	void editItem(const QModelIndex &index);
+
+	void rename(const TreeFileItem *item, const QString &newName);
 
 signals:
 

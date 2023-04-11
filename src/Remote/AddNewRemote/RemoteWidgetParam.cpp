@@ -8,7 +8,7 @@
 #include "GoogleDrive/GoogleDriveRemoteConfigParamsFrame.hpp"
 #include "Local/LocalRemoteConfigParamsFrame.hpp"
 #include "Sftp/SftpRemoteConfigParamsFrame.hpp"
-#include "../../Config/Settings.hpp"
+#include <Settings.hpp>
 
 #include <QLayout>
 #include <QLabel>

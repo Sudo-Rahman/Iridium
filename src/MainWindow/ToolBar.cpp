@@ -3,8 +3,8 @@
 //
 
 #include "ToolBar.hpp"
-#include "../Remote/Remote.h"
-#include "../Config/Settings.hpp"
+#include <Remote.h>
+#include <Settings.hpp>
 #include <QStyle>
 
 ToolBar::ToolBar(QWidget *parent) : QToolBar(parent)
@@ -24,7 +24,7 @@ ToolBar::ToolBar(QWidget *parent) : QToolBar(parent)
 
 void ToolBar::connectSignals()
 {
-	connect(m_hideListeRemotes, &QAction::toggled, this, [=]()
+	connect(m_hideListeRemotes, &QAction::toggled, this, [this]()
 	{
 		m_isHideListeRemotes = !m_isHideListeRemotes;
 		emit hideListeRemotes(m_isHideListeRemotes);

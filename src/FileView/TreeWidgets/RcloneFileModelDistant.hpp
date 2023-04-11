@@ -12,7 +12,7 @@ class RcloneFileModelDistant : public RcloneFileModel
 {
 Q_OBJECT
 
-	RclonesManager manager{std::thread::hardware_concurrency() * 10};
+	RclonesManager manager{boost::thread::hardware_concurrency() * 10};
 
 public:
 	enum Load

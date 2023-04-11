@@ -4,7 +4,6 @@
 
 #include "MainWindow.hpp"
 
-#include <QPushButton>
 #include <QLayout>
 #include <QTimer>
 #include <QMenuBar>

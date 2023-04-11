@@ -21,7 +21,7 @@
 #include <iostream>
 #include <memory>
 #include "RcloneFile.hpp"
-#include "../Remote/Remote.h"
+#include <Remote.h>
 
 class RclonesManager;
 
@@ -75,6 +75,8 @@ public:
 	void deleteFile(const RcloneFile &file);
 
 	void mkdir(const RcloneFile &dir);
+
+	void moveto(const RcloneFile &src, const RcloneFile &dest);
 
 	void listRemotes();
 

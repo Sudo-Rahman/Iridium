@@ -7,7 +7,7 @@
 
 #include <QStandardItem>
 #include <QJsonObject>
-#include "../../Rclone/RcloneFile.hpp"
+#include <RcloneFile.hpp>
 
 class TreeFileItem : public QStandardItem
 {

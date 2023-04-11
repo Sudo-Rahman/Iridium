@@ -11,8 +11,8 @@
 #include <QLabel>
 #include <QLineEdit>
 
-#include "../../Rclone/Rclone.hpp"
-#include "../../Other/RoundedLineEdit.hpp"
+#include <Rclone.hpp>
+#include <RoundedLineEdit.hpp>
 
 class RemoteConfigParamsFrame : public QFrame
 {

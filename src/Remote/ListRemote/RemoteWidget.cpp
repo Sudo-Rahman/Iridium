@@ -118,10 +118,9 @@ void RemoteWidget::init()
 	} else
 		icon = QIcon(QString::fromStdString(m_remoteInfo->m_icon));
 	labelIcon->setPixmap(icon.pixmap(32, 32, QIcon::Normal, QIcon::On));
-	labelIcon->setContentsMargins(0, 0, 10, 0);
 
 
-	// if length of name is more than 20 chars then cut it
+	// if length of name is more than 10 chars then cut it
 	QString name = QString::fromStdString(m_remoteInfo->name());
 	if (name.length() > 10)
 		name = name.left(10) + "...";

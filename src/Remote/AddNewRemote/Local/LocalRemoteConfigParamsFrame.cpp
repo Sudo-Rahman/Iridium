@@ -5,7 +5,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include "LocalRemoteConfigParamsFrame.hpp"
-#include "../../../Config/Settings.hpp"
+#include <Settings.hpp>
 
 LocalRemoteConfigParamsFrame::LocalRemoteConfigParamsFrame(QWidget *parent) : RemoteConfigParamsFrame(parent)
 {

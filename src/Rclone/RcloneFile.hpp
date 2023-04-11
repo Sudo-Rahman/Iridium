@@ -11,7 +11,7 @@
 #include <QFile>
 #include <QDir>
 #include <QJsonDocument>
-#include "../Remote/Remote.h"
+#include <Remote.h>
 
 class RcloneFile : public QObject
 {
@@ -51,6 +51,8 @@ public:
 
 	[[nodiscard]] QString getName() const;
 
+	void changeName(const QString &newName);
+
 	[[nodiscard]] QString getSizeString() const;
 
 	[[nodiscard]] QString getPathString() const;
@@ -66,6 +68,16 @@ public:
 	void setObjs(uint32_t objs);
 
 	[[nodiscard]] QString getFileType() const;
+
+	// define copy operator and copy constructor
+	RcloneFile(const RcloneFile &other)
+	{
+		path = other.path;
+		size = other.size;
+		isDirectory = other.isDirectory;
+		modTime = other.modTime;
+		m_remoteInfo = other.m_remoteInfo;
+	}
 };
 
 typedef std::shared_ptr<RcloneFile> RcloneFilePtr;

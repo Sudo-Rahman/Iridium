@@ -7,7 +7,7 @@
 
 #include <QDialog>
 #include <QLayout>
-#include "../../Rclone/Rclone.hpp"
+#include <Rclone.hpp>
 #include "RemoteConfigParamsFrame.hpp"
 
 
