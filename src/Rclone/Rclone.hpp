@@ -51,7 +51,7 @@ private:
 	std::string mdata{};
 	std::string m_error{};
 	std::map<std::string, std::string> m_mapData{};
-	uint32_t pid{};
+	uint8_t exit{};
 	Rclone::State mstate{};
 	RclonesManager *manager{};
 
@@ -74,6 +74,8 @@ public:
 
 	void deleteFile(const RcloneFile &file);
 
+	void mkdir(const RcloneFile &dir);
+
 	void listRemotes();
 
 	void size(const std::string &path);
@@ -89,6 +91,8 @@ public:
 	[[nodiscard]] std::map<std::string, std::string> getData() const;
 
 	[[nodiscard]] std::string readAllError() const;
+
+	[[nodiscard]] uint8_t exitCode() const;
 
 
 private:

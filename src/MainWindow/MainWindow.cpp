@@ -33,24 +33,26 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	m_mainLayout = new QVBoxLayout;
 	m_layout->addLayout(m_mainLayout);
 
-	m_fileViewWidget = new FileViewWidget(RemoteInfo("nas2:", RemoteType::Drive), this);
+	m_fileViewWidget = new FileViewWidget(this);
 	m_mainLayout->addWidget(m_fileViewWidget);
+	m_fileViewWidget->changeRemote(m_listRemoteWidget->remoteSelected());
 
 	connectSignals();
 }
 
 void MainWindow::connectSignals()
 {
-	connect(m_toolBar, &ToolBar::hideListeRemotes, this, [=]()
+	connect(m_toolBar, &ToolBar::hideListeRemotes, this, [this]()
 	{
 		m_listRemoteWidget->expand();
 	});
 
-	connect(m_listRemoteWidget, &ListRemoteWidget::remoteClicked, this, [=](RemoteWidget *remote)
-	{
-		m_fileViewWidget->changeRemote(remote->remoteInfo());
-	});
-	connect(m_fileViewWidget, &FileViewWidget::progressBarCreated, this, [=](QProgressBar *progressBar)
+	connect(m_listRemoteWidget, &ListRemoteWidget::remoteClicked, this,
+			[this](const std::shared_ptr<remotes_selected> &remotes)
+			{
+				m_fileViewWidget->changeRemote(remotes);
+			});
+	connect(m_fileViewWidget, &FileViewWidget::progressBarCreated, this, [this](QProgressBar *progressBar)
 	{
 		m_mainLayout->addWidget(progressBar);
 	});

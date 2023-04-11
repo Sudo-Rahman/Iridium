@@ -3,13 +3,15 @@
 //
 
 #include "RemoteWidget.hpp"
-#include "../../Config/Settings.hpp"
+#include <Settings.hpp>
 
 #include <QPainter>
 #include <QEvent>
 #include <QPropertyAnimation>
 #include <utility>
 #include <QGraphicsDropShadowEffect>
+#include <QMessageBox>
+#include <Rclone.hpp>
 
 RemoteWidget::RemoteWidget(const RemoteInfo &remoteInfo, QWidget *parent) : QGroupBox(parent),
 																			m_remoteInfo(std::move(
@@ -89,14 +91,9 @@ const RemoteInfoPtr &RemoteWidget::remoteInfo() const
 	return m_remoteInfo;
 }
 
-void RemoteWidget::setSelected(uint8_t selected)
+void RemoteWidget::setSelectedText(const QString &text)
 {
-	if (!selected)
-		m_selected->clear();
-	else if (selected == 3)
-		m_selected->setText("1-2");
-	else
-		m_selected->setText(QString::number(selected));
+	m_selected->setText(text);
 }
 
 RemoteWidget::RemoteWidget(const RemoteInfoPtr &remoteInfo, QWidget *parent)
@@ -108,8 +105,8 @@ RemoteWidget::RemoteWidget(const RemoteInfoPtr &remoteInfo, QWidget *parent)
 void RemoteWidget::init()
 {
 	m_layout = new QHBoxLayout(this);
-	m_layout->setContentsMargins(10, 10, 10, 10);
-	m_layout->setSpacing(15);
+	m_layout->setContentsMargins(10,5, 5, 5);
+	m_layout->setSpacing(0);
 
 	auto *labelIcon = new QLabel;
 	m_layout->addWidget(labelIcon);
@@ -121,17 +118,63 @@ void RemoteWidget::init()
 	} else
 		icon = QIcon(QString::fromStdString(m_remoteInfo->m_icon));
 	labelIcon->setPixmap(icon.pixmap(32, 32, QIcon::Normal, QIcon::On));
+	labelIcon->setContentsMargins(0, 0, 10, 0);
 
 
-	auto *labelRemoteName = new QLabel(QString::fromStdString(m_remoteInfo->name()));
+	// if length of name is more than 20 chars then cut it
+	QString name = QString::fromStdString(m_remoteInfo->name());
+	if (name.length() > 10)
+		name = name.left(10) + "...";
+	auto *labelRemoteName = new QLabel(name);
+	labelRemoteName->setToolTip(QString::fromStdString(m_remoteInfo->name()));
+	labelRemoteName->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+	labelRemoteName->setAlignment(Qt::AlignCenter);
 	// set auto size font
 	QFont font = labelRemoteName->font();
 	font.setPointSize(15);
 	labelRemoteName->setFont(font);
 	m_layout->addWidget(labelRemoteName);
 
+	auto rightLayout = new QVBoxLayout;
+	rightLayout->setSpacing(10);
+	rightLayout->setContentsMargins(0, 0, 0, 0);
 	m_selected = new QLabel(this);
-//	m_selected->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-	m_selected->setAlignment(Qt::AlignRight | Qt::AlignBottom);
-	m_layout->addWidget(m_selected);
+
+	auto *m_delete = new RoundedButton("✕", this);
+	m_delete->setFixedSize(25, 25);
+	m_delete->setFont(QFont("Arial", 15));
+	m_delete->setToolTip("Delete");
+
+	rightLayout->addWidget(m_delete, 0, Qt::AlignTop | Qt::AlignRight);
+	rightLayout->addWidget(m_selected,0, Qt::AlignBottom | Qt::AlignCenter);
+
+	m_layout->addLayout(rightLayout);
+
+	connect(m_delete, &RoundedButton::clicked, this, [this]
+	{
+		auto msgbox = new QMessageBox(QMessageBox::Question, "Suppression",
+									  "Voulez-vous vraiment supprimer ce remote ?",
+									  QMessageBox::Yes | QMessageBox::No, this);
+
+		if (msgbox->exec() == QMessageBox::Yes)
+		{
+			if (m_remoteInfo->isLocal())
+				Settings::deleteRemote(m_remoteInfo);
+			else
+			{
+				Rclone rclone;
+				rclone.deleteRemote(m_remoteInfo->name());
+				rclone.waitForFinished();
+				if (rclone.exitCode() != 0)
+				{
+					auto msgb = QMessageBox(QMessageBox::Critical, "Suppression",
+											"Une erreur est survenue lors de la suppression du remote",
+											QMessageBox::Ok, this);
+					msgb.setDetailedText(QString::fromStdString(rclone.readAllError()));
+					return;
+				}
+			}
+			emit deleted(this);
+		}
+	});
 }

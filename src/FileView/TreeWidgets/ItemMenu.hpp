@@ -22,9 +22,17 @@ private:
 
 
 public:
+
+	enum Action{
+		Copy,
+		Paste,
+		Info,
+		Delete,
+		NewFolder
+	};
 	explicit ItemMenu(QWidget *parent = nullptr);
 
-	void m_info_click(TreeFileItem *file);
+	void setActionEnabled(const QList<QPair<Action, bool>> &lst);
 
 signals:
 

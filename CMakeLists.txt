@@ -44,6 +44,17 @@ set(SRC
         src/FileView/TreeWidgets/TreeFileItemDistant.cpp src/FileView/TreeWidgets/TreeFileItemDistant.hpp src/FileView/TreeWidgets/TreeFileViewContainer.cpp src/FileView/TreeWidgets/TreeFileViewContainer.hpp src/Remote/AddNewRemote/Local/LocalRemoteConfigParamsFrame.cpp src/Remote/AddNewRemote/Local/LocalRemoteConfigParamsFrame.hpp src/MainWindow/ToolBar.cpp
         src/MainWindow/ToolBar.hpp src/Config/Settings.cpp src/Config/Settings.hpp src/Other/RoundedButton.cpp src/Other/RoundedButton.hpp src/Remote/AddNewRemote/Sftp/SftpRemoteConfigParamsFrame.cpp src/Remote/AddNewRemote/Sftp/SftpRemoteConfigParamsFrame.hpp src/Other/RoundedLineEdit.cpp src/Other/RoundedLineEdit.hpp)
 
+include_directories(src
+        src/Config
+        src/FileView
+        src/FileView/TreeWidgets
+        src/MainWindow
+        src/Other
+        src/Rclone
+        src/Remote
+        src/Remote/AddNewRemote
+        src/Remote/ListRemote)
+
 SET(TRANSLATION
         languages/iridium_en.ts
         )

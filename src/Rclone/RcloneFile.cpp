@@ -25,8 +25,8 @@ void RcloneFile::init()
 
 RcloneFile::RcloneFile(const QString &pathFile, const RemoteInfoPtr &remoteInfo)
 {
+	path = pathFile;
 	m_remoteInfo = remoteInfo;
-	setPath(pathFile);
 	init();
 }
 
@@ -35,7 +35,7 @@ RcloneFile::RcloneFile(const QString &pathFile, uint64_t size, bool isDir, QDate
 	: size(size), isDirectory(isDir), modTime(std::move(modTime))
 {
 	m_remoteInfo = remoteInfo;
-	setPath(pathFile);
+	path = pathFile;
 }
 
 
@@ -47,8 +47,6 @@ const QString &RcloneFile::getPath() const
 void RcloneFile::setPath(const QString &path)
 {
 	RcloneFile::path = path;
-	if (not path.endsWith("/") and not path.isEmpty() and isDirectory)
-		RcloneFile::path += "/";
 }
 
 uint64_t RcloneFile::getSize() const
@@ -97,7 +95,7 @@ QString RcloneFile::getSizeString() const
 {
 	if (size == 0)
 		return "--";
-	return QString::fromStdString(Utility::sizeToString(size));
+	return QString::fromStdString(Iridium::Utility::sizeToString(size));
 }
 
 QString RcloneFile::getPathString() const

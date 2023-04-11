@@ -2,7 +2,7 @@
 // Created by sr-71 on 09/01/2023.
 //
 
-#include "Rclone.hpp"
+#include <Rclone.hpp>
 
 #include <utility>
 #include <iostream>
@@ -61,7 +61,7 @@ void Rclone::lsJson(const string &path)
 				emit lsJsonFinished(doc);
 			}
 		});
-	execute({"lsjson", path, "--drive-skip-gdocs"});
+	execute({"lsjson", path, "--drive-skip-gdocs", "--fast-list"});
 }
 
 /**
@@ -72,7 +72,7 @@ void Rclone::lsJson(const string &path)
 void Rclone::copyTo(const RcloneFile &src, const RcloneFile &dest)
 {
 	vector<string> arguments(
-		{"copyto", src.getPath().toStdString(), dest.getPath().toStdString() + "/" + src.getName().toStdString(),
+		{"copyto", src.getPath().toStdString(), dest.getPath().toStdString(),
 		 "-P"});
 
 	m_readyRead.connect(
@@ -199,7 +199,6 @@ void Rclone::execute(const vector<string> &args)
 
 			v.notify_one();
 
-			pid = process.id();
 			string line;
 			while (getline(out, line))
 			{
@@ -210,10 +209,11 @@ void Rclone::execute(const vector<string> &args)
 			{ m_error += line + "\n"; }
 			process.wait();
 			mstate = Finsished;
-			m_finished(process.exit_code());
+			exit = process.exit_code();
+			m_finished(exit);
 			if (manager != nullptr)
 				manager->finished();
-			emit finished(process.exit_code());
+			emit finished(exit);
 			terminate();
 		});
 }
@@ -242,10 +242,10 @@ Rclone::~Rclone()
  */
 void Rclone::terminate()
 {
-	if (pid not_eq 0 and mstate == Running)
+	if (mstate == Running)
 	{
 		mthread->detach();
-		cout << pid << " kill" << endl;
+		cout << "process rclone kill" << endl;
 #ifdef Q_OS_WIN32
 		TerminateThread(mthread->native_handle(), 0);
 #else
@@ -285,17 +285,17 @@ void Rclone::waitForStarted()
 void Rclone::size(const string &path)
 {
 	m_finished.connect(
-		[=](const int exit)
+		[this](const int exit)
 		{
 			if (exit == 0)
 			{
 				auto data = QString::fromStdString(mdata).split("\n");
 				if (data.size() > 1)
 				{
-					auto l1 = QRegularExpression("\\(\\d+\\)").match(data[0]).captured(0).remove("(").remove(
+					auto l1 = QRegularExpression(R"(\(\d+\))").match(data[0]).captured(0).remove("(").remove(
 						")").toUInt();
-					auto l2 = QRegularExpression("\\d+.\\d+ \\w+").match(data[1]).captured(0);
-					auto l3 = QRegularExpression("\\(\\d+").match(data[1]).captured(0).remove("(").toULongLong();
+					auto l2 = QRegularExpression(R"(\d+.\d+ \w+)").match(data[1]).captured(0);
+					auto l3 = QRegularExpression(R"(\(\d+)").match(data[1]).captured(0).remove("(").toULongLong();
 					emit sizeFinished(l1, l3, l2);
 				}
 			}
@@ -312,6 +312,16 @@ map<string, string> Rclone::getData() const
 string Rclone::readAllError() const
 {
 	return m_error;
+}
+
+uint8_t Rclone::exitCode() const
+{
+	return exit;
+}
+
+void Rclone::mkdir(const RcloneFile &dir)
+{
+	execute({"mkdir", dir.getPath().toStdString()});
 }
 
 /**

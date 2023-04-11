@@ -88,13 +88,32 @@ public:
 	RemoteInfo() = default;
 
 	[[nodiscard]] bool isLocal() const
-	{
-		return m_type == RemoteType::LocalHardDrive;
-	}
+	{ return m_type == RemoteType::LocalHardDrive; }
 
 	[[nodiscard]] std::string name() const
+	{ return m_name; }
+
+	// overload operator == to compare two RemoteInfo
+	bool operator==(const RemoteInfo &other) const
+	{ return m_name == other.m_name && m_type == other.m_type && m_path == other.m_path; }
+
+	bool operator==(const RemoteInfo *other) const
+	{ return *this == *other; }
+
+	bool operator!=(const RemoteInfo &other) const
+	{ return !(*this == other); }
+
+	bool operator!=(const RemoteInfo *other) const
+	{ return !(*this == other); }
+
+	// overload operator << to print RemoteInfo
+	friend std::ostream &operator<<(std::ostream &os, const RemoteInfo &info)
 	{
-		return m_name;
+		os << "RemoteInfo{"
+		   << "name=" << info.m_name << ", "
+		   << "type=" << info.m_type << ", "
+		   << "path=" << info.m_path << "}";
+		return os;
 	}
 };
 

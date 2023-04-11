@@ -29,8 +29,29 @@ ItemMenu::ItemMenu(QWidget *parent) : QMenu(parent)
 
 }
 
-void ItemMenu::m_info_click(TreeFileItem *file)
+
+void ItemMenu::setActionEnabled(const QList<QPair<Action, bool>> &lst)
 {
-	ItemInfoDialog dialog(file, this);
-	dialog.exec();
+	for (const auto &pair : lst)
+	{
+		switch (pair.first)
+		{
+			case Copy:
+				m_copy->setEnabled(pair.second);
+				break;
+			case Paste:
+				m_paste->setEnabled(pair.second);
+				break;
+			case Info:
+				m_info->setEnabled(pair.second);
+				break;
+			case Delete:
+				m_delete->setEnabled(pair.second);
+				break;
+			case NewFolder:
+				m_newFolder->setEnabled(pair.second);
+				break;
+		}
+	}
+
 }

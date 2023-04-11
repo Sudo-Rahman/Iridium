@@ -1,7 +1,6 @@
 # <img src="https://github.com/Sudo-Rahman/Iridium/blob/main/ressources/app.png" width="50" height="50" align="center" /> Iridium
 
-Application graphique de gestion de remote type google drive, dropbox, one drive, etc...
-
+Graphical application for managing remote storage services such as Google Drive, Dropbox, OneDrive, etc. Using the Qt framework and C++, rclone and Boost libraries.
 <br>
 
 ## Technologies
@@ -13,7 +12,7 @@ Application graphique de gestion de remote type google drive, dropbox, one drive
 
 <br>
 
-## Fonctionnalités
+## Features
 
 - Ajout de remote :
     - [x] Google Drive
@@ -22,19 +21,20 @@ Application graphique de gestion de remote type google drive, dropbox, one drive
     - [ ] Dropbox
     - [ ] FTP
     - [x] SFTP
+    - [ ] ...
 - Gestion de remote :
   - [x] Copier
   - [x] Coller
   - [ ] Renommer
   - [x] Supprimer
-  - [ ] Créer un dossier
+  - [x] Créer un dossier
   - [x] Voir les propriétés
 
 <br>
 
 ## Installation
 
-### Dependance
+### Dependencies
 
 - [Qt](https://www.qt.io/)
 - [CMake](https://cmake.org/)
@@ -45,6 +45,10 @@ Application graphique de gestion de remote type google drive, dropbox, one drive
 ```bash
 git clone https://github.com/Sudo-Rahman/Iridium.git
 cd Iridium
+```
+- Install rclone binary and add it to Iridium path (see [rclone download page](https://rclone.org/downloads/))
+
+```bash
 mkdir build
 cd build
 cmake ..
@@ -53,11 +57,13 @@ make
 
 <br>
 
-### Auteur
+### Authors
 
 - [Sudo-Rahman](https://github.com/Sudo-Rahman)
 
-<br>
+### Additional Resources
+
+- [Fluent icons](https://github.com/vinceliuice/Fluent-icon-theme)
 
 ### Licence
 

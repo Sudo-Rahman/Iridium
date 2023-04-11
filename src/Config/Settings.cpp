@@ -3,7 +3,7 @@
 //
 
 #include "Settings.hpp"
-#include "../Rclone/Rclone.hpp"
+#include <Rclone.hpp>
 
 using namespace std;
 
@@ -85,6 +85,13 @@ void Settings::addLocalRemote(const RemoteInfo &remoteInfo)
 	settings->beginGroup("LocalRemotes");
 	settings->setValue(QString::fromStdString(remoteInfo.name()), QString::fromStdString(remoteInfo.m_path));
 }
+
+void Settings::deleteRemote(const RemoteInfoPtr &remoteInfo){
+	auto *settings = new QSettings(QSettings::IniFormat, QSettings::UserScope, "Iridium", "Iridium");
+	settings->beginGroup("LocalRemotes");
+	settings->remove(QString::fromStdString(remoteInfo->name()));
+}
+
 
 void Settings::init()
 {

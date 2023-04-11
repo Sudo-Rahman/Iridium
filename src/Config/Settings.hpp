@@ -8,7 +8,7 @@
 #include <QSettings>
 #include <QIcon>
 #include <QApplication>
-#include "../Remote/Remote.h"
+#include <Remote.h>
 
 
 class Settings : public QSettings
@@ -42,6 +42,8 @@ public:
 	static void addLocalRemote(const RemoteInfoPtr &remoteInfo);
 
 	static void addLocalRemote(const RemoteInfo &remoteInfo);
+
+	static void deleteRemote(const RemoteInfoPtr &remoteInfo);
 };
 
 

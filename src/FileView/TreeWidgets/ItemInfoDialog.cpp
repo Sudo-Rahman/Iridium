@@ -3,9 +3,11 @@
 //
 
 #include "ItemInfoDialog.hpp"
-#include "../../Utility/Utility.hpp"
+#include <Utility/Utility.hpp>
 #include <QDirIterator>
 #include <QPropertyAnimation>
+
+using namespace Iridium;
 
 ItemInfoDialog::ItemInfoDialog(TreeFileItem *item, QWidget *parent) : QDialog(parent)
 {

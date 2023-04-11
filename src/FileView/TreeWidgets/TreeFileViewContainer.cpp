@@ -11,6 +11,17 @@
  */
 TreeFileViewContainer::TreeFileViewContainer(const RemoteInfoPtr &remoteInfo, QWidget *parent)
 {
+	initUI();
+	m_treeFileView->changeRemote(remoteInfo);
+}
+
+TreeFileViewContainer::TreeFileViewContainer(QWidget *parent)
+{
+	initUI();
+}
+
+void TreeFileViewContainer::initUI()
+{
 	m_layout = new QVBoxLayout(this);
 	setContentsMargins(0, 0, 0, 0);
 	m_layout->setContentsMargins(0, 0, 0, 0);
@@ -21,15 +32,18 @@ TreeFileViewContainer::TreeFileViewContainer(const RemoteInfoPtr &remoteInfo, QW
 	m_layout->addLayout(btnLayout);
 
 	m_backButton = new RoundedButton("<", this);
-	m_backButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+//	m_backButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	m_backButton->setFixedSize(35, 35);
 	btnLayout->addWidget(m_backButton);
 
 	m_frontButton = new RoundedButton(">", this);
-	m_frontButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+//	m_frontButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	m_frontButton->setFixedSize(35, 35);
 	btnLayout->addWidget(m_frontButton);
 
 	m_refreshButton = new RoundedButton("↻", this);
-	m_refreshButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+//	m_refreshButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	m_refreshButton->setFixedSize(35, 35);
 	btnLayout->addWidget(m_refreshButton);
 
 
@@ -44,8 +58,8 @@ TreeFileViewContainer::TreeFileViewContainer(const RemoteInfoPtr &remoteInfo, QW
 	btnLayout->setAlignment(Qt::AlignLeft);
 	btnLayout->setSpacing(0);
 
-	m_treeFileView = new TreeFileView(remoteInfo, this);
-	m_layout->addWidget(m_treeFileView);
+	m_treeFileView = new TreeFileView(this);
+	m_layout->addWidget( m_treeFileView);
 
 
 	connect(m_backButton, &QPushButton::clicked, m_treeFileView, &TreeFileView::back);
@@ -60,5 +74,4 @@ TreeFileViewContainer::TreeFileViewContainer(const RemoteInfoPtr &remoteInfo, QW
 	});
 
 	connect(m_refreshButton, &QPushButton::clicked, m_treeFileView, &TreeFileView::reload);
-
 }

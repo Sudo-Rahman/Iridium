@@ -3,6 +3,7 @@
 //
 
 #include <QPropertyAnimation>
+#include <QMessageBox>
 #include "ListRemoteWidget.hpp"
 #include "../AddNewRemote/AddNewRemoteDialog.hpp"
 #include "../../Config/Settings.hpp"
@@ -30,6 +31,7 @@ ListRemoteWidget::ListRemoteWidget(QWidget *parent) : QScrollArea(parent)
 	auto *toplayout = new QHBoxLayout;
 
 	m_add = new RoundedButton("+");
+	m_add->setFixedSize(35, 35);
 	connect(m_add, &QPushButton::clicked, this, [this]()
 	{
 		auto *addRemote = new AddNewRemoteDialog(this);
@@ -49,6 +51,7 @@ ListRemoteWidget::ListRemoteWidget(QWidget *parent) : QScrollArea(parent)
 	m_remoteLayout = new QVBoxLayout;
 	m_layout->addLayout(m_remoteLayout);
 
+	m_remoteSelected = std::make_shared<remotes_selected>();
 	getAllRemote();
 	// no border
 	setFrameShape(QFrame::NoFrame);
@@ -56,7 +59,6 @@ ListRemoteWidget::ListRemoteWidget(QWidget *parent) : QScrollArea(parent)
 	m_width = QScrollArea::sizeHint().width();
 
 	setMaximumWidth(0);
-
 }
 
 /**
@@ -94,10 +96,46 @@ void ListRemoteWidget::getAllRemote()
 
 	for (auto *remote: m_listRemote)
 	{
-		connect(remote, &RemoteWidget::clicked, this, [this, remote]()
-		{ emit remoteClicked(remote); });
+		connect(remote, &RemoteWidget::clicked, this, [this](RemoteWidget *remoteWidget)
+		{
+			m_remoteSelected->first->setSelectedText("");
+			m_remoteSelected->second->setSelectedText("");
+			if (m_selected)
+				m_remoteSelected->first = remoteWidget;
+			else
+				m_remoteSelected->second = remoteWidget;
+			if (m_remoteSelected->first == m_remoteSelected->second)
+
+				m_remoteSelected->first->setSelectedText("➀➁");
+			else
+			{
+				m_remoteSelected->first->setSelectedText("➀");
+				m_remoteSelected->second->setSelectedText("➁");
+			}
+			m_selected = !m_selected;
+			emit remoteClicked(m_remoteSelected);
+		});
+
+		connect(remote, &RemoteWidget::deleted, this, [this](const auto remoteWidget)
+		{
+			m_listRemote.removeOne(remoteWidget);
+			m_remoteLayout->removeWidget(remoteWidget);
+			delete remoteWidget;
+		});
 		m_remoteLayout->addWidget(remote);
 	}
+
+	if (!m_listRemote.isEmpty())
+	{
+		m_remoteSelected->first = m_listRemote.first();
+		m_remoteSelected->first->setSelectedText("➀");
+	}
+	if (m_listRemote.size() > 1)
+	{
+		m_remoteSelected->second = m_listRemote[1];
+		m_remoteSelected->second->setSelectedText("➁");
+	}
+
 }
 
 /**

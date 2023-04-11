@@ -9,7 +9,8 @@
 #include <QGridLayout>
 #include <QLabel>
 #include <QList>
-#include "../Remote.h"
+#include <Remote.h>
+#include <RoundedButton.hpp>
 
 class RemoteWidget : public QGroupBox
 {
@@ -19,7 +20,6 @@ protected:
 	QHBoxLayout *m_layout{};
 
 	RemoteInfoPtr m_remoteInfo{};
-
 	QLabel *m_selected{};
 
 	bool m_hover{};
@@ -42,11 +42,13 @@ public:
 
 	[[nodiscard]] const RemoteInfoPtr &remoteInfo() const;
 
-	void setSelected(uint8_t);
+	void setSelectedText(const QString &text);
 
 signals:
 
 	void clicked(RemoteWidget *);
+
+	void deleted(RemoteWidget *);
 };
 
 

@@ -13,10 +13,16 @@
 #include <QList>
 
 #include "RemoteWidget.hpp"
-#include "../../Rclone/Rclone.hpp"
-#include "../../Other/RoundedButton.hpp"
-#include "../../Other/RoundedLineEdit.hpp"
+#include <Remote.h>
+#include <RoundedButton.hpp>
+#include <RoundedLineEdit.hpp>
+#include <Rclone.hpp>
 
+struct remotes_selected
+{
+	RemoteWidget *first{};
+	RemoteWidget *second{};
+};
 
 class ListRemoteWidget : public QScrollArea
 {
@@ -30,6 +36,10 @@ private:
 
 	QList<RemoteWidget *> m_listRemote{};
 
+	std::shared_ptr<remotes_selected> m_remoteSelected{};
+
+	bool m_selected{};
+
 	RclonesManager m_manager{};
 
 	int m_width{};
@@ -40,6 +50,9 @@ public:
 
 	void expand();
 
+	const std::shared_ptr<remotes_selected> &remoteSelected()
+	{ return m_remoteSelected; }
+
 private:
 	void getAllRemote();
 
@@ -47,7 +60,7 @@ private:
 
 signals:
 
-	void remoteClicked(RemoteWidget *);
+	void remoteClicked(const std::shared_ptr<remotes_selected> &);
 };
 
 

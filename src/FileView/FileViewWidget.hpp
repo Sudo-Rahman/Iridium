@@ -5,9 +5,10 @@
 #ifndef IRIDIUM_FILEVIEWWIDGET_HPP
 #define IRIDIUM_FILEVIEWWIDGET_HPP
 
-#include "TreeWidgets/TreeFileViewContainer.hpp"
+#include <TreeFileViewContainer.hpp>
 #include <QLayout>
 #include <QProgressBar>
+#include <ListRemoteWidget.hpp>
 
 class FileViewWidget : public QWidget
 {
@@ -20,17 +21,12 @@ private:
 
 	RclonesManager m_rclonesManager{};
 
-	uint8_t m_currentView{};
-
 	QList<TreeFileItem *> m_currentFileList{};
 
 public:
-	explicit FileViewWidget(const RemoteInfo &remoteInfo, QWidget *parent = nullptr);
+	explicit FileViewWidget(QWidget *parent = nullptr);
 
-	void changeRemote(const RemoteInfoPtr &);
-
-private:
-	void copyTo(const QPair<QList<RcloneFilePtr>, RcloneFilePtr> &lst, TreeFileViewContainer *view);
+	void changeRemote(const std::shared_ptr<remotes_selected> &);
 
 
 signals:

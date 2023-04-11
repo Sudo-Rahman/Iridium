@@ -29,31 +29,39 @@ Q_OBJECT
 public:
 	explicit TreeFileView(const RemoteInfoPtr &remoteInfo, QWidget *parent = nullptr);
 
+	explicit TreeFileView(QWidget *parent = nullptr);
+
 	void back();
 
 	void front();
 
 	void changeRemote(const RemoteInfoPtr &info);
 
-	void paste(const QList<TreeFileItem *> &);
+	void copyto(const QList<TreeFileItem *> &);
 
 	void reload();
+
+	RemoteInfoPtr remoteInfo() const
+	{return m_remoteInfo;};
 
 
 protected:
 	void resizeEvent(QResizeEvent *event) override;
 
-	virtual void keyPressEvent(QKeyEvent *event) override;
+	void keyPressEvent(QKeyEvent *event) override;
 
 protected slots:
 
 	void doubleClick(const QModelIndex &index);
 
-	virtual void expand(const QModelIndex &index);
+	void expand(const QModelIndex &index);
 
 	void mouseReleaseEvent(QMouseEvent *event) override;
 
 private:
+
+	void initUI();
+
 	void setModel(RcloneFileModel *model);
 
 	QString getPath();
@@ -66,7 +74,11 @@ private:
 
 	void removeItem(TreeFileItem *item);
 
-	bool fileIsInFolder(const RcloneFilePtr &, TreeFileItem *folder);
+	static bool fileIsInFolder(const RcloneFilePtr &, TreeFileItem *folder);
+
+	void mkdir();
+
+	QDialog *mkdirDialog();
 
 signals:
 

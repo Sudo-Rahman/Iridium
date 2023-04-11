@@ -2,11 +2,13 @@
 // Created by rahman on 12/02/23.
 //
 
+
 #include <sstream>
 #include <cmath>
 #include "Utility.hpp"
 
 using namespace std;
+using namespace Iridium;
 
 /**
  * @brief Utility::numberToString, coverti un nombre en string avec des espaces
@@ -14,7 +16,7 @@ using namespace std;
  * @param space
  * @return string
  */
-std::string Utility::numberToString(uint64_t num, int space)
+string Utility::numberToString(uint64_t num, int space)
 {
 	string tmpSize;
 
@@ -44,7 +46,7 @@ std::string Utility::numberToString(uint64_t num, int space)
  * @param space
  * @return string
  */
-std::string Utility::numberToString(double64_t num, int space)
+string Utility::numberToString(double64_t num, int space)
 {
 	string tmpSize;
 
@@ -63,7 +65,7 @@ std::string Utility::numberToString(double64_t num, int space)
  * @param size
  * @return string
  */
-std::string Utility::sizeToString(double64_t size)
+string Utility::sizeToString(double64_t size)
 {
 	if (size / pow(1024, 4.0) > 1)
 	{
