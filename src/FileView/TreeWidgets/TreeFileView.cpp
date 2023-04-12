@@ -195,9 +195,11 @@ void TreeFileView::doubleClick(const QModelIndex &index)
 	dynamic_cast<RcloneFileModel *>(model)->addItem(item->getFile(), item);
 	if (!item->getFile()->isDir())
 		return;
+	// get parent index
 	auto id = item->getParent() == nullptr ? index.parent() : model->indexFromItem(item->getParent()).parent();
 	indexBack.push_back(id);
 	indexTop.clear();
+	// if item getParent is null,it's first column item, else we get first column item.
 	QTreeView::setRootIndex(item->getParent() == nullptr ? index : model->indexFromItem(item->getParent()));
 	emit pathChanged(getPath());
 }
@@ -228,7 +230,7 @@ void TreeFileView::mouseReleaseEvent(QMouseEvent *event)
 			{
 				auto *dialog = new ItemInfoDialog(item, this);
 				dialog->move(QPoint(rand() % 1000, rand() % 1000));
-				dialog->show();
+				dialog->open();
 			}
 		});
 
@@ -321,7 +323,7 @@ void TreeFileView::copyto(const QList<TreeFileItem *> &items)
 			continue;
 
 		RcloneFilePtr newFile = std::make_shared<RcloneFile>(
-			treePaste->getFile()->getPath() + "/" + item->getFile()->getName(),
+			treePaste->getFile()->getPath() + item->getFile()->getName(),
 			item->getFile()->getSize(),
 			item->getFile()->isDir(),
 			item->getFile()->isDir() ? QDateTime::currentDateTime() : item->getFile()->getModTime(),
@@ -332,7 +334,7 @@ void TreeFileView::copyto(const QList<TreeFileItem *> &items)
 		{
 			if (exit == 0)
 			{
-				auto *treeItem = new TreeFileItem(newFile->getName(), newFile, treePaste, true);
+				auto *treeItem = new TreeFileItem(newFile->getName(), newFile, nullptr, true);
 				auto list = RcloneFileModel::getItemList(treeItem);
 				if (newFile->isDir())
 					treeItem->appendRow({});
@@ -586,6 +588,7 @@ void TreeFileView::mkdir()
 		QDateTime::currentDateTime(),
 		m_remoteInfo
 	);
+	qDebug() << "mkdir" << rcloneFile->getPath();
 	if (fileIsInFolder(rcloneFile->getName(), items.first()))
 	{
 		auto msgb = QMessageBox(QMessageBox::Critical, tr("Création"), tr("Le dossier existe déjà"),
@@ -607,7 +610,7 @@ void TreeFileView::mkdir()
 		{
 			auto msgb = QMessageBox(QMessageBox::Critical, tr("Création"), tr("Le dossier n’a pas pu être créé"),
 									QMessageBox::Ok, this);
-			msgb.setDetailedText(QString::fromStdString(rclone->readAllError()));
+			msgb.setDetailedText(QString::fromStdString(rclone->readAllError().back()));
 			msgb.exec();
 		}
 	});
@@ -621,6 +624,7 @@ void TreeFileView::mkdir()
  */
 void TreeFileView::editItem(const QModelIndex &index)
 {
+	// if not the first column
 	if (model->index(index.row(), 0, index.parent()) not_eq index)
 		return;
 	auto *item = dynamic_cast<TreeFileItem *>(model->itemFromIndex(index));
@@ -632,6 +636,11 @@ void TreeFileView::editItem(const QModelIndex &index)
 	edit(index);
 }
 
+/**
+ * @brief reanme item
+ * @param item
+ * @param newName
+ */
 void TreeFileView::rename(const TreeFileItem *item, const QString &newName)
 {
 	auto rclone = m_rclonesManager.get();
@@ -646,7 +655,7 @@ void TreeFileView::rename(const TreeFileItem *item, const QString &newName)
 			model->itemFromIndex(item->index())->setText(item->getFile()->getName());
 			auto msgb = QMessageBox(QMessageBox::Critical, tr("Renommage"), tr("Le fichier n’a pas pu être renommé"),
 									QMessageBox::Ok, this);
-			msgb.setDetailedText(QString::fromStdString(rclone->readAllError()));
+			msgb.setDetailedText(QString::fromStdString(rclone->readAllError().back()));
 			msgb.exec();
 		}
 	});

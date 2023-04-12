@@ -8,6 +8,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <boost/thread.hpp>
 
 typedef long double double64_t;
 
@@ -25,6 +26,8 @@ namespace Iridium
 		[[nodiscard]] static std::string numberToString(double64_t num, int space = 3);
 
 		[[nodiscard]] static std::string sizeToString(double64_t num);
+
+		static void KillThread(const boost::detail::thread_data_base::native_handle_type &handle);
 	};
 
 }

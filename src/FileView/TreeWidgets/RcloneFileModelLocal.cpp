@@ -5,6 +5,7 @@
 #include "RcloneFileModelLocal.hpp"
 #include "TreeFileItemLocal.hpp"
 #include <Settings.hpp>
+#include <Utility/Utility.hpp>
 
 
 RcloneFileModelLocal::RcloneFileModelLocal(const RemoteInfoPtr &remoteInfo, QObject *parent) : RcloneFileModel(
@@ -18,11 +19,7 @@ void RcloneFileModelLocal::addItem(const RcloneFilePtr &file, TreeFileItem *pare
 	if (m_thread not_eq nullptr)
 	{
 		m_thread->detach();
-#ifdef Q_OS_WIN32
-		TerminateThread(m_thread->native_handle(), 0);
-#else
-		pthread_kill(m_thread->native_handle(), SIGKILL);
-#endif
+		Iridium::Utility::KillThread(m_thread->native_handle());
 	}
 	auto *tree_item = (parent->getParent() == nullptr ? parent : parent->getParent());
 	m_thread = boost::make_shared<boost::thread>(

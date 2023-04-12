@@ -7,7 +7,10 @@
 #include <utility>
 #include <iostream>
 
+#include <Utility/Utility.hpp>
+
 namespace bp = boost::process;
+namespace bj = boost::json;
 using namespace std;
 
 /**
@@ -56,9 +59,15 @@ void Rclone::lsJson(const string &path)
 		{
 			if (exit == 0)
 			{
-				auto doc = QJsonDocument::fromJson(
-					QString::fromStdString(mdata).toUtf8());
-				emit lsJsonFinished(doc);
+				try
+				{
+					auto joinStr = boost::algorithm::join(m_out, "");
+					lsJsonFinished(QJsonDocument::fromJson(joinStr.c_str()));
+				} catch (boost::exception &e)
+				{
+					emit lsJsonFinished(QJsonDocument());
+					cerr << "Error: " << boost::diagnostic_information(e) << endl;
+				}
 			}
 		});
 	execute({"lsjson", path, "--drive-skip-gdocs", "--fast-list"});
@@ -73,27 +82,17 @@ void Rclone::copyTo(const RcloneFile &src, const RcloneFile &dest)
 {
 	vector<string> arguments(
 		{"copyto", src.getPath().toStdString(), dest.getPath().toStdString(),
-		 "-P"});
+		 "-v", "--use-json-log", "--stats", "0.2s"});
 
 	m_readyRead.connect(
 		[this](const string &data)
 		{
-			auto qdata = QString::fromStdString(data).split("\n");
-			if (not qdata.isEmpty())
-			{
-				auto l1 = qdata[0].split(QRegularExpression(" |,"));
-				erase_if(l1, [](const auto &item)
-				{ return item == "" or item == "\t" or item == ","; });
-				if (l1.size() > 11)
-				{
-					if (l1[11].remove("%").toInt() != 100)
-						emit copyProgress(l1[11].remove("%").toInt());
-				}
-			}
+			try
+			{ emit taskProgress(bj::parse(data).as_object()); }
+			catch (boost::exception &e)
+			{ cerr << "Error: " << boost::diagnostic_information(e) << endl; }
 		});
 	execute(arguments);
-	m_finished.connect([this](int ex)
-					   { emit copyProgress(100); });
 }
 
 
@@ -120,12 +119,6 @@ void Rclone::deleteFile(const RcloneFile &file)
  */
 void Rclone::config(RemoteType type, const string &name, const vector<string> &params)
 {
-	m_finished.connect([this](int exit)
-					   {
-						   emit
-							   configFinished(exit);
-					   });
-
 	vector<string> args = {"config", "create", name};
 	switch (type)
 	{
@@ -143,7 +136,7 @@ void Rclone::config(RemoteType type, const string &name, const vector<string> &p
 }
 
 /**
- * @brief Rclone::listRemotes, permet de lister les remotes configurés
+ * @brief Rclone::m_lstRemote, permet de lister les remotes configurés
  */
 void Rclone::listRemotes()
 {
@@ -152,12 +145,10 @@ void Rclone::listRemotes()
 		{
 			if (exit == 0)
 			{
-				auto data = QString::fromStdString(mdata).split("\n");
-				erase_if(data, [](auto &str)
-				{ return str == ""; });
 				map<string, string> map;
-				for (auto &str: data)
+				for (auto &string: m_out)
 				{
+					auto str = QString::fromStdString(string);
 					auto name = str.split(":")[0].toStdString();
 					auto type = str.split(":")[1].toStdString();
 					type.erase(remove(type.begin(), type.end(), ' '), type.end());
@@ -190,7 +181,7 @@ void Rclone::execute(const vector<string> &args)
 		{
 			if (manager != nullptr)
 				manager->start();
-			mdata.clear();
+			m_out.clear();
 			bp::ipstream out;
 			bp::ipstream err;
 			auto process = bp::child(m_pathRclone, bp::args(args),
@@ -200,15 +191,28 @@ void Rclone::execute(const vector<string> &args)
 
 			v.notify_one();
 
-			string line;
-			while (getline(out, line))
-			{
-				mdata += line + "\n";
-				m_readyRead(line);
-			}
-			while (getline(err, line))
-			{ m_error += line + "\n"; }
+			string line_out, line_err;
+			auto th1 = boost::thread(
+				[this, &err, &line_err]
+				{
+					while (getline(err, line_err))
+					{
+						m_error.emplace_back(line_err);
+						m_readyRead(line_err);
+					}
+				});
+			auto th2 = boost::thread(
+				[this, &out, &line_out]
+				{
+					while (getline(out, line_out))
+					{
+						m_out.emplace_back(line_out);
+						m_readyRead(line_out);
+					}
+				});
 			process.wait();
+			th1.join();
+			th2.join();
 			mstate = Finsished;
 			exit = process.exit_code();
 			m_finished(exit);
@@ -247,11 +251,7 @@ void Rclone::terminate()
 	{
 		mthread->detach();
 		cout << "process rclone kill" << endl;
-#ifdef Q_OS_WIN32
-		TerminateThread(mthread->native_handle(), 0);
-#else
-		pthread_kill(mthread->native_handle(), SIGKILL);
-#endif
+		Iridium::Utility::KillThread(mthread->native_handle());
 		if (mthread->joinable())
 			mthread->join();
 		mstate = Finsished;
@@ -290,18 +290,24 @@ void Rclone::size(const string &path)
 		{
 			if (exit == 0)
 			{
-				auto data = QString::fromStdString(mdata).split("\n");
-				if (data.size() > 1)
+				for (const auto &string: m_out)
 				{
-					auto l1 = QRegularExpression(R"(\(\d+\))").match(data[0]).captured(0).remove("(").remove(
-						")").toUInt();
-					auto l2 = QRegularExpression(R"(\d+.\d+ \w+)").match(data[1]).captured(0);
-					auto l3 = QRegularExpression(R"(\(\d+)").match(data[1]).captured(0).remove("(").toULongLong();
-					emit sizeFinished(l1, l3, l2);
+					try
+					{
+						auto json = bj::parse(string);
+						auto count = json.at("count").as_int64();
+						auto sizeBytes = json.at("bytes").as_int64();
+						auto humanReadable = Iridium::Utility::sizeToString( sizeBytes);
+						emit sizeFinished(count, sizeBytes, humanReadable);
+					} catch (boost::exception &e)
+					{
+						cerr << "Erreur parse json" << endl;
+						cerr << boost::diagnostic_information(e) << endl;
+					}
 				}
 			}
 		});
-	execute({"size", path});
+	execute({"size", path, "--json"});
 
 }
 
@@ -310,7 +316,7 @@ map<string, string> Rclone::getData() const
 	return m_mapData;
 }
 
-string Rclone::readAllError() const
+std::vector<std::string> Rclone::readAllError() const
 {
 	return m_error;
 }

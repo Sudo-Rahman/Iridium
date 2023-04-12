@@ -19,8 +19,8 @@ void GoogleDriveRemoteConfigParamsFrame::addRemote()
 		return;
 	m_rclone->config(RemoteType::Drive, m_remoteName->text().toStdString());
 	m_rclone->waitForStarted();
-	logInBtn->hide();
-	cancelBtn->show();
+	m_login->hide();
+	m_cancel->show();
 }
 
 void GoogleDriveRemoteConfigParamsFrame::createUi()

@@ -59,8 +59,6 @@ public:
 
 	[[nodiscard]] QString getModTimeString() const;
 
-	[[nodiscard]] QString getIsDirString() const;
-
 	[[nodiscard]] std::shared_ptr<RemoteInfo> getRemoteInfo() const;
 
 	[[nodiscard]] uint32_t getObjs() const;
@@ -72,7 +70,7 @@ public:
 	// define copy operator and copy constructor
 	RcloneFile(const RcloneFile &other)
 	{
-		path = other.path;
+		setPath(other.path);
 		size = other.size;
 		isDirectory = other.isDirectory;
 		modTime = other.modTime;

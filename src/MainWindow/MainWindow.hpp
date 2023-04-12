@@ -9,6 +9,7 @@
 #include <QCoreApplication>
 #include <QSettings>
 #include <QLayout>
+#include <QSplitter>
 #include <Rclone.hpp>
 #include <ListRemoteWidget.hpp>
 #include <FileViewWidget.hpp>
@@ -19,12 +20,11 @@ class MainWindow : public QMainWindow
 {
 Q_OBJECT
 
-	QList<RemoteWidget *> m_listRemote{};
 	ToolBar *m_toolBar{};
 	ListRemoteWidget *m_listRemoteWidget{};
 	FileViewWidget *m_fileViewWidget{};
 	QHBoxLayout *m_layout{};
-	QVBoxLayout *m_mainLayout{};
+	QSplitter *m_splitter{};
 
 public:
 	explicit MainWindow(QWidget *parent = nullptr);

@@ -9,6 +9,7 @@
 #include <QLabel>
 #include <QGridLayout>
 #include <boost/thread.hpp>
+#include <Utility/Utility.hpp>
 #include <QTimer>
 #include "TreeFileItem.hpp"
 #include <Rclone.hpp>
@@ -49,6 +50,10 @@ private:
 	void loading();
 
 	void initLabel();
+
+protected:
+
+	~ItemInfoDialog() override;
 
 signals:
 

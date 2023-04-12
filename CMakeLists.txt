@@ -15,7 +15,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
 set(Boost_USE_STATIC_LIBS ON)
-find_package(Boost COMPONENTS system filesystem thread REQUIRED)
+find_package(Boost COMPONENTS system filesystem json thread REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 
 find_package(QT NAMES Qt6 REQUIRED COMPONENTS
@@ -42,9 +42,10 @@ set(SRC
         src/FileView/TreeWidgets/ItemInfoDialog.cpp src/FileView/TreeWidgets/ItemInfoDialog.hpp src/Utility/Utility.cpp src/Utility/Utility.hpp src/FileView/TreeWidgets/RcloneProxy.cpp src/FileView/TreeWidgets/RcloneProxy.hpp src/Remote/ListRemote/ListRemoteWidget.cpp src/Remote/ListRemote/ListRemoteWidget.hpp
         src/Remote/ListRemote/RemoteWidget.cpp src/Remote/ListRemote/RemoteWidget.hpp src/FileView/TreeWidgets/RcloneFileModelLocal.cpp src/FileView/TreeWidgets/RcloneFileModelLocal.hpp src/FileView/FileViewWidget.cpp src/FileView/FileViewWidget.hpp src/FileView/TreeWidgets/TreeFileItemLocal.cpp src/FileView/TreeWidgets/TreeFileItemLocal.hpp
         src/FileView/TreeWidgets/TreeFileItemDistant.cpp src/FileView/TreeWidgets/TreeFileItemDistant.hpp src/FileView/TreeWidgets/TreeFileViewContainer.cpp src/FileView/TreeWidgets/TreeFileViewContainer.hpp src/Remote/AddNewRemote/Local/LocalRemoteConfigParamsFrame.cpp src/Remote/AddNewRemote/Local/LocalRemoteConfigParamsFrame.hpp src/MainWindow/ToolBar.cpp
-        src/MainWindow/ToolBar.hpp src/Config/Settings.cpp src/Config/Settings.hpp src/Other/RoundedButton.cpp src/Other/RoundedButton.hpp src/Remote/AddNewRemote/Sftp/SftpRemoteConfigParamsFrame.cpp src/Remote/AddNewRemote/Sftp/SftpRemoteConfigParamsFrame.hpp src/Other/RoundedLineEdit.cpp src/Other/RoundedLineEdit.hpp)
+        src/MainWindow/ToolBar.hpp src/Config/Settings.cpp src/Config/Settings.hpp src/Other/RoundedButton.cpp src/Other/RoundedButton.hpp src/Remote/AddNewRemote/Sftp/SftpRemoteConfigParamsFrame.cpp src/Remote/AddNewRemote/Sftp/SftpRemoteConfigParamsFrame.hpp src/Other/RoundedLineEdit.cpp src/Other/RoundedLineEdit.hpp src/Task/TaskTreeView.cpp src/Task/TaskTreeView.hpp src/Task/TaskItem.cpp src/Task/TaskItem.hpp)
 
 include_directories(src
+        src/Task
         src/Config
         src/FileView
         src/FileView/TreeWidgets
@@ -87,6 +88,7 @@ target_link_libraries(Iridium PRIVATE
         Boost::system
         Boost::filesystem
         Boost::thread
+        Boost::json
         )
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     target_link_libraries(Iridium PRIVATE ws2_32)

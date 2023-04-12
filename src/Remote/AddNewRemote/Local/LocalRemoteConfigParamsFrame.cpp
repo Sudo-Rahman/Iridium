@@ -15,17 +15,13 @@ LocalRemoteConfigParamsFrame::LocalRemoteConfigParamsFrame(QWidget *parent) : Re
 void LocalRemoteConfigParamsFrame::createUi()
 {
 
-	auto *layout = new QHBoxLayout;
-	layout->setContentsMargins(0, 0, 0, 0);
-	m_layout->addLayout(layout);
-
 	auto *btn = new QPushButton(tr("Chemin du dossier"), this);
-	layout->addWidget(btn);
 
 	auto *path = new QLineEdit(this);
 	path->setPlaceholderText("/user/home");
 	connecLineEdit(path);
-	layout->addWidget(path);
+
+	m_formLayout->addRow(btn, path);
 
 	connect(btn, &QPushButton::clicked, this, [this, path]()
 	{
@@ -55,7 +51,7 @@ void LocalRemoteConfigParamsFrame::createUi()
 	});
 
 	RemoteConfigParamsFrame::createUi();
-	logInBtn->setText(tr("Ajouter"));
+	m_login->setText(tr("Ajouter"));
 
 }
 
@@ -72,7 +68,7 @@ void LocalRemoteConfigParamsFrame::addRemote()
 
 	} else
 	{
-		messageLabel->setText(tr("Le chemin n’existe pas !"));
-		messageLabel->show();
+		m_messLabel->setText(tr("Le chemin n’existe pas !"));
+		m_messLabel->show();
 	}
 }

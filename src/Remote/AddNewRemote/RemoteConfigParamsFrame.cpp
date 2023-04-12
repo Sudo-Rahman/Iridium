@@ -13,8 +13,11 @@ RemoteConfigParamsFrame::RemoteConfigParamsFrame(QWidget *parent) : QFrame(paren
 {
 	m_layout = new QVBoxLayout(this);
 
-	auto *tmpLayout = new QHBoxLayout;
-	tmpLayout->addWidget(new QLabel(tr("Nom : "), this));
+	m_formLayout = new QFormLayout;
+	m_formLayout->setFieldGrowthPolicy(QFormLayout::ExpandingFieldsGrow);
+	m_formLayout->setFormAlignment( Qt::AlignTop);
+	m_formLayout->setContentsMargins(0, 0, 0, 0);
+	m_layout->addLayout(m_formLayout);
 
 	m_remoteName = new QLineEdit(this);
 	m_remoteName->setStyleSheet("border: 1px solid gray; border-radius: 5px;");
@@ -22,15 +25,14 @@ RemoteConfigParamsFrame::RemoteConfigParamsFrame(QWidget *parent) : QFrame(paren
 	{
 		if (not text.isEmpty())
 			m_remoteName->setStyleSheet("border: 1px solid gray; border-radius: 5px;");
-		if (not messageLabel->isHidden())
-			messageLabel->hide();
+		if (not m_messLabel->isHidden())
+			m_messLabel->hide();
 	});
-	tmpLayout->addWidget(m_remoteName);
+	m_formLayout->addRow(tr("Nom : "),m_remoteName);
 
-	m_layout->addLayout(tmpLayout);
 
 	m_rclone = Rclone::instance();
-	connect(m_rclone.get(), &Rclone::configFinished, this, [this](int exit)
+	connect(m_rclone.get(), &Rclone::finished, this, [this](int exit)
 	{
 		if (exit == 0)
 		{
@@ -43,7 +45,7 @@ RemoteConfigParamsFrame::RemoteConfigParamsFrame(QWidget *parent) : QFrame(paren
 			auto *msgBox = new QMessageBox();
 			msgBox->setWindowTitle(tr("Erreur"));
 			msgBox->setText(tr("Une erreur est survenue lors de la configuration du serveur distant !"));
-			msgBox->setDetailedText(m_rclone->readAllError().c_str());
+			msgBox->setDetailedText(m_rclone->readAllError().back().c_str());
 			msgBox->setStandardButtons(QMessageBox::Ok);
 			msgBox->exec();
 		}
@@ -54,39 +56,39 @@ void RemoteConfigParamsFrame::createUi()
 {
 	auto *tmpwidlay = new QHBoxLayout;
 
-	logInBtn = new QPushButton(tr("Se connecter"), this);
-	logInBtn->setDefault(true);
-	logInBtn->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	m_login = new QPushButton(tr("Se connecter"), this);
+	m_login->setDefault(true);
+	m_login->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
-	tmpwidlay->addWidget(logInBtn, Qt::AlignTop);
-	tmpwidlay->setAlignment(logInBtn, Qt::AlignTop);
+	tmpwidlay->addWidget(m_login, Qt::AlignTop);
+	tmpwidlay->setAlignment(m_login, Qt::AlignTop);
 
-	cancelBtn = new QPushButton(tr("Annuler"), this);
-	cancelBtn->hide();
-	cancelBtn->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-	tmpwidlay->addWidget(cancelBtn, Qt::AlignTop);
-	tmpwidlay->setAlignment(cancelBtn, Qt::AlignTop);
+	m_cancel = new QPushButton(tr("Annuler"), this);
+	m_cancel->hide();
+	m_cancel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	tmpwidlay->addWidget(m_cancel, Qt::AlignTop);
+	tmpwidlay->setAlignment(m_cancel, Qt::AlignTop);
 
 	m_layout->addLayout(tmpwidlay);
 
-	connect(logInBtn, &QPushButton::clicked, this, &RemoteConfigParamsFrame::addRemote);
+	connect(m_login, &QPushButton::clicked, this, &RemoteConfigParamsFrame::addRemote);
 
-	connect(cancelBtn, &QPushButton::clicked, this, [this]()
+	connect(m_cancel, &QPushButton::clicked, this, [this]()
 	{
 		if (m_rclone->getState() == Rclone::Running)
 			m_rclone->terminate();
-		cancelBtn->hide();
-		logInBtn->show();
+		m_cancel->hide();
+		m_login->show();
 	});
 
-	messageLabel = new QLabel(this);
-	messageLabel->hide();
-	messageLabel->setAutoFillBackground(true);
+	m_messLabel = new QLabel(this);
+	m_messLabel->hide();
+	m_messLabel->setAutoFillBackground(true);
 	QPalette p;
 	p.setColor(QPalette::WindowText, Qt::red);
-	messageLabel->setPalette(p);
-	m_layout->addWidget(messageLabel, Qt::AlignTop);
-	m_layout->setAlignment(messageLabel, Qt::AlignTop);
+	m_messLabel->setPalette(p);
+	m_layout->addWidget(m_messLabel, Qt::AlignTop);
+	m_layout->setAlignment(m_messLabel, Qt::AlignTop);
 }
 
 void RemoteConfigParamsFrame::addRemote()
@@ -94,8 +96,8 @@ void RemoteConfigParamsFrame::addRemote()
 	if (m_remoteName->text().isEmpty())
 	{
 		m_remoteName->setStyleSheet("border: 1px solid red; border-radius: 5px;");
-		messageLabel->show();
-		messageLabel->setText(tr("Les champs en rouge sont obligatoires !"));
+		m_messLabel->show();
+		m_messLabel->setText(tr("Les champs en rouge sont obligatoires !"));
 		return;
 	}
 
@@ -103,7 +105,7 @@ void RemoteConfigParamsFrame::addRemote()
 	rclone_liste_remote.listRemotes();
 	rclone_liste_remote.waitForStarted();
 	rclone_liste_remote.waitForFinished();
-	listRemotes = rclone_liste_remote.getData();
+	m_lstRemote = rclone_liste_remote.getData();
 
 }
 
@@ -112,8 +114,8 @@ bool RemoteConfigParamsFrame::checkFields()
 	if (m_remoteName->text().isEmpty())
 	{
 		m_remoteName->setStyleSheet("border: 1px solid red; border-radius: 5px;");
-		messageLabel->show();
-		messageLabel->setText(tr("Les champs en rouge sont obligatoires !"));
+		m_messLabel->show();
+		m_messLabel->setText(tr("Les champs en rouge sont obligatoires !"));
 		return false;
 	}
 	return true;

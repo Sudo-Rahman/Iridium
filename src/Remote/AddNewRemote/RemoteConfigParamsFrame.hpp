@@ -8,6 +8,7 @@
 #include <QFrame>
 #include <QPushButton>
 #include <QLayout>
+#include <QFormLayout>
 #include <QLabel>
 #include <QLineEdit>
 
@@ -19,12 +20,13 @@ class RemoteConfigParamsFrame : public QFrame
 Q_OBJECT
 
 protected:
-	QPushButton *logInBtn{}, *cancelBtn{};
-	QLabel *messageLabel{};
+	QPushButton *m_login{}, *m_cancel{};
+	QLabel *m_messLabel{};
 	QVBoxLayout *m_layout{};
+	QFormLayout *m_formLayout{};
 	QLineEdit *m_remoteName{};
 	RclonePtr m_rclone{};
-	std::map<std::string, std::string> listRemotes{};
+	std::map<std::string, std::string> m_lstRemote{};
 public:
 	explicit RemoteConfigParamsFrame(QWidget *parent = nullptr);
 

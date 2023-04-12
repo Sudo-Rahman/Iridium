@@ -133,17 +133,19 @@ void ItemInfoDialog::initSize()
 	{
 		loading();
 		auto rclone = m_manager.get();
-		connect(rclone.get(), &Rclone::sizeFinished, this, [this](uint32_t objs, uint64_t size, QString strSize)
-		{
-			m_timer.stop();
-			m_size->setText(
-				QString::fromStdString(Utility::numberToString(size)) + " octets" + " (" + strSize + ")");
-			m_objs->setText(QString::fromStdString(Utility::numberToString((uint64_t) objs)));
-			m_file->setSize(size);
-			m_file->setObjs(objs);
-			m_objs->setFont({});
-			m_size->setFont({});
-		});
+		connect(rclone.get(), &Rclone::sizeFinished, this,
+				[this](const uint32_t &objs, const uint64_t &size, const std::string &strSize)
+				{
+					m_timer.stop();
+					m_size->setText(
+						QString::fromStdString(Utility::numberToString(size)) + " octets" + " (" + strSize.c_str() +
+						")");
+					m_objs->setText(QString::fromStdString(Utility::numberToString((uint64_t) objs)));
+					m_file->setSize(size);
+					m_file->setObjs(objs);
+					m_objs->setFont({});
+					m_size->setFont({});
+				});
 		rclone->size(m_file->getPath().toStdString());
 	} else
 	{
@@ -191,4 +193,14 @@ void ItemInfoDialog::initType()
 	m_layout->addWidget(m_type, row, 1, 1, 1);
 	row++;
 
+}
+
+ItemInfoDialog::~ItemInfoDialog()
+{
+	if (m_thread)
+	{
+		m_thread->detach();
+		if (m_thread->joinable())
+			Iridium::Utility::KillThread(m_thread->native_handle());
+	}
 }

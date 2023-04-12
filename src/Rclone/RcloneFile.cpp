@@ -17,7 +17,6 @@ void RcloneFile::init()
 		setPath(info.absoluteFilePath());
 
 	}
-	setPath(path);
 	setIsDir(info.isDir());
 }
 
@@ -112,15 +111,6 @@ QString RcloneFile::getModTimeString() const
 {
 	return QLocale::system().toString(modTime, tr("dd MMM yyyy à hh:mm:ss"));
 }
-
-QString RcloneFile::getIsDirString() const
-{
-	if (isDirectory)
-		return tr("Dossier");
-	else
-		return tr("Fichier");
-}
-
 
 uint32_t RcloneFile::getObjs() const
 {

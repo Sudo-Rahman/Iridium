@@ -169,7 +169,7 @@ void RemoteWidget::init()
 					auto msgb = QMessageBox(QMessageBox::Critical, "Suppression",
 											"Une erreur est survenue lors de la suppression du remote",
 											QMessageBox::Ok, this);
-					msgb.setDetailedText(QString::fromStdString(rclone.readAllError()));
+					msgb.setDetailedText(QString::fromStdString(rclone.readAllError().back()));
 					return;
 				}
 			}

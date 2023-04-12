@@ -16,6 +16,7 @@
 #include <boost/signals2.hpp>
 #include <boost/process.hpp>
 #include <boost/thread.hpp>
+#include <boost/json.hpp>
 #include <thread>
 #include <vector>
 #include <iostream>
@@ -48,8 +49,8 @@ public:
 private:
 	static std::string m_pathRclone;
 	std::shared_ptr<boost::thread> mthread{};
-	std::string mdata{};
-	std::string m_error{};
+	std::vector<std::string> m_out{};
+	std::vector<std::string> m_error{};
 	std::map<std::string, std::string> m_mapData{};
 	uint8_t exit{};
 	Rclone::State mstate{};
@@ -92,7 +93,7 @@ public:
 
 	[[nodiscard]] std::map<std::string, std::string> getData() const;
 
-	[[nodiscard]] std::string readAllError() const;
+	[[nodiscard]] std::vector<std::string> readAllError() const;
 
 	[[nodiscard]] uint8_t exitCode() const;
 
@@ -109,13 +110,11 @@ signals:
 
 	void lsJsonFinished(const QJsonDocument &);
 
-	void copyProgress(const int);
+	void taskProgress(const boost::json::object &);
 
-	void configFinished(int exit);
+	void sizeFinished(const uint32_t &objs, const uint64_t &size, const std::string &strSize);
 
-	void sizeFinished(uint32_t objs, uint64_t size, QString strSize);
-
-	void fileDeleted(int exit);
+	void fileDeleted(const int &exit);
 
 
 };

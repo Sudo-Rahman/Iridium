@@ -9,6 +9,7 @@
 #include <QLayout>
 #include <QProgressBar>
 #include <ListRemoteWidget.hpp>
+#include <QSplitter>
 
 class FileViewWidget : public QWidget
 {
@@ -18,6 +19,8 @@ private:
 	TreeFileViewContainer *m_treeFileView1{};
 	TreeFileViewContainer *m_treeFileView2{};
 	QHBoxLayout *m_layout{};
+
+	QSplitter *m_splitter{};
 
 	RclonesManager m_rclonesManager{};
 

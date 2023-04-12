@@ -10,12 +10,15 @@ FileViewWidget::FileViewWidget(QWidget *parent) : QWidget(parent)
 	setContentsMargins(0, 0, 0, 0);
 	m_layout->setContentsMargins(0, 0, 0, 0);
 
+	m_splitter = new QSplitter(this);
+	m_splitter->setOrientation(Qt::Horizontal);
+	m_layout->addWidget(m_splitter);
+
 	m_treeFileView1 = new TreeFileViewContainer(this);
-	m_layout->addWidget(m_treeFileView1);
+	m_splitter->addWidget(m_treeFileView1);
 
 	m_treeFileView2 = new TreeFileViewContainer(this);
-	m_layout->addWidget(m_treeFileView2);
-
+	m_splitter->addWidget(m_treeFileView2);
 
 	connect(m_treeFileView1->treeFileView(), &TreeFileView::fileCopied, this, [this](const QList<TreeFileItem *> &lst)
 	{ m_currentFileList = lst; });
