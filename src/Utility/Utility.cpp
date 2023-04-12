@@ -7,6 +7,10 @@
 #include <cmath>
 #include "Utility.hpp"
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 using namespace std;
 using namespace Iridium;
 
@@ -104,7 +108,7 @@ string Utility::sizeToString(double64_t size)
 void Utility::KillThread(const boost::detail::thread_data_base::native_handle_type &handle)
 {
 #ifdef _WIN32
-	TerminateProcess(handle, 0);
+	TerminateThread(handle, 0);
 #else
 	pthread_kill(handle, SIGKILL);
 #endif

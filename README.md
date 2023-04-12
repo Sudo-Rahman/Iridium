@@ -13,7 +13,7 @@ Graphical application for managing remote storage services such as Google Drive,
 
 ## Features
 
-- Ajout de remote :
+- Add remote :
     - [x] Google Drive
     - [x] Local
     - [ ] One Drive
@@ -21,13 +21,14 @@ Graphical application for managing remote storage services such as Google Drive,
     - [ ] FTP
     - [x] SFTP
     - [ ] ...
-- Gestion de remote :
-  - [x] Copier
-  - [x] Coller
-  - [ ] Renommer
-  - [x] Supprimer
-  - [x] Créer un dossier
-  - [x] Voir les propriétés
+- Manage remote :
+  - [x] Copy
+  - [x] Paste
+  - [x] Rename
+  - [x] Delete
+  - [x] Create new folder
+  - [x] View file properties
+  - [x] View Transfer progress
 
 <br>
 

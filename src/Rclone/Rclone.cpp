@@ -8,6 +8,11 @@
 #include <iostream>
 
 #include <Utility/Utility.hpp>
+#include <boost/algorithm/string/join.hpp>
+
+#ifdef _WIN32
+#include <boost/process/windows.hpp>
+#endif
 
 namespace bp = boost::process;
 namespace bj = boost::json;
@@ -191,7 +196,12 @@ void Rclone::execute(const vector<string> &args)
 			bp::ipstream err;
 			auto process = bp::child(m_pathRclone, bp::args(args),
 									 bp::std_out > out,
-									 bp::std_err > err);
+									 bp::std_err > err
+#ifdef _WIN32
+				, bp::windows::hide
+#endif
+			);
+
 			mstate = Running;
 
 			v.notify_one();

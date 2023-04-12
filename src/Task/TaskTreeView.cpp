@@ -70,7 +70,7 @@ void TaskTreeView::addTask(const QString &src, const QString &dst, const RcloneP
 			hashList.emplace_back(id);
 
 			// if the task already exist
-			if (m_tasks.contains(id))
+			if (m_tasks.find(id) != m_tasks.end())
 				m_tasks[id]->updateData(item.as_object());
 			// if not exist, create a new one
 			else
