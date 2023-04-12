@@ -82,13 +82,18 @@ void Rclone::copyTo(const RcloneFile &src, const RcloneFile &dest)
 {
 	vector<string> arguments(
 		{"copyto", src.getPath().toStdString(), dest.getPath().toStdString(),
-		 "-v", "--use-json-log", "--stats", "0.2s"});
+		 "-v", "--use-json-log", "--stats", "0.1s"});
 
 	m_readyRead.connect(
 		[this](const string &data)
 		{
 			try
-			{ emit taskProgress(bj::parse(data).as_object()); }
+			{
+				auto json = bj::parse(data).as_object();
+				emit taskProgress(json);
+				m_mapData.clear();
+				m_mapData.emplace("json", boost::json::serialize(json));
+			}
 			catch (boost::exception &e)
 			{ cerr << "Error: " << boost::diagnostic_information(e) << endl; }
 		});
@@ -297,7 +302,7 @@ void Rclone::size(const string &path)
 						auto json = bj::parse(string);
 						auto count = json.at("count").as_int64();
 						auto sizeBytes = json.at("bytes").as_int64();
-						auto humanReadable = Iridium::Utility::sizeToString( sizeBytes);
+						auto humanReadable = Iridium::Utility::sizeToString(sizeBytes);
 						emit sizeFinished(count, sizeBytes, humanReadable);
 					} catch (boost::exception &e)
 					{

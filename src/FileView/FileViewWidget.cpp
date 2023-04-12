@@ -42,6 +42,18 @@ FileViewWidget::FileViewWidget(QWidget *parent) : QWidget(parent)
 			lst << item->getFile();
 		m_treeFileView2->treeFileView()->copyto(m_currentFileList);
 	});
+
+	connect(m_treeFileView1->treeFileView(), &TreeFileView::taskAdded, this,
+			[this](const QString &src, const QString &dst, const RclonePtr &rclone)
+			{
+				emit taskAdded(src, dst, rclone);
+			});
+
+	connect(m_treeFileView2->treeFileView(), &TreeFileView::taskAdded, this,
+			[this](const QString &src, const QString &dst, const RclonePtr &rclone)
+			{
+				emit taskAdded(src, dst, rclone);
+			});
 }
 
 void FileViewWidget::changeRemote(const std::shared_ptr<remotes_selected> &remotes)

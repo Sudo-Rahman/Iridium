@@ -6,28 +6,24 @@
 #define IRIDIUM_TASKTREEVIEW_HPP
 
 #include <QList>
+#include <boost/unordered_map.hpp>
 #include <QTreeView>
 #include <QLayout>
+#include "TaskRow.hpp"
 
 class TaskTreeView : public QTreeView
 {
 Q_OBJECT
 
-	QList<QWidget *> m_tasks;
+	boost::unordered_map<size_t, TaskRowPtr> m_tasks{};
+
+	QStandardItemModel *m_model{};
 
 
 public:
 	explicit TaskTreeView(QWidget *parent = nullptr);
 
-//	void addTask(QWidget *task);
-//
-//	void removeTask(QWidget *task);
-//
-//	void clearAllTasks();
-//
-//	void setTasks(QList<QWidget *> tasks);
-//
-//	QList<QWidget *> getTasks() const;
+	void addTask(const QString &src, const QString &dst, const RclonePtr &rclone);
 
 };
 

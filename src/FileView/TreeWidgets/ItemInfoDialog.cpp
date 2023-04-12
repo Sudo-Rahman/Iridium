@@ -204,3 +204,8 @@ ItemInfoDialog::~ItemInfoDialog()
 			Iridium::Utility::KillThread(m_thread->native_handle());
 	}
 }
+
+void ItemInfoDialog::reject()
+{
+	QDialog::close();
+}

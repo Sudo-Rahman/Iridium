@@ -31,6 +31,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
 	m_splitter = new QSplitter(this);
 	m_splitter->setOrientation(Qt::Vertical);
+	m_splitter->setHandleWidth(15);
 	// no collapsible first widget
 	m_layout->addWidget(m_splitter);
 
@@ -38,12 +39,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	m_splitter->addWidget(m_fileViewWidget);
 	m_fileViewWidget->changeRemote(m_listRemoteWidget->remoteSelected());
 
-	m_splitter->addWidget(new TaskTreeView(this));
+	m_taskTreeView = new TaskTreeView(this);
+	m_splitter->addWidget(m_taskTreeView);
 
 	m_splitter->setCollapsible(0, false);
 	m_splitter->setCollapsible(1, true);
 	// collapse second widget
-	m_splitter->setSizes({10000,  0 });
+	m_splitter->setSizes({10000,0});
 
 	connectSignals();
 }
@@ -60,7 +62,11 @@ void MainWindow::connectSignals()
 			{
 				m_fileViewWidget->changeRemote(remotes);
 			});
-	connect(m_fileViewWidget, &FileViewWidget::progressBarCreated, this, [this](QProgressBar *progressBar)
+	connect(m_fileViewWidget, &FileViewWidget::taskAdded, this, [this](const QString &src, const QString &dst, const RclonePtr &rclone)
 	{
+		if(m_splitter->sizes()[1] == 0)
+			m_splitter->setSizes({1000, 400});
+		m_taskTreeView->addTask(src, dst, rclone);
 	});
+
 }

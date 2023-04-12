@@ -55,6 +55,8 @@ protected:
 
 	~ItemInfoDialog() override;
 
+	void reject() override;
+
 signals:
 
 	void m_threadFinished();

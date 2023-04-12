@@ -13,6 +13,7 @@
 #include <Rclone.hpp>
 #include <ListRemoteWidget.hpp>
 #include <FileViewWidget.hpp>
+#include <TaskTreeView.hpp>
 #include "ToolBar.hpp"
 
 
@@ -25,6 +26,7 @@ Q_OBJECT
 	FileViewWidget *m_fileViewWidget{};
 	QHBoxLayout *m_layout{};
 	QSplitter *m_splitter{};
+	TaskTreeView *m_taskTreeView{};
 
 public:
 	explicit MainWindow(QWidget *parent = nullptr);

@@ -341,6 +341,7 @@ void TreeFileView::copyto(const QList<TreeFileItem *> &items)
 				treePaste->appendRow(list);
 			}
 		});
+		emit taskAdded(item->getFile()->getPath(), newFile->getPath(), rclone);
 		rclone->copyTo(item->getFile().operator*(), newFile.operator*());
 	}
 }

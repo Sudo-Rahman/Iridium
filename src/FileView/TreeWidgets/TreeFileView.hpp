@@ -97,6 +97,8 @@ signals:
 
 	void pasted(const RcloneFilePtr &);
 
+	void taskAdded(const QString &src, const QString &dst, const RclonePtr &rclone);
+
 };
 
 #endif //IRIDIUM_TREEFILEVIEW_HPP

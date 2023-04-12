@@ -98,10 +98,11 @@ public:
 	[[nodiscard]] uint8_t exitCode() const;
 
 
+	boost::signals2::signal<void(const std::string &)> m_readyRead{};
 private:
+
 	void execute(const std::vector<std::string> &args);
 
-	boost::signals2::signal<void(const std::string &)> m_readyRead{};
 	boost::signals2::signal<void(const int exit)> m_finished{};
 
 signals:

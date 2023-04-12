@@ -34,8 +34,7 @@ public:
 
 signals:
 
-	void progressBarCreated(QProgressBar *progressBar);
-
+	void taskAdded(const QString &src, const QString &dst, const RclonePtr &rclone);
 };
 
 

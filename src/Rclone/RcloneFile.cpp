@@ -18,12 +18,14 @@ void RcloneFile::init()
 
 	}
 	setIsDir(info.isDir());
+	if (m_remoteInfo->isLocal() and isDirectory)
+		setPath(path);
 }
 
 
 RcloneFile::RcloneFile(const QString &pathFile, const RemoteInfoPtr &remoteInfo)
 {
-	setPath(pathFile);
+	path = pathFile;
 	m_remoteInfo = remoteInfo;
 	init();
 }
@@ -46,7 +48,8 @@ void RcloneFile::setPath(const QString &path)
 {
 	RcloneFile::path = path;
 	if (not path.endsWith("/") and not path.isEmpty() and isDirectory)
-		RcloneFile::path += "/";}
+		RcloneFile::path += "/";
+}
 
 uint64_t RcloneFile::getSize() const
 {
