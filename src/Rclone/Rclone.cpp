@@ -92,15 +92,13 @@ void Rclone::copyTo(const RcloneFile &src, const RcloneFile &dest)
 	m_readyRead.connect(
 		[this](const string &data)
 		{
-			try
+			bj::object json = parseJson(data);
+			if (not json.contains("error"))
 			{
-				auto json = bj::parse(data).as_object();
 				emit taskProgress(json);
 				m_mapData.clear();
 				m_mapData.emplace("json", boost::json::serialize(json));
 			}
-			catch (boost::exception &e)
-			{ cerr << "Error: " << boost::diagnostic_information(e) << endl; }
 		});
 	execute(arguments);
 }
@@ -112,13 +110,11 @@ void Rclone::copyTo(const RcloneFile &src, const RcloneFile &dest)
  */
 void Rclone::deleteFile(const RcloneFile &file)
 {
-	m_finished.connect(
-		[this](const int exit)
-		{ emit fileDeleted(exit); });
+	connectTaskSignalFinishedJson();
 	if (!file.isDir())
-		execute({"deletefile", file.getPath().toStdString(), "-v"});
+		execute({"deletefile", file.getPath().toStdString(), "-v", "--use-json-log", "--stats", "0.1s"});
 	else
-		execute({"purge", file.getPath().toStdString(), "-v"});
+		execute({"purge", file.getPath().toStdString(), "-v","--use-json-log", "--stats", "0.1s"});
 }
 
 
@@ -347,12 +343,57 @@ uint8_t Rclone::exitCode() const
  */
 void Rclone::mkdir(const RcloneFile &dir)
 {
-	execute({"mkdir", dir.getPath().toStdString()});
+	connectTaskSignalFinishedJson();
+	execute({"mkdir", dir.getPath().toStdString(), "-v", "--use-json-log", "--stats", "0.1s"});
 }
 
 void Rclone::moveto(const RcloneFile &src, const RcloneFile &dest)
 {
-	execute({"moveto", src.getPath().toStdString(), dest.getPath().toStdString()});
+	connectTaskSignalFinishedJson();
+	execute({"moveto", src.getPath().toStdString(), dest.getPath().toStdString(), "-v", "--use-json-log", "--stats",
+			 "0.1s"});
+}
+
+bj::object Rclone::parseJson(const string &str)
+{
+	try
+	{
+		auto json = bj::parse(str);
+		return json.as_object();
+	} catch (boost::exception &e)
+	{
+		cerr << "Erreur parse json" << endl;
+		cerr << boost::diagnostic_information(e) << endl;
+	}
+	auto json = bj::object();
+	json.emplace("error", true);
+	return json;
+}
+
+void Rclone::connectTaskSignalFinishedJson()
+{
+	m_finished.connect(
+		[this](int exit)
+		{
+			bj::object json;
+			if (exit == 0)
+			{
+				auto out = m_out;
+				auto err = m_error;
+				out.insert(out.end(), err.begin(), err.end());
+				json = parseJson(out.back());
+				if (not json.contains("error"))
+				{
+					m_mapData.clear();
+					m_mapData.emplace("json", boost::json::serialize(json));
+				}
+			} else
+			{
+				json = bj::object();
+				json.emplace("error", m_error.back());
+			}
+			emit taskFinished(exit, json);
+		});
 }
 
 

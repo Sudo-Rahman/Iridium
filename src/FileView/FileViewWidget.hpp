@@ -34,7 +34,9 @@ public:
 
 signals:
 
-	void taskAdded(const QString &src, const QString &dst, const RclonePtr &rclone);
+	void
+	taskAdded(const QString &src, const QString &dst, const RclonePtr &rclone, const std::function<void()> &callable,
+			  const Rclone::TaskType &type = Rclone::Unknown);
 };
 
 

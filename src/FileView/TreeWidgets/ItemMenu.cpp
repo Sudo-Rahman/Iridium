@@ -32,7 +32,7 @@ ItemMenu::ItemMenu(QWidget *parent) : QMenu(parent)
 
 void ItemMenu::setActionEnabled(const QList<QPair<Action, bool>> &lst)
 {
-	for (const auto &pair : lst)
+	for (const auto &pair: lst)
 	{
 		switch (pair.first)
 		{

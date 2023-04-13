@@ -44,15 +44,17 @@ FileViewWidget::FileViewWidget(QWidget *parent) : QWidget(parent)
 	});
 
 	connect(m_treeFileView1->treeFileView(), &TreeFileView::taskAdded, this,
-			[this](const QString &src, const QString &dst, const RclonePtr &rclone)
+			[this](const QString &src, const QString &dst, const RclonePtr &rclone,
+				   const std::function<void()> &callable, const Rclone::TaskType &type)
 			{
-				emit taskAdded(src, dst, rclone);
+				emit taskAdded(src, dst, rclone, callable, type);
 			});
 
 	connect(m_treeFileView2->treeFileView(), &TreeFileView::taskAdded, this,
-			[this](const QString &src, const QString &dst, const RclonePtr &rclone)
+			[this](const QString &src, const QString &dst, const RclonePtr &rclone,
+				   const std::function<void()> &callable, const Rclone::TaskType &type)
 			{
-				emit taskAdded(src, dst, rclone);
+				emit taskAdded(src, dst, rclone, callable, type);
 			});
 }
 

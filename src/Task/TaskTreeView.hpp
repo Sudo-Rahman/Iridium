@@ -23,7 +23,8 @@ Q_OBJECT
 public:
 	explicit TaskTreeView(QWidget *parent = nullptr);
 
-	void addTask(const QString &src, const QString &dst, const RclonePtr &rclone);
+	void addTask(const QString &src, const QString &dst, const RclonePtr &rclone, const std::function<void()> &callable,
+				 const Rclone::TaskType &type = Rclone::Unknown);
 
 };
 

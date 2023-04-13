@@ -45,7 +45,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	m_splitter->setCollapsible(0, false);
 	m_splitter->setCollapsible(1, true);
 	// collapse second widget
-	m_splitter->setSizes({10000,0});
+	m_splitter->setSizes({10000, 0});
 
 	connectSignals();
 }
@@ -62,11 +62,13 @@ void MainWindow::connectSignals()
 			{
 				m_fileViewWidget->changeRemote(remotes);
 			});
-	connect(m_fileViewWidget, &FileViewWidget::taskAdded, this, [this](const QString &src, const QString &dst, const RclonePtr &rclone)
-	{
-		if(m_splitter->sizes()[1] == 0)
-			m_splitter->setSizes({1000, 400});
-		m_taskTreeView->addTask(src, dst, rclone);
-	});
+	connect(m_fileViewWidget, &FileViewWidget::taskAdded, this,
+			[this](const QString &src, const QString &dst, const RclonePtr &rclone,
+				   const std::function<void()> &callable, const Rclone::TaskType &type)
+			{
+				if (m_splitter->sizes()[1] == 0)
+					m_splitter->setSizes({1000, 400});
+				m_taskTreeView->addTask(src, dst, rclone, callable, type);
+			});
 
 }

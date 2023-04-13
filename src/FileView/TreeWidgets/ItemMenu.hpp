@@ -23,13 +23,15 @@ private:
 
 public:
 
-	enum Action{
+	enum Action
+	{
 		Copy,
 		Paste,
 		Info,
 		Delete,
 		NewFolder
 	};
+
 	explicit ItemMenu(QWidget *parent = nullptr);
 
 	void setActionEnabled(const QList<QPair<Action, bool>> &lst);

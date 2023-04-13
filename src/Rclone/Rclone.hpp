@@ -45,6 +45,11 @@ public:
 		NotLaunched, Running, Finsished
 	};
 
+	enum TaskType
+	{
+		Unknown, Copy, Move, Delete, Mkdir, Rename
+	};
+
 
 private:
 	static std::string m_pathRclone;
@@ -105,6 +110,11 @@ private:
 
 	boost::signals2::signal<void(const int exit)> m_finished{};
 
+	static boost::json::object parseJson(const std::string &str);
+
+	void connectTaskSignalFinishedJson();
+
+
 signals:
 
 	void finished(int exit);
@@ -115,8 +125,7 @@ signals:
 
 	void sizeFinished(const uint32_t &objs, const uint64_t &size, const std::string &strSize);
 
-	void fileDeleted(const int &exit);
-
+	void taskFinished(const int &exit, const boost::json::object &);
 
 };
 

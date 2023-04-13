@@ -105,7 +105,7 @@ RemoteWidget::RemoteWidget(const RemoteInfoPtr &remoteInfo, QWidget *parent)
 void RemoteWidget::init()
 {
 	m_layout = new QHBoxLayout(this);
-	m_layout->setContentsMargins(10,5, 5, 5);
+	m_layout->setContentsMargins(10, 5, 5, 5);
 	m_layout->setSpacing(0);
 
 	auto *labelIcon = new QLabel;
@@ -145,7 +145,7 @@ void RemoteWidget::init()
 	m_delete->setToolTip("Delete");
 
 	rightLayout->addWidget(m_delete, 0, Qt::AlignTop | Qt::AlignRight);
-	rightLayout->addWidget(m_selected,0, Qt::AlignBottom | Qt::AlignCenter);
+	rightLayout->addWidget(m_selected, 0, Qt::AlignBottom | Qt::AlignCenter);
 
 	m_layout->addLayout(rightLayout);
 

@@ -54,7 +54,7 @@ void TreeFileView::initUI()
 	setUniformRowHeights(true);
 
 	header()->setSectionsMovable(true);
-	header()->setFont(QFont("Arial", 13, QFont::DemiBold));
+	header()->setFont(QFont("Arial", 13));
 	header()->setSortIndicatorShown(true);
 	header()->setSectionsClickable(true);
 	header()->setStretchLastSection(false);
@@ -341,8 +341,11 @@ void TreeFileView::copyto(const QList<TreeFileItem *> &items)
 				treePaste->appendRow(list);
 			}
 		});
-		emit taskAdded(item->getFile()->getPath(), newFile->getPath(), rclone);
-		rclone->copyTo(item->getFile().operator*(), newFile.operator*());
+		emit taskAdded(item->getFile()->getPath(), newFile->getPath(), rclone,
+					   [rclone, newFile, item]
+					   {
+						   rclone->copyTo(item->getFile().operator*(), newFile.operator*());
+					   }, Rclone::Copy);
 	}
 }
 
@@ -453,19 +456,18 @@ void TreeFileView::deleteFile(const QList<TreeFileItem *> &items)
 	for (auto item: items)
 	{
 		auto rclone = m_rclonesManager.get();
-		connect(rclone.get(), &Rclone::fileDeleted, this, [this, files, item, rclone](const int exit)
+		connect(rclone.get(), &Rclone::taskFinished, this, [this, files, item, rclone](const int exit)
 		{
 			if (exit == 0)
 			{
 				m_rclonesManager.release(rclone);
-//				QMessageBox::information(this, tr("Suppression"), files.join(", ") + tr(" Supprimé"));
 				removeItem(item);
-			} else
-			{
-				QMessageBox::critical(this, tr("Suppression"), files.join(", ") + tr(" non supprimé"));
 			}
 		});
-		rclone->deleteFile(item->getFile().operator*());
+		emit taskAdded(item->getFile()->getPath(), "--", rclone, [rclone, item]()
+		{
+			rclone->deleteFile(item->getFile().operator*());
+		}, Rclone::Delete);
 	}
 }
 
@@ -583,13 +585,13 @@ void TreeFileView::mkdir()
 		return;
 	auto items = getSelectedItems();
 	auto rcloneFile = std::make_shared<RcloneFile>(
-		getPath() + "/" + name,
+		getPath() + name,
 		0,
 		true,
 		QDateTime::currentDateTime(),
 		m_remoteInfo
 	);
-	qDebug() << "mkdir" << rcloneFile->getPath();
+//	qDebug() << "mkdir" << rcloneFile->getPath();
 	if (fileIsInFolder(rcloneFile->getName(), items.first()))
 	{
 		auto msgb = QMessageBox(QMessageBox::Critical, tr("Création"), tr("Le dossier existe déjà"),
@@ -615,7 +617,10 @@ void TreeFileView::mkdir()
 			msgb.exec();
 		}
 	});
-	rclone->mkdir(newItem->getFile().operator*());
+	emit taskAdded("--", newItem->getFile()->getPath(), rclone, [rclone, newItem]
+	{
+		rclone->mkdir(newItem->getFile().operator*());
+	}, Rclone::Mkdir);
 }
 
 
@@ -663,7 +668,10 @@ void TreeFileView::rename(const TreeFileItem *item, const QString &newName)
 	auto oldFile = *(item->getFile());
 	auto newFile = oldFile;
 	newFile.changeName(newName);
-	rclone->moveto(oldFile, newFile);
+	emit taskAdded(oldFile.getPath(), newFile.getPath(), rclone, [oldFile, newFile, rclone]()
+	{
+		rclone->moveto(oldFile, newFile);
+	}, Rclone::Rename);
 }
 
 void TreeFileView::mousePressEvent(QMouseEvent *event)

@@ -59,7 +59,7 @@ void TreeFileViewContainer::initUI()
 	btnLayout->setSpacing(0);
 
 	m_treeFileView = new TreeFileView(this);
-	m_layout->addWidget( m_treeFileView);
+	m_layout->addWidget(m_treeFileView);
 
 
 	connect(m_backButton, &QPushButton::clicked, m_treeFileView, &TreeFileView::back);

@@ -18,7 +18,9 @@ Q_OBJECT
 
 public:
 	explicit RoundedButton(const QString &text, QWidget *parent = nullptr);
-	explicit RoundedButton( QWidget *parent = nullptr){};
+
+	explicit RoundedButton(QWidget *parent = nullptr)
+	{};
 
 protected:
 	void paintEvent(QPaintEvent *event) override;

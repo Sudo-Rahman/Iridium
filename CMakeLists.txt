@@ -21,11 +21,13 @@ include_directories(${Boost_INCLUDE_DIRS})
 find_package(QT NAMES Qt6 REQUIRED COMPONENTS
         Core
         Gui
-        Widgets)
+        Widgets
+        LinguistTools)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS
         Core
         Gui
-        Widgets)
+        Widgets
+        LinguistTools)
 
 
 set(SRC
@@ -60,6 +62,13 @@ SET(TRANSLATION
         languages/iridium_en.ts
         )
 
+#qt_create_translation(QM_FILES
+#        ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
+#        ${TRANSLATION})
+
+## update translation
+#qt_add_translation(QM_FILES ${TRANSLATION})
+
 
 set(RCLONE "${CMAKE_CURRENT_SOURCE_DIR}/rclone")
 
@@ -70,7 +79,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     set(myApp_ICON ressources/app.icns)
     set_source_files_properties(${myApp_ICON} PROPERTIES
             MACOSX_PACKAGE_LOCATION "Resources")
-    add_executable(Iridium MACOSX_BUNDLE application.qrc ${TRANSLATION} ${myApp_ICON} ${SRC})
+    add_executable(Iridium MACOSX_BUNDLE application.qrc ${myApp_ICON} ${SRC} ${QM_FILES})
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     file(COPY ${RCLONE}.exe DESTINATION Iridium/../)
     enable_language("RC")

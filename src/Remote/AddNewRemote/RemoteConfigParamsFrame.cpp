@@ -15,7 +15,7 @@ RemoteConfigParamsFrame::RemoteConfigParamsFrame(QWidget *parent) : QFrame(paren
 
 	m_formLayout = new QFormLayout;
 	m_formLayout->setFieldGrowthPolicy(QFormLayout::ExpandingFieldsGrow);
-	m_formLayout->setFormAlignment( Qt::AlignTop);
+	m_formLayout->setFormAlignment(Qt::AlignTop);
 	m_formLayout->setContentsMargins(0, 0, 0, 0);
 	m_layout->addLayout(m_formLayout);
 
@@ -28,7 +28,7 @@ RemoteConfigParamsFrame::RemoteConfigParamsFrame(QWidget *parent) : QFrame(paren
 		if (not m_messLabel->isHidden())
 			m_messLabel->hide();
 	});
-	m_formLayout->addRow(tr("Nom : "),m_remoteName);
+	m_formLayout->addRow(tr("Nom : "), m_remoteName);
 
 
 	m_rclone = Rclone::instance();
