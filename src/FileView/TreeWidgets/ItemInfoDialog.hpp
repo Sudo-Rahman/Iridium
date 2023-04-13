@@ -22,8 +22,6 @@ Q_OBJECT
 private:
 	QGridLayout *m_layout{};
 
-	RclonesManager m_manager{};
-
 	std::shared_ptr<RcloneFile> m_file{};
 	QLabel *m_icon{};
 	QLabel *m_name{};

@@ -23,7 +23,7 @@ using namespace std;
  * @param path
  * @param parent
  */
-Rclone::Rclone(string path, RclonesManager *parent) : manager(parent)
+Rclone::Rclone(string path)
 {
 	Rclone::m_pathRclone = std::move(path);
 }
@@ -32,7 +32,7 @@ Rclone::Rclone(string path, RclonesManager *parent) : manager(parent)
  * @brief Rclone::Rclone
  * @param parent
  */
-Rclone::Rclone(RclonesManager *parent) : manager(parent)
+Rclone::Rclone()
 {}
 
 /**
@@ -115,7 +115,7 @@ void Rclone::deleteFile(const RcloneFile &file)
 	if (!file.isDir())
 		execute({"deletefile", file.getPath().toStdString(), "-v", "--use-json-log", "--stats", "0.1s"});
 	else
-		execute({"purge", file.getPath().toStdString(), "-v","--use-json-log", "--stats", "0.1s"});
+		execute({"purge", file.getPath().toStdString(), "-v", "--use-json-log", "--stats", "0.1s"});
 }
 
 
@@ -183,11 +183,10 @@ void Rclone::deleteRemote(const string &remote)
 void Rclone::execute(const vector<string> &args)
 {
 	qDebug() << args;
-	mthread = std::make_shared<boost::thread>(
+	m_thread = std::make_shared<boost::thread>(
 		[this, args]
 		{
-			if (manager != nullptr)
-				manager->start();
+			RcloneManager::start();
 			m_out.clear();
 			bp::ipstream out;
 			bp::ipstream err;
@@ -199,9 +198,9 @@ void Rclone::execute(const vector<string> &args)
 #endif
 			);
 
-			mstate = Running;
+			m_state = Running;
 
-			v.notify_one();
+			m_cv.notify_one();
 
 			string line_out, line_err;
 			auto th1 = boost::thread(
@@ -209,7 +208,7 @@ void Rclone::execute(const vector<string> &args)
 				{
 					while (getline(err, line_err))
 					{
-						if(m_error.size() > 1000)
+						if (m_error.size() > 1000)
 							m_error.clear();
 						m_error.emplace_back(line_err);
 						m_readyRead(line_err);
@@ -220,7 +219,7 @@ void Rclone::execute(const vector<string> &args)
 				{
 					while (getline(out, line_out))
 					{
-						if(m_out.size() > 1000)
+						if (m_out.size() > 1000)
 							m_out.clear();
 						m_out.emplace_back(line_out);
 						m_readyRead(line_out);
@@ -229,12 +228,11 @@ void Rclone::execute(const vector<string> &args)
 			process.wait();
 			th1.join();
 			th2.join();
-			mstate = Finsished;
-			exit = process.exit_code();
-			m_finished(exit);
-			if (manager != nullptr)
-				manager->finished();
-			emit finished(exit);
+			m_state = Finsished;
+			m_exit = process.exit_code();
+			m_finished(m_exit);
+			RcloneManager::finished();
+			emit finished(m_exit);
 			terminate();
 		});
 }
@@ -244,10 +242,10 @@ void Rclone::execute(const vector<string> &args)
  */
 void Rclone::waitForFinished()
 {
-	if (mstate not_eq Running)
+	if (m_state not_eq Running)
 		waitForStarted();
-	if (mstate == Running and mthread->joinable())
-		mthread->join();
+	if (m_state == Running and m_thread->joinable())
+		m_thread->join();
 }
 
 /**
@@ -263,15 +261,15 @@ Rclone::~Rclone()
  */
 void Rclone::terminate()
 {
-	if (mstate == Running)
+	if (m_state == Running)
 	{
 
-		mthread->detach();
+		m_thread->detach();
 		cout << "process rclone kill" << endl;
-		Iridium::Utility::KillThread(mthread->native_handle());
-		if (mthread->joinable())
-			mthread->join();
-		mstate = Finsished;
+		Iridium::Utility::KillThread(m_thread->native_handle());
+		if (m_thread->joinable())
+			m_thread->join();
+		m_state = Finsished;
 	}
 }
 
@@ -281,7 +279,7 @@ void Rclone::terminate()
  */
 Rclone::State Rclone::getState() const
 {
-	return mstate;
+	return m_state;
 }
 
 /**
@@ -289,10 +287,10 @@ Rclone::State Rclone::getState() const
  */
 void Rclone::waitForStarted()
 {
-	while (mstate != Running)
+	while (m_state != Running)
 	{
-		std::unique_lock<std::mutex> lock(m);
-		v.wait(lock);
+		std::unique_lock<std::mutex> lock(m_mutex);
+		m_cv.wait(lock);
 	}
 }
 
@@ -340,7 +338,7 @@ std::vector<std::string> Rclone::readAllError() const
 
 uint8_t Rclone::exitCode() const
 {
-	return exit;
+	return m_exit;
 }
 
 /**
@@ -402,58 +400,67 @@ void Rclone::connectTaskSignalFinishedJson()
 		});
 }
 
+atomic_uint32_t RcloneManager::m_nbRclone;
+uint16_t RcloneManager::m_nbMaxProcess = thread::hardware_concurrency();
+mutex RcloneManager::m_mutex;
+condition_variable RcloneManager::m_cv;
+vector<RclonePtr> RcloneManager::m_rcloneVector;
 
 /**
- * @brief RclonesManager::RclonesManager, constructeur
+ * @brief RcloneManager::RcloneManager, constructeur
  * @param nbMaxProcess nombre de processus m_rclone maximum
  */
-RclonesManager::RclonesManager(unsigned nbMaxProcess) : nbMaxProcess(nbMaxProcess)
-{}
+RcloneManager::RcloneManager(unsigned nbMaxProcess)
+{
+	RcloneManager::m_nbMaxProcess = nbMaxProcess;
+}
 
 /**
- * @brief RclonesManager::RclonesManager, constructeur
+ * @brief RcloneManager::RcloneManager, constructeur
  */
-RclonesManager::RclonesManager() : nbMaxProcess(thread::hardware_concurrency())
-{}
+RcloneManager::RcloneManager()
+{
+	RcloneManager::m_nbMaxProcess = thread::hardware_concurrency();
+}
 
 /**
- * @brief RclonesManager::get, retourne un pointeur vers un m_rclone
+ * @brief RcloneManager::get, retourne un pointeur vers un m_rclone
  * @return un pointeur vers un m_rclone
  */
-RclonePtr RclonesManager::get()
+RclonePtr RcloneManager::get()
 {
-	rcloneVector.push_back(make_shared<Rclone>(this));
-	return rcloneVector.back();
+	auto rclone = make_shared<Rclone>();
+	RcloneManager::m_rcloneVector.push_back(rclone);
+	return rclone;
 }
 
 /**
- * @brief RclonesManager::start, un processus m_rclone appel cette fonction pour notifier le manager qu'il démarre
+ * @brief RcloneManager::start, un processus m_rclone appel cette fonction pour notifier le manager qu'il démarre
  */
-void RclonesManager::start()
+void RcloneManager::start()
 {
-	while (nb_rclones >= nbMaxProcess)
+	while (RcloneManager::m_nbRclone >= RcloneManager::m_nbMaxProcess)
 	{
-		std::unique_lock<std::mutex> lock(mutex);
-		conditionVariable.wait(lock);
+		std::unique_lock<std::mutex> lock(RcloneManager::m_mutex);
+		RcloneManager::m_cv.wait(lock);
 	}
-	nb_rclones++;
+	RcloneManager::m_nbRclone++;
 }
 
 /**
- * @brief RclonesManager::m_finished, un processus m_rclone appel cette fonction lorsqu'il se termine, pour notifier le manager
+ * @brief RcloneManager::m_finished, un processus m_rclone appel cette fonction lorsqu'il se termine, pour notifier le manager
  */
-void RclonesManager::finished()
+void RcloneManager::finished()
 {
-	nb_rclones--;
-	conditionVariable.notify_one();
-	if (nb_rclones == 0 and rcloneVector.size() > 1)
-		allFinished();
+	RcloneManager::m_nbRclone--;
+	RcloneManager::m_cv.notify_one();
 }
 
 /**
- * @brief RclonesManager::m_finished, un processus m_rclone appel cette fonction lorsqu'il se termine, pour notifier le manager
+ * @brief RcloneManager::m_finished, un processus m_rclone appel cette fonction lorsqu'il se termine, pour notifier le manager
  */
-void RclonesManager::release(RclonePtr rclone)
+void RcloneManager::release(const RclonePtr& rclone)
 {
-	rcloneVector.erase(std::remove(rcloneVector.begin(), rcloneVector.end(), rclone), rcloneVector.end());
+	RcloneManager::m_rcloneVector.erase(std::remove(RcloneManager::m_rcloneVector.begin(), RcloneManager::m_rcloneVector.end(), rclone),
+										 RcloneManager::m_rcloneVector.end());
 }

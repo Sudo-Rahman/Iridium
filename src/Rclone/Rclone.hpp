@@ -24,18 +24,17 @@
 #include "RcloneFile.hpp"
 #include <Remote.h>
 
-class RclonesManager;
 
 class Rclone : public QObject
 {
 Q_OBJECT
 
 public:
-	explicit Rclone(std::string path, RclonesManager * = nullptr);
+	explicit Rclone(std::string path);
 
-	explicit Rclone(RclonesManager * = nullptr);
+	explicit Rclone();
 
-	static std::shared_ptr<Rclone> instance(RclonesManager * = nullptr)
+	static std::shared_ptr<Rclone> instance()
 	{ return std::make_shared<Rclone>(); };
 
 	~Rclone() override;
@@ -53,18 +52,15 @@ public:
 
 private:
 	static std::string m_pathRclone;
-	std::shared_ptr<boost::thread> mthread{};
+	std::shared_ptr<boost::thread> m_thread{};
 	std::vector<std::string> m_out{};
 	std::vector<std::string> m_error{};
 	std::map<std::string, std::string> m_mapData{};
-	uint8_t exit{};
-	Rclone::State mstate{};
-	RclonesManager *manager{};
+	uint8_t m_exit{};
+	Rclone::State m_state{};
 
-	bool m_running = true;
-
-	std::mutex m;
-	std::condition_variable v;
+	std::mutex m_mutex;
+	std::condition_variable m_cv;
 
 public:
 
@@ -133,43 +129,33 @@ signals:
 
 typedef std::shared_ptr<Rclone> RclonePtr;
 
-class RclonesManager
+class RcloneManager
 {
+
 	friend class Rclone;
 
-	std::atomic<unsigned> nb_rclones{};
-	unsigned nbMaxProcess{};
-	std::mutex mutex{};
-	std::condition_variable conditionVariable{};
-	std::vector<RclonePtr> rcloneVector{};
+	static std::atomic_uint32_t m_nbRclone;
+	static uint16_t m_nbMaxProcess;
+	static std::mutex m_mutex;
+	static std::condition_variable m_cv;
+	static std::vector<RclonePtr> m_rcloneVector;
 
 public:
-	explicit RclonesManager(unsigned nbMaxProcess);
+	explicit RcloneManager(unsigned nbMaxProcess);
 
-	explicit RclonesManager();
+	explicit RcloneManager();
 
-	~RclonesManager()
-	{
-		mutex.unlock();
-		conditionVariable.notify_all();
-		for (auto &rclone: rcloneVector)
-			rclone->terminate();
-		rcloneVector.clear();
-	};
+	static RclonePtr get();
 
-	RclonePtr get();
-
-	void release(RclonePtr rclone);
-
-	boost::signals2::signal<void()> allFinished;
+	static void release(const RclonePtr& rclone);
 
 private:
-	void start();
+	static void start();
 
-	void finished();
+	static void finished();
 
 };
 
-typedef std::shared_ptr<RclonesManager> RclonesManagerPtr;
+typedef std::shared_ptr<RcloneManager> RcloneManagerPtr;
 
 #endif //IRIDIUM_RCLONE_HPP

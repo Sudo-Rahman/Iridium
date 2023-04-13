@@ -40,7 +40,6 @@ private:
 
 	bool m_selected{};
 
-	RclonesManager m_manager{};
 
 	int m_width{};
 	bool m_isExpand{};

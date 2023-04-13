@@ -44,7 +44,7 @@ void RcloneFileModelDistant::addItemDynamic(const QString &path, TreeFileItem *p
 {
 
 	auto *tree_item = (parent->getParent() == nullptr ? parent : parent->getParent());
-	auto rclone = manager.get();
+	auto rclone = RcloneManager::get();
 	connect(rclone.get(), &Rclone::lsJsonFinished, this, [tree_item, path, this](const QJsonDocument &doc)
 	{
 		for (const auto &file: doc.array())
@@ -63,7 +63,7 @@ void RcloneFileModelDistant::addItemDynamic(const QString &path, TreeFileItem *p
 
 void RcloneFileModelDistant::initStatic(const QString &path, TreeFileItem *parent)
 {
-	auto rclone = manager.get();
+	auto rclone = RcloneManager::get();
 	connect(rclone.get(), &Rclone::lsJsonFinished, this, [path, parent, this](const QJsonDocument &doc)
 	{
 		for (const auto &file: doc.array())

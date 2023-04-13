@@ -146,7 +146,7 @@ void ItemInfoDialog::initSize()
 	}
 	if (!m_file->getRemoteInfo()->isLocal() and m_file->getSize() == 0)
 	{
-		auto rclone = m_manager.get();
+		auto rclone = RcloneManager::get();
 		connect(rclone.get(), &Rclone::sizeFinished, this,
 				[this](const uint32_t &objs, const uint64_t &size, const std::string &strSize)
 				{

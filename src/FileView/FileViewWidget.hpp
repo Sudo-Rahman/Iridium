@@ -22,8 +22,6 @@ private:
 
 	QSplitter *m_splitter{};
 
-	RclonesManager m_rclonesManager{};
-
 	QList<TreeFileItem *> m_currentFileList{};
 
 public:

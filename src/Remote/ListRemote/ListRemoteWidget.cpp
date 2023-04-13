@@ -74,7 +74,7 @@ void ListRemoteWidget::getAllRemote()
 		delete item->widget();
 		delete item;
 	}
-	auto rclone = m_manager.get();
+	auto rclone = RcloneManager::get();
 	rclone->listRemotes();
 	rclone->waitForFinished();
 	for (const auto &pair: rclone->getData())

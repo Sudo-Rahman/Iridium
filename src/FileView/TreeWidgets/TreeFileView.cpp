@@ -187,7 +187,7 @@ void TreeFileView::expand(const QModelIndex &index)
 	{
 		auto progressBar = new QProgressBar(this);
 		progressBar->setRange(0, 0);
-		progressBar->setFixedWidth(50);
+		progressBar->setFixedWidth(100);
 		progressBar->setAlignment(Qt::AlignCenter);
 		setIndexWidget(item->child(0, 0)->index(), progressBar);
 	}
@@ -212,7 +212,7 @@ void TreeFileView::doubleClick(const QModelIndex &index)
 	{
 		auto progressBar = new QProgressBar(this);
 		progressBar->setRange(0, 0);
-		progressBar->setFixedWidth(50);
+		progressBar->setFixedWidth(100);
 		progressBar->setAlignment(Qt::AlignCenter);
 		setIndexWidget(item->child(0, 0)->index(), progressBar);
 	}
@@ -355,7 +355,7 @@ void TreeFileView::copyto(const QList<TreeFileItem *> &items)
 			item->getFile()->isDir() ? QDateTime::currentDateTime() : item->getFile()->getModTime(),
 			m_remoteInfo
 		);
-		auto rclone = m_rclonesManager.get();
+		auto rclone = RcloneManager::get();
 		connect(rclone.get(), &Rclone::finished, this, [newFile, treePaste](int exit)
 		{
 			if (exit == 0)
@@ -481,12 +481,12 @@ void TreeFileView::deleteFile(const QList<TreeFileItem *> &items)
 	msgb->deleteLater();
 	for (auto item: items)
 	{
-		auto rclone = m_rclonesManager.get();
+		auto rclone = RcloneManager::get();
 		connect(rclone.get(), &Rclone::taskFinished, this, [this, files, item, rclone](const int exit)
 		{
 			if (exit == 0)
 			{
-				m_rclonesManager.release(rclone);
+				RcloneManager::release(rclone);
 				removeItem(item);
 			}
 		});
@@ -625,13 +625,13 @@ void TreeFileView::mkdir()
 		msgb.exec();
 		return;
 	}
-	auto rclone = m_rclonesManager.get();
+	auto rclone = RcloneManager::get();
 	auto *newItem = new TreeFileItem(name, rcloneFile, items.first(), true);
 	connect(rclone.get(), &Rclone::finished, this, [this, rclone, name, newItem, items](const int exit)
 	{
 		if (exit == 0)
 		{
-			m_rclonesManager.release(rclone);
+			RcloneManager::release(rclone);
 			// create new item
 			auto item_list = RcloneFileModel::getItemList(newItem);
 			items.first()->appendRow(item_list);
@@ -675,14 +675,14 @@ void TreeFileView::editItem(const QModelIndex &index)
  */
 void TreeFileView::rename(const TreeFileItem *item, const QString &newName)
 {
-	auto rclone = m_rclonesManager.get();
+	auto rclone = RcloneManager::get();
 	connect(rclone.get(), &Rclone::finished, this, [this, rclone, item, newName](const int exit)
 	{
 		if (item->index() == QModelIndex())
 			return;
 		if (exit == 0)
 		{
-			m_rclonesManager.release(rclone);
+			RcloneManager::release(rclone);
 			item->getFile()->changeName(newName);
 		} else
 			model->itemFromIndex(item->index())->setText(item->getFile()->getName());

@@ -25,8 +25,6 @@ Q_OBJECT
 	QList<QModelIndex> indexTop{};
 	RemoteInfoPtr m_remoteInfo{};
 
-	RclonesManager m_rclonesManager{};
-
 	uint64_t m_clickTime{};
 	QModelIndex m_clickIndex{};
 
