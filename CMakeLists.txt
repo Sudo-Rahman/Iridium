@@ -15,7 +15,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
 set(Boost_USE_STATIC_LIBS ON)
-find_package(Boost COMPONENTS system filesystem json thread REQUIRED)
+find_package(Boost COMPONENTS system filesystem json thread chrono REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 
 find_package(QT NAMES Qt6 REQUIRED COMPONENTS
@@ -98,6 +98,7 @@ target_link_libraries(Iridium PRIVATE
         Boost::filesystem
         Boost::thread
         Boost::json
+        Boost::chrono
         )
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     target_link_libraries(Iridium PRIVATE ws2_32)

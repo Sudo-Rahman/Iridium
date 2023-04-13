@@ -260,6 +260,7 @@ void Rclone::terminate()
 {
 	if (mstate == Running)
 	{
+
 		mthread->detach();
 		cout << "process rclone kill" << endl;
 		Iridium::Utility::KillThread(mthread->native_handle());

@@ -6,18 +6,27 @@
 #define IRIDIUM_TASKTREEVIEW_HPP
 
 #include <QList>
-#include <boost/unordered_map.hpp>
 #include <QTreeView>
 #include <QLayout>
 #include "TaskRow.hpp"
+
+struct Tasks
+{
+	TaskRowPtr parent;
+	std::map<size_t, TaskRowPtr> children;
+};
 
 class TaskTreeView : public QTreeView
 {
 Q_OBJECT
 
-	boost::unordered_map<size_t, TaskRowPtr> m_tasks{};
+	std::unordered_map<size_t, Tasks> m_tasks{};
 
 	QStandardItemModel *m_model{};
+
+	boost::thread m_thread{};
+
+	bool m_isRunning = true;
 
 
 public:
@@ -25,6 +34,15 @@ public:
 
 	void addTask(const QString &src, const QString &dst, const RclonePtr &rclone, const std::function<void()> &callable,
 				 const Rclone::TaskType &type = Rclone::Unknown);
+
+	~TaskTreeView() override
+	{
+		m_isRunning = false;
+		m_thread.join();
+	}
+
+signals:
+	void taskFinished(std::pair<size_t, Tasks>);
 
 };
 

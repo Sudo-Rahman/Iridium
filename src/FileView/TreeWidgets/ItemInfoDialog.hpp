@@ -13,6 +13,7 @@
 #include <QTimer>
 #include "TreeFileItem.hpp"
 #include <Rclone.hpp>
+#include <QProgressBar>
 
 class ItemInfoDialog : public QDialog
 {
@@ -32,8 +33,10 @@ private:
 	QLabel *m_modTime{};
 	QLabel *m_objs{};
 
+	QProgressBar *m_loading1{};
+	QProgressBar *m_loading2{};
+
 	QTimer m_timer{};
-	int cpt{};
 
 	int row{};
 
@@ -47,15 +50,11 @@ private:
 
 	void initType();
 
-	void loading();
-
 	void initLabel();
 
 protected:
 
 	~ItemInfoDialog() override;
-
-	void reject() override;
 
 signals:
 

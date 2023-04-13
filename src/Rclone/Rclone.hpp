@@ -61,6 +61,8 @@ private:
 	Rclone::State mstate{};
 	RclonesManager *manager{};
 
+	bool m_running = true;
+
 	std::mutex m;
 	std::condition_variable v;
 
@@ -145,6 +147,15 @@ public:
 	explicit RclonesManager(unsigned nbMaxProcess);
 
 	explicit RclonesManager();
+
+	~RclonesManager()
+	{
+		mutex.unlock();
+		conditionVariable.notify_all();
+		for (auto &rclone: rcloneVector)
+			rclone->terminate();
+		rcloneVector.clear();
+	};
 
 	RclonePtr get();
 

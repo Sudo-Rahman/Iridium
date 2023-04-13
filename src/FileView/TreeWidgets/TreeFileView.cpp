@@ -182,7 +182,19 @@ void TreeFileView::expand(const QModelIndex &index)
 {
 	QTreeView::expand(index);
 	auto *item = dynamic_cast<TreeFileItem *>(static_cast<QStandardItem *>(model->itemFromIndex(index)));
+
+	if (item->rowCount() == 1)
+	{
+		auto progressBar = new QProgressBar(this);
+		progressBar->setRange(0, 0);
+		progressBar->setFixedWidth(50);
+		progressBar->setAlignment(Qt::AlignCenter);
+		setIndexWidget(item->child(0, 0)->index(), progressBar);
+	}
+
 	dynamic_cast<RcloneFileModel *>(model)->addItem(item->getFile(), item);
+
+	// add to the first chil of index
 }
 
 /**
@@ -192,6 +204,19 @@ void TreeFileView::expand(const QModelIndex &index)
 void TreeFileView::doubleClick(const QModelIndex &index)
 {
 	auto *item = dynamic_cast<TreeFileItem *>(static_cast<QStandardItem *>(model->itemFromIndex(index)));
+
+	if (item == nullptr)
+		return;
+
+	if (item->rowCount() == 1)
+	{
+		auto progressBar = new QProgressBar(this);
+		progressBar->setRange(0, 0);
+		progressBar->setFixedWidth(50);
+		progressBar->setAlignment(Qt::AlignCenter);
+		setIndexWidget(item->child(0, 0)->index(), progressBar);
+	}
+
 	dynamic_cast<RcloneFileModel *>(model)->addItem(item->getFile(), item);
 	if (!item->getFile()->isDir())
 		return;
@@ -652,6 +677,8 @@ void TreeFileView::rename(const TreeFileItem *item, const QString &newName)
 	auto rclone = m_rclonesManager.get();
 	connect(rclone.get(), &Rclone::finished, this, [this, rclone, item, newName](const int exit)
 	{
+		if (item->index() == QModelIndex())
+			return;
 		if (exit == 0)
 		{
 			m_rclonesManager.release(rclone);

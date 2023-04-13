@@ -2,6 +2,7 @@
 // Created by rahman on 05/02/23.
 //
 
+#include <QProgressBar>
 #include "RcloneFileModelDistant.hpp"
 #include "TreeFileItemDistant.hpp"
 
@@ -46,7 +47,6 @@ void RcloneFileModelDistant::addItemDynamic(const QString &path, TreeFileItem *p
 	auto rclone = manager.get();
 	connect(rclone.get(), &Rclone::lsJsonFinished, this, [tree_item, path, this](const QJsonDocument &doc)
 	{
-		m_timer.stop();
 		for (const auto &file: doc.array())
 		{
 			auto *item = new TreeFileItemDistant(path, m_remoteInfo, file.toObject());
@@ -54,14 +54,11 @@ void RcloneFileModelDistant::addItemDynamic(const QString &path, TreeFileItem *p
 			if (item->getFile()->isDir())
 				item->appendRow({new QStandardItem, new QStandardItem, new QStandardItem, new QStandardItem});
 		}
+		delete tree_item->child(0, 0);
 		tree_item->removeRow(0);
 	});
 	if (tree_item->rowCount() == 1)
-	{
-		m_itemLoading = tree_item->child(0, 0);
 		rclone->lsJson(path.toStdString());
-		loading();
-	}
 }
 
 void RcloneFileModelDistant::initStatic(const QString &path, TreeFileItem *parent)
@@ -78,22 +75,4 @@ void RcloneFileModelDistant::initStatic(const QString &path, TreeFileItem *paren
 		}
 	});
 	rclone->lsJson(path.toStdString());
-}
-
-void RcloneFileModelDistant::loading()
-{
-	disconnect(&m_timer, &QTimer::timeout, this, nullptr);
-	connect(&m_timer, &QTimer::timeout, this, [this]()
-	{
-		QString str = QList{"∙∙∙",
-							"●∙∙",
-							"∙●∙",
-							"∙∙●",
-							"∙∙∙"}[cpt];
-		cpt++;
-		if (cpt == 5)
-			cpt = 0;
-		m_itemLoading->setText(str);
-	});
-	m_timer.start();
 }

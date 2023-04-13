@@ -40,7 +40,6 @@ private:
 
 	void initStatic(const QString &path, TreeFileItem *parent);
 
-	void loading();
 };
 
 

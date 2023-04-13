@@ -37,6 +37,7 @@ void RcloneFileModelLocal::addItem(const RcloneFilePtr &file, TreeFileItem *pare
 					if (info.isDir())
 						item->appendRow({new QStandardItem, new QStandardItem, new QStandardItem, new QStandardItem});
 				}
+				delete tree_item->child(0, 0);
 				tree_item->removeRow(0);
 			}
 		});

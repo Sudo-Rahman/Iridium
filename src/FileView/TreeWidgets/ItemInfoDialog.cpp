@@ -6,13 +6,13 @@
 #include <Utility/Utility.hpp>
 #include <QDirIterator>
 #include <QPropertyAnimation>
+#include <QProgressBar>
 
 using namespace Iridium;
 
 ItemInfoDialog::ItemInfoDialog(TreeFileItem *item, QWidget *parent) : QDialog(parent)
 {
 	// delete on close
-	setAttribute(Qt::WA_DeleteOnClose);
 	m_file = item->getFile();
 	setMaximumSize(500, 600);
 	setMinimumWidth(300);
@@ -22,6 +22,12 @@ ItemInfoDialog::ItemInfoDialog(TreeFileItem *item, QWidget *parent) : QDialog(pa
 	m_layout->setColumnStretch(1, 1);
 	m_layout->setVerticalSpacing(20);
 	m_layout->setAlignment(Qt::AlignTop);
+
+	m_loading1 = new QProgressBar(this);
+	m_loading1->setRange(0, 0);
+
+	m_loading2 = new QProgressBar(this);
+	m_loading2->setRange(0, 0);
 
 	initLabel();
 
@@ -49,6 +55,7 @@ ItemInfoDialog::ItemInfoDialog(TreeFileItem *item, QWidget *parent) : QDialog(pa
 	{
 		m_layout->addWidget(new QLabel(tr("Nombre d'objets: ")), row, 0, 1, 1);
 		m_layout->addWidget(m_objs, row, 1, 1, 1);
+		m_layout->addWidget(m_loading2, row, 1, 1, 1);
 	}
 
 
@@ -78,6 +85,7 @@ void ItemInfoDialog::initLabel()
 	if (m_file->isDir())
 	{
 		m_objs = new QLabel("", this);
+		m_objs->hide();
 		m_objs->setWordWrap(true);
 		m_objs->setAlignment(Qt::AlignLeft);
 	}
@@ -90,9 +98,10 @@ void ItemInfoDialog::initSize()
 
 	m_layout->addWidget(new QLabel(tr("Taille: ")), row, 0, 1, 1);
 	m_size = new QLabel("", this);
+	m_size->hide();
+	m_layout->addWidget(m_loading1, row, 1, 1, 1);
 	if (m_file->getRemoteInfo()->isLocal() and m_file->isDir())
 	{
-		loading();
 		auto *size = new uint64_t(0);
 		auto *objs = new uint64_t(0);
 		m_thread = boost::make_shared<boost::thread>(
@@ -117,7 +126,13 @@ void ItemInfoDialog::initSize()
 
 		connect(this, &ItemInfoDialog::m_threadFinished, this, [this, objs, size]()
 		{
-			m_timer.stop();
+			m_layout->removeWidget(m_loading1);
+			m_loading1->deleteLater();
+			m_layout->removeWidget(m_loading2);
+			m_loading2->deleteLater();
+			m_size->show();
+			m_objs->show();
+
 			m_objs->setText(QString::fromStdString(Utility::numberToString((uint64_t) *objs)));
 			m_size->setText(QString::fromStdString(Utility::numberToString(*size)) + " octets" + " ("
 							+ QString::fromStdString(Utility::sizeToString(*size)) + ")");
@@ -131,12 +146,17 @@ void ItemInfoDialog::initSize()
 	}
 	if (!m_file->getRemoteInfo()->isLocal() and m_file->getSize() == 0)
 	{
-		loading();
 		auto rclone = m_manager.get();
 		connect(rclone.get(), &Rclone::sizeFinished, this,
 				[this](const uint32_t &objs, const uint64_t &size, const std::string &strSize)
 				{
-					m_timer.stop();
+					m_layout->removeWidget(m_loading1);
+					m_loading1->deleteLater();
+					m_layout->removeWidget(m_loading2);
+					m_loading2->deleteLater();
+					m_size->show();
+					m_objs->show();
+
 					m_size->setText(
 						QString::fromStdString(Utility::numberToString(size)) + " octets" + " (" + strSize.c_str() +
 						")");
@@ -162,28 +182,6 @@ void ItemInfoDialog::initSize()
 	row++;
 }
 
-void ItemInfoDialog::loading()
-{
-	m_timer.setInterval(125);
-	connect(&m_timer, &QTimer::timeout, this, [this]()
-	{
-		QString str = QList{"∙∙∙",
-							"●∙∙",
-							"∙●∙",
-							"∙∙●",
-							"∙∙∙"}[cpt];
-		cpt++;
-		if (cpt == 5)
-			cpt = 0;
-		QFont font("Arial", 20, QFont::Bold);
-		m_objs->setText(str);
-		m_objs->setFont(font);
-		m_size->setText(str);
-		m_size->setFont(font);
-	});
-	m_timer.start();
-}
-
 void ItemInfoDialog::initType()
 {
 	m_layout->addWidget(new QLabel(tr("Type: ")), row, 0, 1, 1);
@@ -203,9 +201,4 @@ ItemInfoDialog::~ItemInfoDialog()
 		if (m_thread->joinable())
 			Iridium::Utility::KillThread(m_thread->native_handle());
 	}
-}
-
-void ItemInfoDialog::reject()
-{
-	QDialog::close();
 }

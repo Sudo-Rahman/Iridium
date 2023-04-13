@@ -45,6 +45,8 @@ public:
 private:
 	State m_state{};
 
+	Type m_type{};
+
 	void init();
 
 	void normal();
@@ -54,6 +56,10 @@ private:
 	void error();
 
 	void setSpeed();
+
+	void updateDataParent();
+
+	void updateDataChild();
 
 public:
 
@@ -68,14 +74,9 @@ public:
 
 	void updateData(const boost::json::object &);
 
-	[[nodiscard]] const size_t &id() const
-	{ return m_id; }
+	[[nodiscard]] const State &state() const
+	{ return m_state; }
 
-	[[nodiscard]] const QString &src() const
-	{ return m_src; }
-
-	[[nodiscard]] const QString &dest() const
-	{ return m_dest; }
 
 
 	void terminate();
