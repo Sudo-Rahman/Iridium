@@ -151,9 +151,10 @@ QString RcloneFile::getFileType() const
 void RcloneFile::changeName(const QString &newName)
 {
 	if (isDirectory and path.endsWith("/"))
-		path.remove(getName() + "/");
-	else
-		path.remove(getName());
+		path.remove(path.size() - 1, 1);
+	path = path.remove(path.lastIndexOf("/") + 1, path.split("/").last().size());
 	path.append(newName);
+	if (isDirectory)
+		path.append("/");
 }
 

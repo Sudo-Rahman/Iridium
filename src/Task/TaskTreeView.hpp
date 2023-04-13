@@ -14,6 +14,7 @@ struct Tasks
 {
 	TaskRowPtr parent;
 	std::map<size_t, TaskRowPtr> children;
+	bool isFinished = false;
 };
 
 class TaskTreeView : public QTreeView

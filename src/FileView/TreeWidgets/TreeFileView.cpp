@@ -310,9 +310,10 @@ void TreeFileView::changeRemote(const RemoteInfoPtr &info)
 					if (fileIsInFolder(item->text(), getSelectedItems().first()))
 						return;
 
-					rename(dynamic_cast<TreeFileItem *>(static_cast<QStandardItem *>(model->itemFromIndex(
-							   index))),
-						   item->text());
+					if (item != m_editingItem)
+						rename(dynamic_cast<TreeFileItem *>(static_cast<QStandardItem *>(model->itemFromIndex(
+								   index))),
+							   item->text());
 				}
 			});
 	QTreeView::setModel(model);
@@ -684,14 +685,10 @@ void TreeFileView::rename(const TreeFileItem *item, const QString &newName)
 			m_rclonesManager.release(rclone);
 			item->getFile()->changeName(newName);
 		} else
-		{
 			model->itemFromIndex(item->index())->setText(item->getFile()->getName());
-			auto msgb = QMessageBox(QMessageBox::Critical, tr("Renommage"), tr("Le fichier n’a pas pu être renommé"),
-									QMessageBox::Ok, this);
-			msgb.setDetailedText(QString::fromStdString(rclone->readAllError().back()));
-			msgb.exec();
-		}
+		m_editingItem = nullptr;
 	});
+	m_editingItem = const_cast<TreeFileItem *>(item);
 	auto oldFile = *(item->getFile());
 	auto newFile = oldFile;
 	newFile.changeName(newName);

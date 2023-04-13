@@ -30,6 +30,8 @@ Q_OBJECT
 	uint64_t m_clickTime{};
 	QModelIndex m_clickIndex{};
 
+	TreeFileItem *m_editingItem{};
+
 public:
 	explicit TreeFileView(const RemoteInfoPtr &remoteInfo, QWidget *parent = nullptr);
 

@@ -24,8 +24,6 @@ class TaskRow : public QList<QStandardItem *>
 
 	uint64_t m_size{};
 
-	size_t m_id{};
-
 	boost::json::object m_data{};
 
 public:
@@ -63,7 +61,7 @@ private:
 
 public:
 
-	explicit TaskRow(const QString &src, const QString &dest, const boost::json::object &, const size_t &id,
+	explicit TaskRow(const QString &src, const QString &dest, const boost::json::object &,
 					 const Rclone::TaskType &taskType = Rclone::Unknown, const State &state = Normal, const Type &type = Child);
 
 	[[nodiscard]] QProgressBar *progressBar()
@@ -77,6 +75,11 @@ public:
 	[[nodiscard]] const State &state() const
 	{ return m_state; }
 
+	void setMessageToolTip(const std::string &message){
+		at(5)->setToolTip(message.c_str());
+	}
+
+	void setState(const State &state);
 
 
 	void terminate();

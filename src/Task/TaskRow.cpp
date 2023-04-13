@@ -14,12 +14,10 @@
  * @param id
  * @param state
  */
-TaskRow::TaskRow(const QString &src, const QString &dest, const boost::json::object &data, const size_t &id,
+TaskRow::TaskRow(const QString &src, const QString &dest, const boost::json::object &data,
 				 const Rclone::TaskType &taskType, const State &state, const Type &type)
 	: QList<QStandardItem *>()
 {
-
-	m_state = state;
 
 	m_type = type;
 
@@ -34,25 +32,13 @@ TaskRow::TaskRow(const QString &src, const QString &dest, const boost::json::obj
 			break;
 	}
 
-	m_id = id;
 	m_src = src;
 	m_dest = dest;
 
 	init();
 
 	if (m_type == Child)
-		switch (state)
-		{
-			case Normal:
-				normal();
-				break;
-			case Finished:
-				finished();
-				break;
-			case Error:
-				error();
-				break;
-		}
+		setState(state);
 
 	switch (taskType)
 	{
@@ -121,7 +107,7 @@ void TaskRow::updateDataParent()
 
 		m_progressBar->setValue((int) (bytes * 100 / m_size));
 		m_progressBar->setToolTip(QString::number(m_progressBar->value()) + "%");
-		at(8)->setText((Iridium::Utility::sizeToString(m_data.at("speed").as_double())+"/s").c_str());
+		at(8)->setText((Iridium::Utility::sizeToString(m_data.at("speed").as_double()) + "/s").c_str());
 		auto avg = m_data.at("bytes").as_int64() / m_elapsedTimeCount;
 		at(9)->setText((Iridium::Utility::sizeToString(avg) + "/s").c_str());
 
@@ -270,7 +256,14 @@ void TaskRow::error()
 	m_progressBar->setValue(0);
 	m_progressBar->setToolTip("0%");
 	this->at(5)->setText(QObject::tr("Erreur"));
-	this->at(5)->setToolTip(m_data.at("error").as_string().c_str());
+	try
+	{
+		this->at(5)->setToolTip(m_data.at("msg").as_string().c_str());
+
+	} catch (boost::wrapexcept<std::invalid_argument> &e)
+	{}
+	catch (boost::wrapexcept<std::out_of_range> &e)
+	{}
 	this->at(6)->setText("00:00:00");
 }
 
@@ -335,4 +328,22 @@ void TaskRow::init()
 
 	speed->setText("0 B/s");
 	averageSpeed->setText("0 B/s");
+}
+
+void TaskRow::setState(const TaskRow::State &state)
+{
+	m_state = state;
+	switch (state)
+	{
+		case TaskRow::Normal:
+			normal();
+			break;
+		case TaskRow::Finished:
+			finished();
+			break;
+		case TaskRow::Error:
+			error();
+			break;
+	}
+
 }

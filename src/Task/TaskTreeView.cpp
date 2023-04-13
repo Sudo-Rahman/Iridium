@@ -27,7 +27,7 @@ TaskTreeView::TaskTreeView(QWidget *parent) : QTreeView(parent)
 
 	setIndentation(30);
 	setHeaderHidden(false);
-	setRootIsDecorated(false);
+	setRootIsDecorated(true);
 	setSortingEnabled(true);
 	setSelectionMode(QAbstractItemView::SingleSelection);
 	setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -41,6 +41,12 @@ TaskTreeView::TaskTreeView(QWidget *parent) : QTreeView(parent)
 	// set the size of the columns
 	header()->setMinimumSectionSize(100);
 
+	auto errorTask = std::make_shared<TaskRow>("Errors", "--", boost::json::object(), Rclone::Unknown, TaskRow::Error,
+											   TaskRow::Parent);
+	m_tasks[0] = {errorTask, {}};
+	m_model->appendRow(*errorTask);
+	setIndexWidget(errorTask->progressBarIndex(), errorTask->progressBar());
+
 	connect(this, &TaskTreeView::taskFinished, this, [this](std::pair<size_t, Tasks> task)
 	{
 		task.second.parent->terminate();
@@ -52,18 +58,22 @@ TaskTreeView::TaskTreeView(QWidget *parent) : QTreeView(parent)
 		{
 			while (m_isRunning)
 			{
+				auto it = m_tasks.begin();
+				it++;
 				boost::this_thread::sleep_for(boost::chrono::seconds(1));
-				for (auto &task: m_tasks)
+				for (; it != m_tasks.end(); ++it)
 				{
-					auto size = task.second.children.size();
+					if (not it->second.isFinished)
+						continue;
+					auto size = it->second.children.size();
 					uint16_t counter = 0;
-					for (const auto &child: task.second.children)
+					for (const auto &child: it->second.children)
 					{
 						if (child.second->state() == TaskRow::Finished)
 							counter++;
 					}
 					if (counter == size)
-						emit taskFinished(task);
+						emit taskFinished(*it);
 				}
 			}
 		});
@@ -84,19 +94,42 @@ void TaskTreeView::addTask(const QString &src, const QString &dst, const RcloneP
 		size_t idParent = 0;
 		try
 		{
-			if (obj.at("level").as_string() != "info")
-				return;
-			if (not obj.contains("stats"))
-				return;
 			idParent = boost::hash<std::string>{}(
 				src.toStdString() + dst.toStdString());
+
+			if (obj.at("level").as_string() == "error")
+			{
+//				cout << obj << endl;
+				if (m_tasks.find(idParent) == m_tasks.end())
+					return;
+				auto object = obj.at("object").as_string();
+				auto errId = boost::hash<std::string>{}(
+					src.toStdString() + object.c_str() + dst.toStdString() + object.c_str());
+				if (idParent == errId)
+					return;
+				auto it = m_tasks[idParent].children.find(errId);
+				if (it != m_tasks[idParent].children.end())
+				{
+					it->second->setState(TaskRow::Error);
+					it->second->setMessageToolTip(obj.at("msg").as_string().c_str());
+					return;
+				}
+				auto task = std::make_shared<TaskRow>(src + object.c_str(), dst + object.c_str(), obj, type,
+													  TaskRow::Error, TaskRow::Child);
+				m_tasks[idParent].children.insert({errId, task});
+				m_tasks[idParent].parent->first()->appendRow(*task);
+				setIndexWidget(task->progressBarIndex(), task->progressBar());
+				return;
+			}
+			if (not obj.contains("stats"))
+				return;
 
 			auto it = m_tasks.find(idParent);
 			if (it != m_tasks.end())
 				it->second.parent->updateData(obj.at("stats").as_object());
 			else
 			{
-				auto task = std::make_shared<TaskRow>(src, dst, obj, idParent, type, TaskRow::Normal, TaskRow::Parent);
+				auto task = std::make_shared<TaskRow>(src, dst, obj, type, TaskRow::Normal, TaskRow::Parent);
 				m_tasks.insert({idParent, Tasks{task, {}}});
 				m_model->appendRow(*task);
 				setIndexWidget(task->progressBarIndex(), task->progressBar());
@@ -123,8 +156,7 @@ void TaskTreeView::addTask(const QString &src, const QString &dst, const RcloneP
 
 			// hash the name of the file
 			auto name = item.at("name").as_string();
-			childId = boost::hash<std::string>{}(
-				name.c_str() + std::to_string(item.at("size").as_int64()));
+			childId = boost::hash<std::string>{}(src.toStdString() + name.c_str() + dst.toStdString() + name.c_str());
 			hashList.emplace_back(childId);
 
 			// if parent task not exist, return
@@ -141,9 +173,9 @@ void TaskTreeView::addTask(const QString &src, const QString &dst, const RcloneP
 					// if the child task not exist in the task list, create it
 				else
 				{
+//					cout << obj << endl;
 					auto task = std::make_shared<TaskRow>(src + name.c_str(), dst + name.c_str(), item.as_object(),
-														  childId, type, TaskRow::Normal,
-														  TaskRow::Child);
+														  type, TaskRow::Normal, TaskRow::Child);
 					m_tasks[idParent].children.insert({childId, task});
 					m_tasks[idParent].parent->first()->appendRow(*task);
 					setIndexWidget(task->progressBarIndex(), task->progressBar());
@@ -154,12 +186,13 @@ void TaskTreeView::addTask(const QString &src, const QString &dst, const RcloneP
 		for (auto it = m_tasks[idParent].children.begin(); it != m_tasks[idParent].children.end(); ++it)
 		{
 			if (std::find(hashList.begin(), hashList.end(), it->first) == hashList.end())
-				it->second->terminate();
+				if (it->second->state() != TaskRow::Error)
+					it->second->setState(TaskRow::Finished);
 		}
 	});
 
 	connect(rclone.get(), &Rclone::taskFinished, this,
-			[src, dst, type, this](int exit, const boost::json::object &obj)
+			[src, dst, type, rclone, this](int exit, const boost::json::object &obj)
 			{
 				boost::json::object json;
 				size_t id;
@@ -170,22 +203,27 @@ void TaskTreeView::addTask(const QString &src, const QString &dst, const RcloneP
 				} catch (const boost::wrapexcept<std::invalid_argument> &e)
 				{ return; }
 				auto it = m_tasks.find(id);
+				TaskRowPtr task;
 				if (it == m_tasks.end())
 				{
-					TaskRowPtr task;
 					if (exit == 0)
-						task = std::make_shared<TaskRow>(src, dst, obj, id, type, TaskRow::Finished);
-					else
-						task = std::make_shared<TaskRow>(src, dst, obj, id, type, TaskRow::Error);
-
-					m_tasks.insert({id, Tasks{task, {}}});
-					m_model->appendRow(*task);
-					setIndexWidget(task->progressBarIndex(), task->progressBar());
-					m_tasks.erase(id);
+					{
+						task = std::make_shared<TaskRow>(src, dst, obj, type, TaskRow::Finished);
+						m_model->appendRow(*task);
+						setIndexWidget(task->progressBarIndex(), task->progressBar());
+					} else
+					{
+						cout << obj << endl;
+						task = std::make_shared<TaskRow>(src, dst, obj, type, TaskRow::Error);
+						task->setMessageToolTip(rclone->readAllError().back());
+						m_model->appendRow(*task);
+						setIndexWidget(task->progressBarIndex(), task->progressBar());
+					}
 				} else
 				{
-					it->second.parent->terminate();
-					m_tasks.erase(id);
+					m_tasks[id].isFinished = true;
+					m_tasks[id].parent->terminate();
+					m_tasks[id].parent->setMessageToolTip(rclone->readAllError().back());
 				}
 			});
 	callable();

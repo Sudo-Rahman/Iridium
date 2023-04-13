@@ -85,6 +85,7 @@ void Rclone::lsJson(const string &path)
  */
 void Rclone::copyTo(const RcloneFile &src, const RcloneFile &dest)
 {
+	connectTaskSignalFinishedJson();
 	vector<string> arguments(
 		{"copyto", src.getPath().toStdString(), dest.getPath().toStdString(),
 		 "-v", "--use-json-log", "--stats", "0.1s"});
@@ -208,6 +209,8 @@ void Rclone::execute(const vector<string> &args)
 				{
 					while (getline(err, line_err))
 					{
+						if(m_error.size() > 1000)
+							m_error.clear();
 						m_error.emplace_back(line_err);
 						m_readyRead(line_err);
 					}
@@ -217,6 +220,8 @@ void Rclone::execute(const vector<string> &args)
 				{
 					while (getline(out, line_out))
 					{
+						if(m_out.size() > 1000)
+							m_out.clear();
 						m_out.emplace_back(line_out);
 						m_readyRead(line_out);
 					}
@@ -350,6 +355,7 @@ void Rclone::mkdir(const RcloneFile &dir)
 
 void Rclone::moveto(const RcloneFile &src, const RcloneFile &dest)
 {
+
 	connectTaskSignalFinishedJson();
 	execute({"moveto", src.getPath().toStdString(), dest.getPath().toStdString(), "-v", "--use-json-log", "--stats",
 			 "0.1s"});
@@ -364,7 +370,6 @@ bj::object Rclone::parseJson(const string &str)
 	} catch (boost::exception &e)
 	{
 		cerr << "Erreur parse json" << endl;
-		cerr << boost::diagnostic_information(e) << endl;
 	}
 	auto json = bj::object();
 	json.emplace("error", true);
