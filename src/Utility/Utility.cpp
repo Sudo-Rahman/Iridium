@@ -100,16 +100,3 @@ string Utility::sizeToString(double64_t size)
 	ss << size << " B";
 	return ss.str();
 }
-
-/**
- * @brief Utility::KillThread, tue un thread
- * @param handle
- */
-void Utility::KillThread(const boost::detail::thread_data_base::native_handle_type &handle)
-{
-#ifdef _WIN32
-	TerminateThread(handle, 0);
-#else
-	pthread_kill(handle, SIGKILL);
-#endif
-}

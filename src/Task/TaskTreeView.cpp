@@ -5,6 +5,7 @@
 #include <QLabel>
 #include <QStandardItemModel>
 #include <QHeaderView>
+#include <QMenu>
 #include "TaskTreeView.hpp"
 #include "TaskRow.hpp"
 #include <boost/chrono.hpp>
@@ -41,11 +42,18 @@ TaskTreeView::TaskTreeView(QWidget *parent) : QTreeView(parent)
 	// set the size of the columns
 	header()->setMinimumSectionSize(100);
 
-	auto errorTask = std::make_shared<TaskRow>("Errors", "--", boost::json::object(), Rclone::Unknown, TaskRow::Error,
-											   TaskRow::Parent);
-	m_tasks[0] = {errorTask, {}};
-	m_model->appendRow(*errorTask);
-	setIndexWidget(errorTask->progressBarIndex(), errorTask->progressBar());
+	// set Menu context
+	setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(this, &TaskTreeView::customContextMenuRequested, this, [this]{
+		if (QTreeView::selectedIndexes().empty())
+			return;
+		QMenu menu;
+		menu.addAction(QObject::tr("Supprimer"));
+		connect(&menu, &QMenu::triggered, this, [this](QAction *action)
+		{
+		});
+		menu.exec(QCursor::pos());
+	});
 
 	connect(this, &TaskTreeView::taskFinished, this, [this](std::pair<size_t, Tasks> task)
 	{
@@ -59,7 +67,6 @@ TaskTreeView::TaskTreeView(QWidget *parent) : QTreeView(parent)
 			while (m_isRunning)
 			{
 				auto it = m_tasks.begin();
-				it++;
 				boost::this_thread::sleep_for(boost::chrono::seconds(1));
 				for (; it != m_tasks.end(); ++it)
 				{

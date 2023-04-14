@@ -13,6 +13,7 @@ using namespace Iridium;
 ItemInfoDialog::ItemInfoDialog(TreeFileItem *item, QWidget *parent) : QDialog(parent)
 {
 	// delete on close
+	setAttribute(Qt::WA_DeleteOnClose);
 	m_file = item->getFile();
 	setMaximumSize(500, 600);
 	setMinimumWidth(300);
@@ -23,11 +24,6 @@ ItemInfoDialog::ItemInfoDialog(TreeFileItem *item, QWidget *parent) : QDialog(pa
 	m_layout->setVerticalSpacing(20);
 	m_layout->setAlignment(Qt::AlignTop);
 
-	m_loading1 = new QProgressBar(this);
-	m_loading1->setRange(0, 0);
-
-	m_loading2 = new QProgressBar(this);
-	m_loading2->setRange(0, 0);
 
 	initLabel();
 
@@ -55,7 +51,13 @@ ItemInfoDialog::ItemInfoDialog(TreeFileItem *item, QWidget *parent) : QDialog(pa
 	{
 		m_layout->addWidget(new QLabel(tr("Nombre d'objets: ")), row, 0, 1, 1);
 		m_layout->addWidget(m_objs, row, 1, 1, 1);
-		m_layout->addWidget(m_loading2, row, 1, 1, 1);
+		m_loading1 = new QProgressBar(this);
+		m_loading1->setRange(0, 0);
+		m_layout->addWidget(m_loading1, 5, 1, 1, 1);
+
+		m_loading2 = new QProgressBar(this);
+		m_loading2->setRange(0, 0);
+		m_layout->addWidget(m_loading2, 7, 1, 1, 1);
 	}
 
 
@@ -98,8 +100,6 @@ void ItemInfoDialog::initSize()
 
 	m_layout->addWidget(new QLabel(tr("Taille: ")), row, 0, 1, 1);
 	m_size = new QLabel("", this);
-	m_size->hide();
-	m_layout->addWidget(m_loading1, row, 1, 1, 1);
 	if (m_file->getRemoteInfo()->isLocal() and m_file->isDir())
 	{
 		auto *size = new uint64_t(0);
@@ -114,6 +114,7 @@ void ItemInfoDialog::initSize()
 								QDirIterator::Subdirectories);
 				for (; it.hasNext(); it.next())
 				{
+					boost::this_thread::interruption_point();
 					QFileInfo info(it.fileInfo());
 					if (!info.isDir())
 					{
@@ -195,10 +196,11 @@ void ItemInfoDialog::initType()
 
 ItemInfoDialog::~ItemInfoDialog()
 {
-	if (m_thread)
+	if (not m_thread)
+		return;
+	if (m_thread->joinable())
 	{
-		m_thread->detach();
-		if (m_thread->joinable())
-			Iridium::Utility::KillThread(m_thread->native_handle());
+		m_thread->interrupt();
+		m_thread->join();
 	}
 }

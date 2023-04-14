@@ -51,13 +51,16 @@ public:
 
 
 private:
+
+	boost::process::child m_child{};
+
 	static std::string m_pathRclone;
 	std::shared_ptr<boost::thread> m_thread{};
 	std::vector<std::string> m_out{};
 	std::vector<std::string> m_error{};
 	std::map<std::string, std::string> m_mapData{};
 	uint8_t m_exit{};
-	Rclone::State m_state{};
+	Rclone::State m_state= Rclone::NotLaunched;
 
 	std::mutex m_mutex;
 	std::condition_variable m_cv;

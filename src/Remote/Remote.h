@@ -9,7 +9,7 @@
 #include <iostream>
 
 
-const std::string DRIVEICON = ":/ressources/google_drive.png";
+const std::string DRIVEICON = ":google_drive.png";
 const std::string SFTPICON = ":/ressources/sftp.png";
 const std::string HARDDRIVEICON = "drive-harddisk-solidstate";
 

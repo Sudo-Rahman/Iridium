@@ -56,7 +56,6 @@ protected:
 
 	void mousePressEvent(QMouseEvent *event) override;
 
-	void mouseReleaseEvent(QMouseEvent *event) override;
 
 protected slots:
 
@@ -88,6 +87,10 @@ private:
 	void editItem(const QModelIndex &index);
 
 	void rename(const TreeFileItem *item, const QString &newName);
+
+	void showContextMenu();
+
+	void addProgressBar(const QModelIndex &index);
 
 signals:
 

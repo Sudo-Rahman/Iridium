@@ -1,7 +1,7 @@
 <RCC>
     <qresource prefix="/">
-        <file>ressources/app.ico</file>
-        <file>ressources/app.png</file>
+        <file>ressources/Iridium.ico</file>
+        <file>ressources/Iridium.png</file>
         <file>ressources/google_drive.png</file>
         <file>ressources/sftp.png</file>
         <file>icons/fluent/index.theme</file>

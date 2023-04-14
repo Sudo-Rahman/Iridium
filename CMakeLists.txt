@@ -44,7 +44,7 @@ set(SRC
         src/FileView/TreeWidgets/ItemInfoDialog.cpp src/FileView/TreeWidgets/ItemInfoDialog.hpp src/Utility/Utility.cpp src/Utility/Utility.hpp src/FileView/TreeWidgets/RcloneProxy.cpp src/FileView/TreeWidgets/RcloneProxy.hpp src/Remote/ListRemote/ListRemoteWidget.cpp src/Remote/ListRemote/ListRemoteWidget.hpp
         src/Remote/ListRemote/RemoteWidget.cpp src/Remote/ListRemote/RemoteWidget.hpp src/FileView/TreeWidgets/RcloneFileModelLocal.cpp src/FileView/TreeWidgets/RcloneFileModelLocal.hpp src/FileView/FileViewWidget.cpp src/FileView/FileViewWidget.hpp src/FileView/TreeWidgets/TreeFileItemLocal.cpp src/FileView/TreeWidgets/TreeFileItemLocal.hpp
         src/FileView/TreeWidgets/TreeFileItemDistant.cpp src/FileView/TreeWidgets/TreeFileItemDistant.hpp src/FileView/TreeWidgets/TreeFileViewContainer.cpp src/FileView/TreeWidgets/TreeFileViewContainer.hpp src/Remote/AddNewRemote/Local/LocalRemoteConfigParamsFrame.cpp src/Remote/AddNewRemote/Local/LocalRemoteConfigParamsFrame.hpp src/MainWindow/ToolBar.cpp
-        src/MainWindow/ToolBar.hpp src/Config/Settings.cpp src/Config/Settings.hpp src/Other/RoundedButton.cpp src/Other/RoundedButton.hpp src/Remote/AddNewRemote/Sftp/SftpRemoteConfigParamsFrame.cpp src/Remote/AddNewRemote/Sftp/SftpRemoteConfigParamsFrame.hpp src/Other/RoundedLineEdit.cpp src/Other/RoundedLineEdit.hpp src/Task/TaskTreeView.cpp src/Task/TaskTreeView.hpp src/Task/TaskRow.cpp src/Task/TaskRow.hpp)
+        src/MainWindow/ToolBar.hpp src/Config/Settings.cpp src/Config/Settings.hpp src/Other/RoundedButton.cpp src/Other/RoundedButton.hpp src/Remote/AddNewRemote/Sftp/SftpRemoteConfigParamsFrame.cpp src/Remote/AddNewRemote/Sftp/SftpRemoteConfigParamsFrame.hpp src/Other/RoundedLineEdit.cpp src/Other/RoundedLineEdit.hpp src/Task/TaskTreeView.cpp src/Task/TaskTreeView.hpp src/Task/TaskRow.cpp src/Task/TaskRow.hpp src/MainWindow/Menu/MenuBar.cpp src/MainWindow/Menu/MenuBar.hpp src/Config/Config.h)
 
 include_directories(src
         src/Task
@@ -75,8 +75,8 @@ set(RCLONE "${CMAKE_CURRENT_SOURCE_DIR}/rclone")
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     file(COPY ${RCLONE} DESTINATION Iridium.app/Contents/MacOS)
-    set(MACOSX_BUNDLE_ICON_FILE app.icns)
-    set(myApp_ICON ressources/app.icns)
+    set(MACOSX_BUNDLE_ICON_FILE Iridium.icns)
+    set(myApp_ICON ressources/Iridium.icns)
     set_source_files_properties(${myApp_ICON} PROPERTIES
             MACOSX_PACKAGE_LOCATION "Resources")
     add_executable(Iridium MACOSX_BUNDLE application.qrc ${myApp_ICON} ${SRC} ${QM_FILES})

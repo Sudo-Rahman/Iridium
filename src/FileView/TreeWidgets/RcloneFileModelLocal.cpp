@@ -18,8 +18,8 @@ void RcloneFileModelLocal::addItem(const RcloneFilePtr &file, TreeFileItem *pare
 {
 	if (m_thread not_eq nullptr)
 	{
-		m_thread->detach();
-		Iridium::Utility::KillThread(m_thread->native_handle());
+		m_thread->interrupt();
+		m_thread->join();
 	}
 	auto *tree_item = (parent->getParent() == nullptr ? parent : parent->getParent());
 	m_thread = boost::make_shared<boost::thread>(
@@ -32,6 +32,7 @@ void RcloneFileModelLocal::addItem(const RcloneFilePtr &file, TreeFileItem *pare
 				auto list_file = QDir(file->getPath()).entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries);
 				for (const QFileInfo &info: list_file)
 				{
+					boost::this_thread::interruption_point();
 					auto *item = new TreeFileItemLocal(info.filePath(), m_remoteInfo);
 					tree_item->appendRow(getItemList(item));
 					if (info.isDir())

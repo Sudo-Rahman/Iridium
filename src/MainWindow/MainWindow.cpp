@@ -6,7 +6,7 @@
 
 #include <QLayout>
 #include <QTimer>
-#include <QMenuBar>
+#include <Menu/MenuBar.hpp>
 #include <TaskTreeView.hpp>
 
 
@@ -16,6 +16,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	setContentsMargins(0, 0, 0, 0);
 	setMinimumSize(1000, 500);
 	QIcon::setThemeName("fluent");
+
+
+	setMenuBar(new MenuBar(this));
+
 
 	// set tool bar
 	m_toolBar = new ToolBar(this);

@@ -27,7 +27,6 @@ namespace Iridium
 
 		[[nodiscard]] static std::string sizeToString(double64_t num);
 
-		static void KillThread(const boost::detail::thread_data_base::native_handle_type &handle);
 	};
 
 }

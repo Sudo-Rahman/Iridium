@@ -14,6 +14,7 @@
 #include <QPainter>
 #include <chrono>
 #include <QLineEdit>
+#include <QLayout>
 #include <QDialogButtonBox>
 #include <Settings.hpp>
 
@@ -58,6 +59,7 @@ void TreeFileView::initUI()
 	header()->setSortIndicatorShown(true);
 	header()->setSectionsClickable(true);
 	header()->setStretchLastSection(false);
+	setContextMenuPolicy(Qt::CustomContextMenu);
 
 	// set row height
 	setItemDelegate(new MyItemDelegate(this));
@@ -128,6 +130,8 @@ void TreeFileView::connectSignals()
 		if (size < header()->size().width())
 			setColumnWidth(3, header()->size().width() - size + header()->sectionSize(3));
 	});
+
+	connect(this, &QTreeView::customContextMenuRequested, this, &TreeFileView::showContextMenu);
 }
 
 /**
@@ -184,17 +188,9 @@ void TreeFileView::expand(const QModelIndex &index)
 	auto *item = dynamic_cast<TreeFileItem *>(static_cast<QStandardItem *>(model->itemFromIndex(index)));
 
 	if (item->rowCount() == 1)
-	{
-		auto progressBar = new QProgressBar(this);
-		progressBar->setRange(0, 0);
-		progressBar->setFixedWidth(100);
-		progressBar->setAlignment(Qt::AlignCenter);
-		setIndexWidget(item->child(0, 0)->index(), progressBar);
-	}
+		addProgressBar(item->child(0, 0)->index());
 
 	dynamic_cast<RcloneFileModel *>(model)->addItem(item->getFile(), item);
-
-	// add to the first chil of index
 }
 
 /**
@@ -209,13 +205,7 @@ void TreeFileView::doubleClick(const QModelIndex &index)
 		return;
 
 	if (item->rowCount() == 1)
-	{
-		auto progressBar = new QProgressBar(this);
-		progressBar->setRange(0, 0);
-		progressBar->setFixedWidth(100);
-		progressBar->setAlignment(Qt::AlignCenter);
-		setIndexWidget(item->child(0, 0)->index(), progressBar);
-	}
+		addProgressBar(item->child(0, 0)->index());
 
 	dynamic_cast<RcloneFileModel *>(model)->addItem(item->getFile(), item);
 	if (!item->getFile()->isDir())
@@ -230,62 +220,58 @@ void TreeFileView::doubleClick(const QModelIndex &index)
 }
 
 /**
- * @brief mouse release event
- * @param event
+ * @brief context menu
+ * @param pos
  */
-void TreeFileView::mouseReleaseEvent(QMouseEvent *event)
+void TreeFileView::showContextMenu()
 {
-	QTreeView::mouseReleaseEvent(event);
-	if (event->button() == Qt::RightButton)
+	ItemMenu menu(this);
+	auto lisItem = getSelectedItems();
+	if (getSelectedItems(true).isEmpty() and getPath().isEmpty())
+		return;
+	if (lisItem.size() > 1 or not lisItem.first()->getFile()->isDir())
+		menu.setActionEnabled({{ItemMenu::Action::Paste, false},
+							   {ItemMenu::NewFolder,     false}});
+	if (model->indexFromItem(lisItem.first()) == rootIndex())
+		menu.setActionEnabled({{ItemMenu::Delete, false}});
+
+
+	connect(&menu, &ItemMenu::info, this, [lisItem, this]()
 	{
-		ItemMenu menu(this);
-		auto lisItem = getSelectedItems();
-		if (getSelectedItems(true).isEmpty() and getPath().isEmpty())
-			return;
-		if (lisItem.size() > 1)
-			menu.setActionEnabled({{ItemMenu::Action::Paste, false},
-								   {ItemMenu::NewFolder,     false}});
-		if (model->indexFromItem(lisItem.first()) == rootIndex())
-			menu.setActionEnabled({{ItemMenu::Delete, false}});
-
-
-		connect(&menu, &ItemMenu::info, this, [lisItem, this]()
+		for (auto item: lisItem)
 		{
-			for (auto item: lisItem)
-			{
-				auto *dialog = new ItemInfoDialog(item, this);
-				dialog->move(QPoint(rand() % 1000, rand() % 1000));
-				dialog->open();
-			}
-		});
+			auto *dialog = new ItemInfoDialog(item, this);
+			dialog->move(QPoint(rand() % 1000, rand() % 1000));
+			dialog->exec();
+		}
+	});
 
-		connect(&menu, &ItemMenu::copyed, this, [this, lisItem]()
-		{
+	connect(&menu, &ItemMenu::copyed, this, [this, lisItem]()
+	{
 //			qDebug() << lisItem.first()->getFile()->getName();
-			emit fileCopied(lisItem);
-		});
-		connect(&menu, &ItemMenu::pasted, this, [this, lisItem]()
-		{
+		emit fileCopied(lisItem);
+	});
+	connect(&menu, &ItemMenu::pasted, this, [this, lisItem]()
+	{
 //			qDebug() << lisItem.first()->getFile()->getPath();
-			emit pasted(lisItem.first()->getFile());
-		});
-		connect(&menu, &ItemMenu::deleted, this, [this, lisItem]()
+		emit pasted(lisItem.first()->getFile());
+	});
+	connect(&menu, &ItemMenu::deleted, this, [this, lisItem]()
+	{
+		QList<TreeFileItem *> lst;
+		for (int i = 0; i < QTreeView::selectedIndexes().length(); i = i + 4)
 		{
-			QList<TreeFileItem *> lst;
-			for (int i = 0; i < QTreeView::selectedIndexes().length(); i = i + 4)
-			{
-				auto index = QTreeView::selectedIndexes().at(i);
-				auto *item = dynamic_cast<TreeFileItem *>(static_cast<QStandardItem *>(model->itemFromIndex(
-					index)));
-				lst << item;
+			auto index = QTreeView::selectedIndexes().at(i);
+			auto *item = dynamic_cast<TreeFileItem *>(static_cast<QStandardItem *>(model->itemFromIndex(
+				index)));
+			lst << item;
 //				qDebug() << item->getFile()->getPath();
-			}
-			deleteFile(lst);
-		});
-		connect(&menu, &ItemMenu::newFolder, this, [this, lisItem]()
-		{ mkdir(); });
-		menu.exec(event->globalPosition().toPoint());
-	}
+		}
+		deleteFile(lst);
+	});
+	connect(&menu, &ItemMenu::newFolder, this, [this, lisItem]()
+	{ mkdir(); });
+	menu.exec(QCursor::pos());
 }
 
 /**
@@ -716,4 +702,17 @@ void TreeFileView::mousePressEvent(QMouseEvent *event)
 	m_clickIndex = indexAt(event->pos());
 	m_clickTime = QDateTime::currentMSecsSinceEpoch();
 	QTreeView::mousePressEvent(event);
+}
+
+void TreeFileView::addProgressBar(const QModelIndex &index)
+{
+	auto *container = new QWidget;
+	auto *layout = new QHBoxLayout(container);
+	layout->setContentsMargins(0, 0, 0, 0);
+	layout->setAlignment(Qt::AlignLeft);
+	auto progressBar = new QProgressBar;
+	progressBar->setMaximumWidth(100);
+	layout->addWidget(progressBar);
+	progressBar->setRange(0, 0);
+	setIndexWidget(index, container);
 }

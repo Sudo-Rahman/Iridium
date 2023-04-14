@@ -9,6 +9,8 @@
 
 #include <Utility/Utility.hpp>
 #include <boost/algorithm/string/join.hpp>
+#include <boost/chrono.hpp>
+
 
 #ifdef _WIN32
 #include <boost/process/windows.hpp>
@@ -190,7 +192,7 @@ void Rclone::execute(const vector<string> &args)
 			m_out.clear();
 			bp::ipstream out;
 			bp::ipstream err;
-			auto process = bp::child(m_pathRclone, bp::args(args),
+			m_child= bp::child(m_pathRclone, bp::args(args),
 									 bp::std_out > out,
 									 bp::std_err > err
 #ifdef _WIN32
@@ -225,15 +227,14 @@ void Rclone::execute(const vector<string> &args)
 						m_readyRead(line_out);
 					}
 				});
-			process.wait();
+			m_child.wait();
 			th1.join();
 			th2.join();
 			m_state = Finsished;
-			m_exit = process.exit_code();
+			m_exit = m_child.exit_code();
 			m_finished(m_exit);
 			RcloneManager::finished();
 			emit finished(m_exit);
-			terminate();
 		});
 }
 
@@ -263,10 +264,13 @@ void Rclone::terminate()
 {
 	if (m_state == Running)
 	{
-
-		m_thread->detach();
 		cout << "process rclone kill" << endl;
-		Iridium::Utility::KillThread(m_thread->native_handle());
+		m_child.detach();
+#ifdef _WIN32
+		bp::system("TASKKILL", "/F","/T", "/PID", to_string(m_child.id()));
+#else
+		kill(m_child.id(), SIGKILL);
+#endif
 		if (m_thread->joinable())
 			m_thread->join();
 		m_state = Finsished;
@@ -353,10 +357,20 @@ void Rclone::mkdir(const RcloneFile &dir)
 
 void Rclone::moveto(const RcloneFile &src, const RcloneFile &dest)
 {
-
+	m_readyRead.connect(
+		[this](const string &data)
+		{
+			bj::object json = parseJson(data);
+			if (not json.contains("error"))
+			{
+				emit taskProgress(json);
+				m_mapData.clear();
+				m_mapData.emplace("json", boost::json::serialize(json));
+			}
+		});
 	connectTaskSignalFinishedJson();
 	execute({"moveto", src.getPath().toStdString(), dest.getPath().toStdString(), "-v", "--use-json-log", "--stats",
-			 "0.1s"});
+			 "1s"});
 }
 
 bj::object Rclone::parseJson(const string &str)
@@ -459,8 +473,9 @@ void RcloneManager::finished()
 /**
  * @brief RcloneManager::m_finished, un processus m_rclone appel cette fonction lorsqu'il se termine, pour notifier le manager
  */
-void RcloneManager::release(const RclonePtr& rclone)
+void RcloneManager::release(const RclonePtr &rclone)
 {
-	RcloneManager::m_rcloneVector.erase(std::remove(RcloneManager::m_rcloneVector.begin(), RcloneManager::m_rcloneVector.end(), rclone),
-										 RcloneManager::m_rcloneVector.end());
+	RcloneManager::m_rcloneVector.erase(
+		std::remove(RcloneManager::m_rcloneVector.begin(), RcloneManager::m_rcloneVector.end(), rclone),
+		RcloneManager::m_rcloneVector.end());
 }
