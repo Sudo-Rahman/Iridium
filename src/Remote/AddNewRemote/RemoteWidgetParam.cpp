@@ -8,6 +8,8 @@
 #include "GoogleDrive/GoogleDriveRemoteConfigParamsFrame.hpp"
 #include "Local/LocalRemoteConfigParamsFrame.hpp"
 #include "Sftp/SftpRemoteConfigParamsFrame.hpp"
+#include "OneDrive/OneDriveRemoteConfigParamsFrame.hpp"
+#include "DropBox/DropboxRemoteConfigParamsFrame.hpp"
 #include <Settings.hpp>
 
 #include <QLayout>
@@ -45,6 +47,11 @@ RemoteWidgetParam::RemoteWidgetParam(RemoteType type, QWidget *parent) :
 			break;
 		case LocalHardDrive:
 			labelRemoteName->setText("Local");
+		case OneDrive:
+			labelRemoteName->setText("OneDrive");
+			break;
+		case Dropbox:
+			labelRemoteName->setText("Dropbox");
 			break;
 		default:
 			break;
@@ -86,6 +93,13 @@ void RemoteWidgetParam::initParamsFrame()
 			break;
 		case LocalHardDrive:
 			paramsFrame = new LocalRemoteConfigParamsFrame();
+		case OneDrive:
+			paramsFrame = new OneDriveRemoteConfigParamsFrame();
+			break;
+		case Dropbox:
+			paramsFrame = new DropboxRemoteConfigParamsFrame();
+			break;
+		default:
 			break;
 	}
 	connect(paramsFrame, &RemoteConfigParamsFrame::remoteAdded, this, &RemoteWidgetParam::newRemoteAdded);

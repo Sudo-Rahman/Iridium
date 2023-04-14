@@ -40,6 +40,8 @@ RemoteConfigParamsFrame::RemoteConfigParamsFrame(QWidget *parent) : QFrame(paren
 			QMessageBox::information(this, tr("Succès"),
 									 tr("Le disque %1 a été ajouté avec succès").arg(m_remoteName->text()));
 			clearAllFields();
+			m_cancel->hide();
+			m_login->show();
 		} else
 		{
 			auto *msgBox = new QMessageBox();

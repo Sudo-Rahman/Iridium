@@ -43,6 +43,10 @@ AddNewRemoteDialog::AddNewRemoteDialog(QWidget *parent) : QDialog(parent)
 	connect(oneDrive, &RemoteWidgetParam::clicked, this, &AddNewRemoteDialog::changeParamsFrame);
 	scrollWidgetLayout->addWidget(oneDrive);
 
+	auto dropbox = new RemoteWidgetParam(RemoteType::Dropbox);
+	connect(dropbox, &RemoteWidgetParam::clicked, this, &AddNewRemoteDialog::changeParamsFrame);
+	scrollWidgetLayout->addWidget(dropbox);
+
 	layout->addWidget(scrollArea);
 	paramsFrame = drive->getParamsFrame();
 	layout->addWidget(paramsFrame);

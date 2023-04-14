@@ -137,6 +137,12 @@ void Rclone::config(RemoteType type, const string &name, const vector<string> &p
 		case Sftp:
 			args.emplace_back("sftp");
 			break;
+		case OneDrive:
+			args.emplace_back("onedrive");
+			break;
+		case Dropbox:
+			args.emplace_back("dropbox");
+			break;
 		default:
 			break;
 	}
@@ -192,9 +198,9 @@ void Rclone::execute(const vector<string> &args)
 			m_out.clear();
 			bp::ipstream out;
 			bp::ipstream err;
-			m_child= bp::child(m_pathRclone, bp::args(args),
-									 bp::std_out > out,
-									 bp::std_err > err
+			m_child = bp::child(m_pathRclone, bp::args(args),
+								bp::std_out > out,
+								bp::std_err > err
 #ifdef _WIN32
 				, bp::windows::hide
 #endif
@@ -330,7 +336,8 @@ void Rclone::size(const string &path)
 
 }
 
-string Rclone::version(){
+string Rclone::version()
+{
 	execute({"version"});
 	waitForFinished();
 	return m_out[0];

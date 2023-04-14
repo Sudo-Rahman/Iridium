@@ -16,8 +16,8 @@ Graphical application for managing remote storage services such as Google Drive,
 - Add remote :
     - [x] Google Drive
     - [x] Local
-    - [ ] One Drive
-    - [ ] Dropbox
+    - [x] One Drive
+    - [x] Dropbox
     - [ ] FTP
     - [x] SFTP
     - [ ] ...
