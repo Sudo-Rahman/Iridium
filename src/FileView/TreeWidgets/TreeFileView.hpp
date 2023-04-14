@@ -90,8 +90,6 @@ private:
 
 	void showContextMenu();
 
-	void addProgressBar(const QModelIndex &index);
-
 signals:
 
 	void pathChanged(const QString &);

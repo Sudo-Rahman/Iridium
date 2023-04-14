@@ -9,24 +9,27 @@
 #include <iostream>
 
 
-const std::string DRIVEICON = ":google_drive.png";
+const std::string DRIVEICON = ":/ressources/google_drive.png";
 const std::string SFTPICON = ":/ressources/sftp.png";
+const std::string ONEDRIVEICON = ":/ressources/onde_drive.png";
 const std::string HARDDRIVEICON = "drive-harddisk-solidstate";
 
 enum RemoteType
 {
-	Drive, Sftp, LocalHardDrive
+	Drive, Sftp, LocalHardDrive, OneDrive, Dropbox
 };
 
 const std::map<RemoteType, std::string> remoteIco = {
 	{RemoteType::Drive,          DRIVEICON},
 	{RemoteType::Sftp,           SFTPICON},
-	{RemoteType::LocalHardDrive, HARDDRIVEICON}
+	{RemoteType::LocalHardDrive, HARDDRIVEICON},
+	{RemoteType::OneDrive,       ONEDRIVEICON},
 };
 const std::map<std::string, RemoteType> stringToRemoteType = {
-	{"drive", RemoteType::Drive},
-	{"sftp",  RemoteType::Sftp},
-	{"local", RemoteType::LocalHardDrive}
+	{"drive",    RemoteType::Drive},
+	{"sftp",     RemoteType::Sftp},
+	{"local",    RemoteType::LocalHardDrive},
+	{"onedrive", RemoteType::OneDrive},
 };
 
 struct RemoteInfo

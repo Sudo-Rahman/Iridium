@@ -20,14 +20,14 @@ public:
 		Static, Dynamic
 	};
 private:
-	Load load{};
+	static Load m_load;
+
+	static uint8_t m_maxDepth;
 
 	QTimer m_timer{};
-	int cpt{};
-	QStandardItem *m_itemLoading{};
 
 public:
-	explicit RcloneFileModelDistant(const RemoteInfoPtr &remoteInfo, Load = Static, QObject *parent = nullptr);
+	explicit RcloneFileModelDistant(const RemoteInfoPtr &remoteInfo, QTreeView *parent);
 
 protected:
 	void init() override;
@@ -38,7 +38,7 @@ private:
 	void addItemDynamic(const QString &path, TreeFileItem *parent);
 
 
-	void initStatic(const QString &path, TreeFileItem *parent);
+	void addItemStatic(const QString &path, TreeFileItem *parent, uint8_t depth = m_maxDepth);
 
 };
 

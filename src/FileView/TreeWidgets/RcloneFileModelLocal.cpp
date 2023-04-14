@@ -8,8 +8,8 @@
 #include <Utility/Utility.hpp>
 
 
-RcloneFileModelLocal::RcloneFileModelLocal(const RemoteInfoPtr &remoteInfo, QObject *parent) : RcloneFileModel(
-	remoteInfo, parent)
+RcloneFileModelLocal::RcloneFileModelLocal(const RemoteInfoPtr &remoteInfo, QTreeView *View) : RcloneFileModel(
+	remoteInfo, View)
 {
 	RcloneFileModelLocal::init();
 }
@@ -22,9 +22,11 @@ void RcloneFileModelLocal::addItem(const RcloneFilePtr &file, TreeFileItem *pare
 		m_thread->join();
 	}
 	auto *tree_item = (parent->getParent() == nullptr ? parent : parent->getParent());
+	if (tree_item->rowCount() == 1)
+		addProgressBar(tree_item->child(0, 0)->index());
+
 	m_thread = boost::make_shared<boost::thread>(
 
-//	m_thread = std::make_shared<std::thread>(
 		[this, tree_item, file]()
 		{
 			if (tree_item->rowCount() == 1)

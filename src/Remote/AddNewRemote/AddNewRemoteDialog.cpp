@@ -39,6 +39,10 @@ AddNewRemoteDialog::AddNewRemoteDialog(QWidget *parent) : QDialog(parent)
 	connect(sftp, &RemoteWidgetParam::clicked, this, &AddNewRemoteDialog::changeParamsFrame);
 	scrollWidgetLayout->addWidget(sftp);
 
+	auto oneDrive = new RemoteWidgetParam(RemoteType::OneDrive);
+	connect(oneDrive, &RemoteWidgetParam::clicked, this, &AddNewRemoteDialog::changeParamsFrame);
+	scrollWidgetLayout->addWidget(oneDrive);
+
 	layout->addWidget(scrollArea);
 	paramsFrame = drive->getParamsFrame();
 	layout->addWidget(paramsFrame);

@@ -91,7 +91,6 @@ void ItemInfoDialog::initLabel()
 		m_objs->setWordWrap(true);
 		m_objs->setAlignment(Qt::AlignLeft);
 	}
-
 }
 
 

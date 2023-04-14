@@ -15,7 +15,7 @@ Q_OBJECT
 	boost::shared_ptr<boost::thread> m_thread{};
 
 public:
-	explicit RcloneFileModelLocal(const RemoteInfoPtr &remoteInfo, QObject *parent = nullptr);
+	explicit RcloneFileModelLocal(const RemoteInfoPtr &remoteInfo, QTreeView *View);
 
 
 public:

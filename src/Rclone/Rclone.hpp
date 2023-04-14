@@ -89,6 +89,8 @@ public:
 
 	void size(const std::string &path);
 
+	std::string version();
+
 	void waitForFinished();
 
 	void terminate();

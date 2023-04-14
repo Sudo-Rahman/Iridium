@@ -1,4 +1,4 @@
-# <img src="https://github.com/Sudo-Rahman/Iridium/blob/main/ressources/app.png" width="50" height="50" align="center" /> Iridium
+# <img src="https://github.com/Sudo-Rahman/Iridium/blob/main/ressources/Iridium.png" width="50" height="50" align="center" /> Iridium
 
 Graphical application for managing remote storage services such as Google Drive, Dropbox, OneDrive, etc. Using the Qt framework and C++, rclone and Boost libraries.
 <br>
@@ -29,6 +29,10 @@ Graphical application for managing remote storage services such as Google Drive,
   - [x] Create new folder
   - [x] View file properties
   - [x] View Transfer progress
+  - [ ] Search
+  - [ ] Sort
+  - [ ] sync
+  - [ ] ...
 
 <br>
 

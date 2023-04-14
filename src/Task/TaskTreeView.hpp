@@ -27,8 +27,6 @@ Q_OBJECT
 
 	boost::thread m_thread{};
 
-	bool m_isRunning = true;
-
 
 public:
 	explicit TaskTreeView(QWidget *parent = nullptr);
@@ -38,7 +36,7 @@ public:
 
 	~TaskTreeView() override
 	{
-		m_isRunning = false;
+		m_thread.interrupt();
 		m_thread.join();
 	}
 

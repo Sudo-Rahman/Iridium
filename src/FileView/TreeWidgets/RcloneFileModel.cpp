@@ -3,10 +3,16 @@
 //
 
 #include "RcloneFileModel.hpp"
+#include <QVBoxLayout>
+#include <QProgressBar>
 
 
-RcloneFileModel::RcloneFileModel(const RemoteInfoPtr &remoteInfo, QObject *parent) : QStandardItemModel(
-	parent)
+/**
+ * @brief RcloneFileModel::RcloneFileModel
+ * @param remoteInfo
+ * @param View
+ */
+RcloneFileModel::RcloneFileModel(const RemoteInfoPtr &remoteInfo, QTreeView *View) : m_view(View)
 {
 	m_remoteInfo = remoteInfo;
 
@@ -16,6 +22,11 @@ RcloneFileModel::RcloneFileModel(const RemoteInfoPtr &remoteInfo, QObject *paren
 	setHorizontalHeaderLabels({tr("Nom"), tr("Taille"), tr("Date de modification"), tr("Type")});
 }
 
+/**
+ * @brief return a list of QStandardItem that have the same parent and the same file
+ * @param item
+ * @return list of QStandardItem
+ */
 QList<QStandardItem *> RcloneFileModel::getItemList(TreeFileItem *item)
 {
 	return {
@@ -29,4 +40,21 @@ QList<QStandardItem *> RcloneFileModel::getItemList(TreeFileItem *item)
 const QModelIndex &RcloneFileModel::getRootIndex() const
 {
 	return m_root_index;
+}
+
+/**
+ * @brief Add a progress bar during the loading of the directory
+ * @param index
+ */
+void RcloneFileModel::addProgressBar(const QModelIndex &index)
+{
+	auto *container = new QWidget;
+	auto *layout = new QHBoxLayout(container);
+	layout->setContentsMargins(0, 0, 0, 0);
+	layout->setAlignment(Qt::AlignLeft);
+	auto progressBar = new QProgressBar;
+	progressBar->setMaximumWidth(100);
+	layout->addWidget(progressBar);
+	progressBar->setRange(0, 0);
+	m_view->setIndexWidget(index, container);
 }

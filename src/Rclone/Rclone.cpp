@@ -184,7 +184,7 @@ void Rclone::deleteRemote(const string &remote)
  */
 void Rclone::execute(const vector<string> &args)
 {
-	qDebug() << args;
+//	qDebug() << args;
 	m_thread = std::make_shared<boost::thread>(
 		[this, args]
 		{
@@ -328,6 +328,12 @@ void Rclone::size(const string &path)
 		});
 	execute({"size", path, "--json"});
 
+}
+
+string Rclone::version(){
+	execute({"version"});
+	waitForFinished();
+	return m_out[0];
 }
 
 map<string, string> Rclone::getData() const

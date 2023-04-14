@@ -2,7 +2,6 @@
 // Created by sr-71 on 12/04/2023.
 //
 
-#include <QLabel>
 #include <QStandardItemModel>
 #include <QHeaderView>
 #include <QMenu>
@@ -44,7 +43,8 @@ TaskTreeView::TaskTreeView(QWidget *parent) : QTreeView(parent)
 
 	// set Menu context
 	setContextMenuPolicy(Qt::CustomContextMenu);
-	connect(this, &TaskTreeView::customContextMenuRequested, this, [this]{
+	connect(this, &TaskTreeView::customContextMenuRequested, this, [this]
+	{
 		if (QTreeView::selectedIndexes().empty())
 			return;
 		QMenu menu;
@@ -58,16 +58,20 @@ TaskTreeView::TaskTreeView(QWidget *parent) : QTreeView(parent)
 	connect(this, &TaskTreeView::taskFinished, this, [this](std::pair<size_t, Tasks> task)
 	{
 		task.second.parent->terminate();
-		m_tasks.erase(task.first);
+		erase_if(m_tasks, [task](const auto &t)
+		{ return t.first == task.first; });
 	});
 
 	m_thread = boost::thread(
 		[this]()
 		{
-			while (m_isRunning)
+			while (true)
 			{
-				auto it = m_tasks.begin();
 				boost::this_thread::sleep_for(boost::chrono::seconds(1));
+				boost::this_thread::interruption_point();
+				if (m_tasks.empty())
+					continue;
+				auto it = m_tasks.begin();
 				for (; it != m_tasks.end(); ++it)
 				{
 					if (not it->second.isFinished)
@@ -226,6 +230,7 @@ void TaskTreeView::addTask(const QString &src, const QString &dst, const RcloneP
 						m_model->appendRow(*task);
 						setIndexWidget(task->progressBarIndex(), task->progressBar());
 					}
+					m_tasks.insert({id, Tasks{task, {}}});
 				} else
 				{
 					m_tasks[id].isFinished = true;

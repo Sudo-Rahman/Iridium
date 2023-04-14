@@ -7,6 +7,7 @@
 
 #include <QStandardItemModel>
 #include "TreeFileItem.hpp"
+#include <QTreeView>
 #include <Rclone.hpp>
 
 
@@ -18,9 +19,13 @@ protected:
 	RemoteInfoPtr m_remoteInfo{};
 	QModelIndex m_root_index{};
 
+	QTreeView *m_view{};
+
 	virtual void init() = 0;
 
-	explicit RcloneFileModel(const RemoteInfoPtr &remoteInfo, QObject *parent = nullptr);
+	explicit RcloneFileModel(const RemoteInfoPtr &remoteInfo, QTreeView *View);
+
+	void addProgressBar(const QModelIndex &index);
 
 public:
 	virtual void addItem(const RcloneFilePtr &file, TreeFileItem *parent) = 0;

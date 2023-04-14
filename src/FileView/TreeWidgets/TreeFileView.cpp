@@ -187,9 +187,6 @@ void TreeFileView::expand(const QModelIndex &index)
 	QTreeView::expand(index);
 	auto *item = dynamic_cast<TreeFileItem *>(static_cast<QStandardItem *>(model->itemFromIndex(index)));
 
-	if (item->rowCount() == 1)
-		addProgressBar(item->child(0, 0)->index());
-
 	dynamic_cast<RcloneFileModel *>(model)->addItem(item->getFile(), item);
 }
 
@@ -203,9 +200,6 @@ void TreeFileView::doubleClick(const QModelIndex &index)
 
 	if (item == nullptr)
 		return;
-
-	if (item->rowCount() == 1)
-		addProgressBar(item->child(0, 0)->index());
 
 	dynamic_cast<RcloneFileModel *>(model)->addItem(item->getFile(), item);
 	if (!item->getFile()->isDir())
@@ -283,9 +277,9 @@ void TreeFileView::changeRemote(const RemoteInfoPtr &info)
 	m_remoteInfo = info;
 	delete model;
 	if (!m_remoteInfo->isLocal())
-		model = new RcloneFileModelDistant(m_remoteInfo, RcloneFileModelDistant::Dynamic);
+		model = new RcloneFileModelDistant(m_remoteInfo, this);
 	else
-		model = new RcloneFileModelLocal(m_remoteInfo);
+		model = new RcloneFileModelLocal(m_remoteInfo, this);
 
 	connect(model, &RcloneFileModel::itemChanged, this,
 			[this](const QStandardItem *item)
@@ -702,17 +696,4 @@ void TreeFileView::mousePressEvent(QMouseEvent *event)
 	m_clickIndex = indexAt(event->pos());
 	m_clickTime = QDateTime::currentMSecsSinceEpoch();
 	QTreeView::mousePressEvent(event);
-}
-
-void TreeFileView::addProgressBar(const QModelIndex &index)
-{
-	auto *container = new QWidget;
-	auto *layout = new QHBoxLayout(container);
-	layout->setContentsMargins(0, 0, 0, 0);
-	layout->setAlignment(Qt::AlignLeft);
-	auto progressBar = new QProgressBar;
-	progressBar->setMaximumWidth(100);
-	layout->addWidget(progressBar);
-	progressBar->setRange(0, 0);
-	setIndexWidget(index, container);
 }
