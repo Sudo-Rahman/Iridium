@@ -22,13 +22,3 @@ void GoogleDriveRemoteConfigParamsFrame::addRemote()
 	m_login->hide();
 	m_cancel->show();
 }
-
-void GoogleDriveRemoteConfigParamsFrame::createUi()
-{
-	RemoteConfigParamsFrame::createUi();
-}
-
-bool GoogleDriveRemoteConfigParamsFrame::checkFields()
-{
-	return RemoteConfigParamsFrame::checkFields();
-}

@@ -81,6 +81,7 @@ void ListRemoteWidget::getAllRemote()
 	{
 		auto *remote = new RemoteWidget({pair.first, stringToRemoteType.find(pair.second)->second,
 										}, this);
+		remote->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 		m_listRemote << remote;
 	}
 

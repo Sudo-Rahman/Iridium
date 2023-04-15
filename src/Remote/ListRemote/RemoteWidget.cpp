@@ -126,7 +126,7 @@ void RemoteWidget::init()
 		name = name.left(10) + "...";
 	auto *labelRemoteName = new QLabel(name);
 	labelRemoteName->setToolTip(QString::fromStdString(m_remoteInfo->name()));
-	labelRemoteName->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+	labelRemoteName->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
 	labelRemoteName->setAlignment(Qt::AlignCenter);
 	// set auto size font
 	QFont font = labelRemoteName->font();

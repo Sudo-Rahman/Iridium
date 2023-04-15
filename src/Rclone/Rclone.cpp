@@ -14,6 +14,7 @@
 
 #ifdef _WIN32
 #include <boost/process/windows.hpp>
+#include <codecvt>
 #endif
 
 namespace bp = boost::process;
@@ -143,6 +144,12 @@ void Rclone::config(RemoteType type, const string &name, const vector<string> &p
 		case Dropbox:
 			args.emplace_back("dropbox");
 			break;
+		case Ftp:
+			args.emplace_back("ftp");
+			break;
+		case Mega:
+			args.emplace_back("mega");
+			break;
 		default:
 			break;
 	}
@@ -190,15 +197,21 @@ void Rclone::deleteRemote(const string &remote)
  */
 void Rclone::execute(const vector<string> &args)
 {
-//	qDebug() << args;
+	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+	std::wstring exe = converter.from_bytes(m_pathRclone);
+	vector<std::wstring> argsEncoding;
+	argsEncoding.reserve(args.size());
+	for (auto &arg: args)
+		argsEncoding.emplace_back(converter.from_bytes(arg));
+
 	m_thread = std::make_shared<boost::thread>(
-		[this, args]
+		[this, exe, argsEncoding]
 		{
 			RcloneManager::start();
 			m_out.clear();
 			bp::ipstream out;
 			bp::ipstream err;
-			m_child = bp::child(m_pathRclone, bp::args(args),
+			m_child = bp::child(exe, bp::args(argsEncoding),
 								bp::std_out > out,
 								bp::std_err > err
 #ifdef _WIN32

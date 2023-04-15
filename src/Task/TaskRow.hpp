@@ -35,7 +35,8 @@ public:
 		Error
 	};
 
-	enum Type {
+	enum Type
+	{
 		Parent,
 		Child
 	};
@@ -62,7 +63,8 @@ private:
 public:
 
 	explicit TaskRow(const QString &src, const QString &dest, const boost::json::object &,
-					 const Rclone::TaskType &taskType = Rclone::Unknown, const State &state = Normal, const Type &type = Child);
+					 const Rclone::TaskType &taskType = Rclone::Unknown, const State &state = Normal,
+					 const Type &type = Child);
 
 	[[nodiscard]] QProgressBar *progressBar()
 	{ return m_progressBar; }
@@ -75,7 +77,8 @@ public:
 	[[nodiscard]] const State &state() const
 	{ return m_state; }
 
-	void setMessageToolTip(const std::string &message){
+	void setMessageToolTip(const std::string &message)
+	{
 		at(5)->setToolTip(message.c_str());
 	}
 

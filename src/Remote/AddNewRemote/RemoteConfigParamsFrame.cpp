@@ -11,6 +11,10 @@ using namespace std;
 
 RemoteConfigParamsFrame::RemoteConfigParamsFrame(QWidget *parent) : QFrame(parent)
 {
+	m_stateMachine = new QStateMachine(this);
+	m_stateMachine->setGlobalRestorePolicy(QStateMachine::RestoreProperties);
+	m_stateMachine->setAnimated(true);
+
 	m_layout = new QVBoxLayout(this);
 
 	m_formLayout = new QFormLayout;
@@ -20,14 +24,6 @@ RemoteConfigParamsFrame::RemoteConfigParamsFrame(QWidget *parent) : QFrame(paren
 	m_layout->addLayout(m_formLayout);
 
 	m_remoteName = new QLineEdit(this);
-	m_remoteName->setStyleSheet("border: 1px solid gray; border-radius: 5px;");
-	connect(m_remoteName, &QLineEdit::textChanged, this, [this](const QString &text)
-	{
-		if (not text.isEmpty())
-			m_remoteName->setStyleSheet("border: 1px solid gray; border-radius: 5px;");
-		if (not m_messLabel->isHidden())
-			m_messLabel->hide();
-	});
 	m_formLayout->addRow(tr("Nom : "), m_remoteName);
 
 
@@ -84,6 +80,7 @@ void RemoteConfigParamsFrame::createUi()
 	});
 
 	m_messLabel = new QLabel(this);
+	m_messLabel->setText(tr("Les champs en rouge sont obligatoires !"));
 	m_messLabel->hide();
 	m_messLabel->setAutoFillBackground(true);
 	QPalette p;
@@ -91,6 +88,8 @@ void RemoteConfigParamsFrame::createUi()
 	m_messLabel->setPalette(p);
 	m_layout->addWidget(m_messLabel, Qt::AlignTop);
 	m_layout->setAlignment(m_messLabel, Qt::AlignTop);
+
+	connecLineEdit();
 }
 
 void RemoteConfigParamsFrame::addRemote()
@@ -113,26 +112,38 @@ void RemoteConfigParamsFrame::addRemote()
 
 bool RemoteConfigParamsFrame::checkFields()
 {
-	if (m_remoteName->text().isEmpty())
+	for (auto &field: findChildren<QLineEdit *>())
 	{
-		m_remoteName->setStyleSheet("border: 1px solid red; border-radius: 5px;");
-		m_messLabel->show();
-		m_messLabel->setText(tr("Les champs en rouge sont obligatoires !"));
-		return false;
+		if (field->text().isEmpty())
+		{
+			field->setStyleSheet("border: 1px solid red; border-radius: 5px;");
+			m_messLabel->show();
+			m_messLabel->setText(tr("Les champs en rouge sont obligatoires !"));
+			return false;
+		}
 	}
 	return true;
 }
 
-void RemoteConfigParamsFrame::connecLineEdit(QLineEdit *lineEdit)
+void RemoteConfigParamsFrame::connecLineEdit()
 {
-	lineEdit->setStyleSheet("border: 1px solid gray; border-radius: 5px;");
-	connect(lineEdit, &QLineEdit::textChanged, this, [=](const QString &text)
+	for (auto &field: findChildren<QLineEdit *>())
 	{
-		if (not text.isEmpty())
-			lineEdit->setStyleSheet("border: 1px solid gray; border-radius: 5px;");
-		else
-			lineEdit->setStyleSheet("border: 1px solid red; border-radius: 5px;");
-	});
+		field->setStyleSheet("border: 1px solid gray; border-radius: 5px;");
+		connect(field, &QLineEdit::textChanged, this, [field, this](const QString &text)
+		{
+			if (not text.isEmpty())
+			{
+				field->setStyleSheet("border: 1px solid gray; border-radius: 5px;");
+				if (not m_messLabel->isHidden())
+					m_messLabel->hide();
+			} else
+			{
+				field->setStyleSheet("border: 1px solid red; border-radius: 5px;");
+				m_messLabel->show();
+			}
+		});
+	}
 }
 
 void RemoteConfigParamsFrame::clearAllFields()
@@ -142,4 +153,11 @@ void RemoteConfigParamsFrame::clearAllFields()
 		field->clear();
 		field->setStyleSheet("border: 1px solid gray; border-radius: 5px;");
 	}
+}
+
+
+void RemoteConfigParamsFrame::reset()
+{
+	clearAllFields();
+	m_messLabel->hide();
 }

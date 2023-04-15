@@ -60,7 +60,7 @@ private:
 	std::vector<std::string> m_error{};
 	std::map<std::string, std::string> m_mapData{};
 	uint8_t m_exit{};
-	Rclone::State m_state= Rclone::NotLaunched;
+	Rclone::State m_state = Rclone::NotLaunched;
 
 	std::mutex m_mutex;
 	std::condition_variable m_cv;
@@ -152,7 +152,7 @@ public:
 
 	static RclonePtr get();
 
-	static void release(const RclonePtr& rclone);
+	static void release(const RclonePtr &rclone);
 
 private:
 	static void start();

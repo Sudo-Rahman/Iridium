@@ -38,12 +38,14 @@ void MenuBar::connectSignals()
 
 		// add icon
 		auto icon = QLabel();
-		icon.setPixmap(QPixmap(":/ressources/Iridium.png").scaled(100, 100, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+		icon.setPixmap(
+			QPixmap(":/ressources/Iridium.png").scaled(100, 100, Qt::KeepAspectRatio, Qt::SmoothTransformation));
 		icon.setAlignment(Qt::AlignCenter);
 		formLayout.addRow(&icon);
 
 		auto version = QLabel(
-			"<a href=\"https://github.com/Sudo-Rahman/Iridium/releases/tag/v" + QString::fromStdString(IRIDIUM_VERSION) +
+			"<a href=\"https://github.com/Sudo-Rahman/Iridium/releases/tag/v" +
+			QString::fromStdString(IRIDIUM_VERSION) +
 			"\">" + QString::fromStdString(IRIDIUM_VERSION) + "</a>");
 		version.setOpenExternalLinks(true);
 		formLayout.addRow(new QLabel(tr("Iridium version : ")), &version);
@@ -52,11 +54,13 @@ void MenuBar::connectSignals()
 		qtVersion.setOpenExternalLinks(true);
 		formLayout.addRow(new QLabel(tr("Qt Version : ")), &qtVersion);
 
-		auto boostVersion = QLabel("<a href=\"https://www.boostVersion.org/\">" + QString::fromStdString(BOOST_LIB_VERSION) + "</a>");
+		auto boostVersion = QLabel(
+			"<a href=\"https://www.boostVersion.org/\">" + QString::fromStdString(BOOST_LIB_VERSION) + "</a>");
 		boostVersion.setOpenExternalLinks(true);
 		formLayout.addRow(new QLabel(tr("Boost Version : ")), &boostVersion);
 
-		auto rcloneVersion = QLabel("<a href=\"https://rclone.org/\">" + QString::fromStdString(Rclone().version()) + "</a>");
+		auto rcloneVersion = QLabel(
+			"<a href=\"https://rclone.org/\">" + QString::fromStdString(Rclone().version()) + "</a>");
 		rcloneVersion.setOpenExternalLinks(true);
 		formLayout.addRow(new QLabel(tr("Rclone Version : ")), &rcloneVersion);
 

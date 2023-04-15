@@ -41,6 +41,7 @@ public:
 	}
 
 signals:
+
 	void taskFinished(std::pair<size_t, Tasks>);
 
 };

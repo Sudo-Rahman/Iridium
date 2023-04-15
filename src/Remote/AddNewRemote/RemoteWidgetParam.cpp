@@ -10,6 +10,8 @@
 #include "Sftp/SftpRemoteConfigParamsFrame.hpp"
 #include "OneDrive/OneDriveRemoteConfigParamsFrame.hpp"
 #include "DropBox/DropboxRemoteConfigParamsFrame.hpp"
+#include "Ftp/FtpRemoteConfigParamsFrame.hpp"
+#include "Mega/MegaRemoteConfigParamsFrame.hpp"
 #include <Settings.hpp>
 
 #include <QLayout>
@@ -47,11 +49,18 @@ RemoteWidgetParam::RemoteWidgetParam(RemoteType type, QWidget *parent) :
 			break;
 		case LocalHardDrive:
 			labelRemoteName->setText("Local");
+			break;
 		case OneDrive:
 			labelRemoteName->setText("OneDrive");
 			break;
 		case Dropbox:
 			labelRemoteName->setText("Dropbox");
+			break;
+		case Ftp:
+			labelRemoteName->setText("Ftp");
+			break;
+		case Mega:
+			labelRemoteName->setText("Mega");
 			break;
 		default:
 			break;
@@ -98,6 +107,12 @@ void RemoteWidgetParam::initParamsFrame()
 			break;
 		case Dropbox:
 			paramsFrame = new DropboxRemoteConfigParamsFrame();
+			break;
+		case Ftp:
+			paramsFrame = new FtpRemoteConfigParamsFrame();
+			break;
+		case Mega:
+			paramsFrame = new MegaRemoteConfigParamsFrame();
 			break;
 		default:
 			break;

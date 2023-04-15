@@ -99,15 +99,21 @@ void TaskRow::updateDataParent()
 {
 	try
 	{
-		m_size = m_data.at("totalBytes").as_int64();
-
+		auto tmp = m_data.at("totalBytes").as_int64();
+		if (tmp != m_size)
+		{
+			m_size = tmp;
+			at(2)->setText(Iridium::Utility::sizeToString(m_size).c_str());
+		}
 		auto bytes = m_data.at("bytes").as_int64();
-
-		at(2)->setText(Iridium::Utility::sizeToString(m_size).c_str());
 
 		m_progressBar->setValue((int) (bytes * 100 / m_size));
 		m_progressBar->setToolTip(QString::number(m_progressBar->value()) + "%");
 		at(8)->setText((Iridium::Utility::sizeToString(m_data.at("speed").as_double()) + "/s").c_str());
+
+		if (m_elapsedTimeCount == 0)
+			return;
+
 		auto avg = m_data.at("bytes").as_int64() / m_elapsedTimeCount;
 		at(9)->setText((Iridium::Utility::sizeToString(avg) + "/s").c_str());
 
@@ -151,6 +157,8 @@ void TaskRow::updateDataChild()
 	try
 	{
 		speed = m_data.at("speed").as_double();
+		if (speed == 0)
+			return;
 		speedAvg = m_data.at("speedAvg").as_double();
 		remainingTime = double64_t(m_size - m_data.at("bytes").as_int64()) / speed;
 	}
@@ -345,5 +353,4 @@ void TaskRow::setState(const TaskRow::State &state)
 			error();
 			break;
 	}
-
 }

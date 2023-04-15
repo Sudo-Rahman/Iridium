@@ -7,7 +7,6 @@
 
 #include "../RemoteConfigParamsFrame.hpp"
 
-#include <QSpinBox>
 
 class SftpRemoteConfigParamsFrame : public RemoteConfigParamsFrame
 {
@@ -19,12 +18,12 @@ Q_OBJECT
 public:
 	explicit SftpRemoteConfigParamsFrame(QWidget *parent = nullptr);
 
+	void reset() override;
+
 protected:
 	void addRemote() override;
 
 	void createUi() override;
-
-	bool checkFields() override;
 
 };
 

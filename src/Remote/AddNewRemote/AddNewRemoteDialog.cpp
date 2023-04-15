@@ -27,28 +27,16 @@ AddNewRemoteDialog::AddNewRemoteDialog(QWidget *parent) : QDialog(parent)
 	scrollWidgetLayout->setAlignment(Qt::AlignTop);
 	scrollArea->setWidget(scrollWidget);
 
-	auto drive = new RemoteWidgetParam(RemoteType::Drive);
-	connect(drive, &RemoteWidgetParam::clicked, this, &AddNewRemoteDialog::changeParamsFrame);
-	scrollWidgetLayout->addWidget(drive);
-
-	auto local = new RemoteWidgetParam(RemoteType::LocalHardDrive);
-	connect(local, &RemoteWidgetParam::clicked, this, &AddNewRemoteDialog::changeParamsFrame);
-	scrollWidgetLayout->addWidget(local);
-
-	auto sftp = new RemoteWidgetParam(RemoteType::Sftp);
-	connect(sftp, &RemoteWidgetParam::clicked, this, &AddNewRemoteDialog::changeParamsFrame);
-	scrollWidgetLayout->addWidget(sftp);
-
-	auto oneDrive = new RemoteWidgetParam(RemoteType::OneDrive);
-	connect(oneDrive, &RemoteWidgetParam::clicked, this, &AddNewRemoteDialog::changeParamsFrame);
-	scrollWidgetLayout->addWidget(oneDrive);
-
-	auto dropbox = new RemoteWidgetParam(RemoteType::Dropbox);
-	connect(dropbox, &RemoteWidgetParam::clicked, this, &AddNewRemoteDialog::changeParamsFrame);
-	scrollWidgetLayout->addWidget(dropbox);
+	for (int t = Drive; t != Mega + 1; t++)
+	{
+		auto type = static_cast<RemoteType>(t);
+		auto *widget = new RemoteWidgetParam(type);
+		connect(widget, &RemoteWidgetParam::clicked, this, &AddNewRemoteDialog::changeParamsFrame);
+		scrollWidgetLayout->addWidget(widget);
+	}
 
 	layout->addWidget(scrollArea);
-	paramsFrame = drive->getParamsFrame();
+	paramsFrame = findChildren<RemoteWidgetParam *>().first()->getParamsFrame();
 	layout->addWidget(paramsFrame);
 
 	for (auto *widget: scrollWidget->findChildren<RemoteWidgetParam *>())
@@ -62,11 +50,11 @@ AddNewRemoteDialog::AddNewRemoteDialog(QWidget *parent) : QDialog(parent)
 
 void AddNewRemoteDialog::changeParamsFrame(RemoteConfigParamsFrame *frame)
 {
+	frame->reset();
 	if (frame == paramsFrame)
 		return;
 	if (paramsFrame not_eq nullptr)
 	{
-
 		layout->removeWidget(paramsFrame);
 		paramsFrame->hide();
 	}

@@ -19,7 +19,6 @@ void LocalRemoteConfigParamsFrame::createUi()
 
 	auto *path = new QLineEdit(this);
 	path->setPlaceholderText("/user/home");
-	connecLineEdit(path);
 
 	m_formLayout->addRow(btn, path);
 
@@ -51,6 +50,7 @@ void LocalRemoteConfigParamsFrame::createUi()
 	});
 
 	RemoteConfigParamsFrame::createUi();
+
 	m_login->setText(tr("Ajouter"));
 
 }

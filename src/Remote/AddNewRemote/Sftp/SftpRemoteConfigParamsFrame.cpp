@@ -26,7 +26,6 @@ void SftpRemoteConfigParamsFrame::createUi()
 
 	m_host = new QLineEdit(this);
 	m_host->setPlaceholderText(tr("exemple.com"));
-	connecLineEdit(m_host);
 	m_formLayout->addRow(tr("Hôte : "), m_host);
 
 
@@ -37,37 +36,19 @@ void SftpRemoteConfigParamsFrame::createUi()
 
 	m_user = new QLineEdit(this);
 	m_user->setPlaceholderText(tr("root"));
-	connecLineEdit(m_user);
 	m_formLayout->addRow(tr("Utilisateur : "), m_user);
 
 	m_password = new QLineEdit(this);
 	m_password->setPlaceholderText(tr("********"));
 	m_password->setClearButtonEnabled(true);
 	m_password->setEchoMode(QLineEdit::Password);
-	connecLineEdit(m_password);
 	m_formLayout->addRow(tr("Mot de passe : "), m_password);
 
 	RemoteConfigParamsFrame::createUi();
 }
 
-bool SftpRemoteConfigParamsFrame::checkFields()
+void SftpRemoteConfigParamsFrame::reset()
 {
-	bool ok;
-	ok = RemoteConfigParamsFrame::checkFields();
-	if (m_host->text().isEmpty())
-	{
-		m_host->setStyleSheet("border: 1px solid red; border-radius: 5px;");
-		ok = false;
-	}
-	if (m_user->text().isEmpty())
-	{
-		m_user->setStyleSheet("border: 1px solid red; border-radius: 5px;");
-		ok = false;
-	}
-	if (m_password->text().isEmpty())
-	{
-		m_password->setStyleSheet("border: 1px solid red; border-radius: 5px;");
-		ok = false;
-	}
-	return ok;
+	m_port->setValue(22);
+	RemoteConfigParamsFrame::reset();
 }

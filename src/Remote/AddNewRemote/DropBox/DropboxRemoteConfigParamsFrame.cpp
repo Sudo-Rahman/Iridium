@@ -9,16 +9,6 @@ DropboxRemoteConfigParamsFrame::DropboxRemoteConfigParamsFrame(QWidget *parent) 
 	DropboxRemoteConfigParamsFrame::createUi();
 }
 
-void DropboxRemoteConfigParamsFrame::createUi()
-{
-	RemoteConfigParamsFrame::createUi();
-}
-
-bool DropboxRemoteConfigParamsFrame::checkFields()
-{
-	return RemoteConfigParamsFrame::checkFields();
-}
-
 void DropboxRemoteConfigParamsFrame::addRemote()
 {
 

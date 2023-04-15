@@ -17,9 +17,6 @@ public:
 protected:
 	void addRemote() override;
 
-	void createUi() override;
-
-	bool checkFields() override;
 
 };
 
