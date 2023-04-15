@@ -11,9 +11,6 @@ using namespace std;
 
 RemoteConfigParamsFrame::RemoteConfigParamsFrame(QWidget *parent) : QFrame(parent)
 {
-	m_stateMachine = new QStateMachine(this);
-	m_stateMachine->setGlobalRestorePolicy(QStateMachine::RestoreProperties);
-	m_stateMachine->setAnimated(true);
 
 	m_layout = new QVBoxLayout(this);
 

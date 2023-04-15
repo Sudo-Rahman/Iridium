@@ -13,7 +13,6 @@
 #include <QLineEdit>
 #include <QSpinBox>
 #include <QComboBox>
-#include <QStateMachine>
 
 #include <Rclone.hpp>
 #include <RoundedLineEdit.hpp>
@@ -30,7 +29,6 @@ protected:
 	QLineEdit *m_remoteName{};
 	RclonePtr m_rclone{};
 	std::map<std::string, std::string> m_lstRemote{};
-	QStateMachine *m_stateMachine{};
 
 public:
 	explicit RemoteConfigParamsFrame(QWidget *parent = nullptr);
