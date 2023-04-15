@@ -18,8 +18,11 @@ Graphical application for managing remote storage services such as Google Drive,
     - [x] Local
     - [x] One Drive
     - [x] Dropbox
-    - [ ] FTP
+    - [x] FTP
     - [x] SFTP
+    - [x] Mega
+    - [ ] SMB
+    - [ ] PCloud
     - [ ] ...
 - Manage remote :
   - [x] Copy
