@@ -39,6 +39,26 @@ Graphical application for managing remote storage services such as Google Drive,
 
 <br>
 
+## Visuals
+
+### Main window
+
+<img src="https://github.com/Sudo-Rahman/Iridium/blob/main/screen/screen1.png" width="500" height="auto" align="center" />
+<br>
+<img src="https://github.com/Sudo-Rahman/Iridium/blob/main/screen/screen2.png" width="500" height="auto" align="center" />
+<br>
+<img src="https://github.com/Sudo-Rahman/Iridium/blob/main/screen/screen4.png" width="500" height="auto" align="center" />
+<br>
+<img src="https://github.com/Sudo-Rahman/Iridium/blob/main/screen/screen5.png" width="500" height="auto" align="center" />
+<br>
+
+### Add remote window
+<img src="https://github.com/Sudo-Rahman/Iridium/blob/main/screen/screen3.png" width="500" height="auto" align="center" />
+<br>
+
+### Windows
+<img src="https://github.com/Sudo-Rahman/Iridium/blob/main/screen/screen Windows.png" width="500" height="auto" align="center" />
+
 ## Installation
 
 ### Dependencies
@@ -54,6 +74,7 @@ git clone https://github.com/Sudo-Rahman/Iridium.git
 cd Iridium
 ```
 - Install rclone binary and add it to Iridium directory (see [rclone download page](https://rclone.org/downloads/))
+- Set Cmake prefix path to Qt installation directory
 
 ```bash
 mkdir build
