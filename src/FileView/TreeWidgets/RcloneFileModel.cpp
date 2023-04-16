@@ -4,7 +4,7 @@
 
 #include "RcloneFileModel.hpp"
 #include <QVBoxLayout>
-#include <QProgressBar>
+#include <ProgressBar.hpp>
 
 
 /**
@@ -49,11 +49,22 @@ const QModelIndex &RcloneFileModel::getRootIndex() const
 void RcloneFileModel::addProgressBar(const QModelIndex &index)
 {
 	auto *container = new QWidget;
+	container->setContentsMargins(0, 0, 0, 0);
 	auto *layout = new QHBoxLayout(container);
 	layout->setContentsMargins(0, 0, 0, 0);
+	ProgressBar *progressBar;
+	// change size of item if it's a double click
+	if (m_expandOrDoubleClick)
+	{
+		progressBar = new ProgressBar(ProgressBar::Circular, container);
+		progressBar->setFixedSize(40, 40);
+	} else
+	{
+		progressBar = new ProgressBar(ProgressBar::Linear, container);
+		progressBar->setFixedSize(100,15);
+	}
+//	// align the progress bar to the left
 	layout->setAlignment(Qt::AlignLeft);
-	auto progressBar = new QProgressBar;
-	progressBar->setMaximumWidth(100);
 	layout->addWidget(progressBar);
 	progressBar->setRange(0, 0);
 	m_view->setIndexWidget(index, container);

@@ -123,7 +123,7 @@ void TaskTreeView::addTask(const QString &src, const QString &dst, const RcloneP
 						{
 							m_tasks[idParent].parent->setState(TaskRow::Error);
 							m_tasks[idParent].parent->setMessageToolTip(obj.at("msg").as_string().c_str());
-							rclone->terminate();
+							RcloneManager::release(rclone);
 							return;
 						}
 						auto it = m_tasks[idParent].children.find(errId);

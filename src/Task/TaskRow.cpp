@@ -108,7 +108,6 @@ void TaskRow::updateDataParent()
 		auto bytes = m_data.at("bytes").as_int64();
 
 		m_progressBar->setValue((int) (bytes * 100 / m_size));
-		m_progressBar->setToolTip(QString::number(m_progressBar->value()) + "%");
 		at(8)->setText((Iridium::Utility::sizeToString(m_data.at("speed").as_double()) + "/s").c_str());
 
 		if (m_elapsedTimeCount == 0)
@@ -142,7 +141,6 @@ void TaskRow::updateDataChild()
 	{
 		m_progressBar->setValue(
 			m_data.at("percentage").as_int64());
-		m_progressBar->setToolTip(QString::number(m_progressBar->value()) + "%");
 
 	}
 	catch (boost::wrapexcept<std::invalid_argument> &e)
@@ -281,10 +279,11 @@ void TaskRow::error()
  */
 void TaskRow::init()
 {
-	m_progressBar = new QProgressBar;
+	m_progressBar = new ProgressBar(ProgressBar::Linear);
 	m_progressBar->setRange(0, 100);
 	m_progressBar->setValue(0);
-	m_progressBar->setTextVisible(true);
+	m_progressBar->setShowProgress(true);
+	m_progressBar->setMaximumHeight(20);
 
 	m_elapsedTime.setInterval(1000);
 	m_elapsedTime.start();

@@ -13,7 +13,7 @@
 #include <QTimer>
 #include "TreeFileItem.hpp"
 #include <Rclone.hpp>
-#include <QProgressBar>
+#include <ProgressBar.hpp>
 
 class ItemInfoDialog : public QDialog
 {
@@ -23,16 +23,9 @@ private:
 	QGridLayout *m_layout{};
 
 	std::shared_ptr<RcloneFile> m_file{};
-	QLabel *m_icon{};
-	QLabel *m_name{};
-	QLabel *m_size{};
-	QLabel *m_type{};
-	QLabel *m_path{};
-	QLabel *m_modTime{};
-	QLabel *m_objs{};
+	QLabel *m_icon{}, *m_name{}, *m_size{}, *m_type{}, *m_path{}, *m_modTime{}, *m_objs{};
 
-	QProgressBar *m_loading1{};
-	QProgressBar *m_loading2{};
+	ProgressBar *m_loading1{}, *m_loading2{};
 
 	QTimer m_timer{};
 

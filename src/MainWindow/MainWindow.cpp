@@ -8,6 +8,7 @@
 #include <QTimer>
 #include <Menu/MenuBar.hpp>
 #include <TaskTreeView.hpp>
+#include <ProgressBar.hpp>
 
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)

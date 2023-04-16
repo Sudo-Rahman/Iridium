@@ -21,6 +21,7 @@ protected:
 
 	QTreeView *m_view{};
 
+	bool m_expandOrDoubleClick{};
 
 	virtual void init() = 0;
 
@@ -34,6 +35,10 @@ public:
 	[[nodiscard]] const QModelIndex &getRootIndex() const;
 
 	static QList<QStandardItem *> getItemList(TreeFileItem *item);
+
+	void setExpandOrDoubleClick(bool expandOrDoubleClick){
+		m_expandOrDoubleClick = expandOrDoubleClick;
+	}
 
 };
 

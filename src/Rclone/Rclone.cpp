@@ -124,7 +124,7 @@ void Rclone::config(RemoteType type, const string &name, const vector<string> &p
 		case Mega:
 			args.emplace_back("mega");
 			break;
-			case OpenDrive:
+		case OpenDrive:
 			args.emplace_back("opendrive");
 			break;
 		default:
@@ -276,14 +276,9 @@ void Rclone::terminate()
 #endif
 		if (m_thread->joinable())
 			m_thread->join();
-		m_state = Stopped;
 		m_exit = 1;
-		RcloneManager::finished();
-	} else
-		m_state = Stopped;
-	m_readyRead.disconnect_all_slots();
-	m_finished.disconnect_all_slots();
-	disconnect();
+	}
+	m_state = Stopped;
 }
 
 /**

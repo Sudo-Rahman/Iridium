@@ -7,20 +7,19 @@
 
 #include <QStandardItem>
 #include <QList>
-#include <QProgressBar>
+#include <ProgressBar.hpp>
 #include <QTimer>
 #include <boost/json.hpp>
 #include <Rclone.hpp>
 
 class TaskRow : public QList<QStandardItem *>
 {
-	QProgressBar *m_progressBar{};
+	ProgressBar *m_progressBar{};
 
 	QTimer m_elapsedTime{};
 	uint64_t m_elapsedTimeCount{};
 
-	QString m_src{};
-	QString m_dest{};
+	QString m_src{}, m_dest{};
 
 	uint64_t m_size{};
 
@@ -66,7 +65,7 @@ public:
 					 const Rclone::TaskType &taskType = Rclone::Unknown, const State &state = Normal,
 					 const Type &type = Child);
 
-	[[nodiscard]] QProgressBar *progressBar()
+	[[nodiscard]] ProgressBar *progressBar()
 	{ return m_progressBar; }
 
 	[[nodiscard]] QModelIndex progressBarIndex() const

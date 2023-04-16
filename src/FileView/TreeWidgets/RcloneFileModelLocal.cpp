@@ -24,7 +24,6 @@ void RcloneFileModelLocal::addItem(const RcloneFilePtr &file, TreeFileItem *pare
 	auto *tree_item = (parent->getParent() == nullptr ? parent : parent->getParent());
 	if (tree_item->rowCount() == 1 and tree_item->state() == TreeFileItem::NotLoaded)
 	{
-		addProgressBar(tree_item->child(0, 0)->index());
 		tree_item->setState(TreeFileItem::Loading);
 		m_thread = boost::make_shared<boost::thread>(
 			[this, tree_item, file]()

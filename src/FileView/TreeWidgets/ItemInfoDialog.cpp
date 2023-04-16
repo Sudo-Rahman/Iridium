@@ -49,15 +49,18 @@ ItemInfoDialog::ItemInfoDialog(TreeFileItem *item, QWidget *parent) : QDialog(pa
 
 	if (m_file->isDir())
 	{
+		m_size->hide();
 		m_layout->addWidget(new QLabel(tr("Nombre d'objets: ")), row, 0, 1, 1);
 		m_layout->addWidget(m_objs, row, 1, 1, 1);
-		m_loading1 = new QProgressBar(this);
+		m_loading1 = new ProgressBar(ProgressBar::Circular, this);
+		m_loading1->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 		m_loading1->setRange(0, 0);
-		m_layout->addWidget(m_loading1, 5, 1, 1, 1);
+		m_layout->addWidget(m_loading1, 5, 1, 1, 1, Qt::AlignLeft);
 
-		m_loading2 = new QProgressBar(this);
+		m_loading2 = new ProgressBar(ProgressBar::Circular, this);
 		m_loading2->setRange(0, 0);
-		m_layout->addWidget(m_loading2, 7, 1, 1, 1);
+		m_loading2->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+		m_layout->addWidget(m_loading2, 7, 1, 1, 1, Qt::AlignLeft);
 	}
 
 
@@ -146,6 +149,7 @@ void ItemInfoDialog::initSize()
 	}
 	if (!m_file->getRemoteInfo()->isLocal() and m_file->getSize() == 0)
 	{
+
 		auto rclone = RcloneManager::get();
 		connect(rclone.get(), &Rclone::sizeFinished, this,
 				[this](const uint32_t &objs, const uint64_t &size, const std::string &strSize)

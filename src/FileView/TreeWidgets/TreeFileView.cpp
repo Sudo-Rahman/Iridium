@@ -185,6 +185,7 @@ void TreeFileView::front()
 void TreeFileView::expand(const QModelIndex &index)
 {
 	auto *item = dynamic_cast<TreeFileItem *>(model->itemFromIndex(index));
+	model->setExpandOrDoubleClick(false);
 
 	model->addItem(item->getFile(), item);
 	QTreeView::expand(index);
@@ -200,6 +201,8 @@ void TreeFileView::doubleClick(const QModelIndex &index)
 
 	if (item == nullptr)
 		return;
+
+	model->setExpandOrDoubleClick(true);
 
 	model->addItem(item->getFile(), item);
 	if (!item->getFile()->isDir())
