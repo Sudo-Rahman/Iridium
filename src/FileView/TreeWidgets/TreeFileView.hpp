@@ -20,7 +20,7 @@ class TreeFileView : public QTreeView
 {
 Q_OBJECT
 
-	QStandardItemModel *model{};
+	RcloneFileModel *model{};
 	QList<QModelIndex> indexBack{};
 	QList<QModelIndex> indexTop{};
 	RemoteInfoPtr m_remoteInfo{};

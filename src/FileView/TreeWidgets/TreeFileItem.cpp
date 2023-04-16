@@ -9,15 +9,15 @@
 
 const std::shared_ptr<RcloneFile> &TreeFileItem::getFile() const
 {
-	return file;
+	return m_file;
 }
 
-TreeFileItem::TreeFileItem(const QString &path, const RemoteInfoPtr &remoteInfo, TreeFileItem *parent) : parent(
+TreeFileItem::TreeFileItem(const QString &path, const RemoteInfoPtr &remoteInfo, TreeFileItem *parent) : m_parent(
 	parent), QStandardItem()
 {
 	if (parent not_eq nullptr)
 		parent->addChild(this);
-	TreeFileItem::file = std::make_shared<RcloneFile>(
+	TreeFileItem::m_file = std::make_shared<RcloneFile>(
 		path,
 		remoteInfo
 	);
@@ -26,11 +26,11 @@ TreeFileItem::TreeFileItem(const QString &path, const RemoteInfoPtr &remoteInfo,
 }
 
 TreeFileItem::TreeFileItem(const QString &path, const std::shared_ptr<RcloneFile> &file, TreeFileItem *parent,
-						   bool initIco) : parent(parent)
+						   bool initIco) : m_parent(parent)
 {
 	if (parent not_eq nullptr)
 		parent->addChild(this);
-	TreeFileItem::file = file;
+	TreeFileItem::m_file = file;
 	setText(path);
 	if (initIco)
 		initIcon();
@@ -38,34 +38,34 @@ TreeFileItem::TreeFileItem(const QString &path, const std::shared_ptr<RcloneFile
 
 TreeFileItem *TreeFileItem::getParent() const
 {
-	return parent;
+	return m_parent;
 }
 
 void TreeFileItem::initIcon()
 {
 	QIcon ico;
-	if (file->isDir())
+	if (m_file->isDir())
 	{
-		if (QFileInfo(file->getName()).suffix() == "app")
-			ico = QIcon::fromTheme(file->getName().toLower().remove(".app").replace(" ", "-"),
+		if (QFileInfo(m_file->getName()).suffix() == "app")
+			ico = QIcon::fromTheme(m_file->getName().toLower().remove(".app").replace(" ", "-"),
 								   QIcon::fromTheme("application-default-icon"));
 		else ico = Settings::DIR_ICON;
-		file->setSize(0);
+		m_file->setSize(0);
 	} else
 	{
-		if (QFileInfo(file->getName()).suffix() == "exe")
-			ico = QIcon::fromTheme(file->getName().toLower().remove(".exe").replace(" ", "-"));
+		if (QFileInfo(m_file->getName()).suffix() == "exe")
+			ico = QIcon::fromTheme(m_file->getName().toLower().remove(".exe").replace(" ", "-"));
 		if (ico.isNull())
-			ico = QIcon::fromTheme(QMimeDatabase().mimeTypeForFile(file->getPath()).iconName(),
+			ico = QIcon::fromTheme(QMimeDatabase().mimeTypeForFile(m_file->getPath()).iconName(),
 								   QIcon::fromTheme(
-									   QMimeDatabase().mimeTypeForFile(file->getPath()).genericIconName()));
+									   QMimeDatabase().mimeTypeForFile(m_file->getPath()).genericIconName()));
 		if (ico.isNull())
 			ico = QIcon::fromTheme("unknown");
 	}
 	setIcon(ico);
 }
 
-TreeFileItem::TreeFileItem(TreeFileItem *parent) : parent(parent)
+TreeFileItem::TreeFileItem(TreeFileItem *parent) : m_parent(parent)
 {
 	if (parent not_eq nullptr)
 		parent->addChild(this);

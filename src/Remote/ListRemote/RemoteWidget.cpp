@@ -161,15 +161,15 @@ void RemoteWidget::init()
 				Settings::deleteRemote(m_remoteInfo);
 			else
 			{
-				Rclone rclone;
-				rclone.deleteRemote(m_remoteInfo->name());
-				rclone.waitForFinished();
-				if (rclone.exitCode() != 0)
+				auto rclone = RcloneManager::get();
+				rclone->deleteRemote(m_remoteInfo->name());
+				rclone->waitForFinished();
+				if (rclone->exitCode() != 0)
 				{
 					auto msgb = QMessageBox(QMessageBox::Critical, "Suppression",
 											"Une erreur est survenue lors de la suppression du remote",
 											QMessageBox::Ok, this);
-					msgb.setDetailedText(QString::fromStdString(rclone.readAllError().back()));
+					msgb.setDetailedText(QString::fromStdString(rclone->readAllError().back()));
 					return;
 				}
 			}

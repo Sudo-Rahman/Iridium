@@ -24,24 +24,23 @@
 #include "RcloneFile.hpp"
 #include <Remote.h>
 
+class RcloneManager;
 
 class Rclone : public QObject
 {
 Q_OBJECT
 
+	friend class RcloneManager;
+
+private:
+	Rclone() = default;
+
 public:
-	explicit Rclone(std::string path);
-
-	explicit Rclone();
-
-	static std::shared_ptr<Rclone> instance()
-	{ return std::make_shared<Rclone>(); };
-
 	~Rclone() override;
 
 	enum State
 	{
-		NotLaunched, Running, Finsished
+		NotLaunched, Running, Finsished, Stopped
 	};
 
 	enum TaskType
@@ -56,18 +55,15 @@ private:
 
 	static std::string m_pathRclone;
 	std::shared_ptr<boost::thread> m_thread{};
-	std::vector<std::string> m_out{};
-	std::vector<std::string> m_error{};
+	std::vector<std::string> m_out{}, m_error{};
 	std::map<std::string, std::string> m_mapData{};
 	uint8_t m_exit{};
-	Rclone::State m_state = Rclone::NotLaunched;
+	Rclone::State m_state{Rclone::NotLaunched};
 
 	std::mutex m_mutex;
 	std::condition_variable m_cv;
 
 public:
-
-	[[nodiscard]] static const std::string &getPathRclone();
 
 	static void setPathRclone(const std::string &pathRclone);
 
@@ -95,7 +91,7 @@ public:
 
 	void terminate();
 
-	[[nodiscard]] State getState() const;
+	[[nodiscard]] State state() const;
 
 	void waitForStarted();
 
@@ -106,8 +102,8 @@ public:
 	[[nodiscard]] uint8_t exitCode() const;
 
 
-	boost::signals2::signal<void(const std::string &)> m_readyRead{};
 private:
+	boost::signals2::signal<void(const std::string &)> m_readyRead{};
 
 	void execute(const std::vector<std::string> &args);
 
@@ -146,9 +142,6 @@ class RcloneManager
 	static std::vector<RclonePtr> m_rcloneVector;
 
 public:
-	explicit RcloneManager(unsigned nbMaxProcess);
-
-	explicit RcloneManager();
 
 	static RclonePtr get();
 

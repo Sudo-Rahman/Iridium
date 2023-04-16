@@ -22,14 +22,12 @@ void RcloneFileModelLocal::addItem(const RcloneFilePtr &file, TreeFileItem *pare
 		m_thread->join();
 	}
 	auto *tree_item = (parent->getParent() == nullptr ? parent : parent->getParent());
-	if (tree_item->rowCount() == 1)
+	if (tree_item->rowCount() == 1 and tree_item->state() == TreeFileItem::NotLoaded)
+	{
 		addProgressBar(tree_item->child(0, 0)->index());
-
-	m_thread = boost::make_shared<boost::thread>(
-
-		[this, tree_item, file]()
-		{
-			if (tree_item->rowCount() == 1)
+		tree_item->setState(TreeFileItem::Loading);
+		m_thread = boost::make_shared<boost::thread>(
+			[this, tree_item, file]()
 			{
 				auto list_file = QDir(file->getPath()).entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries);
 				for (const QFileInfo &info: list_file)
@@ -38,12 +36,13 @@ void RcloneFileModelLocal::addItem(const RcloneFilePtr &file, TreeFileItem *pare
 					auto *item = new TreeFileItemLocal(info.filePath(), m_remoteInfo);
 					tree_item->appendRow(getItemList(item));
 					if (info.isDir())
-						item->appendRow({new QStandardItem, new QStandardItem, new QStandardItem, new QStandardItem});
+						item->appendRow(
+							{new QStandardItem, new QStandardItem, new QStandardItem, new QStandardItem});
 				}
-				delete tree_item->child(0, 0);
 				tree_item->removeRow(0);
-			}
-		});
+				tree_item->setState(TreeFileItem::Loaded);
+			});
+	}
 }
 
 void RcloneFileModelLocal::init()

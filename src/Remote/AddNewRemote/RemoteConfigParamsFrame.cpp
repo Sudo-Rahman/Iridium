@@ -24,7 +24,7 @@ RemoteConfigParamsFrame::RemoteConfigParamsFrame(QWidget *parent) : QFrame(paren
 	m_formLayout->addRow(tr("Nom : "), m_remoteName);
 
 
-	m_rclone = Rclone::instance();
+	m_rclone = RcloneManager::get();
 	connect(m_rclone.get(), &Rclone::finished, this, [this](int exit)
 	{
 		if (exit == 0)
@@ -70,8 +70,11 @@ void RemoteConfigParamsFrame::createUi()
 
 	connect(m_cancel, &QPushButton::clicked, this, [this]()
 	{
-		if (m_rclone->getState() == Rclone::Running)
-			m_rclone->terminate();
+		if (m_rclone->state() == Rclone::Running)
+		{
+			RcloneManager::release(m_rclone);
+			m_rclone = RcloneManager::get();
+		}
 		m_cancel->hide();
 		m_login->show();
 	});
@@ -99,11 +102,11 @@ void RemoteConfigParamsFrame::addRemote()
 		return;
 	}
 
-	Rclone rclone_liste_remote;
-	rclone_liste_remote.listRemotes();
-	rclone_liste_remote.waitForStarted();
-	rclone_liste_remote.waitForFinished();
-	m_lstRemote = rclone_liste_remote.getData();
+	auto  rclone_liste_remote = RcloneManager::get();
+	rclone_liste_remote->listRemotes();
+	rclone_liste_remote->waitForStarted();
+	rclone_liste_remote->waitForFinished();
+	m_lstRemote = rclone_liste_remote->getData();
 
 }
 

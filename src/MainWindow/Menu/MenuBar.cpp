@@ -3,6 +3,7 @@
 //
 
 #include "MenuBar.hpp"
+#include "SettingsDialog.hpp"
 #include <QMessageBox>
 #include <QFormLayout>
 #include <QLabel>
@@ -60,7 +61,7 @@ void MenuBar::connectSignals()
 		formLayout.addRow(new QLabel(tr("Boost Version : ")), &boostVersion);
 
 		auto rcloneVersion = QLabel(
-			"<a href=\"https://rclone.org/\">" + QString::fromStdString(Rclone().version()) + "</a>");
+			"<a href=\"https://rclone.org/\">" + QString::fromStdString(RcloneManager::get()->version()) + "</a>");
 		rcloneVersion.setOpenExternalLinks(true);
 		formLayout.addRow(new QLabel(tr("Rclone Version : ")), &rcloneVersion);
 
@@ -73,5 +74,8 @@ void MenuBar::connectSignals()
 	});
 
 	connect(m_settingsAction, &QAction::triggered, this, [this]()
-	{});
+	{
+		auto dialog = SettingsDialog(this);
+		dialog.exec();
+	});
 }

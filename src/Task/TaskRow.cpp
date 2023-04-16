@@ -260,6 +260,7 @@ void TaskRow::finished()
  */
 void TaskRow::error()
 {
+	m_state = TaskRow::Error;
 	m_elapsedTime.stop();
 	m_progressBar->setValue(0);
 	m_progressBar->setToolTip("0%");

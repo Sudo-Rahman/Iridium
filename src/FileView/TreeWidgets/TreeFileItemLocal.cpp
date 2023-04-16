@@ -7,10 +7,10 @@
 TreeFileItemLocal::TreeFileItemLocal(const QString &path, const RemoteInfoPtr &remoteInfo, TreeFileItem *parent)
 	: TreeFileItem(parent)
 {
-	TreeFileItem::file = std::make_shared<RcloneFile>(
+	TreeFileItem::m_file = std::make_shared<RcloneFile>(
 		path,
 		remoteInfo
 	);
-	setText(file->getName());
+	setText(m_file->getName());
 	initIcon();
 }

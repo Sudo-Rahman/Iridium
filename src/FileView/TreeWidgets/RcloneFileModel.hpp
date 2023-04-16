@@ -21,6 +21,7 @@ protected:
 
 	QTreeView *m_view{};
 
+
 	virtual void init() = 0;
 
 	explicit RcloneFileModel(const RemoteInfoPtr &remoteInfo, QTreeView *View);

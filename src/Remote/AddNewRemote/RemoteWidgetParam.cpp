@@ -12,6 +12,7 @@
 #include "DropBox/DropboxRemoteConfigParamsFrame.hpp"
 #include "Ftp/FtpRemoteConfigParamsFrame.hpp"
 #include "Mega/MegaRemoteConfigParamsFrame.hpp"
+#include "OpenDrive/OpenDriveRemoteConfigParamsFrame.hpp"
 #include <Settings.hpp>
 
 #include <QLayout>
@@ -61,6 +62,9 @@ RemoteWidgetParam::RemoteWidgetParam(RemoteType type, QWidget *parent) :
 			break;
 		case Mega:
 			labelRemoteName->setText("Mega");
+			break;
+		case OpenDrive:
+			labelRemoteName->setText("OpenDrive");
 			break;
 		default:
 			break;
@@ -113,6 +117,9 @@ void RemoteWidgetParam::initParamsFrame()
 			break;
 		case Mega:
 			paramsFrame = new MegaRemoteConfigParamsFrame();
+			break;
+		case OpenDrive:
+			paramsFrame = new OpenDriveRemoteConfigParamsFrame();
 			break;
 		default:
 			break;

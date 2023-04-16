@@ -19,8 +19,8 @@ void FtpRemoteConfigParamsFrame::createUi()
 	m_portSpinBox->setToolTip("Port number");
 
 	m_userLineEdit = new QLineEdit(this);
-	m_userLineEdit->setPlaceholderText("User");
-	m_userLineEdit->setToolTip("User");
+	m_userLineEdit->setPlaceholderText("Utilisateur");
+	m_userLineEdit->setToolTip("Utilisateur");
 
 	m_passwordLineEdit = new QLineEdit(this);
 	m_passwordLineEdit->setClearButtonEnabled(true);

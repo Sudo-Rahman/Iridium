@@ -11,10 +11,18 @@
 
 class TreeFileItem : public QStandardItem
 {
+public:
+	enum State
+	{
+		NotLoaded,
+		Loaded,
+		Loading
+	};
 protected:
-	RcloneFilePtr file{};
-	TreeFileItem *parent{};
-	QList<TreeFileItem *> children{};
+	RcloneFilePtr m_file{};
+	TreeFileItem *m_parent{};
+	QList<TreeFileItem *> m_children{};
+	State m_state{NotLoaded};
 
 public:
 	explicit TreeFileItem(TreeFileItem * = nullptr);
@@ -29,10 +37,16 @@ public:
 	[[nodiscard]] TreeFileItem *getParent() const;
 
 	[[nodiscard]] const QList<TreeFileItem *> &getChildren() const
-	{ return children; }
+	{ return m_children; }
 
 	void addChild(TreeFileItem *child)
-	{ children << child; }
+	{ m_children << child; }
+
+	[[nodiscard]] State state() const
+	{ return m_state; }
+
+	void setState(const State &state)
+	{ TreeFileItem::m_state = state; }
 
 protected:
 

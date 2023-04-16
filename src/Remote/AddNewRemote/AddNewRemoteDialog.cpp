@@ -27,7 +27,7 @@ AddNewRemoteDialog::AddNewRemoteDialog(QWidget *parent) : QDialog(parent)
 	scrollWidgetLayout->setAlignment(Qt::AlignTop);
 	scrollArea->setWidget(scrollWidget);
 
-	for (int t = Drive; t != Mega + 1; t++)
+	for (int t = Drive; t != OpenDrive + 1; t++)
 	{
 		auto type = static_cast<RemoteType>(t);
 		auto *widget = new RemoteWidgetParam(type);

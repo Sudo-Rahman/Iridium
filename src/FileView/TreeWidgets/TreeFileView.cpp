@@ -159,7 +159,7 @@ void TreeFileView::back()
 		indexTop << QTreeView::rootIndex();
 		QTreeView::setRootIndex(index);
 	} else
-		QTreeView::setRootIndex(dynamic_cast<RcloneFileModel *>(model)->getRootIndex());
+		QTreeView::setRootIndex(model->getRootIndex());
 	emit pathChanged(getPath());
 }
 
@@ -184,10 +184,10 @@ void TreeFileView::front()
  */
 void TreeFileView::expand(const QModelIndex &index)
 {
-	QTreeView::expand(index);
-	auto *item = dynamic_cast<TreeFileItem *>(static_cast<QStandardItem *>(model->itemFromIndex(index)));
+	auto *item = dynamic_cast<TreeFileItem *>(model->itemFromIndex(index));
 
-	dynamic_cast<RcloneFileModel *>(model)->addItem(item->getFile(), item);
+	model->addItem(item->getFile(), item);
+	QTreeView::expand(index);
 }
 
 /**
@@ -196,12 +196,12 @@ void TreeFileView::expand(const QModelIndex &index)
  */
 void TreeFileView::doubleClick(const QModelIndex &index)
 {
-	auto *item = dynamic_cast<TreeFileItem *>(static_cast<QStandardItem *>(model->itemFromIndex(index)));
+	auto *item = dynamic_cast<TreeFileItem *>(model->itemFromIndex(index));
 
 	if (item == nullptr)
 		return;
 
-	dynamic_cast<RcloneFileModel *>(model)->addItem(item->getFile(), item);
+	model->addItem(item->getFile(), item);
 	if (!item->getFile()->isDir())
 		return;
 	// get parent index
@@ -256,8 +256,7 @@ void TreeFileView::showContextMenu()
 		for (int i = 0; i < QTreeView::selectedIndexes().length(); i = i + 4)
 		{
 			auto index = QTreeView::selectedIndexes().at(i);
-			auto *item = dynamic_cast<TreeFileItem *>(static_cast<QStandardItem *>(model->itemFromIndex(
-				index)));
+			auto *item = dynamic_cast<TreeFileItem *>(model->itemFromIndex(index));
 			lst << item;
 //				qDebug() << item->getFile()->getPath();
 		}
@@ -308,7 +307,7 @@ QString TreeFileView::getPath()
 	auto index = QTreeView::rootIndex();
 	if (!index.isValid())
 		return "";
-	auto *item = dynamic_cast<TreeFileItem *>(static_cast<QStandardItem *>(model->itemFromIndex(index)));
+	auto *item = dynamic_cast<TreeFileItem *>(model->itemFromIndex(index));
 	return item->getFile()->getPath();
 }
 
@@ -367,7 +366,7 @@ QList<TreeFileItem *> TreeFileView::getSelectedItems(bool can_be_empty)
 	for (int i = 0; i < QTreeView::selectedIndexes().length(); i = i + 4)
 	{
 		auto index = QTreeView::selectedIndexes().at(i);
-		auto *item = dynamic_cast<TreeFileItem *>(static_cast<QStandardItem *>(model->itemFromIndex(index)));
+		auto *item = dynamic_cast<TreeFileItem *>(model->itemFromIndex(index));
 		lst << item;
 	}
 	if (can_be_empty)
@@ -377,12 +376,12 @@ QList<TreeFileItem *> TreeFileView::getSelectedItems(bool can_be_empty)
 		auto index = QTreeView::rootIndex();
 		if (index.isValid())
 		{
-			auto *item = dynamic_cast<TreeFileItem *>(static_cast<QStandardItem *>(model->itemFromIndex(index)));
+			auto *item = dynamic_cast<TreeFileItem *>(model->itemFromIndex(index));
 			lst << item;
 		} else
 		{
 			index = model->index(0, 0, QTreeView::rootIndex());
-			auto *item = dynamic_cast<TreeFileItem *>(static_cast<QStandardItem *>(model->itemFromIndex(index)));
+			auto *item = dynamic_cast<TreeFileItem *>(model->itemFromIndex(index));
 			lst << item;
 		}
 	}
@@ -515,7 +514,7 @@ void TreeFileView::reload()
 
 		if (dynamic_cast<TreeFileItem *>(item->child(0)) == nullptr)
 		{
-			dynamic_cast<RcloneFileModel *>(model)->addItem(item->getFile(), item);
+			model->addItem(item->getFile(), item);
 			continue;
 		}
 
@@ -531,7 +530,8 @@ void TreeFileView::reload()
 			removeItem(child);
 		// add new children
 		item->appendRow({new QStandardItem, new QStandardItem, new QStandardItem, new QStandardItem});
-		dynamic_cast<RcloneFileModel *>(model)->addItem(item->getFile(), item);
+		item->setState(TreeFileItem::NotLoaded);
+		model->addItem(item->getFile(), item);
 	}
 }
 

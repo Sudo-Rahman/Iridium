@@ -12,8 +12,6 @@ class RcloneFileModelDistant : public RcloneFileModel
 {
 Q_OBJECT
 
-	RcloneManager manager{boost::thread::hardware_concurrency() * 10};
-
 public:
 	enum Load
 	{
@@ -24,7 +22,9 @@ private:
 
 	static uint8_t m_maxDepth;
 
-	QTimer m_timer{};
+	std::vector<RclonePtr> m_rcloneList{};
+
+	bool m_newIndex{};
 
 public:
 	explicit RcloneFileModelDistant(const RemoteInfoPtr &remoteInfo, QTreeView *parent);

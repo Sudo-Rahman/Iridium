@@ -22,31 +22,6 @@ namespace bj = boost::json;
 using namespace std;
 
 /**
- * @brief Rclone::Rclone
- * @param path
- * @param parent
- */
-Rclone::Rclone(string path)
-{
-	Rclone::m_pathRclone = std::move(path);
-}
-
-/**
- * @brief Rclone::Rclone
- * @param parent
- */
-Rclone::Rclone()
-{}
-
-/**
- * @brief Rclone::getPathRclone
- */
-const string &Rclone::getPathRclone()
-{
-	return m_pathRclone;
-}
-
-/**
  * @brief Rclone::setPathRclone
  * @param pathRclone
  */
@@ -54,7 +29,6 @@ void Rclone::setPathRclone(const string &pathRclone)
 {
 	Rclone::m_pathRclone = pathRclone;
 }
-
 
 /**
  * @brief Liste sous forme de json les fichiers dans le dossier path
@@ -150,6 +124,9 @@ void Rclone::config(RemoteType type, const string &name, const vector<string> &p
 		case Mega:
 			args.emplace_back("mega");
 			break;
+			case OpenDrive:
+			args.emplace_back("opendrive");
+			break;
 		default:
 			break;
 	}
@@ -158,7 +135,7 @@ void Rclone::config(RemoteType type, const string &name, const vector<string> &p
 }
 
 /**
- * @brief Rclone::m_lstRemote, permet de lister les remotes configurés
+ * @brief Rclone::lstRemote, permet de lister les remotes configurés
  */
 void Rclone::listRemotes()
 {
@@ -197,17 +174,25 @@ void Rclone::deleteRemote(const string &remote)
  */
 void Rclone::execute(const vector<string> &args)
 {
+#ifdef _WIN32
 	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 	std::wstring exe = converter.from_bytes(m_pathRclone);
 	vector<std::wstring> argsEncoding;
 	argsEncoding.reserve(args.size());
 	for (auto &arg: args)
 		argsEncoding.emplace_back(converter.from_bytes(arg));
+#else
+	auto exe = m_pathRclone;
+	const auto &argsEncoding = args;
+#endif
 
+	if (m_state == Stopped)
+		return;
 	m_thread = std::make_shared<boost::thread>(
 		[this, exe, argsEncoding]
 		{
 			RcloneManager::start();
+			m_state = Running;
 			m_out.clear();
 			bp::ipstream out;
 			bp::ipstream err;
@@ -219,8 +204,7 @@ void Rclone::execute(const vector<string> &args)
 #endif
 			);
 
-			m_state = Running;
-
+			// notify that the process has started
 			m_cv.notify_one();
 
 			string line_out, line_err;
@@ -249,16 +233,16 @@ void Rclone::execute(const vector<string> &args)
 			m_child.wait();
 			th1.join();
 			th2.join();
-			m_state = Finsished;
 			m_exit = m_child.exit_code();
 			m_finished(m_exit);
-			RcloneManager::finished();
 			emit finished(m_exit);
+			m_state = Finsished;
+			RcloneManager::finished();
 		});
 }
 
 /**
- * @brief Rclone::waitForFinished, attend que le processus m_rclone se termine
+ * @brief Rclone::waitForFinished, attend que le processus rclone se termine
  */
 void Rclone::waitForFinished()
 {
@@ -277,7 +261,7 @@ Rclone::~Rclone()
 }
 
 /**
- * @brief Rclone::terminate, termine le processus m_rclone
+ * @brief Rclone::terminate, termine le processus rclone
  */
 void Rclone::terminate()
 {
@@ -292,15 +276,21 @@ void Rclone::terminate()
 #endif
 		if (m_thread->joinable())
 			m_thread->join();
-		m_state = Finsished;
-	}
+		m_state = Stopped;
+		m_exit = 1;
+		RcloneManager::finished();
+	} else
+		m_state = Stopped;
+	m_readyRead.disconnect_all_slots();
+	m_finished.disconnect_all_slots();
+	disconnect();
 }
 
 /**
- * @brief Rclone::getState, retourne l'état du processus m_rclone
+ * @brief Rclone::state, retourne l'état du processus m_rclone
  * @return
  */
-Rclone::State Rclone::getState() const
+Rclone::State Rclone::state() const
 {
 	return m_state;
 }
@@ -446,36 +436,20 @@ mutex RcloneManager::m_mutex;
 condition_variable RcloneManager::m_cv;
 vector<RclonePtr> RcloneManager::m_rcloneVector;
 
-/**
- * @brief RcloneManager::RcloneManager, constructeur
- * @param nbMaxProcess nombre de processus m_rclone maximum
- */
-RcloneManager::RcloneManager(unsigned nbMaxProcess)
-{
-	RcloneManager::m_nbMaxProcess = nbMaxProcess;
-}
 
 /**
- * @brief RcloneManager::RcloneManager, constructeur
- */
-RcloneManager::RcloneManager()
-{
-	RcloneManager::m_nbMaxProcess = thread::hardware_concurrency();
-}
-
-/**
- * @brief RcloneManager::get, retourne un pointeur vers un m_rclone
- * @return un pointeur vers un m_rclone
+ * @brief RcloneManager::get, retourne un pointeur vers un rclone
+ * @return un pointeur vers un rclone
  */
 RclonePtr RcloneManager::get()
 {
-	auto rclone = make_shared<Rclone>();
+	auto rclone = RclonePtr(new Rclone);
 	RcloneManager::m_rcloneVector.push_back(rclone);
 	return rclone;
 }
 
 /**
- * @brief RcloneManager::start, un processus m_rclone appel cette fonction pour notifier le manager qu'il démarre
+ * @brief RcloneManager::start, un processus rclone appel cette fonction pour notifier le manager qu'il démarre
  */
 void RcloneManager::start()
 {
@@ -488,7 +462,7 @@ void RcloneManager::start()
 }
 
 /**
- * @brief RcloneManager::m_finished, un processus m_rclone appel cette fonction lorsqu'il se termine, pour notifier le manager
+ * @brief RcloneManager:: finished, un processus rclone appel cette fonction lorsqu’il se termine, pour notifier le manager
  */
 void RcloneManager::finished()
 {
@@ -497,10 +471,13 @@ void RcloneManager::finished()
 }
 
 /**
- * @brief RcloneManager::m_finished, un processus m_rclone appel cette fonction lorsqu'il se termine, pour notifier le manager
+ * @brief RcloneManager::release, libère un processus rclone
+ * @param rclone
  */
 void RcloneManager::release(const RclonePtr &rclone)
 {
+	// erase rclone from vector
+	rclone->terminate();
 	RcloneManager::m_rcloneVector.erase(
 		std::remove(RcloneManager::m_rcloneVector.begin(), RcloneManager::m_rcloneVector.end(), rclone),
 		RcloneManager::m_rcloneVector.end());

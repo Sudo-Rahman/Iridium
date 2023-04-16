@@ -2,12 +2,13 @@
     <qresource prefix="/">
         <file>ressources/Iridium.ico</file>
         <file>ressources/Iridium.png</file>
-        <file>ressources/google_drive.png</file>
+        <file>ressources/google-drive.png</file>
         <file>ressources/sftp.png</file>
-        <file>ressources/onde_drive.png</file>
+        <file>ressources/one-drive.png</file>
         <file>ressources/dropbox.png</file>
         <file>ressources/ftp.png</file>
         <file>ressources/mega.png</file>
+        <file>ressources/open-drive.png</file>
         <file>icons/fluent/index.theme</file>
         <file>icons/fluent/scalable/places</file>
         <file>icons/fluent/scalable/mimetypes</file>
