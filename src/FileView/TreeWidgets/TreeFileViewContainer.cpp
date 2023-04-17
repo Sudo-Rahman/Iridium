@@ -73,5 +73,5 @@ void TreeFileViewContainer::initUI()
 		m_pathLabel->setText(clippedText);
 	});
 
-	connect(m_refreshButton, &QPushButton::clicked, m_treeFileView, &TreeFileView::reload);
+	connect(m_refreshButton, &QPushButton::clicked, this, [this]{ m_treeFileView->reload();});
 }

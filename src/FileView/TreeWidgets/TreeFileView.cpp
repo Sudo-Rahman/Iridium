@@ -503,14 +503,18 @@ void TreeFileView::removeItem(TreeFileItem *item)
 /**
  * @brief reload current folder or selected folders
  */
-void TreeFileView::reload()
+void TreeFileView::reload(TreeFileItem *treeItem)
 {
-	auto index = QTreeView::rootIndex();
-	if (!index.isValid())
-		return;
+	if (treeItem == nullptr)
+	{
+		auto index = QTreeView::rootIndex();
+		if (!index.isValid())
+			return;
+	}
+	auto lstItem = treeItem == nullptr ? getSelectedItems() : QList<TreeFileItem *>{treeItem};
 
 	// all tree selected
-	for (auto item: getSelectedItems())
+	for (auto item: lstItem)
 	{
 		if (!item->getFile()->isDir())
 			return;
@@ -667,6 +671,7 @@ void TreeFileView::rename(const TreeFileItem *item, const QString &newName)
 		{
 			RcloneManager::release(rclone);
 			item->getFile()->changeName(newName);
+			reload(const_cast<TreeFileItem*>(item));
 		} else
 			model->itemFromIndex(item->index())->setText(item->getFile()->getName());
 		m_editingItem = nullptr;

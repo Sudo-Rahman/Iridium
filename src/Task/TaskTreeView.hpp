@@ -8,6 +8,7 @@
 #include <QList>
 #include <QTreeView>
 #include <QLayout>
+#include <QThread>
 #include "TaskRow.hpp"
 
 struct Tasks
@@ -25,20 +26,11 @@ Q_OBJECT
 
 	QStandardItemModel *m_model{};
 
-	boost::thread m_thread{};
-
-
 public:
 	explicit TaskTreeView(QWidget *parent = nullptr);
 
 	void addTask(const QString &src, const QString &dst, const RclonePtr &rclone, const std::function<void()> &callable,
 				 const Rclone::TaskType &type = Rclone::Unknown);
-
-	~TaskTreeView() override
-	{
-		m_thread.interrupt();
-		m_thread.join();
-	}
 
 signals:
 

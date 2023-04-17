@@ -174,6 +174,12 @@ void Rclone::deleteRemote(const string &remote)
  */
 void Rclone::execute(const vector<string> &args)
 {
+	if (m_state == Stopped or m_state == Finsished)
+	{
+		std::exception_ptr eptr = std::make_exception_ptr(
+			std::runtime_error("Rclone is not reusable"));
+	}
+
 #ifdef _WIN32
 	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 	std::wstring exe = converter.from_bytes(m_pathRclone);
@@ -185,9 +191,6 @@ void Rclone::execute(const vector<string> &args)
 	auto exe = m_pathRclone;
 	const auto &argsEncoding = args;
 #endif
-
-	if (m_state == Stopped)
-		return;
 	m_thread = std::make_shared<boost::thread>(
 		[this, exe, argsEncoding]
 		{
@@ -368,20 +371,9 @@ void Rclone::mkdir(const RcloneFile &dir)
 
 void Rclone::moveto(const RcloneFile &src, const RcloneFile &dest)
 {
-	m_readyRead.connect(
-		[this](const string &data)
-		{
-			bj::object json = parseJson(data);
-			if (not json.contains("error"))
-			{
-				emit taskProgress(json);
-				m_mapData.clear();
-				m_mapData.emplace("json", boost::json::serialize(json));
-			}
-		});
 	connectTaskSignalFinishedJson();
 	execute({"moveto", src.getPath().toStdString(), dest.getPath().toStdString(), "-v", "--use-json-log", "--stats",
-			 "1s"});
+			 "0.1s"});
 }
 
 bj::object Rclone::parseJson(const string &str)

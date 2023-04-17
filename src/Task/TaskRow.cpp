@@ -262,6 +262,7 @@ void TaskRow::error()
 	m_elapsedTime.stop();
 	m_progressBar->setValue(0);
 	m_progressBar->setToolTip("0%");
+	m_progressBar->error();
 	this->at(5)->setText(QObject::tr("Erreur"));
 	try
 	{

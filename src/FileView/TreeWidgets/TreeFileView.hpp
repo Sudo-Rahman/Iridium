@@ -43,7 +43,7 @@ public:
 
 	void copyto(const QList<TreeFileItem *> &);
 
-	void reload();
+	void reload(TreeFileItem *item = nullptr);
 
 	RemoteInfoPtr remoteInfo() const
 	{ return m_remoteInfo; };
