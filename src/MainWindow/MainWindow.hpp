@@ -14,14 +14,12 @@
 #include <ListRemoteWidget.hpp>
 #include <FileViewWidget.hpp>
 #include <TaskTreeView.hpp>
-#include "ToolBar.hpp"
 
 
 class MainWindow : public QMainWindow
 {
 Q_OBJECT
 
-	ToolBar *m_toolBar{};
 	ListRemoteWidget *m_listRemoteWidget{};
 	FileViewWidget *m_fileViewWidget{};
 	QHBoxLayout *m_layout{};
@@ -31,8 +29,12 @@ Q_OBJECT
 public:
 	explicit MainWindow(QWidget *parent = nullptr);
 
+
 private:
 	void connectSignals();
+
+protected:
+	void closeEvent(QCloseEvent *event) override;
 };
 
 

@@ -6,6 +6,7 @@
 
 #include <QLayout>
 #include <QTimer>
+#include <Settings.hpp>
 #include <Menu/MenuBar.hpp>
 #include <TaskTreeView.hpp>
 #include <ProgressBar.hpp>
@@ -21,14 +22,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
 	setMenuBar(new MenuBar(this));
 
-
-	// set tool bar
-	m_toolBar = new ToolBar(this);
-	addToolBar(m_toolBar);
-
 	auto *wid = new QWidget(this);
 	wid->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	m_layout = new QHBoxLayout(wid);
+	m_layout->setContentsMargins(0, 10, 10, 10);
 	setCentralWidget(wid);
 
 	m_listRemoteWidget = new ListRemoteWidget(this);
@@ -57,11 +54,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
 void MainWindow::connectSignals()
 {
-	connect(m_toolBar, &ToolBar::hideListeRemotes, this, [this]()
-	{
-		m_listRemoteWidget->expand();
-	});
-
 	connect(m_listRemoteWidget, &ListRemoteWidget::remoteClicked, this,
 			[this](const std::shared_ptr<remotes_selected> &remotes)
 			{
@@ -76,4 +68,10 @@ void MainWindow::connectSignals()
 				m_taskTreeView->addTask(src, dst, rclone, callable, type);
 			});
 
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+	Settings::saveSettings();
+	QMainWindow::closeEvent(event);
 }

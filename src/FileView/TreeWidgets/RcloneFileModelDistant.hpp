@@ -15,7 +15,7 @@ Q_OBJECT
 public:
 	enum Load
 	{
-		Static, Dynamic
+		 Dynamic,Static
 	};
 private:
 	static Load m_load;
@@ -28,6 +28,18 @@ private:
 
 public:
 	explicit RcloneFileModelDistant(const RemoteInfoPtr &remoteInfo, QTreeView *parent);
+
+	static void setLoadType(Load load)
+	{ RcloneFileModelDistant::m_load = load; }
+
+	static void setMaxDepth(uint8_t maxDepth)
+	{ RcloneFileModelDistant::m_maxDepth = maxDepth; }
+
+	static Load loadType()
+	{ return RcloneFileModelDistant::m_load; }
+
+	static uint8_t maxDepth()
+	{ return RcloneFileModelDistant::m_maxDepth; }
 
 protected:
 	void init() override;

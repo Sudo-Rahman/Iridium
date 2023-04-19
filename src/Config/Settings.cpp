@@ -4,13 +4,19 @@
 
 #include "Settings.hpp"
 #include <Rclone.hpp>
+#include <RcloneFileModelDistant.hpp>
+#include <boost/property_tree/json_parser.hpp>
+#include <fstream>
 
 using namespace std;
-
+using namespace boost;
+namespace bf = boost::filesystem;
+namespace pt = boost::property_tree;
 
 QIcon Settings::DIR_ICON;
 QIcon Settings::HARDDRIVE_ICON;
 string Rclone::m_pathRclone;
+property_tree::ptree Settings::m_settings;
 
 
 void Settings::changeDirIcon(const Settings::ThemeColor &color)
@@ -51,42 +57,46 @@ void Settings::changeDirIcon(const Settings::ThemeColor &color)
 			DIR_ICON = DEFAULT_DIR_ICO;
 			break;
 	}
-	auto *settings = new QSettings(QSettings::IniFormat, QSettings::UserScope, "Iridium", "Iridium");
-	settings->beginGroup("Settings");
-	settings->setValue("Theme", static_cast<int>(color));
+	setValues("thme.color", static_cast<int>(color));
 }
 
 QList<RemoteInfoPtr> Settings::getLocalRemotes()
 {
-	auto *settings = new QSettings(QSettings::IniFormat, QSettings::UserScope, "Iridium", "Iridium");
-	settings->beginGroup("LocalRemotes");
-	auto remotes = settings->childKeys();
-	QList<RemoteInfoPtr> remoteInfos;
-
-	for (const auto &remote: remotes)
+	QList<RemoteInfoPtr> remotes;
+	try
+	{ auto remote_ptree = m_settings.get_child("remotes"); }
+	catch (boost::wrapexcept<boost::property_tree::ptree_bad_path> &e)
 	{
-		auto remoteInfo = std::make_shared<RemoteInfo>(
-			settings->value(remote).toString().toStdString(),
-			RemoteType::LocalHardDrive,
-			remote.toStdString()
-		);
-		remoteInfos << remoteInfo;
+		cout << e.what() << endl;
+		return remotes;
 	}
-	return remoteInfos;
+
+
+	for (const auto &remote: m_settings.get_child("remotes"))
+	{
+		try
+		{
+			remotes.append(std::make_shared<RemoteInfo>(
+				remote.second.get<string>("path"), RemoteType::LocalHardDrive, remote.first));
+		}
+		catch (boost::wrapexcept<boost::property_tree::ptree_bad_path> &e)
+		{ continue; }
+	}
+	return remotes;
 }
 
-void Settings::addLocalRemote(const RemoteInfoPtr &remoteInfo)
-{
-	auto *settings = new QSettings(QSettings::IniFormat, QSettings::UserScope, "Iridium", "Iridium");
-	settings->beginGroup("LocalRemotes");
-	settings->setValue(QString::fromStdString(remoteInfo->name()), QString::fromStdString(remoteInfo->m_path));
-}
 
 void Settings::addLocalRemote(const RemoteInfo &remoteInfo)
 {
-	auto *settings = new QSettings(QSettings::IniFormat, QSettings::UserScope, "Iridium", "Iridium");
-	settings->beginGroup("LocalRemotes");
-	settings->setValue(QString::fromStdString(remoteInfo.name()), QString::fromStdString(remoteInfo.m_path));
+	pt::ptree remote, ptree_path;
+	ptree_path.put("", remoteInfo.m_path);
+	remote.add_child("path", ptree_path);
+
+	pt::ptree array = m_settings.get_child("remotes");
+	array.push_back(std::make_pair(remoteInfo.name(), remote));
+	m_settings.put_child("remotes", array);
+
+	saveSettings();
 }
 
 void Settings::deleteRemote(const RemoteInfoPtr &remoteInfo)
@@ -99,23 +109,151 @@ void Settings::deleteRemote(const RemoteInfoPtr &remoteInfo)
 
 void Settings::init()
 {
+
+	auto rclonePath = bf::current_path().append("rclone");
 	if (QSysInfo::productType() == "windows")
-		Rclone::setPathRclone(qApp->applicationDirPath().append("/rclone.exe").toStdString());
-	else
-		Rclone::setPathRclone(qApp->applicationDirPath().append("/rclone").toStdString());
+		rclonePath += ".exe";
+	Rclone::setPathRclone(rclonePath.string());
 
 	Settings::HARDDRIVE_ICON = QIcon::fromTheme("drive-harddisk-solidstate");
-
-	auto *settings = new QSettings(QSettings::IniFormat, QSettings::UserScope, "Iridium", "Iridium");
-	settings->beginGroup("Settings");
-	auto color = settings->value("Theme", 0).toString();
-	Settings::changeDirIcon(static_cast<Settings::ThemeColor>(color.toInt()));
+	initSettings();
+	loadSettings();
+	Settings::changeDirIcon(getDirIconColor());
 }
 
 Settings::ThemeColor Settings::getDirIconColor()
 {
-	auto *settings = new QSettings(QSettings::IniFormat, QSettings::UserScope, "Iridium", "Iridium");
-	settings->beginGroup("Settings");
-	auto color = settings->value("Theme", 0).toString();
-	return static_cast<Settings::ThemeColor>(color.toInt());
+	return static_cast<Settings::ThemeColor>(getValues<int>("theme.color"));
+}
+
+/**
+ * @brief load all app settings
+ */
+void Settings::loadSettings()
+{
+	auto path = Settings::getPathSettings();
+	if (bf::exists(path))
+	{
+		ifstream ifs(path.string());
+		string data((std::istreambuf_iterator<char>(ifs)),
+					std::istreambuf_iterator<char>());
+		pt::read_json(getPathSettings().string(), m_settings);
+		initValues();
+//		std::stringstream ss;
+//		property_tree::json_parser::write_json(ss, m_settings);
+//		cout << ss.str() << endl;
+	} else
+		resetSettings();
+
+}
+
+/**
+ * @brief save all app settings
+ */
+void Settings::saveSettings()
+{
+	// overwrite settings file
+	pt::write_json(getPathSettings().string(), m_settings);
+}
+
+/**
+ * @brief get path to settings file on current OS
+ * @return path to settings file
+ */
+boost::filesystem::path Settings::getPathSettings()
+{
+	bf::path path;
+	if (QSysInfo::productType() == "macos")
+	{
+		path = bf::current_path().parent_path().append("Resources");
+		path /= "settings.iridium";
+	} else
+	{
+		path = bf::current_path();
+		path /= "settings.iridium";
+	}
+	return path;
+}
+
+
+void Settings::initSettings()
+{
+	m_settings.put("theme.color", 0);
+	m_settings.put("general.loadType", 0);
+	m_settings.put("general.maxDepth", 2);
+	m_settings.put("general.maxProcess", std::thread::hardware_concurrency());
+	m_settings.put("remotes", "");
+
+	pt::ptree arrayFlags, flag;
+	flag.put("--transfers", 4);
+	arrayFlags.push_back(std::make_pair("", flag));
+
+	m_settings.add_child("general.flags", arrayFlags);
+
+//	std::stringstream ss;
+//	property_tree::json_parser::write_json(ss, m_settings);
+//	cout << ss.str() << endl;
+
+}
+
+void Settings::resetSettings()
+{
+	m_settings.clear();
+	initSettings();
+	saveSettings();
+}
+
+/**
+ * @brief load variables from m_settings ptree
+ */
+void Settings::initValues()
+{
+	try
+	{
+		RcloneFileModelDistant::setLoadType(
+			static_cast<RcloneFileModelDistant::Load>(m_settings.get<uint>("general.loadType")));
+		RcloneFileModelDistant::setMaxDepth(m_settings.get<uint16_t>("general.maxDepth"));
+		RcloneManager::setMaxProcess(m_settings.get<uint16_t>("general.maxProcess"));
+		Settings::changeDirIcon(static_cast<Settings::ThemeColor>(m_settings.get<int>("theme.color")));
+
+	} catch (boost::exception &e)
+	{
+		cout << diagnostic_information_what(e, true) << endl;
+	}
+}
+
+/**
+ * @brief set value to node path in m_settings ptree
+ * @param node
+ * @param val
+ */
+void Settings::setValues(const std::string &node, const auto &val)
+{
+	try
+	{
+		m_settings.put(node, val);
+		saveSettings();
+	} catch (boost::exception &e)
+	{
+		cout << "eror set Value" << diagnostic_information_what(e, true) << endl;
+	}
+}
+
+/**
+ * @brief get value from node path in m_settings ptree
+ * @tparam Type
+ * @param node
+ * @return Type
+ */
+template<class Type>
+Type Settings::getValues(const string &node)
+{
+	try
+	{
+		return m_settings.get<Type>(node);
+	} catch (boost::exception &e)
+	{
+		cout << "eror get Value" << diagnostic_information_what(e, true) << endl;
+	}
+	return Type();
 }

@@ -110,6 +110,7 @@ void RemoteWidgetParam::initParamsFrame()
 			break;
 		case LocalHardDrive:
 			paramsFrame = new LocalRemoteConfigParamsFrame();
+			break;
 		case OneDrive:
 			paramsFrame = new OneDriveRemoteConfigParamsFrame();
 			break;

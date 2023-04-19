@@ -14,6 +14,7 @@ FolderColorGroupBox::FolderColorGroupBox(QWidget *parent) : QGroupBox(parent)
 	m_layout->addWidget(new QLabel(tr("Couleur dossier")));
 	m_layout->addStretch();
 	auto colorLayout = new QHBoxLayout();
+	colorLayout->setContentsMargins(50, 0, 0, 0);
 	colorLayout->setSpacing(10);
 	m_layout->addLayout(colorLayout);
 	m_buttons << new FolderColorButton(QColor(69, 164, 235)) <<

@@ -24,9 +24,20 @@ ListRemoteWidget::ListRemoteWidget(QWidget *parent) : QScrollArea(parent)
 	m_layout = new QVBoxLayout(widget);
 	m_layout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
 	m_layout->setSpacing(10);
-	setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+	setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum);
 	// padding
 	m_layout->setContentsMargins(10, 10, 15, 10);
+
+	m_expand = new QPushButton(this);
+	m_expand->setCheckable(true);
+	m_expand->setChecked(true);
+	m_expand->setIcon(Settings::HARDDRIVE_ICON);
+	m_expand->setMaximumWidth(35);
+	// rounded button
+	m_layout->addWidget(m_expand);
+
+	connect(m_expand, &QPushButton::clicked, this, [this]()
+	{ expand(); });
 
 	auto *toplayout = new QHBoxLayout;
 
@@ -48,6 +59,7 @@ ListRemoteWidget::ListRemoteWidget(QWidget *parent) : QScrollArea(parent)
 
 	m_layout->addLayout(toplayout);
 
+
 	m_remoteLayout = new QVBoxLayout;
 	m_layout->addLayout(m_remoteLayout);
 
@@ -57,8 +69,6 @@ ListRemoteWidget::ListRemoteWidget(QWidget *parent) : QScrollArea(parent)
 	setFrameShape(QFrame::NoFrame);
 
 	m_width = QScrollArea::sizeHint().width();
-
-	setMaximumWidth(0);
 }
 
 /**
@@ -85,7 +95,7 @@ void ListRemoteWidget::getAllRemote()
 		m_listRemote << remote;
 	}
 
-	// ajout du local
+//	 ajout du local
 	auto *local = new RemoteWidget({"/", RemoteType::LocalHardDrive, "local"}, this);
 	m_listRemote.push_front(local);
 
@@ -148,19 +158,57 @@ void ListRemoteWidget::searchRemote(const QString &name)
 	for (auto *remote: m_listRemote)
 	{
 		if (QString::fromStdString(remote->remoteInfo()->name()).contains(name, Qt::CaseInsensitive))
-			remote->show();
+			showAnimation(remote);
 		else
-			remote->hide();
+			hideAnimation(remote);
 	}
 }
 
 void ListRemoteWidget::expand()
 {
 	auto animation = new QPropertyAnimation(this, "maximumWidth");
-	animation->setDuration(300);
+	animation->setDuration(500);
 	animation->setStartValue(width());
-	animation->setEndValue(m_isExpand ? 0 : m_width);
+	animation->setEndValue(m_isExpand ? 45 : m_width);
 	animation->setEasingCurve(QEasingCurve::InOutQuad);
 	animation->start(QAbstractAnimation::DeleteWhenStopped);
 	m_isExpand = !m_isExpand;
+	if (m_isExpand)
+	{
+		for (auto wid: m_listRemote)
+			showAnimation(wid);
+		m_add->show();
+		showAnimation(m_recherche);
+
+	} else
+	{
+		for (auto wid: m_listRemote)
+			hideAnimation(wid);
+		m_add->hide();
+		hideAnimation(m_recherche);
+	}
+}
+
+void ListRemoteWidget::showAnimation(QWidget *widget) const
+{
+	auto animation = new QPropertyAnimation(widget, "maximumWidth");
+	animation->setDuration(300);
+	animation->setStartValue(0);
+	animation->setEndValue(m_width);
+	animation->setEasingCurve(QEasingCurve::InOutQuad);
+	animation->start(QAbstractAnimation::DeleteWhenStopped);
+	connect(animation, &QPropertyAnimation::finished, widget, [widget]()
+	{ widget->show(); });
+}
+
+void ListRemoteWidget::hideAnimation(QWidget *widget) const
+{
+	auto animation = new QPropertyAnimation(widget, "maximumWidth");
+	animation->setDuration(300);
+	animation->setStartValue(widget->width());
+	animation->setEndValue(0);
+	animation->setEasingCurve(QEasingCurve::InOutQuad);
+	animation->start(QAbstractAnimation::DeleteWhenStopped);
+	connect(animation, &QPropertyAnimation::finished, widget, [widget]()
+	{ widget->hide(); });
 }

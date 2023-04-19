@@ -6,7 +6,7 @@
 #include "RcloneFileModelDistant.hpp"
 #include "TreeFileItemDistant.hpp"
 
-uint8_t RcloneFileModelDistant::m_maxDepth = 10;
+uint8_t RcloneFileModelDistant::m_maxDepth = 2;
 RcloneFileModelDistant::Load RcloneFileModelDistant::m_load = Dynamic;
 
 RcloneFileModelDistant::RcloneFileModelDistant(const RemoteInfoPtr &remoteInfo, QTreeView *View)
@@ -68,18 +68,18 @@ void RcloneFileModelDistant::addItemStatic(const QString &path, TreeFileItem *pa
 	// TODO: not working correctly
 	if (depth == 0)
 		return;
-	if (depth == m_maxDepth)
-	{
-		for (auto &it: m_rcloneList)
-		{
-			if (it->state() == Rclone::NotLaunched)
-			{
-				it->terminate();
-//				RcloneManager::release(it);
-			}
-		}
-		m_rcloneList.clear();
-	}
+//	if (depth == m_maxDepth)
+//	{
+//		for (auto &it: m_rcloneList)
+//		{
+//			if (it->state() == Rclone::NotLaunched)
+//			{
+//				it->terminate();
+////				RcloneManager::release(it);
+//			}
+//		}
+//		m_rcloneList.clear();
+//	}
 
 	auto *tree_item = (parent->getParent() == nullptr ? parent : parent->getParent());
 	auto rclone = RcloneManager::get();

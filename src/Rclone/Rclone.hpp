@@ -63,6 +63,8 @@ private:
 	std::mutex m_mutex;
 	std::condition_variable m_cv;
 
+	static std::map<std::string, std::string> m_mapFlags;
+
 public:
 
 	static void setPathRclone(const std::string &pathRclone);
@@ -101,6 +103,14 @@ public:
 
 	[[nodiscard]] uint8_t exitCode() const;
 
+	static std::string getFlag(const std::string &key){
+		return m_mapFlags[key];
+	}
+
+	static void setFlag(const std::string &key, const std::string &value){
+		m_mapFlags[key] = value;
+	}
+
 
 private:
 	boost::signals2::signal<void(const std::string &)> m_readyRead{};
@@ -135,6 +145,7 @@ class RcloneManager
 
 	friend class Rclone;
 
+private:
 	static std::atomic_uint32_t m_nbRclone;
 	static uint16_t m_nbMaxProcess;
 	static std::mutex m_mutex;
@@ -146,6 +157,10 @@ public:
 	static RclonePtr get();
 
 	static void release(const RclonePtr &rclone);
+
+	static uint16_t maxProcess(){ return m_nbMaxProcess;}
+
+	static void setMaxProcess(uint16_t nbMaxProcess){ m_nbMaxProcess = nbMaxProcess;}
 
 private:
 	static void start();
