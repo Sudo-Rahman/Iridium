@@ -10,6 +10,7 @@
 ItemMenu::ItemMenu(QWidget *parent) : QMenu(parent)
 {
 	m_info = new QAction(tr("Information"), this);
+	m_info->setShortcut(QKeySequence::fromString("space"));
 	m_copy = new QAction(tr("Copier"), this);
 	m_paste = new QAction(tr("Coller"), this);
 	m_delete = new QAction(tr("Supprimer"), this);

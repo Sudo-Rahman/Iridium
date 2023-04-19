@@ -21,6 +21,7 @@ Graphical application for managing remote storage services such as Google Drive,
     - [x] FTP
     - [x] SFTP
     - [x] Mega
+    - [x] OpenDrive
     - [ ] SMB
     - [ ] PCloud
     - [ ] ...
@@ -95,4 +96,4 @@ make
 
 ### Licence
 
-- [LGPG](https://www.gnu.org/licenses/lgpl-3.0.fr.html)
+- [GPL V3](https://www.gnu.org/licenses/gpl-3.0.en.html)

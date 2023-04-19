@@ -16,13 +16,13 @@ string Rclone::m_pathRclone;
 void Settings::changeDirIcon(const Settings::ThemeColor &color)
 {
 	const QIcon YELLOW_DIR_ICO = QIcon::fromTheme("yellow-folder");
+	const QIcon DEFAULT_DIR_ICO = QIcon::fromTheme("default-folder");
 	const QIcon GREEN_DIR_ICO = QIcon::fromTheme("green-folder");
 	const QIcon RED_DIR_ICO = QIcon::fromTheme("red-folder");
 	const QIcon PURPLE_DIR_ICO = QIcon::fromTheme("purple-folder");
 	const QIcon ORANGE_DIR_ICO = QIcon::fromTheme("orange-folder");
-	const QIcon GRAY_DIR_ICO = QIcon::fromTheme("gray-folder");
+	const QIcon GRAY_DIR_ICO = QIcon::fromTheme("grey-folder");
 	const QIcon PINK_DIR_ICO = QIcon::fromTheme("pink-folder");
-	const QIcon DEFAULT_DIR_ICO = QIcon::fromTheme("default-folder");
 
 	switch (color)
 	{
@@ -51,6 +51,9 @@ void Settings::changeDirIcon(const Settings::ThemeColor &color)
 			DIR_ICON = DEFAULT_DIR_ICO;
 			break;
 	}
+	auto *settings = new QSettings(QSettings::IniFormat, QSettings::UserScope, "Iridium", "Iridium");
+	settings->beginGroup("Settings");
+	settings->setValue("Theme", static_cast<int>(color));
 }
 
 QList<RemoteInfoPtr> Settings::getLocalRemotes()
@@ -107,4 +110,12 @@ void Settings::init()
 	settings->beginGroup("Settings");
 	auto color = settings->value("Theme", 0).toString();
 	Settings::changeDirIcon(static_cast<Settings::ThemeColor>(color.toInt()));
+}
+
+Settings::ThemeColor Settings::getDirIconColor()
+{
+	auto *settings = new QSettings(QSettings::IniFormat, QSettings::UserScope, "Iridium", "Iridium");
+	settings->beginGroup("Settings");
+	auto color = settings->value("Theme", 0).toString();
+	return static_cast<Settings::ThemeColor>(color.toInt());
 }

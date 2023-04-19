@@ -13,6 +13,7 @@
 #include "Ftp/FtpRemoteConfigParamsFrame.hpp"
 #include "Mega/MegaRemoteConfigParamsFrame.hpp"
 #include "OpenDrive/OpenDriveRemoteConfigParamsFrame.hpp"
+#include "Pcloud/PcloudRemoteConfigParamsFrame.hpp"
 #include <Settings.hpp>
 
 #include <QLayout>
@@ -65,6 +66,9 @@ RemoteWidgetParam::RemoteWidgetParam(RemoteType type, QWidget *parent) :
 			break;
 		case OpenDrive:
 			labelRemoteName->setText("OpenDrive");
+			break;
+		case Pcloud:
+			labelRemoteName->setText("Pcloud");
 			break;
 		default:
 			break;
@@ -120,6 +124,9 @@ void RemoteWidgetParam::initParamsFrame()
 			break;
 		case OpenDrive:
 			paramsFrame = new OpenDriveRemoteConfigParamsFrame();
+			break;
+		case Pcloud:
+			paramsFrame = new PcloudRemoteConfigParamsFrame();
 			break;
 		default:
 			break;

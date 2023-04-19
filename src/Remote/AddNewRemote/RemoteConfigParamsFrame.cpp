@@ -37,16 +37,19 @@ RemoteConfigParamsFrame::RemoteConfigParamsFrame(QWidget *parent) : QFrame(paren
 			m_login->show();
 		} else
 		{
-			auto *msgBox = new QMessageBox();
-			msgBox->setWindowTitle(tr("Erreur"));
-			msgBox->setText(tr("Une erreur est survenue lors de la configuration du serveur distant !"));
-			msgBox->setDetailedText(m_rclone->readAllError().back().c_str());
-			msgBox->setStandardButtons(QMessageBox::Ok);
-			msgBox->exec();
+			auto msgBox = QMessageBox();
+			msgBox.setWindowTitle(tr("Erreur"));
+			msgBox.setText(tr("Une erreur est survenue lors de la configuration du serveur distant !"));
+			msgBox.setDetailedText(m_rclone->readAllError().back().c_str());
+			msgBox.setStandardButtons(QMessageBox::Ok);
+			msgBox.exec();
 		}
 	});
 }
 
+/**
+ * @brief creation of the ui
+ */
 void RemoteConfigParamsFrame::createUi()
 {
 	auto *tmpwidlay = new QHBoxLayout;
@@ -89,9 +92,11 @@ void RemoteConfigParamsFrame::createUi()
 	m_layout->addWidget(m_messLabel, Qt::AlignTop);
 	m_layout->setAlignment(m_messLabel, Qt::AlignTop);
 
-	connecLineEdit();
 }
 
+/**
+ * @brief add a new remote  function called when the user click on the login button
+ */
 void RemoteConfigParamsFrame::addRemote()
 {
 	if (m_remoteName->text().isEmpty())
@@ -110,6 +115,10 @@ void RemoteConfigParamsFrame::addRemote()
 
 }
 
+/**
+ * @brief check if all fields are filled
+ * @return true if all fields are filled
+ */
 bool RemoteConfigParamsFrame::checkFields()
 {
 	for (auto &field: findChildren<QLineEdit *>())
@@ -125,27 +134,9 @@ bool RemoteConfigParamsFrame::checkFields()
 	return true;
 }
 
-void RemoteConfigParamsFrame::connecLineEdit()
-{
-	for (auto &field: findChildren<QLineEdit *>())
-	{
-		field->setStyleSheet("border: 1px solid gray; border-radius: 5px;");
-		connect(field, &QLineEdit::textChanged, this, [field, this](const QString &text)
-		{
-			if (not text.isEmpty())
-			{
-				field->setStyleSheet("border: 1px solid gray; border-radius: 5px;");
-				if (not m_messLabel->isHidden())
-					m_messLabel->hide();
-			} else
-			{
-				field->setStyleSheet("border: 1px solid red; border-radius: 5px;");
-				m_messLabel->show();
-			}
-		});
-	}
-}
-
+/**
+ * @brief clear all fields
+ */
 void RemoteConfigParamsFrame::clearAllFields()
 {
 	for (auto &field: findChildren<QLineEdit *>())
@@ -155,7 +146,9 @@ void RemoteConfigParamsFrame::clearAllFields()
 	}
 }
 
-
+/**
+ * @brief reset the frame
+ */
 void RemoteConfigParamsFrame::reset()
 {
 	clearAllFields();

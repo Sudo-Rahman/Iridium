@@ -44,9 +44,6 @@ protected:
 
 	void clearAllFields();
 
-private:
-	void connecLineEdit();
-
 
 signals:
 

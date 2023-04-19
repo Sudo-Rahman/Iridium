@@ -93,9 +93,9 @@ void ProgressBar::drawCircular(QPainter &painter)
 	pen.setCapStyle(Qt::RoundCap);
 
 	if (m_state == Error)
-		pen.setColor(QColor(Qt::darkRed));
+		pen.setColor(QColor(255, 118, 118));
 	else
-		pen.setColor(QWidget::palette().color(QPalette::Light));
+		pen.setColor(QWidget::palette().color(QPalette::Mid));
 
 	// draw line circle
 	auto marginRect = rect().marginsRemoved(QMargins(10, 10, 10, 10));
@@ -105,9 +105,9 @@ void ProgressBar::drawCircular(QPainter &painter)
 
 
 	if (m_state == Progress)
-		pen.setColor(QColor(Qt::blue).lighter(100));
+		pen.setColor(QColor(69, 164, 235));
 	else if (m_state == Success)
-		pen.setColor(QColor(Qt::green).lighter(50));
+		pen.setColor(QColor(128, 211, 132));
 
 	if (m_isIndeterminate)
 	{
@@ -161,9 +161,9 @@ void ProgressBar::drawLinear(QPainter &painter)
 	pen.setWidth(QWidget::height() / 2);
 	pen.setCapStyle(Qt::RoundCap);
 	if (m_state == Error)
-		pen.setColor(QColor(Qt::darkRed));
+		pen.setColor(QColor(255, 118, 118));
 	else
-		pen.setColor(QWidget::palette().color(QPalette::Light));
+		pen.setColor(QWidget::palette().color(QPalette::Mid));
 
 	// draw line
 	painter.setPen(pen);
@@ -177,9 +177,9 @@ void ProgressBar::drawLinear(QPainter &painter)
 	pen.setWidth(QWidget::height() / 2);
 
 	if (m_state == Progress)
-		pen.setColor(QColor(Qt::blue).lighter(100));
+		pen.setColor(QColor(69, 164, 235));
 	else if (m_state == Success)
-		pen.setColor(QColor(Qt::green).lighter(50));
+		pen.setColor(QColor(128, 211, 132));
 
 	if (m_isIndeterminate)
 	{

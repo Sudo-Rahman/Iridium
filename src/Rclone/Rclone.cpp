@@ -127,6 +127,9 @@ void Rclone::config(RemoteType type, const string &name, const vector<string> &p
 		case OpenDrive:
 			args.emplace_back("opendrive");
 			break;
+		case Pcloud:
+			args.emplace_back("pcloud");
+			break;
 		default:
 			break;
 	}

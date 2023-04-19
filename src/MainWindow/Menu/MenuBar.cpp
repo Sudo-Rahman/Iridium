@@ -70,6 +70,21 @@ void MenuBar::connectSignals()
 		auteur.setOpenExternalLinks(true);
 		formLayout.addRow(new QLabel(tr("Auteur : ")), &auteur);
 
+		auto licence = QLabel("<a href=\"https://www.gnu.org/licenses/gpl-3.0.html\">GPL</a>");
+		licence.setOpenExternalLinks(true);
+		formLayout.addRow(new QLabel(tr("Licence : ")), &licence);
+
+		auto text = []{
+			QString text;
+			for (auto const &ressource : OTHER_RESSOURCES_AUHTOR)
+				text += "<a href=\"" + QString::fromStdString(ressource) + "\">" + QString::fromStdString(ressource) + "</a><br>";
+			return text;
+		}();
+		auto otherRessources = QLabel(text);
+		otherRessources.setOpenExternalLinks(true);
+		formLayout.addRow(new QLabel(tr("Autres ressources : ")), &otherRessources);
+
+
 		dialog.exec();
 	});
 

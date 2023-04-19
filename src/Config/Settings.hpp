@@ -20,13 +20,13 @@ public:
 	enum class ThemeColor
 	{
 		Default,
-		Yellow,
 		Green,
-		Red,
-		Purple,
-		Orange,
 		Gray,
+		Orange,
 		Pink,
+		Purple,
+		Red,
+		Yellow,
 	};
 
 
@@ -36,6 +36,8 @@ public:
 	static void init();
 
 	static void changeDirIcon(const ThemeColor &color);
+
+	static ThemeColor getDirIconColor();
 
 	static QList<RemoteInfoPtr> getLocalRemotes();
 
