@@ -9,18 +9,6 @@
 #include <QLabel>
 #include "FolderColorGroupBox.hpp"
 
-class AppearanceFrame;
-
-class AppearanceButton : public QFrame
-{
-Q_OBJECT
-
-private:
-	AppearanceFrame *m_frame{};
-	QLabel *m_label{};
-
-
-};
 
 class AppearanceFrame : public QFrame
 {

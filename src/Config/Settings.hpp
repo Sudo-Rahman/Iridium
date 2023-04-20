@@ -14,13 +14,12 @@
 #include <boost/filesystem.hpp>
 
 
-class Settings : public QSettings
+class Settings
 {
-Q_OBJECT
 
 public:
 
-	enum class ThemeColor
+	enum ThemeColor
 	{
 		Default,
 		Green,
@@ -32,8 +31,20 @@ public:
 		Yellow,
 	};
 
-private:
+	enum Node
+	{
+		MaxProcess,
+		LoadType,
+		DirIconColor,
+		Remotes,
+		MaxDepth,
+		Flags
+	};
+
 	static boost::property_tree::ptree m_settings;
+private:
+	static const std::map<Node, std::string> m_nodes;
+
 
 	static void loadSettings();
 
@@ -41,10 +52,11 @@ private:
 
 	static void initSettings();
 
-public:
 	static QIcon DIR_ICON;
 
 	static QIcon HARDDRIVE_ICON;
+public:
+
 
 	static void init();
 
@@ -52,7 +64,11 @@ public:
 
 	static void saveSettings();
 
-	static ThemeColor getDirIconColor();
+	static QIcon dirIcon()
+	{ return DIR_ICON; }
+
+	static QIcon hardDriveIcon()
+	{ return HARDDRIVE_ICON; }
 
 	static QList<RemoteInfoPtr> getLocalRemotes();
 
@@ -64,10 +80,20 @@ public:
 
 	static void initValues();
 
-	static void setValues(const std::string &node, const auto &value);
+	static void setValue(const Node &node, const auto &value);
 
+	/**
+	 * @brief get the value of a node
+	 * @tparam Type
+	 * @param node
+	 * @return
+	 */
 	template<class Type>
-	static Type getValues(const std::string &node);
+	inline
+	static Type getValue(const Node &node)
+	{
+		return m_settings.get_child(m_nodes.at(node)).BOOST_NESTED_TEMPLATE get_value<Type>();
+	}
 
 };
 

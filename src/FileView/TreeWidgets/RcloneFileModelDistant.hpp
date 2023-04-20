@@ -7,6 +7,7 @@
 
 #include "RcloneFileModel.hpp"
 #include <QTimer>
+#include <Settings.hpp>
 
 class RcloneFileModelDistant : public RcloneFileModel
 {
@@ -30,10 +31,10 @@ public:
 	explicit RcloneFileModelDistant(const RemoteInfoPtr &remoteInfo, QTreeView *parent);
 
 	static void setLoadType(Load load)
-	{ RcloneFileModelDistant::m_load = load; }
+	{ RcloneFileModelDistant::m_load = load;}
 
 	static void setMaxDepth(uint8_t maxDepth)
-	{ RcloneFileModelDistant::m_maxDepth = maxDepth; }
+	{ RcloneFileModelDistant::m_maxDepth = maxDepth;}
 
 	static Load loadType()
 	{ return RcloneFileModelDistant::m_load; }

@@ -44,7 +44,11 @@ set(SRC
         src/FileView/TreeWidgets/ItemInfoDialog.cpp src/FileView/TreeWidgets/ItemInfoDialog.hpp src/Utility/Utility.cpp src/Utility/Utility.hpp src/FileView/TreeWidgets/RcloneProxy.cpp src/FileView/TreeWidgets/RcloneProxy.hpp src/Remote/ListRemote/ListRemoteWidget.cpp src/Remote/ListRemote/ListRemoteWidget.hpp
         src/Remote/ListRemote/RemoteWidget.cpp src/Remote/ListRemote/RemoteWidget.hpp src/FileView/TreeWidgets/RcloneFileModelLocal.cpp src/FileView/TreeWidgets/RcloneFileModelLocal.hpp src/FileView/FileViewWidget.cpp src/FileView/FileViewWidget.hpp src/FileView/TreeWidgets/TreeFileItemLocal.cpp src/FileView/TreeWidgets/TreeFileItemLocal.hpp
         src/FileView/TreeWidgets/TreeFileItemDistant.cpp src/FileView/TreeWidgets/TreeFileItemDistant.hpp src/FileView/TreeWidgets/TreeFileViewContainer.cpp src/FileView/TreeWidgets/TreeFileViewContainer.hpp src/Remote/AddNewRemote/Local/LocalRemoteConfigParamsFrame.cpp src/Remote/AddNewRemote/Local/LocalRemoteConfigParamsFrame.hpp
-        src/Config/Settings.cpp src/Config/Settings.hpp src/Other/RoundedButton.cpp src/Other/RoundedButton.hpp src/Remote/AddNewRemote/Sftp/SftpRemoteConfigParamsFrame.cpp src/Remote/AddNewRemote/Sftp/SftpRemoteConfigParamsFrame.hpp src/Other/RoundedLineEdit.cpp src/Other/RoundedLineEdit.hpp src/Task/TaskTreeView.cpp src/Task/TaskTreeView.hpp src/Task/TaskRow.cpp src/Task/TaskRow.hpp src/MainWindow/Menu/MenuBar.cpp src/MainWindow/Menu/MenuBar.hpp src/Config/Config.h src/Remote/AddNewRemote/OneDrive/OneDriveRemoteConfigParamsFrame.cpp src/Remote/AddNewRemote/OneDrive/OneDriveRemoteConfigParamsFrame.hpp src/Remote/AddNewRemote/DropBox/DropboxRemoteConfigParamsFrame.cpp src/Remote/AddNewRemote/DropBox/DropboxRemoteConfigParamsFrame.hpp src/Remote/AddNewRemote/Ftp/FtpRemoteConfigParamsFrame.cpp src/Remote/AddNewRemote/Ftp/FtpRemoteConfigParamsFrame.hpp src/Remote/AddNewRemote/Mega/MegaRemoteConfigParamsFrame.cpp src/Remote/AddNewRemote/Mega/MegaRemoteConfigParamsFrame.hpp src/MainWindow/Menu/SettingsDialog.cpp src/MainWindow/Menu/SettingsDialog.hpp src/Remote/AddNewRemote/OpenDrive/OpenDriveRemoteConfigParamsFrame.cpp src/Remote/AddNewRemote/OpenDrive/OpenDriveRemoteConfigParamsFrame.hpp src/Other/ProgressBar.cpp src/Other/ProgressBar.hpp src/Remote/AddNewRemote/Pcloud/PcloudRemoteConfigParamsFrame.cpp src/Remote/AddNewRemote/Pcloud/PcloudRemoteConfigParamsFrame.hpp src/MainWindow/Menu/Settings/FolderColorGroupBox.cpp src/MainWindow/Menu/Settings/FolderColorGroupBox.hpp src/MainWindow/Menu/Settings/AppearanceFrame.cpp src/MainWindow/Menu/Settings/AppearanceFrame.hpp src/MainWindow/Menu/Settings/GeneralFrame.cpp src/MainWindow/Menu/Settings/GeneralFrame.hpp src/MainWindow/Menu/Settings/SettingsButton.cpp src/MainWindow/Menu/Settings/SettingsButton.hpp)
+        src/Config/Settings.cpp src/Config/Settings.hpp src/Other/RoundedButton.cpp src/Other/RoundedButton.hpp src/Remote/AddNewRemote/Sftp/SftpRemoteConfigParamsFrame.cpp src/Remote/AddNewRemote/Sftp/SftpRemoteConfigParamsFrame.hpp src/Other/RoundedLineEdit.cpp src/Other/RoundedLineEdit.hpp src/Task/TaskTreeView.cpp src/Task/TaskTreeView.hpp src/Task/TaskRow.cpp
+        src/Task/TaskRow.hpp src/MainWindow/Menu/MenuBar.cpp src/MainWindow/Menu/MenuBar.hpp src/Config/Config.h src/Remote/AddNewRemote/OneDrive/OneDriveRemoteConfigParamsFrame.cpp src/Remote/AddNewRemote/OneDrive/OneDriveRemoteConfigParamsFrame.hpp src/Remote/AddNewRemote/DropBox/DropboxRemoteConfigParamsFrame.cpp src/Remote/AddNewRemote/DropBox/DropboxRemoteConfigParamsFrame.hpp
+        src/Remote/AddNewRemote/Ftp/FtpRemoteConfigParamsFrame.cpp src/Remote/AddNewRemote/Ftp/FtpRemoteConfigParamsFrame.hpp src/Remote/AddNewRemote/Mega/MegaRemoteConfigParamsFrame.cpp src/Remote/AddNewRemote/Mega/MegaRemoteConfigParamsFrame.hpp src/MainWindow/Menu/SettingsDialog.cpp src/MainWindow/Menu/SettingsDialog.hpp src/Remote/AddNewRemote/OpenDrive/OpenDriveRemoteConfigParamsFrame.cpp
+        src/Remote/AddNewRemote/OpenDrive/OpenDriveRemoteConfigParamsFrame.hpp src/Other/ProgressBar.cpp src/Other/ProgressBar.hpp src/Remote/AddNewRemote/Pcloud/PcloudRemoteConfigParamsFrame.cpp src/Remote/AddNewRemote/Pcloud/PcloudRemoteConfigParamsFrame.hpp src/MainWindow/Menu/Settings/FolderColorGroupBox.cpp src/MainWindow/Menu/Settings/FolderColorGroupBox.hpp src/MainWindow/Menu/Settings/AppearanceFrame.cpp
+        src/MainWindow/Menu/Settings/AppearanceFrame.hpp src/MainWindow/Menu/Settings/GeneralFrame.cpp src/MainWindow/Menu/Settings/GeneralFrame.hpp src/MainWindow/Menu/Settings/SettingsButton.cpp)
 
 include_directories(src
         src/Task
@@ -81,14 +85,14 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     set(myApp_ICON ressources/Iridium.icns)
     set_source_files_properties(${myApp_ICON} PROPERTIES
             MACOSX_PACKAGE_LOCATION "Resources")
-    add_executable(Iridium MACOSX_BUNDLE application.qrc ${myApp_ICON} ${SRC} ${QM_FILES})
+    qt6_add_executable(Iridium MACOSX_BUNDLE application.qrc ${myApp_ICON} ${SRC} ${QM_FILES})
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     file(COPY ${RCLONE}.exe DESTINATION Iridium/../)
     enable_language("RC")
     set(WIN32_ICO ${CMAKE_CURRENT_SOURCE_DIR}/MyApp.rc)
-    add_executable(Iridium WIN32 application.qrc ${WIN32_ICO} ${SRC})
+    qt6_add_executable(Iridium WIN32 application.qrc ${WIN32_ICO} ${SRC})
 else ()
-    add_executable(Iridium application.qrc ${SRC})
+    qt6_add_executable(Iridium application.qrc ${SRC})
 endif ()
 
 

@@ -48,6 +48,9 @@ public:
 		Unknown, Copy, Move, Delete, Mkdir, Rename
 	};
 
+	enum Flags{
+		Transfers,Retries
+	};
 
 private:
 
@@ -146,8 +149,8 @@ class RcloneManager
 	friend class Rclone;
 
 private:
-	static std::atomic_uint32_t m_nbRclone;
-	static uint16_t m_nbMaxProcess;
+	static std::atomic_uint8_t m_nbRclone;
+	static uint8_t m_nbMaxProcess;
 	static std::mutex m_mutex;
 	static std::condition_variable m_cv;
 	static std::vector<RclonePtr> m_rcloneVector;

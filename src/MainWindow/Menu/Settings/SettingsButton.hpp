@@ -9,6 +9,9 @@
 #include <QHBoxLayout>
 #include <QGroupBox>
 #include <QFrame>
+#include <QMouseEvent>
+#include <GeneralFrame.hpp>
+#include <AppearanceFrame.hpp>
 
 class SettingsButton : public QGroupBox
 {
@@ -19,7 +22,28 @@ Q_OBJECT
 	QFrame *m_frame{};
 
 public:
-	explicit SettingsButton(const QString &text, QWidget *parent = nullptr);
+
+	[[nodiscard]] QString getName() const
+	{ return m_label->text(); }
+
+	[[nodiscard]] QFrame *getFrame() const
+	{ return m_frame; }
+
+	enum class Type
+	{
+		General,
+		Appearance,
+	};
+
+	explicit SettingsButton( const Type &type, QWidget *parent = nullptr);
+
+protected:
+	void mousePressEvent(QMouseEvent *event) override;
+
+
+signals:
+
+	void clicked();
 
 };
 

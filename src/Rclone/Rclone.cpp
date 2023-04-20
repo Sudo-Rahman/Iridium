@@ -425,8 +425,8 @@ void Rclone::connectTaskSignalFinishedJson()
 		});
 }
 
-atomic_uint32_t RcloneManager::m_nbRclone;
-uint16_t RcloneManager::m_nbMaxProcess = thread::hardware_concurrency();
+atomic_uint8_t RcloneManager::m_nbRclone;
+uint8_t RcloneManager::m_nbMaxProcess = thread::hardware_concurrency();
 mutex RcloneManager::m_mutex;
 condition_variable RcloneManager::m_cv;
 vector<RclonePtr> RcloneManager::m_rcloneVector;

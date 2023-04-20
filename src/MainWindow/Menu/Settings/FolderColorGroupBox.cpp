@@ -9,6 +9,7 @@
 
 FolderColorGroupBox::FolderColorGroupBox(QWidget *parent) : QGroupBox(parent)
 {
+	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 	m_layout = new QHBoxLayout(this);
 	m_layout->setSpacing(0);
 	m_layout->addWidget(new QLabel(tr("Couleur dossier")));
@@ -27,7 +28,7 @@ FolderColorGroupBox::FolderColorGroupBox(QWidget *parent) : QGroupBox(parent)
 			  new FolderColorButton(QColor(255, 209, 102));
 
 	// get current color
-	m_buttons.at(static_cast<int>(Settings::getDirIconColor()))->check(true);
+	m_buttons.at(Settings::getValue<int>(Settings::DirIconColor))->check(true);
 
 	for (auto *button: m_buttons)
 	{

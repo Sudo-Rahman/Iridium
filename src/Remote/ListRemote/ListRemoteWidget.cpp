@@ -19,7 +19,7 @@ ListRemoteWidget::ListRemoteWidget(QWidget *parent) : QScrollArea(parent)
 	setWidget(widget);
 
 	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+	setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 
 	m_layout = new QVBoxLayout(widget);
 	m_layout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
@@ -31,7 +31,7 @@ ListRemoteWidget::ListRemoteWidget(QWidget *parent) : QScrollArea(parent)
 	m_expand = new QPushButton(this);
 	m_expand->setCheckable(true);
 	m_expand->setChecked(true);
-	m_expand->setIcon(Settings::HARDDRIVE_ICON);
+	m_expand->setIcon(Settings::hardDriveIcon());
 	m_expand->setMaximumWidth(35);
 	// rounded button
 	m_layout->addWidget(m_expand);

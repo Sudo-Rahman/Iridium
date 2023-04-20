@@ -4,12 +4,11 @@
 
 #include <QVBoxLayout>
 #include <QGroupBox>
-#include <Rclone.hpp>
 #include <QLabel>
 #include <Settings.hpp>
 #include "GeneralFrame.hpp"
 
-GeneralFrame::GeneralFrame(QWidget *parent)
+GeneralFrame::GeneralFrame(QWidget *parent) : QFrame(parent)
 {
 	setMinimumWidth(400);
 	auto *layout = new QVBoxLayout(this);
@@ -20,7 +19,7 @@ GeneralFrame::GeneralFrame(QWidget *parent)
 	auto groupe1Layout = new QHBoxLayout(group1);
 	m_maxRcloneExecution = new QSpinBox(this);
 	m_maxRcloneExecution->setRange(1, 100);
-	m_maxRcloneExecution->setValue(RcloneManager::maxProcess());
+	m_maxRcloneExecution->setValue(Settings::getValue<uint8_t>(Settings::MaxProcess));
 	groupe1Layout->addWidget(new QLabel(tr("Max Rclone Execution : "), this));
 	groupe1Layout->addWidget(m_maxRcloneExecution);
 
@@ -38,10 +37,10 @@ GeneralFrame::GeneralFrame(QWidget *parent)
 	m_loadType = new QComboBox(this);
 	m_loadType->addItem(tr("Dynamic"));
 	m_loadType->addItem(tr("Static"));
-	m_loadType->setCurrentIndex(RcloneFileModelDistant::loadType());
+	m_loadType->setCurrentIndex(Settings::getValue<uint8_t>(Settings::LoadType));
 	m_maxDepth = new QSpinBox(this);
 	m_maxDepth->setRange(1, 100);
-	m_maxDepth->setValue(RcloneFileModelDistant::maxDepth());
+	m_maxDepth->setValue(Settings::getValue<uint8_t>(Settings::MaxDepth));
 	groupe3Layout->addWidget(new QLabel(tr("Type de chargement : "), this));
 	groupe3Layout->addWidget(m_loadType);
 	groupe3Layout->addWidget(m_maxDepth);
@@ -68,19 +67,25 @@ GeneralFrame::GeneralFrame(QWidget *parent)
 
 }
 
-void GeneralFrame::connectSignals(){
+void GeneralFrame::connectSignals()
+{
 	connect(m_maxRcloneExecution, &QSpinBox::valueChanged, [=](int value)
 	{
+		Settings::setValue(Settings::MaxProcess, value);
+		RcloneManager::setMaxProcess(value);
 	});
 	connect(m_parallelTransfers, &QSpinBox::valueChanged, [=](int value)
 	{
+		Rclone::setFlag("transfers", std::to_string(value));
 	});
 	connect(m_loadType, &QComboBox::currentIndexChanged, [=](int index)
 	{
 		RcloneFileModelDistant::setLoadType(static_cast<RcloneFileModelDistant::Load>(index));
+		Settings::setValue(Settings::LoadType, index);
 	});
 	connect(m_maxDepth, &QSpinBox::valueChanged, [=](int value)
 	{
 		RcloneFileModelDistant::setMaxDepth(value);
+		Settings::setValue(Settings::MaxDepth, value);
 	});
 }

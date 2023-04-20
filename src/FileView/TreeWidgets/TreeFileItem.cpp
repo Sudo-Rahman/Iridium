@@ -49,7 +49,7 @@ void TreeFileItem::initIcon()
 		if (QFileInfo(m_file->getName()).suffix() == "app")
 			ico = QIcon::fromTheme(m_file->getName().toLower().remove(".app").replace(" ", "-"),
 								   QIcon::fromTheme("application-default-icon"));
-		else ico = Settings::DIR_ICON;
+		else ico = Settings::dirIcon();
 		m_file->setSize(0);
 	} else
 	{

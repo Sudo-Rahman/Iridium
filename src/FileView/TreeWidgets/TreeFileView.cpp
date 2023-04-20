@@ -568,7 +568,7 @@ QDialog *TreeFileView::mkdirDialog()
 	auto *layout = new QGridLayout(dialog);
 	layout->setSizeConstraint(QLayout::SetFixedSize);
 	auto *icon = new QLabel(dialog);
-	icon->setPixmap(Settings::DIR_ICON.pixmap(64));
+	icon->setPixmap(Settings::dirIcon().pixmap(64));
 	icon->setAlignment(Qt::AlignCenter);
 	layout->addWidget(icon, 0, 0, 3, 1);
 	auto *name = new QLineEdit(dialog);

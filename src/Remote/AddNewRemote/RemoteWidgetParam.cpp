@@ -74,7 +74,7 @@ RemoteWidgetParam::RemoteWidgetParam(RemoteType type, QWidget *parent) :
 			break;
 	}
 	if (type == RemoteType::LocalHardDrive)
-		m_icon = Settings::HARDDRIVE_ICON;
+		m_icon = Settings::hardDriveIcon();
 	else
 		m_icon = QIcon(QString::fromStdString(remoteIco.find(RemoteWidgetParam::type)->second));
 	labelIcon->setPixmap(m_icon.pixmap(32, 32, QIcon::Normal, QIcon::On));
