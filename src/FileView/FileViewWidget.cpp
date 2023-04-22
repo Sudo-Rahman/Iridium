@@ -61,12 +61,19 @@ FileViewWidget::FileViewWidget(QWidget *parent) : QWidget(parent)
 void FileViewWidget::changeRemote(const std::shared_ptr<remotes_selected> &remotes)
 {
 	m_currentFileList.clear();
-	if (remotes->first->remoteInfo().get() != m_treeFileView1->treeFileView()->remoteInfo().get())
+
+	if(remotes->first not_eq nullptr)
 	{
-		m_treeFileView1->treeFileView()->changeRemote(remotes->first->remoteInfo());
+		if (remotes->first->remoteInfo().get() != m_treeFileView1->treeFileView()->remoteInfo().get())
+		{
+			m_treeFileView1->treeFileView()->changeRemote(remotes->first->remoteInfo());
+		}
 	}
-	if (remotes->second->remoteInfo().get() != m_treeFileView2->treeFileView()->remoteInfo().get())
+	if (remotes->second not_eq nullptr)
 	{
-		m_treeFileView2->treeFileView()->changeRemote(remotes->second->remoteInfo());
+		if (remotes->second->remoteInfo().get() != m_treeFileView2->treeFileView()->remoteInfo().get())
+		{
+			m_treeFileView2->treeFileView()->changeRemote(remotes->second->remoteInfo());
+		}
 	}
 }

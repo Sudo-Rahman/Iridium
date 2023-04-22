@@ -109,6 +109,8 @@ void ListRemoteWidget::getAllRemote()
 	{
 		connect(remote, &RemoteWidget::clicked, this, [this](RemoteWidget *remoteWidget)
 		{
+			if (m_remoteSelected->first == nullptr or m_remoteSelected->second == nullptr)
+				return;
 			m_remoteSelected->first->setSelectedText("");
 			m_remoteSelected->second->setSelectedText("");
 			if (m_selected)

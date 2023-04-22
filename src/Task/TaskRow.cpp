@@ -107,7 +107,8 @@ void TaskRow::updateDataParent()
 		}
 		auto bytes = m_data.at("bytes").as_int64();
 
-		m_progressBar->setValue((int) (bytes * 100 / m_size));
+		if (m_size not_eq 0)
+			m_progressBar->setValue((int) (bytes * 100 / m_size));
 		at(8)->setText((Iridium::Utility::sizeToString(m_data.at("speed").as_double()) + "/s").c_str());
 
 		if (m_elapsedTimeCount == 0)
