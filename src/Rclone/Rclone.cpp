@@ -281,12 +281,14 @@ void Rclone::terminate()
 		cout << "process rclone kill" << endl;
 		m_child.detach();
 #ifdef _WIN32
-		bp::system("TASKKILL", "/F","/T", "/PID", to_string(m_child.id()));
+        const auto explorer = OpenProcess(PROCESS_TERMINATE, false, m_child.id());
+        TerminateProcess(explorer, 1);
+        CloseHandle(explorer);
 #else
 		kill(m_child.id(), SIGKILL);
 #endif
 		if (m_thread->joinable())
-			m_thread->join();
+            m_thread->join();
 		m_exit = 1;
 	}
 	m_state = Stopped;

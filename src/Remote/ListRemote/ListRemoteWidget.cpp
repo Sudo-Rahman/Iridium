@@ -41,7 +41,7 @@ ListRemoteWidget::ListRemoteWidget(QWidget *parent) : QScrollArea(parent)
 
 	auto *toplayout = new QHBoxLayout;
 
-	m_add = new RoundedButton("+");
+	m_add = new RoundedButton("＋");
 	m_add->setFixedSize(35, 35);
 	connect(m_add, &QPushButton::clicked, this, [this]()
 	{

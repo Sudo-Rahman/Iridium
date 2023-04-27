@@ -46,7 +46,7 @@ GeneralFrame::GeneralFrame(QWidget *parent) : QFrame(parent)
 	groupe3Layout->addWidget(m_maxDepth);
 	if (RcloneFileModelDistant::loadType() == RcloneFileModelDistant::Dynamic)
 		m_maxDepth->setEnabled(false);
-	connect(m_loadType, &QComboBox::currentIndexChanged, [=](int index)
+	connect(m_loadType, &QComboBox::currentIndexChanged, [this](int index)
 	{
 		if (index == RcloneFileModelDistant::Dynamic)
 			m_maxDepth->setEnabled(false);

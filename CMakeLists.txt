@@ -4,7 +4,7 @@ project(Iridium)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++2b -D NDEBUG -Wno-deprecated-declarations -O3 ")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++2b -D NDEBUG -Wno-deprecated-declarations -O3")
 
 
 # set qt path
@@ -107,5 +107,6 @@ target_link_libraries(Iridium PRIVATE
         Boost::chrono
         )
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-    target_link_libraries(Iridium PRIVATE ws2_32)
+    target_link_libraries(Iridium PRIVATE ws2_32
+            -static gcc stdc++ winpthread -dynamic)
 endif ()
