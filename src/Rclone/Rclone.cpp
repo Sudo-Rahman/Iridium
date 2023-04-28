@@ -21,8 +21,8 @@ namespace bp = boost::process;
 namespace bj = boost::json;
 using namespace std;
 
-std::map<std::string, std::string> Rclone::m_mapFlags{
-	{"transfers", "4"}
+std::map<Rclone::Flags, std::string> Rclone::m_mapFlags{
+	{Rclone::Flags::Transfers, "4"}
 };
 
 
@@ -70,7 +70,7 @@ void Rclone::copyTo(const RcloneFile &src, const RcloneFile &dest)
 	connectTaskSignalFinishedJson();
 	vector<string> arguments(
 		{"copyto", src.getPath().toStdString(), dest.getPath().toStdString(),
-		 "-v", "--use-json-log", "--stats", "0.1s", "--transfers", getFlag("transfers")});
+		 "-v", "--use-json-log", "--stats", "0.1s", "--transfers", getFlag(Flags::Transfers)});
 
 	m_readyRead.connect(
 		[this](const string &data)

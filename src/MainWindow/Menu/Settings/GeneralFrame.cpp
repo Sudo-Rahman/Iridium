@@ -28,7 +28,7 @@ GeneralFrame::GeneralFrame(QWidget *parent) : QFrame(parent)
 	auto groupe2Layout = new QHBoxLayout(group2);
 	m_parallelTransfers = new QSpinBox(this);
 	m_parallelTransfers->setRange(1, 100);
-	m_parallelTransfers->setValue(QString(Rclone::getFlag("transfers").c_str()).toInt());
+	m_parallelTransfers->setValue(QString(Rclone::getFlag(Rclone::Transfers).c_str()).toInt());
 	groupe2Layout->addWidget(new QLabel(tr("Transfers simultané : "), this));
 	groupe2Layout->addWidget(m_parallelTransfers);
 
@@ -76,7 +76,7 @@ void GeneralFrame::connectSignals()
 	});
 	connect(m_parallelTransfers, &QSpinBox::valueChanged, [=](int value)
 	{
-		Rclone::setFlag("transfers", std::to_string(value));
+		Rclone::setFlag(Rclone::Transfers, std::to_string(value));
 	});
 	connect(m_loadType, &QComboBox::currentIndexChanged, [=](int index)
 	{

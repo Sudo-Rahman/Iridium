@@ -133,8 +133,8 @@ void Settings::deleteRemote(const RemoteInfoPtr &remoteInfo)
 			break;
 		}
 	}
-	m_settings.put_child("remotes", array);
-	saveSettings();
+	m_settings.put_child(m_nodes.at(Remotes), array);
+    saveSettings();
 }
 
 /**

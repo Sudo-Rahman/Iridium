@@ -109,12 +109,14 @@ void TaskRow::updateDataParent()
 
 		if (m_size not_eq 0)
 			m_progressBar->setValue((int) (bytes * 100 / m_size));
-		at(8)->setText((Iridium::Utility::sizeToString(m_data.at("speed").as_double()) + "/s").c_str());
+        auto speed = m_data.at("speed").as_double();
+        m_avg.push_back(speed);
+		at(8)->setText((Iridium::Utility::sizeToString(speed) + "/s").c_str());
 
-		if (m_elapsedTimeCount == 0)
+		if (m_avg.empty())
 			return;
 
-		auto avg = m_data.at("bytes").as_int64() / m_elapsedTimeCount;
+		auto avg = std::accumulate(m_avg.begin(), m_avg.end(), 0.0) / m_avg.size();
 		at(9)->setText((Iridium::Utility::sizeToString(avg) + "/s").c_str());
 
 

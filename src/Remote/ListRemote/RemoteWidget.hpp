@@ -46,6 +46,11 @@ public:
 
 	void setSelectedText(const QString &text);
 
+    bool operator==(const RemoteWidget &other) const
+    {
+        return m_remoteInfo == other.m_remoteInfo;
+    }
+
 signals:
 
 	void clicked(RemoteWidget *);

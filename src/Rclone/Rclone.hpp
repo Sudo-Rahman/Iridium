@@ -66,7 +66,7 @@ private:
 	std::mutex m_mutex;
 	std::condition_variable m_cv;
 
-	static std::map<std::string, std::string> m_mapFlags;
+	static std::map<Flags, std::string> m_mapFlags;
 
 public:
 
@@ -106,11 +106,11 @@ public:
 
 	[[nodiscard]] uint8_t exitCode() const;
 
-	static std::string getFlag(const std::string &key){
+	static std::string getFlag(const Flags &key){
 		return m_mapFlags[key];
 	}
 
-	static void setFlag(const std::string &key, const std::string &value){
+	static void setFlag(const Flags &key, const std::string &value){
 		m_mapFlags[key] = value;
 	}
 

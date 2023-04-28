@@ -25,6 +25,8 @@ class TaskRow : public QList<QStandardItem *>
 
 	boost::json::object m_data{};
 
+    std::vector<double> m_avg{};
+
 public:
 
 	enum State

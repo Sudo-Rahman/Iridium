@@ -8,14 +8,15 @@
 #include <string>
 #include <vector>
 
-static std::string const IRIDIUM_VERSION = "0.7.0";
+static std::string const IRIDIUM_VERSION = "0.7.1";
 static std::string const AUTHOR = "Rahman YILMAZ";
 
 static std::vector<std::string> const OTHER_RESSOURCES_AUHTOR = {
-	"https://www.flaticon.com/fr/icone-gratuite/iridium_6160264",
-	"https://www.flaticon.com/fr/icone-gratuite/sftp_8110731",
 	"https://icones8.fr/icons",
+    "https://fr.freepik.com/vecteurs-libre/pack-modeles-logo-degrade_12980862.htm"
 };
+
+static std::string CPP_VERSION = "C++"+std::to_string(__cplusplus).substr(2, 2);
 
 
 #endif //IRIDIUM_CONFIG_H

@@ -2,7 +2,6 @@
 // Created by sr-71 on 18/01/2023.
 //
 #include <QHeaderView>
-#include <QMouseEvent>
 #include "TreeFileView.hpp"
 #include "RcloneFileModelDistant.hpp"
 #include "RcloneFileModelLocal.hpp"
@@ -49,6 +48,7 @@ void TreeFileView::initUI()
 {
     setIndentation(15);
     setSelectionMode(QAbstractItemView::ExtendedSelection);
+    setSelectionBehavior(QAbstractItemView::SelectRows);
     setSortingEnabled(true);
     setRootIsDecorated(true);
     setAnimated(true);
@@ -139,6 +139,7 @@ void TreeFileView::connectSignals()
     });
 
     connect(this, &QTreeView::customContextMenuRequested, this, &TreeFileView::showContextMenu);
+
 }
 
 /**
@@ -152,6 +153,8 @@ void TreeFileView::resizeEvent(QResizeEvent *event)
     QAbstractItemView::resizeEvent(event);
     if (header()->count() > 0)
         header()->setSectionResizeMode(0, QHeaderView::Interactive);
+    if (header()->sectionSize(0) < 200)
+        setColumnWidth(0, 200);
 }
 
 /**
@@ -717,39 +720,50 @@ void TreeFileView::mousePressEvent(QMouseEvent *event)
             }
         }
     }
-    m_dragItems = getSelectedItems(true);
     m_clickIndex = indexAt(event->pos());
     m_clickTime = QDateTime::currentMSecsSinceEpoch();
     QTreeView::mousePressEvent(event);
 }
 
+/**
+ * @brief drop event
+ * @param event
+ */
 void TreeFileView::dropEvent(QDropEvent *event)
 {
-    auto lst = dynamic_cast<TreeFileView *>(event->source())->dragItems();
+    // get items to drop
+    auto lst = dynamic_cast<TreeFileView *>(event->source())->getSelectedItems(true);
     if (lst.isEmpty())
     {
         event->ignore();
         return;
     }
 
+    // get item destination
     auto item_to_drop = dynamic_cast<TreeFileItem *>(model->itemFromIndex(indexAt(event->pos())));
+    // if no item destination
     if (item_to_drop == nullptr)
     {
+        // drop to root
         if (rootIndex().isValid())
             item_to_drop = dynamic_cast<TreeFileItem *>(model->itemFromIndex(rootIndex()));
+        // else ignore
         else
         {
             event->ignore();
             return;
         }
     }
-    item_to_drop = item_to_drop->getParent()== nullptr ? item_to_drop : item_to_drop->getParent();
+    item_to_drop = item_to_drop->getParent() == nullptr ? item_to_drop : item_to_drop->getParent();
     copyto(lst, item_to_drop);
 }
 
+/**
+ * @brief drag enter event
+ * @param event
+ */
 void TreeFileView::dragMoveEvent(QDragMoveEvent *event)
 {
-
     auto item_to_drop = dynamic_cast<TreeFileItem *>(model->itemFromIndex(indexAt(event->pos())));
     if (item_to_drop == nullptr and not rootIndex().isValid())
     {
@@ -757,7 +771,7 @@ void TreeFileView::dragMoveEvent(QDragMoveEvent *event)
         return;
     }
 
-    auto lst = dynamic_cast<TreeFileView *>(event->source())->dragItems();
+    auto lst = dynamic_cast<TreeFileView *>(event->source())->getSelectedItems(true);
 
     if (lst.isEmpty())
         event->ignore();

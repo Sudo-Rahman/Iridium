@@ -51,6 +51,10 @@ void MenuBar::connectSignals()
 		version.setOpenExternalLinks(true);
 		formLayout.addRow(new QLabel(tr("Iridium version : ")), &version);
 
+        auto cppVersion = QLabel("<a href=\"https://isocpp.org/\">" + QString::fromStdString(CPP_VERSION) + "</a>");
+        cppVersion.setOpenExternalLinks(true);
+        formLayout.addRow(new QLabel(tr("C++ Version : ")), &cppVersion);
+
 		auto qtVersion = QLabel("<a href=\"https://www.qt.io/\">" + QString::fromStdString(QT_VERSION_STR) + "</a>");
 		qtVersion.setOpenExternalLinks(true);
 		formLayout.addRow(new QLabel(tr("Qt Version : ")), &qtVersion);
@@ -70,7 +74,7 @@ void MenuBar::connectSignals()
 		auteur.setOpenExternalLinks(true);
 		formLayout.addRow(new QLabel(tr("Auteur : ")), &auteur);
 
-		auto licence = QLabel("<a href=\"https://www.gnu.org/licenses/gpl-3.0.html\">GPL</a>");
+		auto licence = QLabel("<a href=\"https://www.gnu.org/licenses/gpl-3.0.html\">GPL V3</a>");
 		licence.setOpenExternalLinks(true);
 		formLayout.addRow(new QLabel(tr("Licence : ")), &licence);
 
