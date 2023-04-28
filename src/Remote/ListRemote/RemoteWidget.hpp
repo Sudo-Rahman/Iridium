@@ -25,6 +25,8 @@ protected:
 	bool m_hover{};
 	bool m_click{};
 
+    bool deletable = true;
+
 protected:
 	void paintEvent(QPaintEvent *event) override;
 
@@ -36,9 +38,9 @@ private:
 	void addBlur();
 
 public:
-	explicit RemoteWidget(const RemoteInfo &remoteInfo, QWidget *parent = nullptr);
+	explicit RemoteWidget(const RemoteInfo &remoteInfo, bool deletable = true,QWidget *parent = nullptr);
 
-	explicit RemoteWidget(const RemoteInfoPtr &remoteInfo, QWidget *parent = nullptr);
+	explicit RemoteWidget(const RemoteInfoPtr &remoteInfo,bool deletable = true, QWidget *parent = nullptr);
 
 	[[nodiscard]] const RemoteInfoPtr &remoteInfo() const;
 

@@ -23,7 +23,7 @@ Graphical application for managing remote storage services such as Google Drive,
     - [x] Mega
     - [x] OpenDrive
     - [ ] SMB
-    - [ ] PCloud
+    - [x] PCloud
     - [ ] ...
 - Manage remote :
   - [x] Copy

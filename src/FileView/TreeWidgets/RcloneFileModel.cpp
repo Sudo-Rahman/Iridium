@@ -69,3 +69,11 @@ void RcloneFileModel::addProgressBar(const QModelIndex &index)
 	progressBar->setRange(0, 0);
 	m_view->setIndexWidget(index, container);
 }
+
+RcloneFileModel::RcloneFileModel()
+{
+    setColumnCount(4);
+    setRowCount(0);
+
+    setHorizontalHeaderLabels({tr("Nom"), tr("Taille"), tr("Date de modification"), tr("Type")});
+}

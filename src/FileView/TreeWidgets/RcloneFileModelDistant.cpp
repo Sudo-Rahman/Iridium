@@ -43,7 +43,7 @@ void RcloneFileModelDistant::addItemDynamic(const QString &path, TreeFileItem *p
 {
 	auto *tree_item = (parent->getParent() == nullptr ? parent : parent->getParent());
 	auto rclone = RcloneManager::get();
-	if (tree_item->rowCount() == 1 and tree_item->state() == TreeFileItem::NotLoaded)
+	if (tree_item->state() == TreeFileItem::NotLoaded)
 	{
 		addProgressBar(tree_item->child(0, 0)->index());
 		tree_item->setState(TreeFileItem::Loading);
@@ -84,7 +84,7 @@ void RcloneFileModelDistant::addItemStatic(const QString &path, TreeFileItem *pa
 	auto *tree_item = (parent->getParent() == nullptr ? parent : parent->getParent());
 	auto rclone = RcloneManager::get();
 	m_rcloneList.push_back(rclone);
-	if (tree_item->rowCount() == 1 and tree_item->state() == TreeFileItem::NotLoaded)
+	if ( tree_item->state() == TreeFileItem::NotLoaded)
 	{
 		addProgressBar(tree_item->child(0, 0)->index());
 		connect(rclone.get(), &Rclone::lsJsonFinished, this,

@@ -22,7 +22,7 @@ void RcloneFileModelLocal::addItem(const RcloneFilePtr &file, TreeFileItem *pare
 		m_thread->join();
 	}
 	auto *tree_item = (parent->getParent() == nullptr ? parent : parent->getParent());
-	if (tree_item->rowCount() == 1 and tree_item->state() == TreeFileItem::NotLoaded)
+	if ( tree_item->state() == TreeFileItem::NotLoaded)
 	{
 		tree_item->setState(TreeFileItem::Loading);
 		m_thread = boost::make_shared<boost::thread>(

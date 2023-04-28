@@ -13,10 +13,10 @@
 #include <QMessageBox>
 #include <Rclone.hpp>
 
-RemoteWidget::RemoteWidget(const RemoteInfo &remoteInfo, QWidget *parent) : QGroupBox(parent),
+RemoteWidget::RemoteWidget(const RemoteInfo &remoteInfo,bool deletable, QWidget *parent) : QGroupBox(parent),
 																			m_remoteInfo(std::move(
 																				std::make_shared<RemoteInfo>(
-																					remoteInfo)))
+																					remoteInfo))), deletable(deletable)
 {
 	init();
 }
@@ -96,9 +96,10 @@ void RemoteWidget::setSelectedText(const QString &text)
 	m_selected->setText(text);
 }
 
-RemoteWidget::RemoteWidget(const RemoteInfoPtr &remoteInfo, QWidget *parent)
+RemoteWidget::RemoteWidget(const RemoteInfoPtr &remoteInfo,bool deletable, QWidget *parent)
 {
 	m_remoteInfo = remoteInfo;
+    this->deletable = deletable;
 	init();
 }
 
@@ -151,6 +152,11 @@ void RemoteWidget::init()
 
 	connect(m_delete, &RoundedButton::clicked, this, [this]
 	{
+        if(!deletable)
+        {
+            QMessageBox::warning(this,tr("Suppression"),tr("Vous ne pouvez pas supprimer ce remote"));
+            return;
+        }
 		auto msgbox = new QMessageBox(QMessageBox::Question, "Suppression",
 									  "Voulez-vous vraiment supprimer ce remote ?",
 									  QMessageBox::Yes | QMessageBox::No, this);

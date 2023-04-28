@@ -90,18 +90,18 @@ void ListRemoteWidget::getAllRemote()
 	for (const auto &pair: rclone->getData())
 	{
 		auto *remote = new RemoteWidget({pair.first, stringToRemoteType.find(pair.second)->second,
-										}, this);
+										}, true, this);
 		remote->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 		m_listRemote << remote;
 	}
 
 //	 ajout du local
-	auto *local = new RemoteWidget({"/", RemoteType::LocalHardDrive, "local"}, this);
+	auto *local = new RemoteWidget({"/", RemoteType::LocalHardDrive, "Local"}, false,this);
 	m_listRemote.push_front(local);
 
 	for (const auto &localRemote: Settings::getLocalRemotes())
 	{
-		auto *remote = new RemoteWidget(localRemote, this);
+		auto *remote = new RemoteWidget(localRemote, true, this);
 		m_listRemote << remote;
 	}
 
@@ -133,6 +133,11 @@ void ListRemoteWidget::getAllRemote()
 		{
 			m_listRemote.removeOne(remoteWidget);
 			m_remoteLayout->removeWidget(remoteWidget);
+            if (m_remoteSelected->first == remoteWidget)
+                m_remoteSelected->first = nullptr;
+            if (m_remoteSelected->second == remoteWidget)
+                m_remoteSelected->second = nullptr;
+            emit remoteClicked(m_remoteSelected);
 			delete remoteWidget;
 		});
 		m_remoteLayout->addWidget(remote);
@@ -165,7 +170,9 @@ void ListRemoteWidget::searchRemote(const QString &name)
 			hideAnimation(remote);
 	}
 }
-
+/**
+ * @brief expand animation with expand button clicked
+ */
 void ListRemoteWidget::expand()
 {
 	auto animation = new QPropertyAnimation(this, "maximumWidth");
@@ -191,6 +198,10 @@ void ListRemoteWidget::expand()
 	}
 }
 
+/**
+ * @brief set animation for show widget in parameter
+ * @param widget
+ */
 void ListRemoteWidget::showAnimation(QWidget *widget) const
 {
 	auto animation = new QPropertyAnimation(widget, "maximumWidth");
@@ -203,6 +214,10 @@ void ListRemoteWidget::showAnimation(QWidget *widget) const
 	{ widget->show(); });
 }
 
+/**
+ * @brief set animation for hide widget in parameter
+ * @param widget
+ */
 void ListRemoteWidget::hideAnimation(QWidget *widget) const
 {
 	auto animation = new QPropertyAnimation(widget, "maximumWidth");

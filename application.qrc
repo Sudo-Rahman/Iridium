@@ -2,6 +2,7 @@
     <qresource prefix="/">
         <file>ressources/Iridium.ico</file>
         <file>ressources/Iridium.png</file>
+        <file>ressources/Iridium.svg</file>
         <file>ressources/google-drive.png</file>
         <file>ressources/sftp.png</file>
         <file>ressources/one-drive.png</file>

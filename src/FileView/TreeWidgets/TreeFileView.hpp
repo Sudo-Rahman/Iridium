@@ -30,6 +30,8 @@ Q_OBJECT
 
 	TreeFileItem *m_editingItem{};
 
+	QList<TreeFileItem *> m_dragItems{};
+
 public:
 	explicit TreeFileView(const RemoteInfoPtr &remoteInfo, QWidget *parent = nullptr);
 
@@ -41,12 +43,15 @@ public:
 
 	void changeRemote(const RemoteInfoPtr &info);
 
-	void copyto(const QList<TreeFileItem *> &);
+	void copyto(const QList<TreeFileItem *> &, TreeFileItem *item= nullptr);
 
 	void reload(TreeFileItem *item = nullptr);
 
-	RemoteInfoPtr remoteInfo() const
+	[[nodiscard]] RemoteInfoPtr remoteInfo() const
 	{ return m_remoteInfo; };
+
+    [[nodiscard]] const QList<TreeFileItem *> &dragItems() const
+    { return m_dragItems; };
 
 
 protected:
@@ -56,6 +61,9 @@ protected:
 
 	void mousePressEvent(QMouseEvent *event) override;
 
+    void dropEvent(QDropEvent *event) override;
+
+    void dragMoveEvent(QDragMoveEvent *event) override;
 
 protected slots:
 

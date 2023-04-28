@@ -25,6 +25,8 @@ protected:
 
 	virtual void init() = 0;
 
+    explicit RcloneFileModel();
+
 	explicit RcloneFileModel(const RemoteInfoPtr &remoteInfo, QTreeView *View);
 
 	void addProgressBar(const QModelIndex &index);
