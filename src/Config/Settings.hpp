@@ -41,10 +41,11 @@ public:
 		Flags
 	};
 
-	static boost::property_tree::ptree m_settings;
 private:
+	static boost::property_tree::ptree m_settings;
 	static const std::map<Node, std::string> m_nodes;
 
+	static boost::property_tree::ptree m_default;
 
 	static void loadSettings();
 
@@ -94,6 +95,10 @@ public:
 	{
 		return m_settings.get_child(m_nodes.at(node)).BOOST_NESTED_TEMPLATE get_value<Type>();
 	}
+
+    static void setRcloneFlag(const Rclone::Flag &,const std::string &);
+
+    static std::string getRcloneFlag(const Rclone::Flag &);
 
 };
 

@@ -139,7 +139,6 @@ void TreeFileView::connectSignals()
     });
 
     connect(this, &QTreeView::customContextMenuRequested, this, &TreeFileView::showContextMenu);
-
 }
 
 /**
@@ -212,12 +211,13 @@ void TreeFileView::doubleClick(const QModelIndex &index)
     if (item == nullptr)
         return;
 
-    model->setExpandOrDoubleClick(true);
+    if (not item->getFile()->isDir())
+        return;
 
     model->addItem(item->getFile(), item);
-    if (!item->getFile()->isDir())
-        return;
-    // get parent index
+    model->setExpandOrDoubleClick(true);
+
+//     get parent index
     auto id = item->getParent() == nullptr ? index.parent() : model->indexFromItem(item->getParent()).parent();
     indexBack.push_back(id);
     indexTop.clear();
@@ -747,7 +747,7 @@ void TreeFileView::dropEvent(QDropEvent *event)
         // drop to root
         if (rootIndex().isValid())
             item_to_drop = dynamic_cast<TreeFileItem *>(model->itemFromIndex(rootIndex()));
-        // else ignore
+            // else ignore
         else
         {
             event->ignore();
@@ -756,6 +756,7 @@ void TreeFileView::dropEvent(QDropEvent *event)
     }
     item_to_drop = item_to_drop->getParent() == nullptr ? item_to_drop : item_to_drop->getParent();
     copyto(lst, item_to_drop);
+    event->acceptProposedAction();
 }
 
 /**

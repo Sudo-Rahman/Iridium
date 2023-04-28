@@ -13,7 +13,7 @@ class GeneralFrame : public QFrame
 {
 Q_OBJECT
 
-	QSpinBox *m_maxRcloneExecution{}, *m_parallelTransfers{}, *m_maxDepth{};
+	QSpinBox *m_maxRcloneExecution{}, *m_parallelTransfers{}, *m_maxDepth{},*m_statsDuration{};
 	QComboBox *m_loadType{};
 
 

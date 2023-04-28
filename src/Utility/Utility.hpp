@@ -27,6 +27,8 @@ namespace Iridium
 
 		[[nodiscard]] static std::string sizeToString(double64_t num);
 
+        static void pushBack(std::vector<std::string> &dst,const std::vector<std::vector<std::string>>& src);
+
 	};
 
 }

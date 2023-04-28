@@ -23,9 +23,7 @@ private:
 
 	static uint8_t m_maxDepth;
 
-	std::vector<RclonePtr> m_rcloneList{};
-
-	bool m_newIndex{};
+	std::deque<RcloneLocked> m_lockedRclone{};
 
 public:
 	explicit RcloneFileModelDistant(const RemoteInfoPtr &remoteInfo, QTreeView *parent);
@@ -41,6 +39,11 @@ public:
 
 	static uint8_t maxDepth()
 	{ return RcloneFileModelDistant::m_maxDepth; }
+
+	~RcloneFileModelDistant() override{
+		RcloneManager::stop(m_lockedRclone);
+	};
+
 
 protected:
 	void init() override;

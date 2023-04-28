@@ -30,145 +30,194 @@ class Rclone : public QObject
 {
 Q_OBJECT
 
-	friend class RcloneManager;
+    friend class RcloneManager;
 
 private:
-	Rclone() = default;
+    bool m_lockable = false;
+
+    Rclone() = default;
+
+    explicit Rclone(bool lockable) { m_lockable = lockable; }
 
 public:
-	~Rclone() override;
+    Rclone(const Rclone &) = delete;
 
-	enum State
-	{
-		NotLaunched, Running, Finsished, Stopped
-	};
+    Rclone &operator=(const Rclone &) = delete;
 
-	enum TaskType
-	{
-		Unknown, Copy, Move, Delete, Mkdir, Rename
-	};
+public:
+    ~Rclone() override;
 
-	enum Flags{
-		Transfers,Retries
-	};
+    enum State
+    {
+        NotLaunched, Running, Finsished, Stopped
+    };
+
+    enum TaskType
+    {
+        Unknown, Copy, Move, Delete, Mkdir, Rename
+    };
+
+    struct flags_str
+    {
+        std::string name;
+        std::string value;
+
+        [[nodiscard]] std::vector<std::string> to_vector() const
+        {
+            std::vector<std::string> vec;
+            if(!name.empty())
+                vec.emplace_back(name);
+            if(!value.empty())
+                vec.emplace_back(value);
+            return vec;
+        }
+    };
+
+    enum Flag
+    {
+        Transfers, Retries, Stats, Verbose,
+        LogType
+    };
 
 private:
 
-	boost::process::child m_child{};
+    boost::process::child m_child{};
 
-	static std::string m_pathRclone;
-	std::shared_ptr<boost::thread> m_thread{};
-	std::vector<std::string> m_out{}, m_error{};
-	std::map<std::string, std::string> m_mapData{};
-	uint8_t m_exit{};
-	Rclone::State m_state{Rclone::NotLaunched};
+    static std::string m_pathRclone;
+    std::shared_ptr<boost::thread> m_thread{};
+    std::vector<std::string> m_out{}, m_error{};
+    std::map<std::string, std::string> m_mapData{};
+    uint8_t m_exit{};
+    Rclone::State m_state{Rclone::NotLaunched};
 
-	std::mutex m_mutex;
-	std::condition_variable m_cv;
+    std::mutex m_mutex;
+    std::condition_variable m_cv;
 
-	static std::map<Flags, std::string> m_mapFlags;
+    static std::map<Flag, flags_str> m_mapFlags;
 
 public:
 
-	static void setPathRclone(const std::string &pathRclone);
+    static void setPathRclone(const std::string &pathRclone);
 
-	void config(RemoteType type, const std::string &name, const std::vector<std::string> &args = {});
+    void config(RemoteType type, const std::string &name, const std::vector<std::string> &args = {});
 
-	void lsJson(const std::string &path);
+    void lsJson(const std::string &path);
 
-	void copyTo(const RcloneFile &src, const RcloneFile &dest);
+    void copyTo(const RcloneFile &src, const RcloneFile &dest);
 
-	void deleteRemote(const std::string &remote);
+    void deleteRemote(const std::string &remote);
 
-	void deleteFile(const RcloneFile &file);
+    void deleteFile(const RcloneFile &file);
 
-	void mkdir(const RcloneFile &dir);
+    void mkdir(const RcloneFile &dir);
 
-	void moveto(const RcloneFile &src, const RcloneFile &dest);
+    void moveto(const RcloneFile &src, const RcloneFile &dest);
 
-	void listRemotes();
+    void listRemotes();
 
-	void size(const std::string &path);
+    void size(const std::string &path);
 
-	std::string version();
+    std::string version();
 
-	void waitForFinished();
+    void waitForFinished();
 
-	void terminate();
+    void terminate();
 
-	[[nodiscard]] State state() const;
+    [[nodiscard]] State state() const;
 
-	void waitForStarted();
+    void waitForStarted();
 
-	[[nodiscard]] std::map<std::string, std::string> getData() const;
+    [[nodiscard]] std::map<std::string, std::string> getData() const;
 
-	[[nodiscard]] std::vector<std::string> readAllError() const;
+    [[nodiscard]] std::vector<std::string> readAllError() const;
 
-	[[nodiscard]] uint8_t exitCode() const;
+    [[nodiscard]] uint8_t exitCode() const;
 
-	static std::string getFlag(const Flags &key){
-		return m_mapFlags[key];
-	}
+    static Rclone::flags_str getFlag(const Flag &key)
+    {
+        return m_mapFlags[key];
+    }
 
-	static void setFlag(const Flags &key, const std::string &value){
-		m_mapFlags[key] = value;
-	}
-
+    static void setFlag(const Flag &key, const std::string &value)
+    {
+        m_mapFlags[key].value = value;
+    }
 
 private:
-	boost::signals2::signal<void(const std::string &)> m_readyRead{};
+    boost::signals2::signal<void(const std::string &)> m_readyRead{};
 
-	void execute(const std::vector<std::string> &args);
+    void execute(const std::vector<std::string> &args);
 
-	boost::signals2::signal<void(const int exit)> m_finished{};
+    boost::signals2::signal<void(const int exit)> m_finished{};
 
-	static boost::json::object parseJson(const std::string &str);
+    static boost::json::object parseJson(const std::string &str);
 
-	void connectTaskSignalFinishedJson();
+    void connectTaskSignalFinishedJson();
 
 
 signals:
 
-	void finished(int exit);
+    void started();
 
-	void lsJsonFinished(const QJsonDocument &);
+    void finished(int exit);
 
-	void taskProgress(const boost::json::object &);
+    void lsJsonFinished(const QJsonDocument &);
 
-	void sizeFinished(const uint32_t &objs, const uint64_t &size, const std::string &strSize);
+    void taskProgress(const boost::json::object &);
 
-	void taskFinished(const int &exit, const boost::json::object &);
+    void sizeFinished(const uint32_t &objs, const uint64_t &size, const std::string &strSize);
+
+    void taskFinished(const int &exit, const boost::json::object &);
 
 };
 
 typedef std::shared_ptr<Rclone> RclonePtr;
 
+struct RcloneLocked
+{
+    RclonePtr rclone;
+    std::function<void()> func;
+};
+
 class RcloneManager
 {
 
-	friend class Rclone;
+    friend class Rclone;
 
 private:
-	static std::atomic_uint8_t m_nbRclone;
-	static uint8_t m_nbMaxProcess;
-	static std::mutex m_mutex;
-	static std::condition_variable m_cv;
-	static std::vector<RclonePtr> m_rcloneVector;
+    static std::atomic_int_fast8_t m_nbRcloneLocked;
+    static uint8_t m_nbMaxProcess;
+    static std::mutex m_launch_mutex, m_stop_mutex, m_mutexStart;
+    static std::condition_variable m_launch_cv, m_stop_cv;
+    static std::deque<RclonePtr> m_rcloneVector;
+    static boost::thread m_launchThread, m_stopThread;
+    static std::deque<RcloneLocked> m_launch_queue, m_stop_queue;
 
 public:
 
-	static RclonePtr get();
+    static RclonePtr get();
 
-	static void release(const RclonePtr &rclone);
+    static RclonePtr getLockable()
+    {
+        auto rclone = get();
+        rclone->m_lockable = true;
+        return rclone;
+    }
 
-	static uint16_t maxProcess(){ return m_nbMaxProcess;}
+    static void release(const RclonePtr &rclone);
 
-	static void setMaxProcess(uint16_t nbMaxProcess){ m_nbMaxProcess = nbMaxProcess;}
+
+    static uint16_t maxProcess() { return m_nbMaxProcess; }
+
+    static void setMaxProcess(uint16_t nbMaxProcess) { m_nbMaxProcess = nbMaxProcess; }
+
+    static void launch(const RcloneLocked &func);
+
+    static void stop(const std::deque<RcloneLocked> &lst);
 
 private:
-	static void start();
 
-	static void finished();
+    static void finished(const Rclone *);
 
 };
 

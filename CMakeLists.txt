@@ -109,4 +109,6 @@ target_link_libraries(Iridium PRIVATE
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     target_link_libraries(Iridium PRIVATE ws2_32
             -static gcc stdc++ winpthread -dynamic)
+elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    target_link_libraries(Iridium PRIVATE "-framework Cocoa")
 endif ()

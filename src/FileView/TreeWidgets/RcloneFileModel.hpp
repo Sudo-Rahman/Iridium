@@ -41,7 +41,6 @@ public:
 	void setExpandOrDoubleClick(bool expandOrDoubleClick){
 		m_expandOrDoubleClick = expandOrDoubleClick;
 	}
-
 };
 
 

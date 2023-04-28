@@ -76,6 +76,17 @@ public:
 		modTime = other.modTime;
 		m_remoteInfo = other.m_remoteInfo;
 	}
+
+    // ostream operator
+    friend std::ostream& operator<<(std::ostream& os, const RcloneFile& file)
+    {
+        os << "path: " << file.path.toStdString() << std::endl;
+        os << "size: " << file.size << std::endl;
+        os << "isDirectory: " << file.isDirectory << std::endl;
+        os << "modTime: " << file.modTime.toString().toStdString() << std::endl;
+        os << "remoteInfo: " << file.m_remoteInfo->name() << std::endl;
+        return os;
+    }
 };
 
 typedef std::shared_ptr<RcloneFile> RcloneFilePtr;
