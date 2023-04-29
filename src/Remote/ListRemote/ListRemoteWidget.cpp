@@ -45,7 +45,11 @@ ListRemoteWidget::ListRemoteWidget(QWidget *parent) : QScrollArea(parent)
     connect(m_add, &QPushButton::clicked, this, [this]()
     {
         auto *addRemote = new AddNewRemoteDialog(this);
-        connect(addRemote, &AddNewRemoteDialog::newRemoteAdded, this, [this](){getAllRemote();emit remoteClicked(m_remoteSelected);});
+        connect(addRemote, &AddNewRemoteDialog::newRemoteAdded, this, [this]()
+        {
+            getAllRemote();
+            emit remoteClicked(m_remoteSelected);
+        });
         addRemote->exec();
     });
     toplayout->addWidget(m_add);
@@ -161,10 +165,10 @@ void ListRemoteWidget::searchRemote(const QString &name)
 {
     for (auto *remote: m_listRemote)
     {
-        if (QString::fromStdString(remote->remoteInfo()->name()).contains(name, Qt::CaseInsensitive) and
-            remote->isVisible())
+        if (QString::fromStdString(remote->remoteInfo()->name()).contains(name, Qt::CaseInsensitive))
             showAnimation(remote);
-        else { hideAnimation(remote); }
+        else
+            hideAnimation(remote);
     }
 }
 
@@ -180,20 +184,25 @@ void ListRemoteWidget::expand()
     animation->setEasingCurve(QEasingCurve::InOutQuad);
     animation->start(QAbstractAnimation::DeleteWhenStopped);
     m_isExpand = !m_isExpand;
+    if (not m_isExpand)
+        m_add->hide();
     if (m_isExpand)
     {
         for (auto wid: m_listRemote)
             showAnimation(wid);
-        m_add->show();
         showAnimation(m_recherche);
 
     } else
     {
         for (auto wid: m_listRemote)
             hideAnimation(wid);
-        m_add->hide();
         hideAnimation(m_recherche);
     }
+    connect(animation, &QPropertyAnimation::finished, this, [this]()
+    {
+        if (m_isExpand)
+            m_add->show();
+    });
 }
 
 /**

@@ -143,6 +143,12 @@ void Rclone::config(RemoteType type, const string &name, const vector<string> &p
         case Pcloud:
             args.emplace_back("pcloud");
             break;
+        case Box:
+            args.emplace_back("box");
+            break;
+        case Smb:
+            args.emplace_back("smb");
+            break;
         default:
             break;
     }

@@ -63,6 +63,7 @@ void TreeFileItem::initIcon()
 			ico = QIcon::fromTheme("unknown");
 	}
 	setIcon(ico);
+    setToolTip(m_file->getName());
 }
 
 TreeFileItem::TreeFileItem(TreeFileItem *parent) : m_parent(parent)

@@ -18,6 +18,7 @@
 #include <QDropEvent>
 #include <QDrag>
 #include <QMimeData>
+#include <QSysInfo>
 #include <Settings.hpp>
 
 
@@ -36,7 +37,7 @@ public:
 
     [[nodiscard]] QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override
     {
-        return {30, 30};
+        return {35, 35};
     }
 };
 
@@ -53,14 +54,13 @@ void TreeFileView::initUI()
     setRootIsDecorated(true);
     setAnimated(true);
     setEditTriggers(QAbstractItemView::NoEditTriggers);
-//	setFocusPolicy(Qt::NoFocus);
     setIconSize(QSize(30, 30));
-    setFont(QFont("Arial", 12));
+    setFont(QFont("Arial", 15));
     setAlternatingRowColors(true);
     setUniformRowHeights(true);
 
     header()->setSectionsMovable(true);
-    header()->setFont(QFont("Arial", 12));
+    header()->setFont(QFont("Arial", 13));
     header()->setSortIndicatorShown(true);
     header()->setSectionsClickable(true);
     header()->setStretchLastSection(false);
@@ -75,6 +75,14 @@ void TreeFileView::initUI()
     setColumnWidth(1, 50);
 
     setDragDropMode(QAbstractItemView::DragDrop);
+
+    auto p = QTreeView::palette();
+    p.setColor(QPalette::Highlight, QWidget::palette().color(QPalette::Midlight));
+    p.setColor(QPalette::HighlightedText, QWidget::palette().color(QPalette::Text));
+    // if other than macos change alternate base color
+    if (QSysInfo::productType() not_eq "macos")
+        p.setColor(QPalette::AlternateBase, QWidget::palette().color(QPalette::Mid));
+    setPalette(p);
 }
 
 TreeFileView::TreeFileView(QWidget *parent) : QTreeView(parent)
@@ -357,10 +365,17 @@ void TreeFileView::copyto(const QList<TreeFileItem *> &items, TreeFileItem *item
                 m_remoteInfo
         );
         auto rclone = RcloneManager::get();
-        connect(rclone.get(), &Rclone::finished, this, [newFile, treePaste](int exit)
+        connect(rclone.get(), &Rclone::finished, this, [this, newFile, treePaste](int exit)
         {
             if (exit == 0)
             {
+                if (treePaste->state() == TreeFileItem::NotLoaded)
+                    return;
+                if (fileIsInFolder(newFile->getName(), treePaste))
+                {
+                    reload(treePaste);
+                    return;
+                }
                 auto *treeItem = new TreeFileItem(newFile->getName(), newFile, nullptr, true);
                 auto list = RcloneFileModel::getItemList(treeItem);
                 if (newFile->isDir())
@@ -389,7 +404,8 @@ QList<TreeFileItem *> TreeFileView::getSelectedItems(bool can_be_empty)
     {
         auto index = QTreeView::selectedIndexes().at(i);
         auto *item = dynamic_cast<TreeFileItem *>(model->itemFromIndex(index));
-        lst << item;
+        if (index not_eq QTreeView::rootIndex())
+            lst << item;
     }
     if (can_be_empty)
         return lst;
@@ -472,7 +488,7 @@ void TreeFileView::deleteFile(const QList<TreeFileItem *> &items)
 
     msgb->setDefaultButton(QMessageBox::No);
     msgb->setDetailedText(files.join("\n"));
-    msgb->setInformativeText(tr("Cette action est irréversible"));
+    msgb->setInformativeText(tr("Cette action est irréversible."));
     msgb->exec();
     if (msgb->result() == QMessageBox::No)
     {
@@ -721,6 +737,10 @@ void TreeFileView::mousePressEvent(QMouseEvent *event)
         }
     }
     m_clickIndex = indexAt(event->pos());
+
+    m_dragItems = getSelectedItems(true).empty() ?
+                  QList{dynamic_cast<TreeFileItem *>(model->itemFromIndex(m_clickIndex))}
+                                                 : getSelectedItems(true);
     m_clickTime = QDateTime::currentMSecsSinceEpoch();
     QTreeView::mousePressEvent(event);
 }
@@ -731,8 +751,13 @@ void TreeFileView::mousePressEvent(QMouseEvent *event)
  */
 void TreeFileView::dropEvent(QDropEvent *event)
 {
+    if (not dynamic_cast<TreeFileView *>(event->source())->m_dragable)
+    {
+        event->ignore();
+        return;
+    }
     // get items to drop
-    auto lst = dynamic_cast<TreeFileView *>(event->source())->getSelectedItems(true);
+    auto lst = dynamic_cast<TreeFileView *>(event->source())->getDragItems();
     if (lst.isEmpty())
     {
         event->ignore();
@@ -740,20 +765,10 @@ void TreeFileView::dropEvent(QDropEvent *event)
     }
 
     // get item destination
-    auto item_to_drop = dynamic_cast<TreeFileItem *>(model->itemFromIndex(indexAt(event->pos())));
-    // if no item destination
-    if (item_to_drop == nullptr)
-    {
-        // drop to root
-        if (rootIndex().isValid())
-            item_to_drop = dynamic_cast<TreeFileItem *>(model->itemFromIndex(rootIndex()));
-            // else ignore
-        else
-        {
-            event->ignore();
-            return;
-        }
-    }
+    auto item_to_drop = dynamic_cast<TreeFileItem *>(model->itemFromIndex(indexAt(event->pos()))) == nullptr
+                        ? dynamic_cast<TreeFileItem *>(model->itemFromIndex(rootIndex()))
+                        : dynamic_cast<TreeFileItem *>(model->itemFromIndex(indexAt(event->pos())));
+
     item_to_drop = item_to_drop->getParent() == nullptr ? item_to_drop : item_to_drop->getParent();
     copyto(lst, item_to_drop);
     event->acceptProposedAction();
@@ -765,17 +780,49 @@ void TreeFileView::dropEvent(QDropEvent *event)
  */
 void TreeFileView::dragMoveEvent(QDragMoveEvent *event)
 {
-    auto item_to_drop = dynamic_cast<TreeFileItem *>(model->itemFromIndex(indexAt(event->pos())));
-    if (item_to_drop == nullptr and not rootIndex().isValid())
+    auto tree = dynamic_cast<TreeFileView *>(event->source());
+    auto index = indexAt(event->pos());
+    // select all row
+    if (index.isValid())
+        selectionModel()->select(index, QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
+    else
+        selectionModel()->clearSelection();
+
+    auto item_to_drop = dynamic_cast<TreeFileItem *>(model->itemFromIndex(indexAt(event->pos()))) == nullptr
+                        ? dynamic_cast<TreeFileItem *>(model->itemFromIndex(rootIndex()))
+                        : dynamic_cast<TreeFileItem *>(model->itemFromIndex(indexAt(event->pos())));
+    if (item_to_drop == nullptr)
     {
         event->ignore();
+        tree->m_dragable = false;
+        return;
+    }
+    if (not item_to_drop->getFile()->isDir())
+    {
+        event->ignore();
+        tree->m_dragable = false;
         return;
     }
 
-    auto lst = dynamic_cast<TreeFileView *>(event->source())->getSelectedItems(true);
-
-    if (lst.isEmpty())
+    if (item_to_drop->index() == dynamic_cast<TreeFileView *>(event->source())->rootIndex())
+    {
         event->ignore();
-    else
-        event->acceptProposedAction();
+        tree->m_dragable = false;
+        return;
+    }
+
+    auto lst = dynamic_cast<TreeFileView *>(event->source())->getDragItems();
+    if (lst.size() == 1)
+    {
+        if (lst.first()->index() == item_to_drop->index() or
+            fileIsInFolder(lst.first()->getFile()->getName(), item_to_drop))
+        {
+            event->ignore();
+            tree->m_dragable = false;
+            return;
+        }
+    }
+
+    tree->m_dragable = true;
+    event->accept();
 }

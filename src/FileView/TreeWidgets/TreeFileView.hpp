@@ -20,40 +20,43 @@ class TreeFileView : public QTreeView
 {
 Q_OBJECT
 
-	RcloneFileModel *model{};
-	QList<QModelIndex> indexBack{};
-	QList<QModelIndex> indexTop{};
-	RemoteInfoPtr m_remoteInfo{};
+    RcloneFileModel *model{};
+    QList<QModelIndex> indexBack{}, indexTop{};
+    RemoteInfoPtr m_remoteInfo{};
 
-	uint64_t m_clickTime{};
-	QModelIndex m_clickIndex{};
+    uint64_t m_clickTime{};
+    QModelIndex m_clickIndex{};
 
-	TreeFileItem *m_editingItem{};
+    TreeFileItem *m_editingItem{};
+    QList<TreeFileItem *> m_dragItems{};
+
+    bool m_dragable = false;
 
 public:
-	explicit TreeFileView(const RemoteInfoPtr &remoteInfo, QWidget *parent = nullptr);
+    explicit TreeFileView(const RemoteInfoPtr &remoteInfo, QWidget *parent = nullptr);
 
-	explicit TreeFileView(QWidget *parent = nullptr);
+    explicit TreeFileView(QWidget *parent = nullptr);
 
-	void back();
+    void back();
 
-	void front();
+    void front();
 
-	void changeRemote(const RemoteInfoPtr &info);
+    void changeRemote(const RemoteInfoPtr &info);
 
-	void copyto(const QList<TreeFileItem *> &, TreeFileItem *item= nullptr);
+    void copyto(const QList<TreeFileItem *> &, TreeFileItem *item = nullptr);
 
-	void reload(TreeFileItem *item = nullptr);
+    void reload(TreeFileItem *item = nullptr);
 
-	[[nodiscard]] RemoteInfoPtr remoteInfo() const
-	{ return m_remoteInfo; };
+    [[nodiscard]] RemoteInfoPtr remoteInfo() const { return m_remoteInfo; };
+
+    [[nodiscard]] QList<TreeFileItem *> getDragItems() const { return m_dragItems; }
 
 protected:
-	void resizeEvent(QResizeEvent *event) override;
+    void resizeEvent(QResizeEvent *event) override;
 
-	void keyPressEvent(QKeyEvent *event) override;
+    void keyPressEvent(QKeyEvent *event) override;
 
-	void mousePressEvent(QMouseEvent *event) override;
+    void mousePressEvent(QMouseEvent *event) override;
 
     void dropEvent(QDropEvent *event) override;
 
@@ -61,48 +64,48 @@ protected:
 
 protected slots:
 
-	void doubleClick(const QModelIndex &index);
+    void doubleClick(const QModelIndex &index);
 
-	void expand(const QModelIndex &index);
+    void expand(const QModelIndex &index);
 
 
 private:
 
-	void initUI();
+    void initUI();
 
-	QString getPath();
+    QString getPath();
 
-	QList<TreeFileItem *> getSelectedItems(bool can_be_empty = false);
+    QList<TreeFileItem *> getSelectedItems(bool can_be_empty = false);
 
-	void connectSignals();
+    void connectSignals();
 
-	void deleteFile(const QList<TreeFileItem *> &items);
+    void deleteFile(const QList<TreeFileItem *> &items);
 
-	void removeItem(TreeFileItem *item);
+    void removeItem(TreeFileItem *item);
 
-	static bool fileIsInFolder(const QString &name, TreeFileItem *folder);
+    static bool fileIsInFolder(const QString &name, TreeFileItem *folder);
 
-	void mkdir();
+    void mkdir();
 
-	QDialog *mkdirDialog();
+    QDialog *mkdirDialog();
 
-	void editItem(const QModelIndex &index);
+    void editItem(const QModelIndex &index);
 
-	void rename(const TreeFileItem *item, const QString &newName);
+    void rename(const TreeFileItem *item, const QString &newName);
 
-	void showContextMenu();
+    void showContextMenu();
 
 signals:
 
-	void pathChanged(const QString &);
+    void pathChanged(const QString &);
 
-	void fileCopied(const QList<TreeFileItem *> &);
+    void fileCopied(const QList<TreeFileItem *> &);
 
-	void pasted(const RcloneFilePtr &);
+    void pasted(const RcloneFilePtr &);
 
-	void
-	taskAdded(const QString &src, const QString &dst, const RclonePtr &rclone, const std::function<void()> &callable,
-			  const Rclone::TaskType &type = Rclone::Unknown);
+    void
+    taskAdded(const QString &src, const QString &dst, const RclonePtr &rclone, const std::function<void()> &callable,
+              const Rclone::TaskType &type = Rclone::Unknown);
 
 };
 

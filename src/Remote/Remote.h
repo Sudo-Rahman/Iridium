@@ -17,13 +17,15 @@ const std::string FTP = ":/ressources/ftp.png";
 const std::string MEGA = ":/ressources/mega.png";
 const std::string OPENDRIVE = ":/ressources/open-drive.png";
 const std::string PCLOUD = ":/ressources/pcloud.png";
+const std::string BOX = ":/ressources/box.png";
+const std::string SMB = ":/ressources/smb.png";
 
 const std::string HARDDRIVEICON = "drive-harddisk-solidstate";
 
 enum RemoteType
 {
 	Drive, Sftp, LocalHardDrive, OneDrive, Dropbox, Ftp, Mega,
-	OpenDrive, Pcloud
+	OpenDrive, Pcloud, Box,Smb, END
 };
 
 const std::map<RemoteType, std::string> remoteIco = {
@@ -36,6 +38,9 @@ const std::map<RemoteType, std::string> remoteIco = {
 	{RemoteType::Mega,           MEGA},
 	{RemoteType::OpenDrive,      OPENDRIVE},
 	{RemoteType::Pcloud,         PCLOUD},
+    {RemoteType::Box,            BOX},
+    {RemoteType::Smb,            SMB}
+
 };
 const std::map<std::string, RemoteType> stringToRemoteType = {
 	{"drive",     RemoteType::Drive},
@@ -47,6 +52,8 @@ const std::map<std::string, RemoteType> stringToRemoteType = {
 	{"mega",      RemoteType::Mega},
 	{"opendrive", RemoteType::OpenDrive},
 	{"pcloud",    RemoteType::Pcloud},
+    {"box",       RemoteType::Box},
+    {"smb",       RemoteType::Smb}
 };
 
 struct RemoteInfo
