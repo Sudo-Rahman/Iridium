@@ -723,6 +723,7 @@ void TreeFileView::rename(const TreeFileItem *item, const QString &newName)
 
 void TreeFileView::mousePressEvent(QMouseEvent *event)
 {
+    selectionModel()->clearSelection();
     if (event->button() == Qt::LeftButton)
     {
         if (QDateTime::currentMSecsSinceEpoch() - m_clickTime < 700 and
@@ -814,6 +815,7 @@ void TreeFileView::dragMoveEvent(QDragMoveEvent *event)
     auto lst = dynamic_cast<TreeFileView *>(event->source())->getDragItems();
     if (lst.size() == 1)
     {
+        // item to drop not drop in himself
         if (lst.first()->index() == item_to_drop->index() or
             fileIsInFolder(lst.first()->getFile()->getName(), item_to_drop))
         {

@@ -13,7 +13,7 @@ Graphical application for managing remote storage services such as Google Drive,
 
 ## Features
 
-- Add remote :
+- Remote :
     - [x] Google Drive
     - [x] Local
     - [x] One Drive
@@ -22,8 +22,9 @@ Graphical application for managing remote storage services such as Google Drive,
     - [x] SFTP
     - [x] Mega
     - [x] OpenDrive
-    - [ ] SMB
+    - [x] SMB
     - [x] PCloud
+    - [x] Box
     - [ ] ...
 - Manage remote :
   - [x] Copy
@@ -33,6 +34,7 @@ Graphical application for managing remote storage services such as Google Drive,
   - [x] Create new folder
   - [x] View file properties
   - [x] View Transfer progress
+  - [x] Drag and drop
   - [ ] Search
   - [ ] Sort
   - [ ] sync
