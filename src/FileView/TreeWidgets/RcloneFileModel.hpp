@@ -41,6 +41,14 @@ public:
 	void setExpandOrDoubleClick(bool expandOrDoubleClick){
 		m_expandOrDoubleClick = expandOrDoubleClick;
 	}
+
+protected:
+public:
+    bool setData(const QModelIndex &index, const QVariant &value, int role) override;
+
+signals:
+
+    void beforeDataChanged(const QVariant &value, int role);
 };
 
 

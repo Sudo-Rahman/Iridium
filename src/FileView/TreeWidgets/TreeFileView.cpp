@@ -27,16 +27,14 @@ using namespace std::chrono;
 /**
  * @brief Classe permettant de définir la taille des items
  */
-class MyItemDelegate : public QItemDelegate
-{
+class MyItemDelegate : public QItemDelegate {
 public:
     explicit MyItemDelegate(QObject *parent = nullptr) : QItemDelegate(parent) {}
 
     void paint(QPainter *painter, const QStyleOptionViewItem &option,
                const QModelIndex &index) const override { QItemDelegate::paint(painter, option, index); }
 
-    [[nodiscard]] QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override
-    {
+    [[nodiscard]] QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override {
         return {35, 35};
     }
 };
@@ -45,8 +43,7 @@ public:
 /**
  * @brief Initialise l'interface
  */
-void TreeFileView::initUI()
-{
+void TreeFileView::initUI() {
     setIndentation(15);
     setSelectionMode(QAbstractItemView::ExtendedSelection);
     setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -85,8 +82,7 @@ void TreeFileView::initUI()
     setPalette(p);
 }
 
-TreeFileView::TreeFileView(QWidget *parent) : QTreeView(parent)
-{
+TreeFileView::TreeFileView(QWidget *parent) : QTreeView(parent) {
     initUI();
 }
 
@@ -95,8 +91,7 @@ TreeFileView::TreeFileView(QWidget *parent) : QTreeView(parent)
  * @param remoteInfo
  * @param parent
  */
-TreeFileView::TreeFileView(const RemoteInfoPtr &remoteInfo, QWidget *parent) : QTreeView(parent)
-{
+TreeFileView::TreeFileView(const RemoteInfoPtr &remoteInfo, QWidget *parent) : QTreeView(parent) {
     initUI();
     changeRemote(remoteInfo);
 }
@@ -104,10 +99,8 @@ TreeFileView::TreeFileView(const RemoteInfoPtr &remoteInfo, QWidget *parent) : Q
 /**
  * @brief Connecte les signaux
  */
-void TreeFileView::connectSignals()
-{
-    connect(header(), &QHeaderView::sortIndicatorChanged, this, [this](int logicalIndex, Qt::SortOrder order)
-    {
+void TreeFileView::connectSignals() {
+    connect(header(), &QHeaderView::sortIndicatorChanged, this, [this](int logicalIndex, Qt::SortOrder order) {
         sortByColumn(logicalIndex, order);
     });
 
@@ -115,26 +108,22 @@ void TreeFileView::connectSignals()
 
     connect(this, &QTreeView::expanded, this, &TreeFileView::expand);
 
-    connect(this, &QTreeView::collapsed, [this](const QModelIndex &index)
-    {
+    connect(this, &QTreeView::collapsed, [this](const QModelIndex &index) {
         // collapse all children
-        for (int i = 0; i < model->rowCount(index); i++)
-        {
+        for (int i = 0; i < model->rowCount(index); i++) {
             auto child = model->index(i, 0, index);
             collapse(child);
         }
     });
 
-    connect(header(), &QHeaderView::sectionResized, this, [this](int logicalIndex, int oldSize, int newSize)
-    {
+    connect(header(), &QHeaderView::sectionResized, this, [this](int logicalIndex, int oldSize, int newSize) {
         if (logicalIndex == 0 and newSize < 200)
             setColumnWidth(0, 200);
         if (logicalIndex == 1 and newSize < 50)
             setColumnWidth(1, 50);
         if (logicalIndex == 2 and newSize < 100)
             setColumnWidth(2, 100);
-        if (logicalIndex == 3 and newSize < 100)
-        {
+        if (logicalIndex == 3 and newSize < 100) {
             setColumnWidth(3, 100);
             return;
         }
@@ -153,8 +142,7 @@ void TreeFileView::connectSignals()
  * @brief resize event
  * @param event
  */
-void TreeFileView::resizeEvent(QResizeEvent *event)
-{
+void TreeFileView::resizeEvent(QResizeEvent *event) {
     if (header()->count() > 0)
         header()->setSectionResizeMode(0, QHeaderView::Stretch);
     QAbstractItemView::resizeEvent(event);
@@ -167,10 +155,8 @@ void TreeFileView::resizeEvent(QResizeEvent *event)
 /**
  * @brief Back to previous folder
  */
-void TreeFileView::back()
-{
-    if (indexBack.length() > 0)
-    {
+void TreeFileView::back() {
+    if (indexBack.length() > 0) {
         auto index = indexBack.back();
         indexBack.pop_back();
         indexTop << QTreeView::rootIndex();
@@ -183,10 +169,8 @@ void TreeFileView::back()
 /**
  * @brief Go to next folder
  */
-void TreeFileView::front()
-{
-    if (indexTop.length() > 0)
-    {
+void TreeFileView::front() {
+    if (indexTop.length() > 0) {
         auto index = indexTop.back();
         indexTop.pop_back();
         indexBack << index.parent();
@@ -199,8 +183,7 @@ void TreeFileView::front()
  * @brief expand folder
  * @param index
  */
-void TreeFileView::expand(const QModelIndex &index)
-{
+void TreeFileView::expand(const QModelIndex &index) {
     auto *item = dynamic_cast<TreeFileItem *>(model->itemFromIndex(index));
     model->setExpandOrDoubleClick(false);
 
@@ -212,8 +195,7 @@ void TreeFileView::expand(const QModelIndex &index)
  * @brief double click on item
  * @param index
  */
-void TreeFileView::doubleClick(const QModelIndex &index)
-{
+void TreeFileView::doubleClick(const QModelIndex &index) {
     auto *item = dynamic_cast<TreeFileItem *>(model->itemFromIndex(index));
 
     if (item == nullptr)
@@ -238,8 +220,7 @@ void TreeFileView::doubleClick(const QModelIndex &index)
  * @brief context menu
  * @param pos
  */
-void TreeFileView::showContextMenu()
-{
+void TreeFileView::showContextMenu() {
     ItemMenu menu(this);
     auto lisItem = getSelectedItems();
     if (getSelectedItems(true).isEmpty() and getPath().isEmpty())
@@ -247,39 +228,30 @@ void TreeFileView::showContextMenu()
     if (lisItem.size() > 1 or not lisItem.first()->getFile()->isDir())
         menu.setActionEnabled({{ItemMenu::Action::Paste, false},
                                {ItemMenu::NewFolder,     false}});
-    if (model->indexFromItem(lisItem.first()) == rootIndex())
+    if (not QTreeView::currentIndex().parent().isValid())
         menu.setActionEnabled({{ItemMenu::Delete, false}});
 
 
-    connect(&menu, &ItemMenu::info, this, [lisItem, this]()
-    {
-        for (auto item: lisItem)
-        {
+    connect(&menu, &ItemMenu::info, this, [lisItem, this]() {
+        for (auto item: lisItem) {
             auto *dialog = new ItemInfoDialog(item, this);
             dialog->move(QPoint(rand() % 1000, rand() % 1000));
             dialog->exec();
         }
     });
 
-    connect(&menu, &ItemMenu::copyed, this, [this, lisItem]()
-    {
-//			qDebug() << lisItem.first()->getFile()->getName();
+    connect(&menu, &ItemMenu::copyed, this, [this, lisItem]() {
         emit fileCopied(lisItem);
     });
-    connect(&menu, &ItemMenu::pasted, this, [this, lisItem]()
-    {
-//			qDebug() << lisItem.first()->getFile()->getPath();
+    connect(&menu, &ItemMenu::pasted, this, [this, lisItem]() {
         emit pasted(lisItem.first()->getFile());
     });
-    connect(&menu, &ItemMenu::deleted, this, [this, lisItem]()
-    {
+    connect(&menu, &ItemMenu::deleted, this, [this] {
         QList<TreeFileItem *> lst;
-        for (int i = 0; i < QTreeView::selectedIndexes().length(); i = i + 4)
-        {
+        for (int i = 0; i < QTreeView::selectedIndexes().length(); i = i + 4) {
             auto index = QTreeView::selectedIndexes().at(i);
             auto *item = dynamic_cast<TreeFileItem *>(model->itemFromIndex(index));
             lst << item;
-//				qDebug() << item->getFile()->getPath();
         }
         deleteFile(lst);
     });
@@ -291,17 +263,14 @@ void TreeFileView::showContextMenu()
  * @brief function for change remote
  * @param info
  */
-void TreeFileView::changeRemote(const RemoteInfoPtr &info)
-{
+void TreeFileView::changeRemote(const RemoteInfoPtr &info) {
     if (m_remoteInfo == info)
         return;
 
-    if (info == nullptr)
-    {
+    if (info == nullptr) {
         QTreeView::setModel(new QStandardItemModel(this));
         return;
     }
-
 
     m_remoteInfo = info;
     delete model;
@@ -311,19 +280,15 @@ void TreeFileView::changeRemote(const RemoteInfoPtr &info)
         model = new RcloneFileModelLocal(m_remoteInfo, this);
 
     connect(model, &RcloneFileModel::itemChanged, this,
-            [this](const QStandardItem *item)
-            {
-                auto index = model->indexFromItem(item);
-                if (index == m_clickIndex)
-                {
-                    if (fileIsInFolder(item->text(), getSelectedItems().first()))
-                        return;
-
-                    if (item != m_editingItem)
-                        rename(dynamic_cast<TreeFileItem *>(static_cast<QStandardItem *>(model->itemFromIndex(
-                                       index))),
-                               item->text());
+            [this](const QStandardItem *item) {
+                auto index = item->index();
+                if (item != m_editingItem and index == m_clickIndex and not m_editable) {
+                    auto *it = dynamic_cast<TreeFileItem *>(model->itemFromIndex(index));
+                    model->setData(index, it->getFile()->getName(), Qt::EditRole);
                 }
+                if (item != m_editingItem and index == m_clickIndex and m_editable)
+                    rename(dynamic_cast<TreeFileItem *>(static_cast<QStandardItem *>(model->itemFromIndex(
+                            index))), item->text());
             });
     QTreeView::setModel(model);
 }
@@ -332,8 +297,7 @@ void TreeFileView::changeRemote(const RemoteInfoPtr &info)
  * @brief return path of current folder
  * @return
  */
-QString TreeFileView::getPath()
-{
+QString TreeFileView::getPath() {
     auto index = QTreeView::rootIndex();
     if (!index.isValid())
         return "";
@@ -345,13 +309,11 @@ QString TreeFileView::getPath()
  * @brief paste items in current folder or in selected folder
  * @param items
  */
-void TreeFileView::copyto(const QList<TreeFileItem *> &items, TreeFileItem *item)
-{
+void TreeFileView::copyto(const QList<TreeFileItem *> &items, TreeFileItem *item) {
     auto treePaste = item == nullptr ? getSelectedItems().first() : item;
     if (!treePaste->getFile()->isDir())
         return;
-    for (const auto item: items)
-    {
+    for (const auto item: items) {
         if (item == nullptr)
             return;
         if (fileIsInFolder(item->getFile()->getName(), treePaste))
@@ -365,14 +327,11 @@ void TreeFileView::copyto(const QList<TreeFileItem *> &items, TreeFileItem *item
                 m_remoteInfo
         );
         auto rclone = RcloneManager::get();
-        connect(rclone.get(), &Rclone::finished, this, [this, newFile, treePaste](int exit)
-        {
-            if (exit == 0)
-            {
+        connect(rclone.get(), &Rclone::finished, this, [this, newFile, treePaste](int exit) {
+            if (exit == 0) {
                 if (treePaste->state() == TreeFileItem::NotLoaded)
                     return;
-                if (fileIsInFolder(newFile->getName(), treePaste))
-                {
+                if (fileIsInFolder(newFile->getName(), treePaste)) {
                     reload(treePaste);
                     return;
                 }
@@ -384,8 +343,7 @@ void TreeFileView::copyto(const QList<TreeFileItem *> &items, TreeFileItem *item
             }
         });
         emit taskAdded(item->getFile()->getPath(), newFile->getPath(), rclone,
-                       [rclone, newFile, item]
-                       {
+                       [rclone, newFile, item] {
                            rclone->copyTo(item->getFile().operator*(), newFile.operator*());
                        }, Rclone::Copy);
     }
@@ -397,11 +355,9 @@ void TreeFileView::copyto(const QList<TreeFileItem *> &items, TreeFileItem *item
  * @param can_be_empty
  * @return selected items or root item if can_be_empty is false
  */
-QList<TreeFileItem *> TreeFileView::getSelectedItems(bool can_be_empty)
-{
+QList<TreeFileItem *> TreeFileView::getSelectedItems(bool can_be_empty) {
     QList<TreeFileItem *> lst;
-    for (int i = 0; i < QTreeView::selectedIndexes().length(); i = i + 4)
-    {
+    for (int i = 0; i < QTreeView::selectedIndexes().length(); i = i + 4) {
         auto index = QTreeView::selectedIndexes().at(i);
         auto *item = dynamic_cast<TreeFileItem *>(model->itemFromIndex(index));
         if (index not_eq QTreeView::rootIndex())
@@ -409,14 +365,12 @@ QList<TreeFileItem *> TreeFileView::getSelectedItems(bool can_be_empty)
     }
     if (can_be_empty)
         return lst;
-    if (lst.isEmpty())
-    {
+    if (lst.isEmpty()) {
         auto index = QTreeView::rootIndex();
         TreeFileItem *item;
         if (index.isValid())
             item = dynamic_cast<TreeFileItem *>(model->itemFromIndex(index));
-        else
-        {
+        else {
             index = model->index(0, 0, QTreeView::rootIndex());
             item = dynamic_cast<TreeFileItem *>(model->itemFromIndex(index));
         }
@@ -430,8 +384,7 @@ QList<TreeFileItem *> TreeFileView::getSelectedItems(bool can_be_empty)
  * @brief key press event, shortcut
  * @param event
  */
-void TreeFileView::keyPressEvent(QKeyEvent *event)
-{
+void TreeFileView::keyPressEvent(QKeyEvent *event) {
     auto lisItem = getSelectedItems(true);
 
     if (lisItem.isEmpty() and getPath().isEmpty())
@@ -441,16 +394,14 @@ void TreeFileView::keyPressEvent(QKeyEvent *event)
     if (QKeySequence(event->modifiers() | event->key()).matches(QKeySequence::Paste) and getSelectedItems().size() == 1)
         emit pasted(getSelectedItems().first()->getFile());
     if (QKeySequence(event->modifiers() | event->key()).matches(Qt::CTRL + Qt::Key_Backspace) and !lisItem.empty())
-        deleteFile(lisItem);
+        if (QTreeView::currentIndex().parent().isValid())
+            deleteFile(lisItem);
     if (QKeySequence(event->modifiers() | event->key()).matches(Qt::CTRL + Qt::Key_N))
         mkdir();
 
-    switch (event->key())
-    {
-        case Qt::Key_Space:
-        {
-            for (auto item: getSelectedItems())
-            {
+    switch (event->key()) {
+        case Qt::Key_Space: {
+            for (auto item: getSelectedItems()) {
                 auto *info = new ItemInfoDialog(item, this);
                 // show in random position
                 info->move(QPoint(rand() % 1000, rand() % 1000));
@@ -471,10 +422,8 @@ void TreeFileView::keyPressEvent(QKeyEvent *event)
  * @brief delete file, delete item in model
  * @param items
  */
-void TreeFileView::deleteFile(const QList<TreeFileItem *> &items)
-{
-    auto files = [items]() -> auto
-    {
+void TreeFileView::deleteFile(const QList<TreeFileItem *> &items) {
+    auto files = [items]() -> auto {
         QStringList lst;
         for (auto item: items)
             lst << item->getFile()->getName();
@@ -482,33 +431,25 @@ void TreeFileView::deleteFile(const QList<TreeFileItem *> &items)
     }();
     if (files.isEmpty())
         return;
-    auto *msgb = new QMessageBox(QMessageBox::Question, tr("Suppression"),
-                                 tr("Suppression de ") + QString::number(files.size()) + tr(" fichiers"),
-                                 QMessageBox::Yes | QMessageBox::No, this);
+    auto msgb = QMessageBox(QMessageBox::Question, tr("Suppression"),
+                            tr("Suppression de ") + QString::number(files.size()) + tr(" fichiers"),
+                            QMessageBox::Yes | QMessageBox::No, this);
 
-    msgb->setDefaultButton(QMessageBox::No);
-    msgb->setDetailedText(files.join("\n"));
-    msgb->setInformativeText(tr("Cette action est irréversible."));
-    msgb->exec();
-    if (msgb->result() == QMessageBox::No)
-    {
-        msgb->deleteLater();
+    msgb.setDefaultButton(QMessageBox::No);
+    msgb.setDetailedText(files.join("\n"));
+    msgb.setInformativeText(tr("Cette action est irréversible."));
+    msgb.exec();
+    if (msgb.result() == QMessageBox::No)
         return;
-    }
-    msgb->deleteLater();
-    for (auto item: items)
-    {
+    for (auto item: items) {
         auto rclone = RcloneManager::get();
-        connect(rclone.get(), &Rclone::taskFinished, this, [this, files, item, rclone](const int exit)
-        {
-            if (exit == 0)
-            {
+        connect(rclone.get(), &Rclone::taskFinished, this, [this, files, item, rclone](const int exit) {
+            if (exit == 0) {
                 RcloneManager::release(rclone);
                 removeItem(item);
             }
         });
-        emit taskAdded(item->getFile()->getPath(), "--", rclone, [rclone, item]()
-        {
+        emit taskAdded(item->getFile()->getPath(), "--", rclone, [rclone, item]() {
             rclone->deleteFile(item->getFile().operator*());
         }, Rclone::Delete);
     }
@@ -518,15 +459,12 @@ void TreeFileView::deleteFile(const QList<TreeFileItem *> &items)
  * @brief remove item from model
  * @param item
  */
-void TreeFileView::removeItem(TreeFileItem *item)
-{
+void TreeFileView::removeItem(TreeFileItem *item) {
     if (item == nullptr)
         return;
     // remove recursively
-    if (item->getFile()->isDir())
-    {
-        for (int i = 0; i < item->rowCount(); i++)
-        {
+    if (item->getFile()->isDir()) {
+        for (int i = 0; i < item->rowCount(); i++) {
             auto *child = dynamic_cast<TreeFileItem *>(item->child(i));
             if (child not_eq nullptr)
                 removeItem(child);
@@ -538,10 +476,8 @@ void TreeFileView::removeItem(TreeFileItem *item)
 /**
  * @brief reload current folder or selected folders
  */
-void TreeFileView::reload(TreeFileItem *treeItem)
-{
-    if (treeItem == nullptr)
-    {
+void TreeFileView::reload(TreeFileItem *treeItem) {
+    if (treeItem == nullptr) {
         auto index = QTreeView::rootIndex();
         if (not index.isValid())
             return;
@@ -549,21 +485,18 @@ void TreeFileView::reload(TreeFileItem *treeItem)
     auto lstItem = treeItem == nullptr ? getSelectedItems() : QList<TreeFileItem *>{treeItem};
 
     // all tree selected
-    for (auto item: lstItem)
-    {
+    for (auto item: lstItem) {
         if (not item->getFile()->isDir())
             return;
 
-        if (dynamic_cast<TreeFileItem *>(item->child(0)) == nullptr)
-        {
+        if (dynamic_cast<TreeFileItem *>(item->child(0)) == nullptr) {
             model->addItem(item->getFile(), item);
             continue;
         }
 
         // remove all children
         QList<TreeFileItem *> lst;
-        for (int i = 0; i < item->rowCount(); i++)
-        {
+        for (int i = 0; i < item->rowCount(); i++) {
             auto child = dynamic_cast<TreeFileItem *>(item->child(i));
             if (child not_eq nullptr)
                 lst << child;
@@ -583,21 +516,18 @@ void TreeFileView::reload(TreeFileItem *treeItem)
  * @param folder
  * @return true if file is in folder
  */
-bool TreeFileView::fileIsInFolder(const QString &name, TreeFileItem *folder)
-{
+bool TreeFileView::fileIsInFolder(const QString &name, TreeFileItem *folder) {
     if (folder == nullptr)
         exit(1);
     // for each all children
-    for (int i = 0; i < folder->rowCount(); i++)
-    {
+    for (int i = 0; i < folder->rowCount(); i++) {
         if (name == folder->child(i)->text())
             return true;
     }
     return false;
 }
 
-QDialog *TreeFileView::mkdirDialog()
-{
+QDialog *TreeFileView::mkdirDialog() {
     auto *dialog = new QDialog(this);
     dialog->setWindowTitle(tr("Création de dossier"));
     auto *layout = new QGridLayout(dialog);
@@ -622,8 +552,7 @@ QDialog *TreeFileView::mkdirDialog()
 /**
  * @brief create a new folder
  */
-void TreeFileView::mkdir()
-{
+void TreeFileView::mkdir() {
     auto *dialog = mkdirDialog();
     dialog->deleteLater();
     if (dialog->exec() not_eq QDialog::Accepted)
@@ -640,8 +569,7 @@ void TreeFileView::mkdir()
             m_remoteInfo
     );
 //	qDebug() << "mkdir" << rcloneFile->getPath();
-    if (fileIsInFolder(rcloneFile->getName(), items.first()))
-    {
+    if (fileIsInFolder(rcloneFile->getName(), items.first())) {
         auto msgb = QMessageBox(QMessageBox::Critical, tr("Création"), tr("Le dossier existe déjà"),
                                 QMessageBox::Ok);
         msgb.exec();
@@ -649,24 +577,20 @@ void TreeFileView::mkdir()
     }
     auto rclone = RcloneManager::get();
     auto *newItem = new TreeFileItem(name, rcloneFile, items.first(), true);
-    connect(rclone.get(), &Rclone::finished, this, [this, rclone, name, newItem, items](const int exit)
-    {
-        if (exit == 0)
-        {
+    connect(rclone.get(), &Rclone::finished, this, [this, rclone, name, newItem, items](const int exit) {
+        if (exit == 0) {
             RcloneManager::release(rclone);
             // create new item
             auto item_list = RcloneFileModel::getItemList(newItem);
             items.first()->appendRow(item_list);
-        } else
-        {
+        } else {
             auto msgb = QMessageBox(QMessageBox::Critical, tr("Création"), tr("Le dossier n’a pas pu être créé"),
                                     QMessageBox::Ok, this);
             msgb.setDetailedText(QString::fromStdString(rclone->readAllError().back()));
             msgb.exec();
         }
     });
-    emit taskAdded("--", newItem->getFile()->getPath(), rclone, [rclone, newItem]
-    {
+    emit taskAdded("--", newItem->getFile()->getPath(), rclone, [rclone, newItem] {
         rclone->mkdir(newItem->getFile().operator*());
     }, Rclone::Mkdir);
 }
@@ -676,8 +600,7 @@ void TreeFileView::mkdir()
  * @brief edit item
  * @param index
  */
-void TreeFileView::editItem(const QModelIndex &index)
-{
+void TreeFileView::editItem(const QModelIndex &index) {
     // if not the first column
     if (model->index(index.row(), 0, index.parent()) not_eq index)
         return;
@@ -687,6 +610,19 @@ void TreeFileView::editItem(const QModelIndex &index)
     // if not the first element of treeWidget
     if (!index.parent().isValid())
         return;
+    connect(model, &RcloneFileModel::beforeDataChanged, this, [this, index](const QVariant &data, int role) {
+        if (role not_eq Qt::EditRole)
+            return;
+        if (fileIsInFolder(data.toString(), dynamic_cast<TreeFileItem *>(model->itemFromIndex(index.parent())))) {
+            auto msgb = QMessageBox(QMessageBox::Critical, tr("Renommage"), tr("Le fichier existe déjà"),
+                                    QMessageBox::Ok, this);
+            msgb.exec();
+            m_editable = false;
+            disconnect(model, &RcloneFileModel::beforeDataChanged, this, nullptr);
+            return;
+        }
+        m_editable = true;
+    });
     edit(index);
 }
 
@@ -695,15 +631,12 @@ void TreeFileView::editItem(const QModelIndex &index)
  * @param item
  * @param newName
  */
-void TreeFileView::rename(const TreeFileItem *item, const QString &newName)
-{
+void TreeFileView::rename(const TreeFileItem *item, const QString &newName) {
     auto rclone = RcloneManager::get();
-    connect(rclone.get(), &Rclone::finished, this, [this, rclone, item, newName](const int exit)
-    {
+    connect(rclone.get(), &Rclone::finished, this, [this, rclone, item, newName](const int exit) {
         if (item->index() == QModelIndex())
             return;
-        if (exit == 0)
-        {
+        if (exit == 0) {
             RcloneManager::release(rclone);
             item->getFile()->changeName(newName);
             reload(const_cast<TreeFileItem *>(item));
@@ -715,22 +648,17 @@ void TreeFileView::rename(const TreeFileItem *item, const QString &newName)
     auto oldFile = *(item->getFile());
     auto newFile = oldFile;
     newFile.changeName(newName);
-    emit taskAdded(oldFile.getPath(), newFile.getPath(), rclone, [oldFile, newFile, rclone]()
-    {
+    emit taskAdded(oldFile.getPath(), newFile.getPath(), rclone, [oldFile, newFile, rclone]() {
         rclone->moveto(oldFile, newFile);
     }, Rclone::Rename);
 }
 
-void TreeFileView::mousePressEvent(QMouseEvent *event)
-{
+void TreeFileView::mousePressEvent(QMouseEvent *event) {
     selectionModel()->clearSelection();
-    if (event->button() == Qt::LeftButton)
-    {
+    if (event->button() == Qt::LeftButton) {
         if (QDateTime::currentMSecsSinceEpoch() - m_clickTime < 700 and
-            QDateTime::currentMSecsSinceEpoch() - m_clickTime > 350)
-        {
-            if (m_clickIndex == indexAt(event->pos()))
-            {
+            QDateTime::currentMSecsSinceEpoch() - m_clickTime > 350) {
+            if (m_clickIndex == indexAt(event->pos())) {
                 auto index = indexAt(event->pos());
                 if (index.isValid())
                     editItem(index);
@@ -750,17 +678,14 @@ void TreeFileView::mousePressEvent(QMouseEvent *event)
  * @brief drop event
  * @param event
  */
-void TreeFileView::dropEvent(QDropEvent *event)
-{
-    if (not dynamic_cast<TreeFileView *>(event->source())->m_dragable)
-    {
+void TreeFileView::dropEvent(QDropEvent *event) {
+    if (not dynamic_cast<TreeFileView *>(event->source())->m_dragable) {
         event->ignore();
         return;
     }
     // get items to drop
     auto lst = dynamic_cast<TreeFileView *>(event->source())->getDragItems();
-    if (lst.isEmpty())
-    {
+    if (lst.isEmpty()) {
         event->ignore();
         return;
     }
@@ -779,8 +704,7 @@ void TreeFileView::dropEvent(QDropEvent *event)
  * @brief drag enter event
  * @param event
  */
-void TreeFileView::dragMoveEvent(QDragMoveEvent *event)
-{
+void TreeFileView::dragMoveEvent(QDragMoveEvent *event) {
     auto tree = dynamic_cast<TreeFileView *>(event->source());
     auto index = indexAt(event->pos());
     // select all row
@@ -792,33 +716,28 @@ void TreeFileView::dragMoveEvent(QDragMoveEvent *event)
     auto item_to_drop = dynamic_cast<TreeFileItem *>(model->itemFromIndex(indexAt(event->pos()))) == nullptr
                         ? dynamic_cast<TreeFileItem *>(model->itemFromIndex(rootIndex()))
                         : dynamic_cast<TreeFileItem *>(model->itemFromIndex(indexAt(event->pos())));
-    if (item_to_drop == nullptr)
-    {
+    if (item_to_drop == nullptr) {
         event->ignore();
         tree->m_dragable = false;
         return;
     }
-    if (not item_to_drop->getFile()->isDir())
-    {
+    if (not item_to_drop->getFile()->isDir()) {
         event->ignore();
         tree->m_dragable = false;
         return;
     }
 
-    if (item_to_drop->index() == dynamic_cast<TreeFileView *>(event->source())->rootIndex())
-    {
+    if (item_to_drop->index() == dynamic_cast<TreeFileView *>(event->source())->rootIndex()) {
         event->ignore();
         tree->m_dragable = false;
         return;
     }
 
     auto lst = dynamic_cast<TreeFileView *>(event->source())->getDragItems();
-    if (lst.size() == 1)
-    {
+    if (lst.size() == 1) {
         // item to drop not drop in himself
         if (lst.first()->index() == item_to_drop->index() or
-            fileIsInFolder(lst.first()->getFile()->getName(), item_to_drop))
-        {
+            fileIsInFolder(lst.first()->getFile()->getName(), item_to_drop)) {
             event->ignore();
             tree->m_dragable = false;
             return;

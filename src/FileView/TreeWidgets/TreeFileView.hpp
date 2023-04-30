@@ -16,8 +16,7 @@
 #include <Rclone.hpp>
 
 
-class TreeFileView : public QTreeView
-{
+class TreeFileView : public QTreeView {
 Q_OBJECT
 
     RcloneFileModel *model{};
@@ -30,7 +29,7 @@ Q_OBJECT
     TreeFileItem *m_editingItem{};
     QList<TreeFileItem *> m_dragItems{};
 
-    bool m_dragable = false;
+    bool m_dragable, m_editable = false;
 
 public:
     explicit TreeFileView(const RemoteInfoPtr &remoteInfo, QWidget *parent = nullptr);

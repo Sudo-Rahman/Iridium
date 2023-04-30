@@ -77,3 +77,9 @@ RcloneFileModel::RcloneFileModel()
 
     setHorizontalHeaderLabels({tr("Nom"), tr("Taille"), tr("Date de modification"), tr("Type")});
 }
+
+bool RcloneFileModel::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+    emit beforeDataChanged(value, role);
+    return QStandardItemModel::setData(index, value, role);
+}
