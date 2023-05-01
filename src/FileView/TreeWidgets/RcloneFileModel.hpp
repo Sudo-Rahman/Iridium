@@ -23,6 +23,8 @@ protected:
 
 	bool m_expandOrDoubleClick{};
 
+    bool m_check_is_valid = false;
+
 	virtual void init() = 0;
 
     explicit RcloneFileModel();
@@ -32,7 +34,7 @@ protected:
 	void addProgressBar(const QModelIndex &index);
 
 public:
-	virtual void addItem(const RcloneFilePtr &file, TreeFileItem *parent) = 0;
+	virtual void addItem(const RcloneFilePtr &file, TreeFileItem *parent);
 
 	[[nodiscard]] const QModelIndex &getRootIndex() const;
 

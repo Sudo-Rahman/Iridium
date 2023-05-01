@@ -14,6 +14,7 @@
 #include <thread>
 #include <QMessageBox>
 #include <Rclone.hpp>
+#include <RcloneProxy.hpp>
 
 
 class TreeFileView : public QTreeView {

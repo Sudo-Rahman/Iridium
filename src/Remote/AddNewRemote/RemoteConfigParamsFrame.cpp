@@ -75,7 +75,10 @@ void RemoteConfigParamsFrame::createUi()
     connect(m_cancel, &QPushButton::clicked, this, [this]()
     {
         if (m_rclone->state() == Rclone::Running)
+        {
+            m_rclone->disconnect();
             m_rclone->terminate();
+        }
         m_cancel->hide();
         m_login->show();
     });
@@ -89,6 +92,8 @@ void RemoteConfigParamsFrame::createUi()
     m_messLabel->setPalette(p);
     m_layout->addWidget(m_messLabel, Qt::AlignTop);
     m_layout->setAlignment(m_messLabel, Qt::AlignTop);
+
+    m_remoteName->setStyleSheet("border: 1px solid gray; border-radius: 5px;");
 
 }
 
@@ -105,7 +110,7 @@ void RemoteConfigParamsFrame::addRemote()
         return;
     }
 
-    auto  rclone_liste_remote = RcloneManager::get();
+    auto rclone_liste_remote = RcloneManager::get();
     rclone_liste_remote->listRemotes();
     rclone_liste_remote->waitForStarted();
     rclone_liste_remote->waitForFinished();
@@ -119,6 +124,12 @@ void RemoteConfigParamsFrame::addRemote()
  */
 bool RemoteConfigParamsFrame::checkFields()
 {
+    bool ok = true;
+    if (m_lstRemote.contains(m_remoteName->text().toStdString()))
+    {
+        QMessageBox::critical(this, tr("Erreur"), tr("Le nom du disque est déjà utilisé !"));
+        return false;
+    }
     for (auto &field: findChildren<QLineEdit *>())
     {
         if (field->text().isEmpty())
@@ -126,10 +137,10 @@ bool RemoteConfigParamsFrame::checkFields()
             field->setStyleSheet("border: 1px solid red; border-radius: 5px;");
             m_messLabel->show();
             m_messLabel->setText(tr("Les champs en rouge sont obligatoires !"));
-            return false;
+            ok = false;
         }
     }
-    return true;
+    return ok;
 }
 
 /**

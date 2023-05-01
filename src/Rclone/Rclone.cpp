@@ -156,6 +156,19 @@ void Rclone::config(RemoteType type, const string &name, const vector<string> &p
     execute(args);
 }
 
+void Rclone::about(const RemoteInfo &info){
+    m_finished.connect(
+            [this](const int exit)
+            {
+                if (exit == 0)
+                {
+                    auto json = parseJson(boost::algorithm::join(m_out, ""));
+                    m_mapData["json"] = boost::json::serialize(json);
+                }
+            });
+    execute({"about", info.m_path,"--json"});
+}
+
 /**
  * @brief Rclone::lstRemote, permet de lister les remotes configurés
  */

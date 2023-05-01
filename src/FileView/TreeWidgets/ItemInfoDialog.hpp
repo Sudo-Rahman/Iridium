@@ -23,6 +23,7 @@ private:
 	QGridLayout *m_layout{};
 
 	std::shared_ptr<RcloneFile> m_file{};
+    TreeFileItem *m_item{};
 	QLabel *m_icon{}, *m_name{}, *m_size{}, *m_type{}, *m_path{}, *m_modTime{}, *m_objs{};
 
 	ProgressBar *m_loading1{}, *m_loading2{};

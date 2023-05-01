@@ -50,7 +50,8 @@ ListRemoteWidget::ListRemoteWidget(QWidget *parent) : QScrollArea(parent)
             getAllRemote();
             emit remoteClicked(m_remoteSelected);
         });
-        addRemote->exec();
+        addRemote->setModal(true);
+        addRemote->show();
     });
     toplayout->addWidget(m_add);
 
@@ -132,17 +133,19 @@ void ListRemoteWidget::getAllRemote()
             emit remoteClicked(m_remoteSelected);
         });
 
-        connect(remote, &RemoteWidget::deleted, this, [this](const auto remoteWidget)
+        connect(remote, &RemoteWidget::deleted, this, [this](auto *remoteWidget)
         {
-            m_listRemote.removeOne(remoteWidget);
-            m_remoteLayout->removeWidget(remoteWidget);
-            if (m_remoteSelected->first == remoteWidget)
-                m_remoteSelected->first = nullptr;
-            if (m_remoteSelected->second == remoteWidget)
-                m_remoteSelected->second = nullptr;
+            m_listRemote.clear();
+            for(int i = m_remoteLayout->count() - 1; i >= 0; --i)
+            {
+                auto *item = m_remoteLayout->itemAt(i);
+                m_remoteLayout->removeItem(item);
+                item->widget()->deleteLater();
+            }
+            getAllRemote();
             emit remoteClicked(m_remoteSelected);
-            delete remoteWidget;
         });
+
         m_remoteLayout->addWidget(remote);
         if (!m_listRemote.isEmpty())
         {

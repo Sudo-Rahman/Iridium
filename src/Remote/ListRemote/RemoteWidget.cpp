@@ -158,11 +158,11 @@ void RemoteWidget::init()
             QMessageBox::warning(this, tr("Suppression"), tr("Vous ne pouvez pas supprimer ce remote"));
             return;
         }
-        auto msgbox = new QMessageBox(QMessageBox::Question, "Suppression",
-                                      "Voulez-vous vraiment supprimer ce remote ?",
-                                      QMessageBox::Yes | QMessageBox::No, this);
+        auto msgbox = QMessageBox(QMessageBox::Question, "Suppression",
+                                  "Voulez-vous vraiment supprimer ce remote ?",
+                                  QMessageBox::Yes | QMessageBox::No, this);
 
-        if (msgbox->exec() == QMessageBox::Yes)
+        if (msgbox.exec() == QMessageBox::Yes)
         {
             if (m_remoteInfo->isLocal())
                 Settings::deleteRemote(m_remoteInfo);
@@ -177,6 +177,7 @@ void RemoteWidget::init()
                                             "Une erreur est survenue lors de la suppression du remote",
                                             QMessageBox::Ok, this);
                     msgb.setDetailedText(QString::fromStdString(rclone->readAllError().back()));
+                    msgb.exec();
                     return;
                 }
             }

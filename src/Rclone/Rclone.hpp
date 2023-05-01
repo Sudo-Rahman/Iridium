@@ -143,6 +143,8 @@ public:
         m_mapFlags[key].value = value;
     }
 
+    void about(const RemoteInfo &info);
+
 private:
     boost::signals2::signal<void(const std::string &)> m_readyRead{};
 

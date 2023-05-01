@@ -11,11 +11,11 @@
 ItemMenu::ItemMenu(QWidget *parent) : QMenu(parent)
 {
 
-    m_info = addAction(tr("Information"), this, &ItemMenu::info);
-    m_copy = addAction(tr("Copy"), this, &ItemMenu::copyed);
-    m_paste = addAction(tr("Coller"), this, &ItemMenu::pasted);
-    m_delete = addAction(tr("Supprimer"), this, &ItemMenu::deleted);
-    m_newFolder = addAction(tr("Nouveau dossier"), this, &ItemMenu::newFolder);
+    m_info = addAction(tr("Information"), this, [this]{m_action = Info; emit info();});
+    m_copy = addAction(tr("Copy"), this, [this]{m_action = Copy; emit copyed();});
+    m_paste = addAction(tr("Coller"), this, [this]{m_action = Paste; emit pasted();});
+    m_delete = addAction(tr("Supprimer"), this, [this]{m_action = Delete; emit deleted();});
+    m_newFolder = addAction(tr("Nouveau dossier"), this, [this]{m_action = NewFolder; emit newFolder();});
 
     // add icons
     m_info->setIcon(style()->standardIcon(QStyle::SP_FileDialogInfoView));

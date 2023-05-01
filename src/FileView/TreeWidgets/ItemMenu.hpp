@@ -9,44 +9,48 @@
 #include <QMenu>
 #include "TreeFileItem.hpp"
 
-class ItemMenu : public QMenu
-{
+class ItemMenu : public QMenu {
 Q_OBJECT
 
 private:
-	QAction *m_info{};
-	QAction *m_copy{};
-	QAction *m_paste{};
-	QAction *m_delete{};
-	QAction *m_newFolder{};
-
+    QAction *m_info{}, *m_copy{}, *m_paste{}, *m_delete{}, *m_newFolder{};
 
 public:
 
-	enum Action
-	{
-		Copy,
-		Paste,
-		Info,
-		Delete,
-		NewFolder
-	};
+    enum Action {
+        Copy,
+        Paste,
+        Info,
+        Delete,
+        NewFolder
+    };
 
-	explicit ItemMenu(QWidget *parent = nullptr);
+    [[nodiscard]] Action action() const { return m_action; }
 
-	void setActionEnabled(const QList<QPair<Action, bool>> &lst);
+    explicit ItemMenu(QWidget *parent = nullptr);
+
+    void setActionEnabled(const QList<QPair<Action, bool>> &lst);
+
+    // override exec and return action clicked
+    Action exec(const QPoint &pos) {
+        QMenu::exec(pos);
+        return m_action;
+    }
+
+private:
+    Action m_action{};
 
 signals:
 
-	void copyed();
+    void copyed();
 
-	void pasted();
+    void pasted();
 
-	void info();
+    void info();
 
-	void deleted();
+    void deleted();
 
-	void newFolder();
+    void newFolder();
 
 };
 

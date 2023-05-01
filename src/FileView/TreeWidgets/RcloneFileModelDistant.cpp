@@ -33,6 +33,7 @@ void RcloneFileModelDistant::init()
 
 void RcloneFileModelDistant::addItem(const RcloneFilePtr &file, TreeFileItem *parent)
 {
+    RcloneFileModel::addItem(file, parent);
     if (m_load == Dynamic)
         addItemDynamic(file->getPath(), parent);
     else

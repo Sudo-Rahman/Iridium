@@ -5,6 +5,7 @@
 #include "RcloneFileModel.hpp"
 #include <QVBoxLayout>
 #include <ProgressBar.hpp>
+#include <QMessageBox>
 
 
 /**
@@ -14,12 +15,12 @@
  */
 RcloneFileModel::RcloneFileModel(const RemoteInfoPtr &remoteInfo, QTreeView *View) : m_view(View)
 {
-	m_remoteInfo = remoteInfo;
+    m_remoteInfo = remoteInfo;
 
-	setColumnCount(4);
-	setRowCount(0);
+    setColumnCount(4);
+    setRowCount(0);
 
-	setHorizontalHeaderLabels({tr("Nom"), tr("Taille"), tr("Date de modification"), tr("Type")});
+    setHorizontalHeaderLabels({tr("Nom"), tr("Taille"), tr("Date de modification"), tr("Type")});
 }
 
 /**
@@ -29,17 +30,17 @@ RcloneFileModel::RcloneFileModel(const RemoteInfoPtr &remoteInfo, QTreeView *Vie
  */
 QList<QStandardItem *> RcloneFileModel::getItemList(TreeFileItem *item)
 {
-	return {
-		item,
-		new TreeFileItem(item->getFile()->getSizeString(), item->getFile(), item),
-		new TreeFileItem(item->getFile()->getModTimeString(), item->getFile(), item),
-		new TreeFileItem(item->getFile()->getFileType(), item->getFile(), item)
-	};
+    return {
+            item,
+            new TreeFileItem(item->getFile()->getSizeString(), item->getFile(), item),
+            new TreeFileItem(item->getFile()->getModTimeString(), item->getFile(), item),
+            new TreeFileItem(item->getFile()->getFileType(), item->getFile(), item)
+    };
 }
 
 const QModelIndex &RcloneFileModel::getRootIndex() const
 {
-	return m_root_index;
+    return m_root_index;
 }
 
 /**
@@ -48,26 +49,26 @@ const QModelIndex &RcloneFileModel::getRootIndex() const
  */
 void RcloneFileModel::addProgressBar(const QModelIndex &index)
 {
-	auto *container = new QWidget;
-	container->setContentsMargins(0, 0, 0, 0);
-	auto *layout = new QHBoxLayout(container);
-	layout->setContentsMargins(0, 0, 0, 0);
-	ProgressBar *progressBar;
-	// change size of item if it's a double click
-	if (m_expandOrDoubleClick)
-	{
-		progressBar = new ProgressBar(ProgressBar::Circular, container);
-		progressBar->setFixedSize(40, 40);
-	} else
-	{
-		progressBar = new ProgressBar(ProgressBar::Linear, container);
-		progressBar->setFixedSize(100,15);
-	}
+    auto *container = new QWidget;
+    container->setContentsMargins(0, 0, 0, 0);
+    auto *layout = new QHBoxLayout(container);
+    layout->setContentsMargins(0, 0, 0, 0);
+    ProgressBar *progressBar;
+    // change size of item if it's a double click
+    if (m_expandOrDoubleClick)
+    {
+        progressBar = new ProgressBar(ProgressBar::Circular, container);
+        progressBar->setFixedSize(40, 40);
+    } else
+    {
+        progressBar = new ProgressBar(ProgressBar::Linear, container);
+        progressBar->setFixedSize(100, 15);
+    }
 //	// align the progress bar to the left
-	layout->setAlignment(Qt::AlignLeft);
-	layout->addWidget(progressBar);
-	progressBar->setRange(0, 0);
-	m_view->setIndexWidget(index, container);
+    layout->setAlignment(Qt::AlignLeft);
+    layout->addWidget(progressBar);
+    progressBar->setRange(0, 0);
+    m_view->setIndexWidget(index, container);
 }
 
 RcloneFileModel::RcloneFileModel()
@@ -82,4 +83,28 @@ bool RcloneFileModel::setData(const QModelIndex &index, const QVariant &value, i
 {
     emit beforeDataChanged(value, role);
     return QStandardItemModel::setData(index, value, role);
+}
+
+void RcloneFileModel::addItem(const RcloneFilePtr &file, TreeFileItem *parent)
+{
+    if (not m_check_is_valid)
+    {
+        auto rclone = RcloneManager::get();
+        connect(rclone.get(), &Rclone::finished, this, [this, rclone](int exit)
+        {
+            if (exit not_eq 0)
+            {
+                auto msgBox = QMessageBox();
+                msgBox.setWindowTitle(tr("Erreur"));
+                msgBox.setText(tr("Impossible de se connecter au serveur %1 !").QString::arg(m_remoteInfo->name().c_str()));
+                msgBox.setIcon(QMessageBox::Critical);
+                msgBox.setDetailedText(rclone->readAllError().back().c_str());
+                msgBox.setStandardButtons(QMessageBox::Ok);
+                msgBox.exec();
+            }
+            m_check_is_valid = true;
+            RcloneManager::release(rclone);
+        });
+        rclone->about(m_remoteInfo.operator*());
+    }
 }

@@ -16,8 +16,7 @@ class FileViewWidget : public QWidget
 Q_OBJECT
 
 private:
-	TreeFileViewContainer *m_treeFileView1{};
-	TreeFileViewContainer *m_treeFileView2{};
+	TreeFileViewContainer *m_treeFileView1{},*m_treeFileView2{};
 	QHBoxLayout *m_layout{};
 
 	QSplitter *m_splitter{};
@@ -32,8 +31,7 @@ public:
 
 signals:
 
-	void
-	taskAdded(const QString &src, const QString &dst, const RclonePtr &rclone, const std::function<void()> &callable,
+	void taskAdded(const QString &src, const QString &dst, const RclonePtr &rclone, const std::function<void()> &callable,
 			  const Rclone::TaskType &type = Rclone::Unknown);
 };
 
