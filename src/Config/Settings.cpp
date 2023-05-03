@@ -219,7 +219,7 @@ boost::filesystem::path Settings::getPathSettings()
 
 void Settings::initSettings()
 {
-    m_settings.put(m_nodes.at(Language), QLocale(QLocale::English).name().toStdString());
+    m_settings.put(m_nodes.at(Language), QLocale::system().name().toStdString());
     m_settings.put(m_nodes.at(DirIconColor), 0);
     m_settings.put(m_nodes.at(LoadType), 0);
     m_settings.put(m_nodes.at(MaxDepth), 2);

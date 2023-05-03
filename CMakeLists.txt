@@ -5,7 +5,6 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++2b -D NDEBUG -Wno-deprecated-declarations -O3")
-# set qt path
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -71,9 +70,10 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Iridium.app/Contents/Translations)
     set_source_files_properties(${TRANSLATION}
             PROPERTIES OUTPUT_LOCATION ${CMAKE_CURRENT_BINARY_DIR}/Iridium.app/Contents/Translations)
-elseif ()
+else ()
+    file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Translations)
     set_source_files_properties(${TRANSLATION} PROPERTIES
-            OUTPUT_LOCATION ${CMAKE_CURRENT_BINARY_DIR}/translations)
+            OUTPUT_LOCATION ${CMAKE_CURRENT_BINARY_DIR}/Translations)
 endif ()
 
 qt_add_translation(QM_FILES ${TRANSLATION})
