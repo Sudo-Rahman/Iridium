@@ -1,5 +1,5 @@
 //
-// Created by sr-71 on 18/01/2023.
+// Created by Rahman on 18/01/2023.
 //
 
 #ifndef IRIDIUM_TREEFILEVIEW_HPP
@@ -17,12 +17,13 @@
 #include <RcloneProxy.hpp>
 
 
-class TreeFileView : public QTreeView {
+class TreeFileView : public QTreeView
+{
 Q_OBJECT
 
     RcloneFileModel *model{};
-    QList<QModelIndex> indexBack{}, indexTop{};
-    RemoteInfoPtr m_remoteInfo{};
+    QList<QModelIndex> m_index_back{}, m_index_front{};
+    RemoteInfoPtr m_remote_info{};
 
     uint64_t m_clickTime{};
     QModelIndex m_clickIndex{};
@@ -30,7 +31,7 @@ Q_OBJECT
     TreeFileItem *m_editingItem{};
     QList<TreeFileItem *> m_dragItems{};
 
-    bool m_dragable, m_editable = false;
+    bool m_dragable{}, m_editable = false;
 
 public:
     explicit TreeFileView(const RemoteInfoPtr &remoteInfo, QWidget *parent = nullptr);
@@ -47,7 +48,7 @@ public:
 
     void reload(TreeFileItem *item = nullptr);
 
-    [[nodiscard]] RemoteInfoPtr remoteInfo() const { return m_remoteInfo; };
+    [[nodiscard]] RemoteInfoPtr remoteInfo() const { return m_remote_info; };
 
     [[nodiscard]] QList<TreeFileItem *> getDragItems() const { return m_dragItems; }
 

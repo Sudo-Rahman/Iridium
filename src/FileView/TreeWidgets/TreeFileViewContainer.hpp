@@ -1,5 +1,5 @@
 //
-// Created by sr-71 on 03/04/2023.
+// Created by Rahman on 03/04/2023.
 //
 
 #ifndef IRIDIUM_TREEFILEVIEWCONTAINER_HPP
@@ -18,20 +18,19 @@ class TreeFileViewContainer : public QWidget
 Q_OBJECT
 
 private:
-	TreeFileView *m_treeFileView{};
-	QVBoxLayout *m_layout{};
-	RoundedButton *m_backButton{}, *m_frontButton{}, *m_refreshButton{};
-	QLabel *m_pathLabel{};
+    TreeFileView *m_treeFileView{};
+    QVBoxLayout *m_layout{};
+    RoundedButton *m_back_button{}, *m_front_button{}, *m_refresh_button{};
+    QLabel *m_path_label{};
 
-	void initUI();
+    void initUI();
 
 public:
-	explicit TreeFileViewContainer(const RemoteInfoPtr &remoteInfo, QWidget *parent = nullptr);
+    explicit TreeFileViewContainer(const RemoteInfoPtr &remoteInfo, QWidget *parent = nullptr);
 
-	explicit TreeFileViewContainer(QWidget *parent = nullptr);
+    explicit TreeFileViewContainer(QWidget *parent = nullptr);
 
-	[[nodiscard]] TreeFileView *treeFileView() const
-	{ return m_treeFileView; }
+    [[nodiscard]] TreeFileView *treeFileView() const { return m_treeFileView; }
 };
 
 

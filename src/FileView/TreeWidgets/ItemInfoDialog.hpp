@@ -1,5 +1,5 @@
 //
-// Created by sr-71 on 11/02/2023.
+// Created by Rahman on 11/02/2023.
 //
 
 #ifndef IRIDIUM_ITEMINFODIALOG_HPP
@@ -20,37 +20,37 @@ class ItemInfoDialog : public QDialog
 Q_OBJECT
 
 private:
-	QGridLayout *m_layout{};
+    QGridLayout *m_layout{};
 
-	std::shared_ptr<RcloneFile> m_file{};
+    std::shared_ptr<RcloneFile> m_file{};
     TreeFileItem *m_item{};
-	QLabel *m_icon{}, *m_name{}, *m_size{}, *m_type{}, *m_path{}, *m_modTime{}, *m_objs{};
+    QLabel *m_icon{}, *m_name{}, *m_size{}, *m_type{}, *m_path{}, *m_mod_time{}, *m_objs{};
 
-	ProgressBar *m_loading1{}, *m_loading2{};
+    ProgressBar *m_loading1{}, *m_loading2{};
 
-	QTimer m_timer{};
+    QTimer m_timer{};
 
-	int row{};
+    int row{};
 
-	boost::shared_ptr<boost::thread> m_thread{};
+    boost::shared_ptr<boost::thread> m_thread{};
 
 public:
-	explicit ItemInfoDialog(TreeFileItem *item, QWidget *parent = nullptr);
+    explicit ItemInfoDialog(TreeFileItem *item, QWidget *parent = nullptr);
 
 private:
-	void initSize();
+    void initSize();
 
-	void initType();
+    void initType();
 
-	void initLabel();
+    void initLabel();
 
 protected:
 
-	~ItemInfoDialog() override;
+    ~ItemInfoDialog() override;
 
 signals:
 
-	void m_threadFinished();
+    void m_threadFinished();
 
 };
 

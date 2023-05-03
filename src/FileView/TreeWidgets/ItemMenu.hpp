@@ -1,5 +1,5 @@
 //
-// Created by sr-71 on 11/02/2023.
+// Created by Rahman on 11/02/2023.
 //
 
 #ifndef IRIDIUM_ITEMMENU_HPP
@@ -9,15 +9,17 @@
 #include <QMenu>
 #include "TreeFileItem.hpp"
 
-class ItemMenu : public QMenu {
+class ItemMenu : public QMenu
+{
 Q_OBJECT
 
 private:
-    QAction *m_info{}, *m_copy{}, *m_paste{}, *m_delete{}, *m_newFolder{};
+    QAction *m_info{}, *m_copy{}, *m_paste{}, *m_delete{}, *m_new_folder{};
 
 public:
 
-    enum Action {
+    enum Action
+    {
         Copy,
         Paste,
         Info,
@@ -32,7 +34,8 @@ public:
     void setActionEnabled(const QList<QPair<Action, bool>> &lst);
 
     // override exec and return action clicked
-    Action exec(const QPoint &pos) {
+    Action exec(const QPoint &pos)
+    {
         QMenu::exec(pos);
         return m_action;
     }

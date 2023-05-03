@@ -1,5 +1,5 @@
 //
-// Created by sr-71 on 09/01/2023.
+// Created by Rahman on 09/01/2023.
 //
 
 #ifndef IRIDIUM_MAINWINDOW_HPP
@@ -20,21 +20,21 @@ class MainWindow : public QMainWindow
 {
 Q_OBJECT
 
-	ListRemoteWidget *m_listRemoteWidget{};
-	FileViewWidget *m_fileViewWidget{};
-	QHBoxLayout *m_layout{};
-	QSplitter *m_splitter{};
-	TaskTreeView *m_taskTreeView{};
+    ListRemoteWidget *m_list_remoteWidget{};
+    FileViewWidget *m_file_viewWidget{};
+    QHBoxLayout *m_layout{};
+    QSplitter *m_splitter{};
+    TaskTreeView *m_task_treeView{};
 
 public:
-	explicit MainWindow(QWidget *parent = nullptr);
+    explicit MainWindow(QWidget *parent = nullptr);
 
 
 private:
-	void connectSignals();
+    void connectSignals();
 
 protected:
-	void closeEvent(QCloseEvent *event) override;
+    void closeEvent(QCloseEvent *event) override;
 };
 
 

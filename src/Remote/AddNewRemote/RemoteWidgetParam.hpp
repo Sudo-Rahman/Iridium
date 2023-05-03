@@ -1,5 +1,5 @@
 //
-// Created by sr-71 on 11/01/2023.
+// Created by Rahman on 11/01/2023.
 //
 
 #ifndef IRIDIUM_REMOTEWIDGETPARAM_HPP
@@ -15,31 +15,31 @@ class RemoteWidgetParam : public QGroupBox
 Q_OBJECT
 
 private:
-	RemoteType type;
-	QIcon m_icon{};
-	bool m_hover{}, m_click{};
-	RemoteConfigParamsFrame *paramsFrame{};
+    RemoteType type;
+    QIcon m_icon{};
+    bool m_hover{}, m_click{};
+    RemoteConfigParamsFrame *paramsFrame{};
 
-	void initParamsFrame();
+    void initParamsFrame();
 
-	void addBlur();
+    void addBlur();
 
 public:
-	explicit RemoteWidgetParam(RemoteType type, QWidget *parent = nullptr);
+    explicit RemoteWidgetParam(RemoteType type, QWidget *parent = nullptr);
 
-	[[nodiscard]] RemoteConfigParamsFrame *getParamsFrame() const;
+    [[nodiscard]] RemoteConfigParamsFrame *getParamsFrame() const;
 
 protected:
 
-	virtual bool event(QEvent *event) override;
+    virtual bool event(QEvent *event) override;
 
-	void paintEvent(QPaintEvent *event) override;
+    void paintEvent(QPaintEvent *event) override;
 
 signals:
 
-	void clicked(RemoteConfigParamsFrame *);
+    void clicked(RemoteConfigParamsFrame *);
 
-	void newRemoteAdded();
+    void newRemoteAdded();
 };
 
 

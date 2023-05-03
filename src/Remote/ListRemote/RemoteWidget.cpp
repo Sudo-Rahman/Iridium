@@ -1,5 +1,5 @@
 //
-// Created by sr-71 on 29/03/2023.
+// Created by Rahman on 29/03/2023.
 //
 
 #include "RemoteWidget.hpp"
@@ -14,10 +14,10 @@
 #include <Rclone.hpp>
 
 RemoteWidget::RemoteWidget(const RemoteInfo &remoteInfo, bool deletable, QWidget *parent) : QGroupBox(parent),
-                                                                                            m_remoteInfo(std::move(
+                                                                                            m_remote_info(std::move(
                                                                                                     std::make_shared<RemoteInfo>(
                                                                                                             remoteInfo))),
-                                                                                            deletable(deletable)
+                                                                                            m_deletable(deletable)
 {
     init();
 }
@@ -89,7 +89,7 @@ void RemoteWidget::addBlur()
 
 const RemoteInfoPtr &RemoteWidget::remoteInfo() const
 {
-    return m_remoteInfo;
+    return m_remote_info;
 }
 
 void RemoteWidget::setSelectedText(const QString &text)
@@ -99,8 +99,8 @@ void RemoteWidget::setSelectedText(const QString &text)
 
 RemoteWidget::RemoteWidget(const RemoteInfoPtr &remoteInfo, bool deletable, QWidget *parent)
 {
-    m_remoteInfo = remoteInfo;
-    this->deletable = deletable;
+    m_remote_info = remoteInfo;
+    this->m_deletable = deletable;
     init();
 }
 
@@ -114,20 +114,20 @@ void RemoteWidget::init()
     m_layout->addWidget(labelIcon);
 // create pixmap
     QIcon icon;
-    if (m_remoteInfo->isLocal())
+    if (m_remote_info->isLocal())
     {
         icon = Settings::hardDriveIcon();
     } else
-        icon = QIcon(QString::fromStdString(m_remoteInfo->m_icon));
+        icon = QIcon(QString::fromStdString(m_remote_info->m_icon));
     labelIcon->setPixmap(icon.pixmap(32, 32, QIcon::Normal, QIcon::On));
 
 
     // if length of name is more than 10 chars then cut it
-    QString name = QString::fromStdString(m_remoteInfo->name());
+    QString name = QString::fromStdString(m_remote_info->name());
     if (name.length() > 10)
         name = name.left(10) + "...";
     auto *labelRemoteName = new QLabel(name);
-    labelRemoteName->setToolTip(QString::fromStdString(m_remoteInfo->name()));
+    labelRemoteName->setToolTip(QString::fromStdString(m_remote_info->name()));
     labelRemoteName->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
     labelRemoteName->setAlignment(Qt::AlignCenter);
     // set auto size font
@@ -153,9 +153,9 @@ void RemoteWidget::init()
 
     connect(m_delete, &RoundedButton::clicked, this, [this]
     {
-        if (!deletable)
+        if (not m_deletable)
         {
-            QMessageBox::warning(this, tr("Suppression"), tr("Vous ne pouvez pas supprimer ce remote"));
+            QMessageBox::warning(this, tr("Suppression"), tr("Vous ne pouvez pas supprimer ce remote."));
             return;
         }
         auto msgbox = QMessageBox(QMessageBox::Question, "Suppression",
@@ -164,12 +164,12 @@ void RemoteWidget::init()
 
         if (msgbox.exec() == QMessageBox::Yes)
         {
-            if (m_remoteInfo->isLocal())
-                Settings::deleteRemote(m_remoteInfo);
+            if (m_remote_info->isLocal())
+                Settings::deleteRemote(m_remote_info);
             else
             {
                 auto rclone = RcloneManager::get();
-                rclone->deleteRemote(m_remoteInfo->name());
+                rclone->deleteRemote(m_remote_info->name());
                 rclone->waitForFinished();
                 if (rclone->exitCode() != 0)
                 {

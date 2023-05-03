@@ -1,5 +1,5 @@
 //
-// Created by sr-71 on 05/04/2023.
+// Created by Rahman on 05/04/2023.
 //
 
 #ifndef IRIDIUM_LOCALREMOTECONFIGPARAMSFRAME_HPP
@@ -12,15 +12,15 @@ class LocalRemoteConfigParamsFrame : public RemoteConfigParamsFrame
 Q_OBJECT
 
 private:
-	QString m_path{};
+    QString m_path{};
 
 public:
-	explicit LocalRemoteConfigParamsFrame(QWidget *parent = nullptr);
+    explicit LocalRemoteConfigParamsFrame(QWidget *parent = nullptr);
 
 protected:
-	void addRemote() override;
+    void addRemote() override;
 
-	void createUi() override;
+    void createUi() override;
 
 
 };

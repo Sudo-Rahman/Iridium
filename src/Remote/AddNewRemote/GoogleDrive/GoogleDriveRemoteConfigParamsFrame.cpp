@@ -6,19 +6,19 @@
 #include "GoogleDriveRemoteConfigParamsFrame.hpp"
 
 GoogleDriveRemoteConfigParamsFrame::GoogleDriveRemoteConfigParamsFrame(QWidget *parent)
-	: RemoteConfigParamsFrame(parent)
+        : RemoteConfigParamsFrame(parent)
 {
-	GoogleDriveRemoteConfigParamsFrame::createUi();
+    GoogleDriveRemoteConfigParamsFrame::createUi();
 }
 
 void GoogleDriveRemoteConfigParamsFrame::addRemote()
 {
 
-	RemoteConfigParamsFrame::addRemote();
-	if (not checkFields())
-		return;
-	m_rclone->config(RemoteType::Drive, m_remoteName->text().toStdString());
-	m_rclone->waitForStarted();
-	m_login->hide();
-	m_cancel->show();
+    RemoteConfigParamsFrame::addRemote();
+    if (not checkFields())
+        return;
+    m_rclone->config(RemoteType::Drive, m_remoteName->text().toStdString());
+    m_rclone->waitForStarted();
+    m_login->hide();
+    m_cancel->show();
 }

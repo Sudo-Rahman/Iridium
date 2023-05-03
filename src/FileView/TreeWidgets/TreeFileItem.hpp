@@ -1,5 +1,5 @@
 //
-// Created by sr-71 on 18/01/2023.
+// Created by Rahman on 18/01/2023.
 //
 
 #ifndef IRIDIUM_TREEFILEITEM_HPP
@@ -9,9 +9,13 @@
 #include <QJsonObject>
 #include <RcloneFile.hpp>
 
-class TreeFileItem : public QStandardItem {
+#define SORT_ROLE (Qt::UserRole + 1)
+
+class TreeFileItem : public QStandardItem
+{
 public:
-    enum State {
+    enum State
+    {
         NotLoaded,
         Loaded,
         Loading
@@ -27,8 +31,7 @@ public:
 
     explicit TreeFileItem(const QString &path, const RemoteInfoPtr &remoteInfo, TreeFileItem * = nullptr);
 
-    explicit TreeFileItem(const QString &path, const std::shared_ptr<RcloneFile> &file, TreeFileItem * = nullptr,
-                          bool initIco = false);
+    explicit TreeFileItem(const int &column, const std::shared_ptr<RcloneFile> &file, TreeFileItem * = nullptr);
 
     [[nodiscard]] const std::shared_ptr<RcloneFile> &getFile() const;
 

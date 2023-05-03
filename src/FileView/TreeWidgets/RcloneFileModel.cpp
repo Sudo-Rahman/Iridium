@@ -1,5 +1,5 @@
 //
-// Created by sr-71 on 02/02/2023.
+// Created by Rahman on 02/02/2023.
 //
 
 #include "RcloneFileModel.hpp"
@@ -15,11 +15,11 @@
  */
 RcloneFileModel::RcloneFileModel(const RemoteInfoPtr &remoteInfo, QTreeView *View) : m_view(View)
 {
-    m_remoteInfo = remoteInfo;
+    m_remote_info = remoteInfo;
 
     setColumnCount(4);
     setRowCount(0);
-
+    setSortRole(SORT_ROLE);
     setHorizontalHeaderLabels({tr("Nom"), tr("Taille"), tr("Date de modification"), tr("Type")});
 }
 
@@ -32,9 +32,9 @@ QList<QStandardItem *> RcloneFileModel::getItemList(TreeFileItem *item)
 {
     return {
             item,
-            new TreeFileItem(item->getFile()->getSizeString(), item->getFile(), item),
-            new TreeFileItem(item->getFile()->getModTimeString(), item->getFile(), item),
-            new TreeFileItem(item->getFile()->getFileType(), item->getFile(), item)
+            new TreeFileItem(1, item->getFile(), item),
+            new TreeFileItem(2, item->getFile(), item),
+            new TreeFileItem(3, item->getFile(), item)
     };
 }
 
@@ -54,8 +54,8 @@ void RcloneFileModel::addProgressBar(const QModelIndex &index)
     auto *layout = new QHBoxLayout(container);
     layout->setContentsMargins(0, 0, 0, 0);
     ProgressBar *progressBar;
-    // change size of item if it's a double click
-    if (m_expandOrDoubleClick)
+
+    if (m_expand_or_double_click)
     {
         progressBar = new ProgressBar(ProgressBar::Circular, container);
         progressBar->setFixedSize(40, 40);
@@ -64,7 +64,7 @@ void RcloneFileModel::addProgressBar(const QModelIndex &index)
         progressBar = new ProgressBar(ProgressBar::Linear, container);
         progressBar->setFixedSize(100, 15);
     }
-//	// align the progress bar to the left
+
     layout->setAlignment(Qt::AlignLeft);
     layout->addWidget(progressBar);
     progressBar->setRange(0, 0);
@@ -96,7 +96,8 @@ void RcloneFileModel::addItem(const RcloneFilePtr &file, TreeFileItem *parent)
             {
                 auto msgBox = QMessageBox();
                 msgBox.setWindowTitle(tr("Erreur"));
-                msgBox.setText(tr("Impossible de se connecter au serveur %1 !").QString::arg(m_remoteInfo->name().c_str()));
+                msgBox.setText(
+                        tr("Impossible de se connecter au remote %1 !").QString::arg(m_remote_info->name().c_str()));
                 msgBox.setIcon(QMessageBox::Critical);
                 msgBox.setDetailedText(rclone->readAllError().back().c_str());
                 msgBox.setStandardButtons(QMessageBox::Ok);
@@ -105,6 +106,6 @@ void RcloneFileModel::addItem(const RcloneFilePtr &file, TreeFileItem *parent)
             m_check_is_valid = true;
             RcloneManager::release(rclone);
         });
-        rclone->about(m_remoteInfo.operator*());
+        rclone->about(m_remote_info.operator*());
     }
 }

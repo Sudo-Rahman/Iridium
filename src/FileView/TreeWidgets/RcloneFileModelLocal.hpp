@@ -1,5 +1,5 @@
 //
-// Created by sr-71 on 30/03/2023.
+// Created by Rahman on 30/03/2023.
 //
 
 #ifndef IRIDIUM_RCLONEFILEMODELLOCAL_HPP
@@ -12,18 +12,18 @@ class RcloneFileModelLocal : public RcloneFileModel
 {
 Q_OBJECT
 
-	boost::shared_ptr<boost::thread> m_thread{};
+    boost::shared_ptr<boost::thread> m_thread{};
 
 public:
-	explicit RcloneFileModelLocal(const RemoteInfoPtr &remoteInfo, QTreeView *View);
+    explicit RcloneFileModelLocal(const RemoteInfoPtr &remoteInfo, QTreeView *View);
 
 
 public:
-	void addItem(const RcloneFilePtr &file, TreeFileItem *parent) override;
+    void addItem(const RcloneFilePtr &file, TreeFileItem *parent) override;
 
 protected:
 
-	void init() override;
+    void init() override;
 };
 
 

@@ -1,5 +1,5 @@
 //
-// Created by sr-71 on 11/01/2023.
+// Created by Rahman on 11/01/2023.
 //
 
 #ifndef IRIDIUM_ADDNEWREMOTEDIALOG_HPP
@@ -15,18 +15,18 @@ class AddNewRemoteDialog : public QDialog
 {
 Q_OBJECT
 
-	QHBoxLayout *layout{};
-	RemoteConfigParamsFrame *paramsFrame{};
+    QHBoxLayout *layout{};
+    RemoteConfigParamsFrame *paramsFrame{};
 
 public:
-	explicit AddNewRemoteDialog(QWidget *parent = nullptr);
+    explicit AddNewRemoteDialog(QWidget *parent = nullptr);
 
 private:
-	void changeParamsFrame(RemoteConfigParamsFrame *);
+    void changeParamsFrame(RemoteConfigParamsFrame *);
 
 signals:
 
-	void newRemoteAdded();
+    void newRemoteAdded();
 
 };
 

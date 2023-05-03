@@ -1,5 +1,5 @@
 //
-// Created by sr-71 on 09/01/2023.
+// Created by Rahman on 09/01/2023.
 //
 
 
@@ -65,9 +65,9 @@ public:
         [[nodiscard]] std::vector<std::string> to_vector() const
         {
             std::vector<std::string> vec;
-            if(!name.empty())
+            if (!name.empty())
                 vec.emplace_back(name);
-            if(!value.empty())
+            if (!value.empty())
                 vec.emplace_back(value);
             return vec;
         }
@@ -83,17 +83,17 @@ private:
 
     boost::process::child m_child{};
 
-    static std::string m_pathRclone;
+    static std::string m_path_rclone;
     std::shared_ptr<boost::thread> m_thread{};
     std::vector<std::string> m_out{}, m_error{};
-    std::map<std::string, std::string> m_mapData{};
+    std::map<std::string, std::string> m_map_data{};
     uint8_t m_exit{};
     Rclone::State m_state{Rclone::NotLaunched};
 
     std::mutex m_mutex;
     std::condition_variable m_cv;
 
-    static std::map<Flag, flags_str> m_mapFlags;
+    static std::map<Flag, flags_str> m_map_flags;
 
 public:
 
@@ -135,12 +135,12 @@ public:
 
     static Rclone::flags_str getFlag(const Flag &key)
     {
-        return m_mapFlags[key];
+        return m_map_flags[key];
     }
 
     static void setFlag(const Flag &key, const std::string &value)
     {
-        m_mapFlags[key].value = value;
+        m_map_flags[key].value = value;
     }
 
     void about(const RemoteInfo &info);
@@ -187,12 +187,12 @@ class RcloneManager
     friend class Rclone;
 
 private:
-    static std::atomic_int_fast8_t m_nbRcloneLocked;
-    static uint8_t m_nbMaxProcess;
-    static std::mutex m_launch_mutex, m_stop_mutex, m_mutexStart;
+    static std::atomic_int_fast8_t m_nb_rclone_locked;
+    static uint8_t m_nb_max_process;
+    static std::mutex m_launch_mutex, m_stop_mutex, m_mutex_start;
     static std::condition_variable m_launch_cv, m_stop_cv;
-    static std::deque<RclonePtr> m_rcloneVector;
-    static boost::thread m_launchThread, m_stopThread;
+    static std::deque<RclonePtr> m_rclone_vector;
+    static boost::thread m_launch_thread, m_stop_thread;
     static std::deque<RcloneLocked> m_launch_queue, m_stop_queue;
 
 public:
@@ -209,9 +209,9 @@ public:
     static void release(const RclonePtr &rclone);
 
 
-    static uint16_t maxProcess() { return m_nbMaxProcess; }
+    static uint16_t maxProcess() { return m_nb_max_process; }
 
-    static void setMaxProcess(uint16_t nbMaxProcess) { m_nbMaxProcess = nbMaxProcess; }
+    static void setMaxProcess(uint16_t nbMaxProcess) { m_nb_max_process = nbMaxProcess; }
 
     static void launch(const RcloneLocked &func);
 

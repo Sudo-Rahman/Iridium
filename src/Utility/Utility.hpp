@@ -14,22 +14,22 @@ typedef long double double64_t;
 
 namespace Iridium
 {
-	/**
-	 * @brief The Utility class
-	 */
-	class Utility
-	{
+    /**
+     * @brief The Utility class
+     */
+    class Utility
+    {
 
-	public:
-		[[nodiscard]] static std::string numberToString(uint64_t num, int space = 3);
+    public:
+        [[nodiscard]] static std::string numberToString(uint64_t num, int space = 3);
 
-		[[nodiscard]] static std::string numberToString(double64_t num, int space = 3);
+        [[nodiscard]] static std::string numberToString(double64_t num, int space = 3);
 
-		[[nodiscard]] static std::string sizeToString(double64_t num);
+        [[nodiscard]] static std::string sizeToString(double64_t num);
 
-        static void pushBack(std::vector<std::string> &dst,const std::vector<std::vector<std::string>>& src);
+        static void pushBack(std::vector<std::string> &dst, const std::vector<std::vector<std::string>> &src);
 
-	};
+    };
 
 }
 #endif //IRIDIUM_UTILITY_HPP

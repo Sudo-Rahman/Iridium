@@ -1,5 +1,5 @@
 //
-// Created by sr-71 on 08/03/2023.
+// Created by Rahman on 08/03/2023.
 //
 
 #ifndef IRIDIUM_RCLONEPROXY_HPP
@@ -12,10 +12,10 @@ class RcloneProxy : public QSortFilterProxyModel
 Q_OBJECT
 
 public:
-	explicit RcloneProxy(QObject *parent = nullptr);
+    explicit RcloneProxy(QObject *parent = nullptr);
 
 protected:
-	bool lessThan(const QModelIndex &source_left, const QModelIndex &source_right) const override;
+    bool lessThan(const QModelIndex &source_left, const QModelIndex &source_right) const override;
 
 };
 

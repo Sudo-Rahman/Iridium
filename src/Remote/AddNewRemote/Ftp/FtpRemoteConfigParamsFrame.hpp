@@ -1,5 +1,5 @@
 //
-// Created by sr-71 on 14/04/2023.
+// Created by Rahman on 14/04/2023.
 //
 
 #ifndef IRIDIUM_FTPREMOTECONFIGPARAMSFRAME_HPP
@@ -11,22 +11,22 @@ class FtpRemoteConfigParamsFrame : public RemoteConfigParamsFrame
 {
 Q_OBJECT
 
-	QSpinBox *m_portSpinBox{};
-	QLineEdit *m_userLineEdit{};
-	QLineEdit *m_passwordLineEdit{};
-	QLineEdit *m_hostLineEdit{};
-	QComboBox *m_tls{};
+    QSpinBox *m_portSpinBox{};
+    QLineEdit *m_userLineEdit{};
+    QLineEdit *m_passwordLineEdit{};
+    QLineEdit *m_hostLineEdit{};
+    QComboBox *m_tls{};
 
 public:
-	explicit FtpRemoteConfigParamsFrame(QWidget *parent = nullptr);
+    explicit FtpRemoteConfigParamsFrame(QWidget *parent = nullptr);
 
-	void reset() override;
+    void reset() override;
 
 protected:
 
-	void createUi() override;
+    void createUi() override;
 
-	void addRemote() override;
+    void addRemote() override;
 
 };
 

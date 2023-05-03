@@ -1,5 +1,5 @@
 //
-// Created by sr-71 on 30/03/2023.
+// Created by Rahman on 30/03/2023.
 //
 
 #include "RcloneFileModelLocal.hpp"
@@ -33,7 +33,7 @@ void RcloneFileModelLocal::addItem(const RcloneFilePtr &file, TreeFileItem *pare
                     for (const QFileInfo &info: list_file)
                     {
                         boost::this_thread::interruption_point();
-                        auto *item = new TreeFileItemLocal(info.filePath(), m_remoteInfo);
+                        auto *item = new TreeFileItemLocal(info.filePath(), m_remote_info);
                         tree_item->appendRow(getItemList(item));
                         if (info.isDir())
                             item->appendRow(
@@ -47,14 +47,15 @@ void RcloneFileModelLocal::addItem(const RcloneFilePtr &file, TreeFileItem *pare
 
 void RcloneFileModelLocal::init()
 {
-    auto *drive = new TreeFileItem(QString::fromStdString(m_remoteInfo->m_path), m_remoteInfo);
+    auto *drive = new TreeFileItem(QString::fromStdString(m_remote_info->m_path), m_remote_info);
+    drive->getFile()->setSize(0);
     drive->setIcon(Settings::hardDriveIcon());
     m_root_index = drive->index();
     drive->appendRow({new QStandardItem, new QStandardItem, new QStandardItem, new QStandardItem});
     appendRow({
                       drive,
-                      new TreeFileItem("--", drive->getFile(), drive),
-                      new TreeFileItem("--", drive->getFile(), drive),
-                      new TreeFileItem(tr("Disque"), drive->getFile(), drive)
+                      new TreeFileItem(1, drive->getFile(), drive),
+                      new TreeFileItem(2, drive->getFile(), drive),
+                      new TreeFileItem(3, drive->getFile(), drive)
               });
 }

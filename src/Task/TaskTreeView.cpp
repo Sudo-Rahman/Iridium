@@ -1,5 +1,5 @@
 //
-// Created by sr-71 on 12/04/2023.
+// Created by Rahman on 12/04/2023.
 //
 
 #include <QStandardItemModel>
@@ -18,50 +18,49 @@ using namespace boost;
  */
 TaskTreeView::TaskTreeView(QWidget *parent) : QTreeView(parent)
 {
-	setAlternatingRowColors(true);
-	setUniformRowHeights(true);
+    setAlternatingRowColors(true);
+    setUniformRowHeights(true);
 
 
-	m_model = new QStandardItemModel(0, 10, this);
-	QTreeView::setModel(m_model);
+    m_model = new QStandardItemModel(0, 10, this);
+    QTreeView::setModel(m_model);
 
-	setIndentation(30);
-	setHeaderHidden(false);
-	setRootIsDecorated(true);
-	setSortingEnabled(true);
-	setSelectionMode(QAbstractItemView::SingleSelection);
-	setSelectionBehavior(QAbstractItemView::SelectRows);
-	setEditTriggers(QAbstractItemView::NoEditTriggers);
+    setIndentation(30);
+    setHeaderHidden(false);
+    setRootIsDecorated(true);
+    setSortingEnabled(true);
+    setSelectionMode(QAbstractItemView::SingleSelection);
+    setSelectionBehavior(QAbstractItemView::SelectRows);
+    setEditTriggers(QAbstractItemView::NoEditTriggers);
 
-	m_model->setHorizontalHeaderLabels(
-		{tr("Source"), tr("Destination"), tr("Taille"), tr("Type"), tr("Progression"),
-		 tr("Statut"), tr("Temps restant"),
-		 tr("Temps écoulé"), tr("Vitesse"), tr("Vitesse moyenne")});
+    m_model->setHorizontalHeaderLabels(
+            {tr("Source"), tr("Destination"), tr("Taille"), tr("Type"), tr("Progression"),
+             tr("Statut"), tr("Temps restant"),
+             tr("Temps écoulé"), tr("Vitesse"), tr("Vitesse moyenne")});
 
-	// set the size of the columns
-	header()->setMinimumSectionSize(100);
+    // set the size of the columns
+    header()->setMinimumSectionSize(100);
 
-	// set Menu context
-	setContextMenuPolicy(Qt::CustomContextMenu);
-	connect(this, &TaskTreeView::customContextMenuRequested, this, [this]
-	{
-		if (QTreeView::selectedIndexes().empty())
-			return;
-		QMenu menu;
-		menu.addAction(QObject::tr("Supprimer"));
-		connect(&menu, &QMenu::triggered, this, [this](QAction *action)
-		{
-		});
-		menu.exec(QCursor::pos());
-	});
+    // set Menu context
+    setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(this, &TaskTreeView::customContextMenuRequested, this, [this]
+    {
+        if (QTreeView::selectedIndexes().empty())
+            return;
+        QMenu menu;
+        menu.addAction(QObject::tr("Supprimer"));
+        connect(&menu, &QMenu::triggered, this, [this](QAction *action)
+        {
+        });
+        menu.exec(QCursor::pos());
+    });
 
-	connect(this, &TaskTreeView::taskFinished, this, [this](std::pair<size_t, Tasks> task)
-	{
-		if (task.second.parent->state() not_eq TaskRow::State::Error)
-			task.second.parent->terminate();
-		erase_if(m_tasks, [task](const auto &t)
-		{ return t.first == task.first; });
-	});
+    connect(this, &TaskTreeView::taskFinished, this, [this](std::pair<size_t, Tasks> task)
+    {
+        if (task.second.parent->state() not_eq TaskRow::State::Error)
+            task.second.parent->terminate();
+        erase_if(m_tasks, [task](const auto &t) { return t.first == task.first; });
+    });
 }
 
 /**
@@ -71,153 +70,151 @@ TaskTreeView::TaskTreeView(QWidget *parent) : QTreeView(parent)
  * @param rclone
  */
 void TaskTreeView::addTask(const QString &src, const QString &dst, const RclonePtr &rclone,
-						   const std::function<void()> &callable, const Rclone::TaskType &type)
+                           const std::function<void()> &callable, const Rclone::TaskType &type)
 {
-	auto idParent = boost::hash<std::string>{}(src.toStdString() + dst.toStdString());
-	if (m_tasks.find(idParent) != m_tasks.end())
-		return;
-	auto task = std::make_shared<TaskRow>(src, dst, boost::json::object(), type, TaskRow::Normal, TaskRow::Parent);
-	m_tasks.insert({idParent, Tasks{task, {}}});
-	m_model->appendRow(*task);
-	setIndexWidget(task->progressBarIndex(), task->progressBar());
+    auto idParent = boost::hash<std::string>{}(src.toStdString() + dst.toStdString());
+    if (m_tasks.find(idParent) != m_tasks.end())
+        return;
+    auto task = std::make_shared<TaskRow>(src, dst, boost::json::object(), type, TaskRow::Normal, TaskRow::Parent);
+    m_tasks.insert({idParent, Tasks{task, {}}});
+    m_model->appendRow(*task);
+    setIndexWidget(task->progressBarIndex(), task->progressBar());
 
 
-	connect(rclone.get(), &Rclone::taskProgress, this,
-			[this, src, dst, rclone, type, idParent](const boost::json::object &obj)
-			{
-				boost::json::array transfer;
-				try
-				{
-					if (obj.at("level").as_string() == "error")
-					{
+    connect(rclone.get(), &Rclone::taskProgress, this,
+            [this, src, dst, rclone, type, idParent](const boost::json::object &obj)
+            {
+                boost::json::array transfer;
+                try
+                {
+                    if (obj.at("level").as_string() == "error")
+                    {
 //				cout << obj << endl;
-						if (m_tasks.find(idParent) == m_tasks.end())
-							return;
-						auto object = obj.at("object").as_string();
-						size_t errId;
-						if (src.back() == '/')
+                        if (m_tasks.find(idParent) == m_tasks.end())
+                            return;
+                        auto object = obj.at("object").as_string();
+                        size_t errId;
+                        if (src.back() == '/')
 
-							errId = boost::hash<std::string>{}(
-								src.toStdString() + object.c_str() + dst.toStdString() + object.c_str());
-						else
-							errId = boost::hash<std::string>{}(src.toStdString() + dst.toStdString());
-						if (idParent == errId)
-						{
-							m_tasks[idParent].parent->setState(TaskRow::Error);
-							m_tasks[idParent].parent->setMessageToolTip(obj.at("msg").as_string().c_str());
-							if (m_tasks[idParent].children.size() > 0)
-								for (auto &child: m_tasks[idParent].children)
-									child.second->setState(TaskRow::Error);
-							RcloneManager::release(rclone);
-							return;
-						}
-						auto it = m_tasks[idParent].children.find(errId);
-						if (it != m_tasks[idParent].children.end())
-						{
-							it->second->setState(TaskRow::Error);
-							it->second->setMessageToolTip(obj.at("msg").as_string().c_str());
-							return;
-						}
-						auto task = std::make_shared<TaskRow>(src + object.c_str(), dst + object.c_str(), obj, type,
-															  TaskRow::Error, TaskRow::Child);
-						m_tasks[idParent].children.insert({errId, task});
-						m_tasks[idParent].parent->first()->appendRow(*task);
-						setIndexWidget(task->progressBarIndex(), task->progressBar());
-						return;
-					}
-					if (not obj.contains("stats"))
-						return;
+                            errId = boost::hash<std::string>{}(
+                                    src.toStdString() + object.c_str() + dst.toStdString() + object.c_str());
+                        else
+                            errId = boost::hash<std::string>{}(src.toStdString() + dst.toStdString());
+                        if (idParent == errId)
+                        {
+                            m_tasks[idParent].parent->setState(TaskRow::Error);
+                            m_tasks[idParent].parent->setMessageToolTip(obj.at("msg").as_string().c_str());
+                            if (m_tasks[idParent].children.size() > 0)
+                                for (auto &child: m_tasks[idParent].children)
+                                    child.second->setState(TaskRow::Error);
+                            RcloneManager::release(rclone);
+                            return;
+                        }
+                        auto it = m_tasks[idParent].children.find(errId);
+                        if (it != m_tasks[idParent].children.end())
+                        {
+                            it->second->setState(TaskRow::Error);
+                            it->second->setMessageToolTip(obj.at("msg").as_string().c_str());
+                            return;
+                        }
+                        auto task = std::make_shared<TaskRow>(src + object.c_str(), dst + object.c_str(), obj, type,
+                                                              TaskRow::Error, TaskRow::Child);
+                        m_tasks[idParent].children.insert({errId, task});
+                        m_tasks[idParent].parent->first()->appendRow(*task);
+                        setIndexWidget(task->progressBarIndex(), task->progressBar());
+                        return;
+                    }
+                    if (not obj.contains("stats"))
+                        return;
 
-					auto it = m_tasks.find(idParent);
-					if (it != m_tasks.end())
-						it->second.parent->updateData(obj.at("stats").as_object());
+                    auto it = m_tasks.find(idParent);
+                    if (it != m_tasks.end())
+                        it->second.parent->updateData(obj.at("stats").as_object());
 
-					transfer = obj.at("stats").at("transferring").as_array();
-				}
-					// if invalid argument
-				catch (const boost::wrapexcept<std::invalid_argument> &e)
-				{
-					std::cout << e.what() << std::endl;
-					return;
-				}
-					// if out of range
-				catch (const boost::wrapexcept<std::out_of_range> &e)
-				{ std::cout << "no Data" << std::endl; }
+                    transfer = obj.at("stats").at("transferring").as_array();
+                }
+                    // if invalid argument
+                catch (const boost::wrapexcept<std::invalid_argument> &e)
+                {
+                    std::cout << e.what() << std::endl;
+                    return;
+                }
+                    // if out of range
+                catch (const boost::wrapexcept<std::out_of_range> &e) { std::cout << "no Data" << std::endl; }
 
-				size_t childId;
-				std::vector<size_t> hashList;
-				for (const auto &item: transfer)
-				{
-					if (not item.is_object())
-						continue;
+                size_t childId;
+                std::vector<size_t> hashList;
+                for (const auto &item: transfer)
+                {
+                    if (not item.is_object())
+                        continue;
 
-					// hash the name of the file
-					auto name = item.at("name").as_string();
-					childId = boost::hash<std::string>{}(
-						src.toStdString() + name.c_str() + dst.toStdString() + name.c_str());
-					hashList.emplace_back(childId);
+                    // hash the name of the file
+                    auto name = item.at("name").as_string();
+                    childId = boost::hash<std::string>{}(
+                            src.toStdString() + name.c_str() + dst.toStdString() + name.c_str());
+                    hashList.emplace_back(childId);
 
-					// if parent task not exist, return
-					if (m_tasks.find(idParent) == m_tasks.end())
-						return;
+                    // if parent task not exist, return
+                    if (m_tasks.find(idParent) == m_tasks.end())
+                        return;
 
-					auto it = m_tasks[idParent].children.find(childId);
+                    auto it = m_tasks[idParent].children.find(childId);
 
-					if (std::find(hashList.begin(), hashList.end(), childId) != hashList.end())
-					{
-						// if the child task already exist and is json data
-						if (it != m_tasks[idParent].children.end())
-							it->second->updateData(item.as_object());
-							// if the child task not exist in the task list, create it
-						else
-						{
+                    if (std::find(hashList.begin(), hashList.end(), childId) != hashList.end())
+                    {
+                        // if the child task already exist and is json data
+                        if (it != m_tasks[idParent].children.end())
+                            it->second->updateData(item.as_object());
+                            // if the child task not exist in the task list, create it
+                        else
+                        {
 //					cout << obj << endl;
-							TaskRowPtr task;
-							if (src.back() == '/')
-								task = std::make_shared<TaskRow>(src + name.c_str(), dst + name.c_str(),
-																 item.as_object(),
-																 type, TaskRow::Normal, TaskRow::Child);
-							else
-								task = std::make_shared<TaskRow>(src, dst, item.as_object(),
-																 type, TaskRow::Normal, TaskRow::Child);
-							m_tasks[idParent].children.insert({childId, task});
-							m_tasks[idParent].parent->first()->appendRow(*task);
-							setIndexWidget(task->progressBarIndex(), task->progressBar());
-						}
-					}
-				}
-				// if the child task already in the list but not in the json data, terminate it
-				for (auto it = m_tasks[idParent].children.begin(); it != m_tasks[idParent].children.end(); ++it)
-				{
-					if (std::find(hashList.begin(), hashList.end(), it->first) == hashList.end())
-						if (it->second->state() != TaskRow::Error)
-							it->second->setState(TaskRow::Finished);
-				}
-			});
+                            TaskRowPtr task;
+                            if (src.back() == '/')
+                                task = std::make_shared<TaskRow>(src + name.c_str(), dst + name.c_str(),
+                                                                 item.as_object(),
+                                                                 type, TaskRow::Normal, TaskRow::Child);
+                            else
+                                task = std::make_shared<TaskRow>(src, dst, item.as_object(),
+                                                                 type, TaskRow::Normal, TaskRow::Child);
+                            m_tasks[idParent].children.insert({childId, task});
+                            m_tasks[idParent].parent->first()->appendRow(*task);
+                            setIndexWidget(task->progressBarIndex(), task->progressBar());
+                        }
+                    }
+                }
+                // if the child task already in the list but not in the json data, terminate it
+                for (auto it = m_tasks[idParent].children.begin(); it != m_tasks[idParent].children.end(); ++it)
+                {
+                    if (std::find(hashList.begin(), hashList.end(), it->first) == hashList.end())
+                        if (it->second->state() != TaskRow::Error)
+                            it->second->setState(TaskRow::Finished);
+                }
+            });
 
-	connect(rclone.get(), &Rclone::taskFinished, this,
-			[src, dst, rclone, this](int exit, const boost::json::object &obj)
-			{
-				boost::json::object json;
-				size_t id;
-				try
-				{
-					id = boost::hash<std::string>{}(
-						src.toStdString() + dst.toStdString());
-				} catch (const boost::wrapexcept<std::invalid_argument> &e)
-				{ return; }
-				auto it = m_tasks.find(id);
-				if (exit == 0)
-					(*it).second.parent->setState(TaskRow::Finished);
-				else
-				{
-					(*it).second.parent->setState(TaskRow::Error);
-					(*it).second.parent->setMessageToolTip(rclone->readAllError().back());
-					(*it).second.parent->progressBar()->error();
-				}
-				m_tasks[id].isFinished = true;
-				emit taskFinished(*m_tasks.find(id));
-				RcloneManager::release(rclone);
-			});
-	callable();
+    connect(rclone.get(), &Rclone::taskFinished, this,
+            [src, dst, rclone, this](int exit, const boost::json::object &obj)
+            {
+                boost::json::object json;
+                size_t id;
+                try
+                {
+                    id = boost::hash<std::string>{}(
+                            src.toStdString() + dst.toStdString());
+                } catch (const boost::wrapexcept<std::invalid_argument> &e) { return; }
+                auto it = m_tasks.find(id);
+                if (exit == 0)
+                    (*it).second.parent->setState(TaskRow::Finished);
+                else
+                {
+                    (*it).second.parent->setState(TaskRow::Error);
+                    (*it).second.parent->setMessageToolTip(rclone->readAllError().back());
+                    (*it).second.parent->progressBar()->error();
+                }
+                m_tasks[id].isFinished = true;
+                emit taskFinished(*m_tasks.find(id));
+                RcloneManager::release(rclone);
+            });
+    callable();
 }

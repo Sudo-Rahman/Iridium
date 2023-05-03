@@ -1,5 +1,5 @@
 //
-// Created by sr-71 on 30/03/2023.
+// Created by Rahman on 30/03/2023.
 //
 
 #include "FileViewWidget.hpp"
@@ -21,26 +21,26 @@ FileViewWidget::FileViewWidget(QWidget *parent) : QWidget(parent)
     m_splitter->addWidget(m_treeFileView2);
 
     connect(m_treeFileView1->treeFileView(), &TreeFileView::fileCopied, this,
-            [this](const QList<TreeFileItem *> &lst) { m_currentFileList = lst; });
+            [this](const QList<TreeFileItem *> &lst) { m_current_file_list = lst; });
     connect(m_treeFileView2->treeFileView(), &TreeFileView::fileCopied, this,
-            [this](const QList<TreeFileItem *> &lst) { m_currentFileList = lst; });
+            [this](const QList<TreeFileItem *> &lst) { m_current_file_list = lst; });
     connect(m_treeFileView1->treeFileView(), &TreeFileView::pasted, this, [this](const RcloneFilePtr &file)
     {
-        if (m_currentFileList.empty())
+        if (m_current_file_list.empty())
             return;
         QList<RcloneFilePtr> lst;
-        for (auto item: m_currentFileList)
+        for (auto item: m_current_file_list)
             lst << item->getFile();
-        m_treeFileView1->treeFileView()->copyto(m_currentFileList);
+        m_treeFileView1->treeFileView()->copyto(m_current_file_list);
     });
     connect(m_treeFileView2->treeFileView(), &TreeFileView::pasted, this, [this](const RcloneFilePtr &file)
     {
-        if (m_currentFileList.empty())
+        if (m_current_file_list.empty())
             return;
         QList<RcloneFilePtr> lst;
-        for (auto item: m_currentFileList)
+        for (auto item: m_current_file_list)
             lst << item->getFile();
-        m_treeFileView2->treeFileView()->copyto(m_currentFileList);
+        m_treeFileView2->treeFileView()->copyto(m_current_file_list);
     });
 
     connect(m_treeFileView1->treeFileView(), &TreeFileView::taskAdded, this,
@@ -60,7 +60,7 @@ FileViewWidget::FileViewWidget(QWidget *parent) : QWidget(parent)
 
 void FileViewWidget::changeRemote(const std::shared_ptr<remotes_selected> &remotes)
 {
-    m_currentFileList.clear();
+    m_current_file_list.clear();
 
     if (remotes->first not_eq nullptr)
     {

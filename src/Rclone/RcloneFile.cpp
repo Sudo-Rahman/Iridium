@@ -1,5 +1,5 @@
 //
-// Created by sr-71 on 10/01/2023.
+// Created by Rahman on 10/01/2023.
 //
 
 #include "RcloneFile.hpp"
@@ -9,139 +9,139 @@
 
 void RcloneFile::init()
 {
-	QFileInfo info(path);
-	if (m_remoteInfo->isLocal())
-	{
-		setSize(info.size());
-		setModTime(info.lastModified());
-		setPath(info.absoluteFilePath());
+    QFileInfo info(m_path);
+    if (m_remote_info->isLocal())
+    {
+        setSize(info.size());
+        setModTime(info.lastModified());
+        setPath(info.absoluteFilePath());
 
-	}
-	setIsDir(info.isDir());
-	if (m_remoteInfo->isLocal() and isDirectory)
-		setPath(path);
+    }
+    setIsDir(info.isDir());
+    if (m_remote_info->isLocal() and m_is_dir)
+        setPath(m_path);
 }
 
 
 RcloneFile::RcloneFile(const QString &pathFile, const RemoteInfoPtr &remoteInfo)
 {
-	path = pathFile;
-	m_remoteInfo = remoteInfo;
-	init();
+    m_path = pathFile;
+    m_remote_info = remoteInfo;
+    init();
 }
 
 RcloneFile::RcloneFile(const QString &pathFile, uint64_t size, bool isDir, QDateTime modTime,
-					   const RemoteInfoPtr &remoteInfo)
-	: size(size), isDirectory(isDir), modTime(std::move(modTime))
+                       const RemoteInfoPtr &remoteInfo)
+        : m_size(size), m_is_dir(isDir), m_mod_time(std::move(modTime))
 {
-	m_remoteInfo = remoteInfo;
-	setPath(pathFile);
+    m_remote_info = remoteInfo;
+    setPath(pathFile);
 }
 
 
 const QString &RcloneFile::getPath() const
 {
-	return path;
+    return m_path;
 }
 
 void RcloneFile::setPath(const QString &path)
 {
-	RcloneFile::path = path;
-	if (not path.endsWith("/") and not path.isEmpty() and isDirectory)
-		RcloneFile::path += "/";
+    RcloneFile::m_path = path;
+    if (not path.endsWith("/") and not path.isEmpty() and m_is_dir)
+        RcloneFile::m_path += "/";
 }
 
 uint64_t RcloneFile::getSize() const
 {
-	return size;
+    return m_size;
 }
 
 void RcloneFile::setSize(uint64_t size)
 {
-	RcloneFile::size = size;
+    RcloneFile::m_size = size;
 }
 
 const QDateTime &RcloneFile::getModTime() const
 {
-	return modTime;
+    return m_mod_time;
 }
 
 void RcloneFile::setModTime(const QDateTime &modTime)
 {
-	RcloneFile::modTime = modTime;
+    RcloneFile::m_mod_time = modTime;
 }
 
 QString RcloneFile::getName() const
 {
-	QString name;
-	if (isDirectory)
-		return getPathString();
-	path.contains(":") ? name = QFileInfo(path.split(":")[1]).fileName() : name = QFileInfo(path).fileName();
-	return name;
+    QString name;
+    if (m_is_dir)
+        return getPathString();
+    m_path.contains(":") ? name = QFileInfo(m_path.split(":")[1]).fileName() : name = QFileInfo(m_path).fileName();
+    return name;
 }
 
 bool RcloneFile::isDir() const
 {
-	return isDirectory;
+    return m_is_dir;
 }
 
 void RcloneFile::setIsDir(bool isDir)
 {
-	if (path.endsWith(":"))
-		RcloneFile::isDirectory = true;
-	else
-		RcloneFile::isDirectory = isDir;
+    if (m_path.endsWith(":"))
+        RcloneFile::m_is_dir = true;
+    else
+        RcloneFile::m_is_dir = isDir;
 }
 
 QString RcloneFile::getSizeString() const
 {
-	if (size == 0)
-		return "--";
-	return QString::fromStdString(Iridium::Utility::sizeToString(size));
+    if (m_size == 0)
+        return "--";
+    return QString::fromStdString(Iridium::Utility::sizeToString(m_size));
 }
 
 QString RcloneFile::getPathString() const
 {
-	QString tmpPath = path;
-	if (isDirectory and !m_remoteInfo->isLocal() and path.contains(":"))
-	{
-		tmpPath = path.split(":")[1];
-	}
-	return QDir(tmpPath).dirName();
+    QString tmpPath = m_path;
+    if (m_is_dir and !m_remote_info->isLocal() and m_path.contains(":"))
+    {
+        tmpPath = m_path.split(":")[1];
+    }
+    return QDir(tmpPath).dirName();
 }
 
 QString RcloneFile::getModTimeString() const
 {
-	return QLocale::system().toString(modTime, tr("dd MMM yyyy à hh:mm:ss"));
+    return QLocale().toString(m_mod_time, tr("dd MMM yyyy - hh:mm:ss"));
 }
 
 uint32_t RcloneFile::getObjs() const
 {
-	return objs;
+    return m_objs;
 }
 
 void RcloneFile::setObjs(uint32_t objs)
 {
-	RcloneFile::objs = objs;
+    RcloneFile::m_objs = objs;
 }
 
 std::shared_ptr<RemoteInfo> RcloneFile::getRemoteInfo() const
 {
-	return m_remoteInfo;
+    return m_remote_info;
 }
 
 QString RcloneFile::getFileType() const
 {
-	if (isDirectory)
-		return tr("Dossier");
-	auto mime = QMimeDatabase().mimeTypeForFile(getPath());
-	if (mime.name() != "application/octet-stream")
-	{
-		auto type = mime.comment();
-		type.front() = type.front().toUpper();
-		return type;
-	} else
-		return tr("Document ") + QFileInfo(getPath()).suffix().toUpper();
+    if (m_is_dir)
+        return tr("Dossier");
+    auto mime = QMimeDatabase().mimeTypeForFile(getPath());
+    if (mime.name() != "application/octet-stream")
+    {
+        auto type = mime.comment();
+        type.front() = type.front().toUpper();
+        return type;
+    } else
+        return tr("Document ") + QFileInfo(getPath()).suffix().toUpper();
 }
 
 /**
@@ -150,19 +150,19 @@ QString RcloneFile::getFileType() const
  */
 void RcloneFile::changeName(const QString &newName)
 {
-	if (not m_remoteInfo->isLocal() and not path.contains("/"))
-	{
-		path = path.split(":")[0] + ":" + newName;
-		return;
-	}
-	if (isDirectory and path.endsWith("/"))
-		path.remove(path.size() - 1, 1);
-	if (path.contains("/"))
-		path = path.remove(path.lastIndexOf("/") + 1, path.split("/").last().size());
-	else if (not m_remoteInfo->isLocal())
-		path = path.remove(path.lastIndexOf(":") + 1, path.split(":").last().size());
-	path.append(newName);
-	if (isDirectory)
-		path.append("/");
+    if (not m_remote_info->isLocal() and not m_path.contains("/"))
+    {
+        m_path = m_path.split(":")[0] + ":" + newName;
+        return;
+    }
+    if (m_is_dir and m_path.endsWith("/"))
+        m_path.remove(m_path.size() - 1, 1);
+    if (m_path.contains("/"))
+        m_path = m_path.remove(m_path.lastIndexOf("/") + 1, m_path.split("/").last().size());
+    else if (not m_remote_info->isLocal())
+        m_path = m_path.remove(m_path.lastIndexOf(":") + 1, m_path.split(":").last().size());
+    m_path.append(newName);
+    if (m_is_dir)
+        m_path.append("/");
 }
 

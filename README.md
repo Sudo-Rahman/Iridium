@@ -1,6 +1,6 @@
 # <img src="https://github.com/Sudo-Rahman/Iridium/blob/main/ressources/Iridium.png" width="50" height="50" align="center" /> Iridium
 
-Graphical application for managing remote storage services such as Google Drive, Dropbox, OneDrive, etc. Using the Qt framework and C++, rclone and Boost libraries.
+Graphical application for managing remote storage services such as Google Drive, Dropbox, OneDrive, etc. Written in C++, using Qt framework, boost library and rclone binary.
 <br>
 
 ## Technologies
@@ -36,7 +36,7 @@ Graphical application for managing remote storage services such as Google Drive,
   - [x] View Transfer progress
   - [x] Drag and drop
   - [ ] Search
-  - [ ] Sort
+  - [x] Sort by name, size, date, type
   - [ ] sync
   - [ ] ...
 
@@ -78,6 +78,7 @@ cd Iridium
 ```
 - Install rclone binary and add it to Iridium directory (see [rclone download page](https://rclone.org/downloads/))
 - Set Cmake prefix path to Qt installation directory
+- Set Cmake boost path to Boost installation directory
 
 ```bash
 mkdir build

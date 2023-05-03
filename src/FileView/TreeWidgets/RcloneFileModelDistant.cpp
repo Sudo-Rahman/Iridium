@@ -6,7 +6,7 @@
 #include "RcloneFileModelDistant.hpp"
 #include "TreeFileItemDistant.hpp"
 
-uint8_t RcloneFileModelDistant::m_maxDepth = 2;
+uint8_t RcloneFileModelDistant::m_max_depth = 2;
 RcloneFileModelDistant::Load RcloneFileModelDistant::m_load = Dynamic;
 
 RcloneFileModelDistant::RcloneFileModelDistant(const RemoteInfoPtr &remoteInfo, QTreeView *View)
@@ -17,18 +17,19 @@ RcloneFileModelDistant::RcloneFileModelDistant(const RemoteInfoPtr &remoteInfo, 
 
 void RcloneFileModelDistant::init()
 {
-    auto *drive = new TreeFileItem(QString::fromStdString(m_remoteInfo->m_path), m_remoteInfo);
-    drive->setIcon(QIcon(QString::fromStdString(m_remoteInfo->m_icon)));
+    auto *drive = new TreeFileItem(m_remote_info->m_path.c_str(), m_remote_info);
+    drive->getFile()->setSize(0);
+    drive->setIcon(QIcon(m_remote_info->m_icon.c_str()));
     m_root_index = drive->index();
     drive->appendRow({new QStandardItem, new QStandardItem, new QStandardItem, new QStandardItem});
     appendRow({
                       drive,
-                      new TreeFileItem("--", drive->getFile(), drive),
-                      new TreeFileItem("--", drive->getFile(), drive),
-                      new TreeFileItem(tr("Disque"), drive->getFile(), drive),
+                      new TreeFileItem(1, drive->getFile(), drive),
+                      new TreeFileItem(2, drive->getFile(), drive),
+                      new TreeFileItem(3, drive->getFile(), drive),
               });
     if (m_load == Static)
-        addItemStatic(QString::fromStdString(m_remoteInfo->m_path), drive);
+        addItemStatic(m_remote_info->m_path.c_str(), drive);
 }
 
 void RcloneFileModelDistant::addItem(const RcloneFilePtr &file, TreeFileItem *parent)
@@ -53,7 +54,7 @@ void RcloneFileModelDistant::addItemDynamic(const QString &path, TreeFileItem *p
             tree_item->removeRow(0);
             for (const auto &file: doc.array())
             {
-                auto *item = new TreeFileItemDistant(path, m_remoteInfo, file.toObject());
+                auto *item = new TreeFileItemDistant(path, m_remote_info, file.toObject());
                 tree_item->appendRow(getItemList(item));
                 if (item->getFile()->isDir())
                     item->appendRow({new QStandardItem, new QStandardItem, new QStandardItem, new QStandardItem});
@@ -68,8 +69,8 @@ void RcloneFileModelDistant::addItemStatic(const QString &path, TreeFileItem *pa
 {
     if (depth == 0)
         return;
-    if (depth == m_maxDepth)
-        RcloneManager::stop(m_lockedRclone);
+    if (depth == m_max_depth)
+        RcloneManager::stop(m_locked_rclone);
 
     auto *tree_item = (parent->getParent() == nullptr ? parent : parent->getParent());
     auto rclone = RcloneManager::getLockable();
@@ -82,7 +83,7 @@ void RcloneFileModelDistant::addItemStatic(const QString &path, TreeFileItem *pa
                     tree_item->removeRow(0);
                     for (const auto &file: doc.array())
                     {
-                        auto *item = new TreeFileItemDistant(path, m_remoteInfo, file.toObject());
+                        auto *item = new TreeFileItemDistant(path, m_remote_info, file.toObject());
                         parent->appendRow(getItemList(item));
                         if (item->getFile()->isDir())
                         {
@@ -98,7 +99,7 @@ void RcloneFileModelDistant::addItemStatic(const QString &path, TreeFileItem *pa
 
         RcloneLocked rcloneLocked = {rclone, [rclone, path] { rclone->lsJson(path.toStdString()); }};
 
-        m_lockedRclone.push_back(rcloneLocked);
+        m_locked_rclone.push_back(rcloneLocked);
         RcloneManager::launch(rcloneLocked);
     }
 }

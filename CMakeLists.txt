@@ -5,8 +5,6 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++2b -D NDEBUG -Wno-deprecated-declarations -O3")
-
-
 # set qt path
 
 set(CMAKE_AUTOMOC ON)
@@ -48,7 +46,7 @@ set(SRC
         src/Task/TaskRow.hpp src/MainWindow/Menu/MenuBar.cpp src/MainWindow/Menu/MenuBar.hpp src/Config/Config.h src/Remote/AddNewRemote/OneDrive/OneDriveRemoteConfigParamsFrame.cpp src/Remote/AddNewRemote/OneDrive/OneDriveRemoteConfigParamsFrame.hpp src/Remote/AddNewRemote/DropBox/DropboxRemoteConfigParamsFrame.cpp src/Remote/AddNewRemote/DropBox/DropboxRemoteConfigParamsFrame.hpp
         src/Remote/AddNewRemote/Ftp/FtpRemoteConfigParamsFrame.cpp src/Remote/AddNewRemote/Ftp/FtpRemoteConfigParamsFrame.hpp src/Remote/AddNewRemote/Mega/MegaRemoteConfigParamsFrame.cpp src/Remote/AddNewRemote/Mega/MegaRemoteConfigParamsFrame.hpp src/MainWindow/Menu/SettingsDialog.cpp src/MainWindow/Menu/SettingsDialog.hpp src/Remote/AddNewRemote/OpenDrive/OpenDriveRemoteConfigParamsFrame.cpp
         src/Remote/AddNewRemote/OpenDrive/OpenDriveRemoteConfigParamsFrame.hpp src/Other/ProgressBar.cpp src/Other/ProgressBar.hpp src/Remote/AddNewRemote/Pcloud/PcloudRemoteConfigParamsFrame.cpp src/Remote/AddNewRemote/Pcloud/PcloudRemoteConfigParamsFrame.hpp src/MainWindow/Menu/Settings/FolderColorGroupBox.cpp src/MainWindow/Menu/Settings/FolderColorGroupBox.hpp src/MainWindow/Menu/Settings/AppearanceFrame.cpp
-        src/MainWindow/Menu/Settings/AppearanceFrame.hpp src/MainWindow/Menu/Settings/GeneralFrame.cpp src/MainWindow/Menu/Settings/GeneralFrame.hpp src/MainWindow/Menu/Settings/SettingsButton.cpp src/Remote/AddNewRemote/Box/BoxRemoteConfigParamsFrame.cpp src/Remote/AddNewRemote/Box/BoxRemoteConfigParamsFrame.hpp src/Remote/AddNewRemote/Smb/SmbRemoteConfigParamsFrame.cpp src/Remote/AddNewRemote/Smb/SmbRemoteConfigParamsFrame.hpp)
+        src/MainWindow/Menu/Settings/AppearanceFrame.hpp src/MainWindow/Menu/Settings/RcloneFrame.cpp src/MainWindow/Menu/Settings/RcloneFrame.hpp src/MainWindow/Menu/Settings/SettingsButton.cpp src/Remote/AddNewRemote/Box/BoxRemoteConfigParamsFrame.cpp src/Remote/AddNewRemote/Box/BoxRemoteConfigParamsFrame.hpp src/Remote/AddNewRemote/Smb/SmbRemoteConfigParamsFrame.cpp src/Remote/AddNewRemote/Smb/SmbRemoteConfigParamsFrame.hpp src/MainWindow/Menu/Settings/GeneralFrame.cpp src/MainWindow/Menu/Settings/GeneralFrame.hpp)
 
 include_directories(src
         src/Task
@@ -68,12 +66,17 @@ SET(TRANSLATION
         languages/iridium_en.ts
         )
 
-#qt_create_translation(QM_FILES
-#        ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
-#        ${TRANSLATION})
 
-## update translation
-#qt_add_translation(QM_FILES ${TRANSLATION})
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Iridium.app/Contents/Translations)
+    set_source_files_properties(${TRANSLATION}
+            PROPERTIES OUTPUT_LOCATION ${CMAKE_CURRENT_BINARY_DIR}/Iridium.app/Contents/Translations)
+elseif ()
+    set_source_files_properties(${TRANSLATION} PROPERTIES
+            OUTPUT_LOCATION ${CMAKE_CURRENT_BINARY_DIR}/translations)
+endif ()
+
+qt_add_translation(QM_FILES ${TRANSLATION})
 
 
 set(RCLONE "${CMAKE_CURRENT_SOURCE_DIR}/rclone")
@@ -90,9 +93,9 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     file(COPY ${RCLONE}.exe DESTINATION Iridium/../)
     enable_language("RC")
     set(WIN32_ICO ${CMAKE_CURRENT_SOURCE_DIR}/MyApp.rc)
-    qt6_add_executable(Iridium WIN32 application.qrc ${WIN32_ICO} ${SRC})
+    qt6_add_executable(Iridium WIN32 application.qrc ${WIN32_ICO} ${SRC} ${QM_FILES})
 else ()
-    qt6_add_executable(Iridium application.qrc ${SRC})
+    qt6_add_executable(Iridium application.qrc ${SRC} ${QM_FILES})
 endif ()
 
 

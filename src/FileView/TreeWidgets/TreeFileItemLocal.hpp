@@ -1,5 +1,5 @@
 //
-// Created by sr-71 on 31/03/2023.
+// Created by Rahman on 31/03/2023.
 //
 
 #ifndef IRIDIUM_TREEFILEITEMLOCAL_HPP
@@ -10,7 +10,7 @@
 class TreeFileItemLocal : public TreeFileItem
 {
 public:
-	explicit TreeFileItemLocal(const QString &path, const RemoteInfoPtr &remoteInfo, TreeFileItem * = nullptr);
+    explicit TreeFileItemLocal(const QString &path, const RemoteInfoPtr &remoteInfo, TreeFileItem * = nullptr);
 
 
 };

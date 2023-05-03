@@ -1,5 +1,5 @@
 //
-// Created by sr-71 on 18/01/2023.
+// Created by Rahman on 18/01/2023.
 //
 #include <QHeaderView>
 #include "TreeFileView.hpp"
@@ -106,11 +106,6 @@ TreeFileView::TreeFileView(const RemoteInfoPtr &remoteInfo, QWidget *parent) : Q
 void TreeFileView::connectSignals()
 {
 
-    connect(header(), &QHeaderView::sortIndicatorChanged, this, [this](int logicalIndex, Qt::SortOrder order)
-    {
-        sortByColumn(logicalIndex, order);
-    });
-
     connect(this, &QTreeView::doubleClicked, this, &TreeFileView::doubleClick);
 
     connect(this, &QTreeView::expanded, this, &TreeFileView::expand);
@@ -169,11 +164,11 @@ void TreeFileView::resizeEvent(QResizeEvent *event)
  */
 void TreeFileView::back()
 {
-    if (indexBack.length() > 0)
+    if (m_index_back.length() > 0)
     {
-        auto index = indexBack.back();
-        indexBack.pop_back();
-        indexTop << QTreeView::rootIndex();
+        auto index = m_index_back.back();
+        m_index_back.pop_back();
+        m_index_front << QTreeView::rootIndex();
         QTreeView::setRootIndex(index);
     } else
         QTreeView::setRootIndex(model->getRootIndex());
@@ -185,11 +180,11 @@ void TreeFileView::back()
  */
 void TreeFileView::front()
 {
-    if (indexTop.length() > 0)
+    if (m_index_front.length() > 0)
     {
-        auto index = indexTop.back();
-        indexTop.pop_back();
-        indexBack << index.parent();
+        auto index = m_index_front.back();
+        m_index_front.pop_back();
+        m_index_back << index.parent();
         QTreeView::setRootIndex(index);
     }
     emit pathChanged(getPath());
@@ -227,8 +222,8 @@ void TreeFileView::doubleClick(const QModelIndex &index)
 
 //     get parent index
     auto id = item->getParent() == nullptr ? index.parent() : model->indexFromItem(item->getParent()).parent();
-    indexBack.push_back(id);
-    indexTop.clear();
+    m_index_back.push_back(id);
+    m_index_front.clear();
     // if item getParent is null,it's first column item, else we get first column item.
     QTreeView::setRootIndex(item->getParent() == nullptr ? index : model->indexFromItem(item->getParent()));
     emit pathChanged(getPath());
@@ -294,7 +289,7 @@ void TreeFileView::showContextMenu()
  */
 void TreeFileView::changeRemote(const RemoteInfoPtr &info)
 {
-    if (m_remoteInfo == info)
+    if (m_remote_info == info)
         return;
 
     if (info == nullptr)
@@ -303,12 +298,12 @@ void TreeFileView::changeRemote(const RemoteInfoPtr &info)
         return;
     }
 
-    m_remoteInfo = info;
+    m_remote_info = info;
     delete model;
-    if (!m_remoteInfo->isLocal())
-        model = new RcloneFileModelDistant(m_remoteInfo, this);
+    if (!m_remote_info->isLocal())
+        model = new RcloneFileModelDistant(m_remote_info, this);
     else
-        model = new RcloneFileModelLocal(m_remoteInfo, this);
+        model = new RcloneFileModelLocal(m_remote_info, this);
 
     connect(model, &RcloneFileModel::itemChanged, this,
             [this](const QStandardItem *item)
@@ -360,7 +355,7 @@ void TreeFileView::copyto(const QList<TreeFileItem *> &items, TreeFileItem *item
                 item->getFile()->getSize(),
                 item->getFile()->isDir(),
                 item->getFile()->isDir() ? QDateTime::currentDateTime() : item->getFile()->getModTime(),
-                m_remoteInfo
+                m_remote_info
         );
         auto rclone = RcloneManager::get();
         connect(rclone.get(), &Rclone::finished, this, [this, newFile, treePaste](int exit)
@@ -374,7 +369,7 @@ void TreeFileView::copyto(const QList<TreeFileItem *> &items, TreeFileItem *item
                     reload(treePaste);
                     return;
                 }
-                auto *treeItem = new TreeFileItem(newFile->getName(), newFile, nullptr, true);
+                auto *treeItem = new TreeFileItem(0, newFile, nullptr);
                 auto list = RcloneFileModel::getItemList(treeItem);
                 if (newFile->isDir())
                     treeItem->appendRow({});
@@ -462,6 +457,10 @@ void TreeFileView::keyPressEvent(QKeyEvent *event)
             break;
         case Qt::Key_Right:
             front();
+            break;
+        case Qt::Key_F2:
+            if (m_clickIndex not_eq model->index(0, 0))
+                edit(m_clickIndex);
             break;
     }
 }
@@ -631,7 +630,7 @@ void TreeFileView::mkdir()
             0,
             true,
             QDateTime::currentDateTime(),
-            m_remoteInfo
+            m_remote_info
     );
 //	qDebug() << "mkdir" << rcloneFile->getPath();
     if (fileIsInFolder(rcloneFile->getName(), items.first()))
@@ -642,7 +641,7 @@ void TreeFileView::mkdir()
         return;
     }
     auto rclone = RcloneManager::get();
-    auto *newItem = new TreeFileItem(name, rcloneFile, items.first(), true);
+    auto *newItem = new TreeFileItem(0, rcloneFile, items.first());
     connect(rclone.get(), &Rclone::finished, this, [this, rclone, name, newItem, items](const int exit)
     {
         if (exit == 0)

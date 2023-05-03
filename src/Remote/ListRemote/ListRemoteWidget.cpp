@@ -1,5 +1,5 @@
 //
-// Created by sr-71 on 29/03/2023.
+// Created by Rahman on 29/03/2023.
 //
 
 #include <QPropertyAnimation>
@@ -136,7 +136,7 @@ void ListRemoteWidget::getAllRemote()
         connect(remote, &RemoteWidget::deleted, this, [this](auto *remoteWidget)
         {
             m_listRemote.clear();
-            for(int i = m_remoteLayout->count() - 1; i >= 0; --i)
+            for (int i = m_remoteLayout->count() - 1; i >= 0; --i)
             {
                 auto *item = m_remoteLayout->itemAt(i);
                 m_remoteLayout->removeItem(item);

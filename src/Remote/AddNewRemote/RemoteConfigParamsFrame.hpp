@@ -22,32 +22,32 @@ class RemoteConfigParamsFrame : public QFrame
 Q_OBJECT
 
 protected:
-	QPushButton *m_login{}, *m_cancel{};
-	QLabel *m_messLabel{};
-	QVBoxLayout *m_layout{};
-	QFormLayout *m_formLayout{};
-	QLineEdit *m_remoteName{};
-	RclonePtr m_rclone{};
-	std::map<std::string, std::string> m_lstRemote{};
+    QPushButton *m_login{}, *m_cancel{};
+    QLabel *m_messLabel{};
+    QVBoxLayout *m_layout{};
+    QFormLayout *m_formLayout{};
+    QLineEdit *m_remoteName{};
+    RclonePtr m_rclone{};
+    std::map<std::string, std::string> m_lstRemote{};
 
 public:
-	explicit RemoteConfigParamsFrame(QWidget *parent = nullptr);
+    explicit RemoteConfigParamsFrame(QWidget *parent = nullptr);
 
-	virtual void reset();
+    virtual void reset();
 
 protected:
-	virtual void addRemote();
+    virtual void addRemote();
 
-	virtual void createUi();
+    virtual void createUi();
 
-	virtual bool checkFields();
+    virtual bool checkFields();
 
-	void clearAllFields();
+    void clearAllFields();
 
 
 signals:
 
-	void remoteAdded();
+    void remoteAdded();
 
 };
 

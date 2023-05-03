@@ -1,5 +1,5 @@
 //
-// Created by sr-71 on 05/04/2023.
+// Created by Rahman on 05/04/2023.
 //
 
 #include "Settings.hpp"
@@ -8,6 +8,7 @@
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/dll.hpp>
 #include <fstream>
+#include <QTranslator>
 
 using namespace std;
 using namespace boost;
@@ -16,15 +17,20 @@ namespace pt = boost::property_tree;
 
 QIcon Settings::DIR_ICON;
 QIcon Settings::HARDDRIVE_ICON;
-string Rclone::m_pathRclone;
+string Rclone::m_path_rclone;
 property_tree::ptree Settings::m_settings, Settings::m_default;
 const map<Settings::Node, string> Settings::m_nodes = {
-        {Settings::Node::MaxProcess,   "general.max_process"},
-        {Settings::Node::LoadType,     "general.load_type"},
-        {Settings::Node::DirIconColor, "theme.color"},
-        {Settings::Node::Remotes,      "rclone.remotes"},
-        {Settings::Node::MaxDepth,     "general.max_depth"},
-        {Settings::Node::Flags,        "rclone.flags"}
+        {Settings::Node::All,          ""},
+        {Settings::Node::General,      "general"},
+        {Settings::Node::Rclone,       "rclone"},
+        {Settings::Node::Theme,        "theme"},
+        {Settings::Node::MaxProcess,   "rclone.max_process"},
+        {Settings::Node::LoadType,     "rclone.load_type"},
+        {Settings::Node::DirIconColor, "theme.dir_color"},
+        {Settings::Node::Remotes,      "remotes"},
+        {Settings::Node::MaxDepth,     "rclone.max_depth"},
+        {Settings::Node::Flags,        "rclone.flags"},
+        {Settings::Node::Language,     "general.language"}
 };
 
 /**
@@ -140,7 +146,6 @@ void Settings::deleteRemote(const RemoteInfoPtr &remoteInfo)
  */
 void Settings::init()
 {
-
     auto rclonePath = dll::program_location().parent_path().append("rclone");
     if (QSysInfo::productType() == "windows")
         rclonePath += ".exe";
@@ -150,6 +155,19 @@ void Settings::init()
     initSettings();
     loadSettings();
     Settings::changeDirIcon(static_cast<ThemeColor>(getValue<uint8_t>(DirIconColor)));
+
+
+    boost::filesystem::path translation_dir;
+    if (QSysInfo::productType() == "macos")
+        translation_dir = dll::program_location().parent_path().parent_path().append("Translations");
+    else
+        translation_dir = dll::program_location().parent_path().append("Translations");
+
+    auto *translator = new QTranslator();
+    translator->load(QLocale(getValue<string>(Language).c_str()), "iridium", "_", translation_dir.string().c_str());
+    QApplication::installTranslator(translator);
+    QLocale::setDefault(QLocale(getValue<string>(Language).c_str()));
+
 }
 
 /**
@@ -166,7 +184,7 @@ void Settings::loadSettings()
         pt::read_json(getPathSettings().string(), m_settings);
         initValues();
     } else
-        resetSettings();
+        resetSettings(All);
 
 }
 
@@ -201,6 +219,7 @@ boost::filesystem::path Settings::getPathSettings()
 
 void Settings::initSettings()
 {
+    m_settings.put(m_nodes.at(Language), QLocale(QLocale::English).name().toStdString());
     m_settings.put(m_nodes.at(DirIconColor), 0);
     m_settings.put(m_nodes.at(LoadType), 0);
     m_settings.put(m_nodes.at(MaxDepth), 2);
@@ -230,10 +249,17 @@ void Settings::initSettings()
 
 }
 
-void Settings::resetSettings()
+void Settings::resetSettings(const Node &node)
 {
-    m_settings.clear();
-    m_settings = m_default;
+    if (node == All)
+    {
+        m_settings.clear();
+        m_settings = m_default;
+    } else
+    {
+        m_settings.erase(m_nodes.at(node));
+        m_settings.put_child(m_nodes.at(node), m_default.get_child(m_nodes.at(node)));
+    }
     saveSettings();
     initValues();
 }
@@ -305,6 +331,12 @@ std::string Settings::getRcloneFlag(const Rclone::Flag &flag)
         if (it.first == to_string(flag))
             return it.second.get<string>("value");
     }
-    resetSettings();
+    resetSettings(All);
     return getRcloneFlag(flag);
+}
+
+void Settings::setLanguage(const QLocale::Language &lang)
+{
+    m_settings.put(m_nodes.at(Language), QLocale(lang).name().toStdString());
+    saveSettings();
 }

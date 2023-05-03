@@ -1,5 +1,5 @@
 //
-// Created by sr-71 on 09/01/2023.
+// Created by Rahman on 09/01/2023.
 //
 
 #include <Rclone.hpp>
@@ -21,7 +21,7 @@ namespace bp = boost::process;
 namespace bj = boost::json;
 using namespace std;
 
-std::map<Rclone::Flag, Rclone::flags_str> Rclone::m_mapFlags{
+std::map<Rclone::Flag, Rclone::flags_str> Rclone::m_map_flags{
         {Rclone::Flag::Transfers, {"--transfers", "4"}},
         {Rclone::Flag::Stats,     {"--stats",     "0.5s"}},
         {Rclone::Flag::Retries,   {"--retries",   "3"}},
@@ -36,7 +36,7 @@ std::map<Rclone::Flag, Rclone::flags_str> Rclone::m_mapFlags{
  */
 void Rclone::setPathRclone(const string &pathRclone)
 {
-    Rclone::m_pathRclone = pathRclone;
+    Rclone::m_path_rclone = pathRclone;
 }
 
 /**
@@ -84,8 +84,8 @@ void Rclone::copyTo(const RcloneFile &src, const RcloneFile &dest)
                 if (not json.contains("error"))
                 {
                     emit taskProgress(json);
-                    m_mapData.clear();
-                    m_mapData.emplace("json", boost::json::serialize(json));
+                    m_map_data.clear();
+                    m_map_data.emplace("json", boost::json::serialize(json));
                 }
             });
     execute(arguments);
@@ -156,17 +156,18 @@ void Rclone::config(RemoteType type, const string &name, const vector<string> &p
     execute(args);
 }
 
-void Rclone::about(const RemoteInfo &info){
+void Rclone::about(const RemoteInfo &info)
+{
     m_finished.connect(
             [this](const int exit)
             {
                 if (exit == 0)
                 {
                     auto json = parseJson(boost::algorithm::join(m_out, ""));
-                    m_mapData["json"] = boost::json::serialize(json);
+                    m_map_data["json"] = boost::json::serialize(json);
                 }
             });
-    execute({"about", info.m_path,"--json"});
+    execute({"about", info.m_path, "--json"});
 }
 
 /**
@@ -188,7 +189,7 @@ void Rclone::listRemotes()
                         type.erase(remove(type.begin(), type.end(), ' '), type.end());
                         map.insert({name, type});
                     }
-                    m_mapData = map;
+                    m_map_data = map;
                 }
             });
     execute({"listremotes", "--long"});
@@ -217,13 +218,13 @@ void Rclone::execute(const vector<string> &args)
 
 #ifdef _WIN32
     std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-    std::wstring exe = converter.from_bytes(m_pathRclone);
+    std::wstring exe = converter.from_bytes(m_path_rclone);
     vector<std::wstring> argsEncoding;
     argsEncoding.reserve(args.size());
     for (auto &arg: args)
         argsEncoding.emplace_back(converter.from_bytes(arg));
 #else
-    auto exe = m_pathRclone;
+    auto exe = m_path_rclone;
     const auto &argsEncoding = args;
 #endif
     m_thread = std::make_shared<boost::thread>(
@@ -383,7 +384,7 @@ string Rclone::version()
 
 map<string, string> Rclone::getData() const
 {
-    return m_mapData;
+    return m_map_data;
 }
 
 std::vector<std::string> Rclone::readAllError() const
@@ -448,8 +449,8 @@ void Rclone::connectTaskSignalFinishedJson()
                     json = parseJson(out.back());
                     if (not json.contains("error"))
                     {
-                        m_mapData.clear();
-                        m_mapData.emplace("json", boost::json::serialize(json));
+                        m_map_data.clear();
+                        m_map_data.emplace("json", boost::json::serialize(json));
                     }
                 } else
                 {
@@ -460,14 +461,14 @@ void Rclone::connectTaskSignalFinishedJson()
             });
 }
 
-std::atomic_int_fast8_t RcloneManager::m_nbRcloneLocked;
-uint8_t RcloneManager::m_nbMaxProcess = thread::hardware_concurrency();
-mutex RcloneManager::m_launch_mutex, RcloneManager::m_stop_mutex, RcloneManager::m_mutexStart;
+std::atomic_int_fast8_t RcloneManager::m_nb_rclone_locked;
+uint8_t RcloneManager::m_nb_max_process = thread::hardware_concurrency();
+mutex RcloneManager::m_launch_mutex, RcloneManager::m_stop_mutex, RcloneManager::m_mutex_start;
 condition_variable RcloneManager::m_launch_cv, RcloneManager::m_stop_cv;
-deque<RclonePtr> RcloneManager::m_rcloneVector;
+deque<RclonePtr> RcloneManager::m_rclone_vector;
 deque<RcloneLocked> RcloneManager::m_launch_queue, RcloneManager::m_stop_queue;
 
-boost::thread RcloneManager::m_launchThread = boost::thread(
+boost::thread RcloneManager::m_launch_thread = boost::thread(
         []
         {
             while (true)
@@ -477,13 +478,13 @@ boost::thread RcloneManager::m_launchThread = boost::thread(
                 RcloneManager::m_launch_cv.wait(lock, []
                 {
                     return not RcloneManager::m_launch_queue.empty() and
-                           RcloneManager::m_nbRcloneLocked < RcloneManager::m_nbMaxProcess;
+                           RcloneManager::m_nb_rclone_locked < RcloneManager::m_nb_max_process;
                 });
                 if (not RcloneManager::m_launch_queue.empty())
                 {
                     auto rclone_locked = RcloneManager::m_launch_queue.front();
                     rclone_locked.func();
-                    ++RcloneManager::m_nbRcloneLocked;
+                    ++RcloneManager::m_nb_rclone_locked;
                     std::erase_if(RcloneManager::m_launch_queue, [rclone_locked](const RcloneLocked &rclone)
                     {
                         return rclone.rclone == rclone_locked.rclone;
@@ -492,7 +493,7 @@ boost::thread RcloneManager::m_launchThread = boost::thread(
             }
         });
 
-boost::thread RcloneManager::m_stopThread = boost::thread(
+boost::thread RcloneManager::m_stop_thread = boost::thread(
         []
         {
             while (true)
@@ -508,7 +509,7 @@ boost::thread RcloneManager::m_stopThread = boost::thread(
                     auto obj = *it;
                     if (obj.rclone->state() not_eq Rclone::Running)
                         obj.rclone->terminate();
-                    erase_if(RcloneManager::m_rcloneVector,
+                    erase_if(RcloneManager::m_rclone_vector,
                              [obj](const RclonePtr &rclone) { return rclone == obj.rclone; });
                     erase_if(RcloneManager::m_launch_queue,
                              [obj](const RcloneLocked &rcloneLocked) { return rcloneLocked.rclone == obj.rclone; });
@@ -526,7 +527,7 @@ boost::thread RcloneManager::m_stopThread = boost::thread(
 RclonePtr RcloneManager::get()
 {
     auto rclone = RclonePtr(new Rclone());
-    RcloneManager::m_rcloneVector.push_back(rclone);
+    RcloneManager::m_rclone_vector.push_back(rclone);
     return rclone;
 }
 
@@ -541,11 +542,11 @@ void RcloneManager::launch(const RcloneLocked &rcloneLocked)
  */
 void RcloneManager::finished(const Rclone *rclone)
 {
-    --RcloneManager::m_nbRcloneLocked;
-    auto it = std::find_if(m_rcloneVector.begin(), m_rcloneVector.end(),
+    --RcloneManager::m_nb_rclone_locked;
+    auto it = std::find_if(m_rclone_vector.begin(), m_rclone_vector.end(),
                            [rclone](const RclonePtr &rclonePtr) { return rclonePtr.get() == rclone; });
-    if (it not_eq m_rcloneVector.end())
-        m_rcloneVector.erase(it);
+    if (it not_eq m_rclone_vector.end())
+        m_rclone_vector.erase(it);
     RcloneManager::m_launch_cv.notify_one();
 }
 
@@ -557,11 +558,11 @@ void RcloneManager::release(const RclonePtr &rclone)
 {
     // erase rclone from vector
     rclone->terminate();
-    for (auto it = m_rcloneVector.begin(); it != m_rcloneVector.end(); ++it)
+    for (auto it = m_rclone_vector.begin(); it != m_rclone_vector.end(); ++it)
     {
         if (it->get() == rclone.get())
         {
-            m_rcloneVector.erase(it);
+            m_rclone_vector.erase(it);
             break;
         }
     }

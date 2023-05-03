@@ -1,5 +1,5 @@
 //
-// Created by sr-71 on 08/04/2023.
+// Created by Rahman on 08/04/2023.
 //
 
 #ifndef IRIDIUM_ROUNDEDBUTTON_HPP
@@ -11,22 +11,21 @@ class RoundedButton : public QPushButton
 {
 Q_OBJECT
 
-	bool m_hover{};
-	bool m_click{};
+    bool m_hover{};
+    bool m_click{};
 
-	void addBlur();
+    void addBlur();
 
 public:
-	explicit RoundedButton(const QString &text, QWidget *parent = nullptr);
+    explicit RoundedButton(const QString &text, QWidget *parent = nullptr);
 
-	explicit RoundedButton(QWidget *parent = nullptr)
-	{};
+    explicit RoundedButton(QWidget *parent = nullptr) {};
 
 protected:
-	void paintEvent(QPaintEvent *event) override;
+    void paintEvent(QPaintEvent *event) override;
 
 
-	virtual bool event(QEvent *event) override;
+    virtual bool event(QEvent *event) override;
 
 };
 

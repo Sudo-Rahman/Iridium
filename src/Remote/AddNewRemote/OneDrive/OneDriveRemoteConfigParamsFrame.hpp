@@ -1,5 +1,5 @@
 //
-// Created by sr-71 on 14/04/2023.
+// Created by Rahman on 14/04/2023.
 //
 
 #ifndef IRIDIUM_ONEDRIVEREMOTECONFIGPARAMSFRAME_HPP
@@ -12,14 +12,14 @@ class OneDriveRemoteConfigParamsFrame : public RemoteConfigParamsFrame
 Q_OBJECT
 
 public:
-	explicit OneDriveRemoteConfigParamsFrame(QWidget *parent = nullptr);
+    explicit OneDriveRemoteConfigParamsFrame(QWidget *parent = nullptr);
 
 protected:
-	void addRemote() override;
+    void addRemote() override;
 
-	void createUi() override;
+    void createUi() override;
 
-	bool checkFields() override;
+    bool checkFields() override;
 
 };
 

@@ -1,5 +1,5 @@
 //
-// Created by sr-71 on 14/04/2023.
+// Created by Rahman on 14/04/2023.
 //
 
 #ifndef IRIDIUM_MENUBAR_HPP
@@ -11,17 +11,17 @@ class MenuBar : public QMenuBar
 {
 Q_OBJECT
 
-	QMenu *m_aboutMenu{};
-	QAction *m_aboutAction{};
+    QMenu *m_about_menu{};
+    QAction *m_about_action{};
 
-	QMenu *m_settingsMenu{};
-	QAction *m_settingsAction{};
+    QMenu *m_settings_menu{};
+    QAction *m_settings_action{};
 
 public:
-	explicit MenuBar(QWidget *parent = nullptr);
+    explicit MenuBar(QWidget *parent = nullptr);
 
 private:
-	void connectSignals();
+    void connectSignals();
 
 };
 

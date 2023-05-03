@@ -1,5 +1,5 @@
 //
-// Created by sr-71 on 08/04/2023.
+// Created by Rahman on 08/04/2023.
 //
 
 #ifndef IRIDIUM_ROUNDEDLINEEDIT_HPP
@@ -12,19 +12,19 @@ class RoundedLineEdit : public QLineEdit
 {
 Q_OBJECT
 
-	QTimer *m_timer;
-	bool m_addCusrsor{};
+    QTimer *m_timer;
+    bool m_add_cusrsor{};
 
 public:
-	explicit RoundedLineEdit(QWidget *parent = nullptr);
+    explicit RoundedLineEdit(QWidget *parent = nullptr);
 
 protected:
-	void paintEvent(QPaintEvent *event) override;
+    void paintEvent(QPaintEvent *event) override;
 
-	bool event(QEvent *) override;
+    bool event(QEvent *) override;
 
 private:
-	void addBlur();
+    void addBlur();
 
 };
 

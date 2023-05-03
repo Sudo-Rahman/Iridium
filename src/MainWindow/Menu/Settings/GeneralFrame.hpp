@@ -1,5 +1,5 @@
 //
-// Created by sr-71 on 19/04/2023.
+// Created by Rahman on 02/05/2023.
 //
 
 #ifndef IRIDIUM_GENERALFRAME_HPP
@@ -13,15 +13,13 @@ class GeneralFrame : public QFrame
 {
 Q_OBJECT
 
-	QSpinBox *m_maxRcloneExecution{}, *m_parallelTransfers{}, *m_maxDepth{},*m_statsDuration{};
-	QComboBox *m_loadType{};
-
+    QComboBox *m_language{};
 
 public:
-	explicit GeneralFrame(QWidget *parent = nullptr);
+    explicit GeneralFrame(QWidget *parent = nullptr);
 
 private:
-	void connectSignals();
+    void connectSignals();
 
 };
 

@@ -1,5 +1,5 @@
 //
-// Created by sr-71 on 10/01/2023.
+// Created by Rahman on 10/01/2023.
 //
 
 #ifndef IRIDIUM_RCLONEFILE_HPP
@@ -17,74 +17,74 @@ class RcloneFile : public QObject
 {
 Q_OBJECT
 
-	RemoteInfoPtr m_remoteInfo{};
-	QString path{};
-	uint64_t size{};
-	uint32_t objs{};
-	bool isDirectory{};
-	QDateTime modTime{};
+    RemoteInfoPtr m_remote_info{};
+    QString m_path{};
+    uint64_t m_size{};
+    uint32_t m_objs{};
+    bool m_is_dir{};
+    QDateTime m_mod_time{};
 
-	void init();
+    void init();
 
 public:
 
-	RcloneFile(const QString &pathFile, const RemoteInfoPtr &remoteInfo);
+    RcloneFile(const QString &pathFile, const RemoteInfoPtr &remoteInfo);
 
-	RcloneFile(const QString &pathFile, uint64_t size, bool isDir, QDateTime modTime,
-			   const RemoteInfoPtr &remoteInfo);
+    RcloneFile(const QString &pathFile, uint64_t size, bool isDir, QDateTime modTime,
+               const RemoteInfoPtr &remoteInfo);
 
-	[[nodiscard]] const QString &getPath() const;
+    [[nodiscard]] const QString &getPath() const;
 
-	void setPath(const QString &path);
+    void setPath(const QString &path);
 
-	[[nodiscard]] uint64_t getSize() const;
+    [[nodiscard]] uint64_t getSize() const;
 
-	void setSize(uint64_t size);
+    void setSize(uint64_t size);
 
-	[[nodiscard]] bool isDir() const;
+    [[nodiscard]] bool isDir() const;
 
-	void setIsDir(bool isDir);
+    void setIsDir(bool isDir);
 
-	[[nodiscard]] const QDateTime &getModTime() const;
+    [[nodiscard]] const QDateTime &getModTime() const;
 
-	void setModTime(const QDateTime &modTime);
+    void setModTime(const QDateTime &modTime);
 
-	[[nodiscard]] QString getName() const;
+    [[nodiscard]] QString getName() const;
 
-	void changeName(const QString &newName);
+    void changeName(const QString &newName);
 
-	[[nodiscard]] QString getSizeString() const;
+    [[nodiscard]] QString getSizeString() const;
 
-	[[nodiscard]] QString getPathString() const;
+    [[nodiscard]] QString getPathString() const;
 
-	[[nodiscard]] QString getModTimeString() const;
+    [[nodiscard]] QString getModTimeString() const;
 
-	[[nodiscard]] std::shared_ptr<RemoteInfo> getRemoteInfo() const;
+    [[nodiscard]] std::shared_ptr<RemoteInfo> getRemoteInfo() const;
 
-	[[nodiscard]] uint32_t getObjs() const;
+    [[nodiscard]] uint32_t getObjs() const;
 
-	void setObjs(uint32_t objs);
+    void setObjs(uint32_t objs);
 
-	[[nodiscard]] QString getFileType() const;
+    [[nodiscard]] QString getFileType() const;
 
-	// define copy operator and copy constructor
-	RcloneFile(const RcloneFile &other)
-	{
-		setPath(other.path);
-		size = other.size;
-		isDirectory = other.isDirectory;
-		modTime = other.modTime;
-		m_remoteInfo = other.m_remoteInfo;
-	}
+    // define copy operator and copy constructor
+    RcloneFile(const RcloneFile &other)
+    {
+        setPath(other.m_path);
+        m_size = other.m_size;
+        m_is_dir = other.m_is_dir;
+        m_mod_time = other.m_mod_time;
+        m_remote_info = other.m_remote_info;
+    }
 
     // ostream operator
-    friend std::ostream& operator<<(std::ostream& os, const RcloneFile& file)
+    friend std::ostream &operator<<(std::ostream &os, const RcloneFile &file)
     {
-        os << "path: " << file.path.toStdString() << std::endl;
-        os << "size: " << file.size << std::endl;
-        os << "isDirectory: " << file.isDirectory << std::endl;
-        os << "modTime: " << file.modTime.toString().toStdString() << std::endl;
-        os << "remoteInfo: " << file.m_remoteInfo->name() << std::endl;
+        os << "path: " << file.m_path.toStdString() << std::endl;
+        os << "size: " << file.m_size << std::endl;
+        os << "m_is_dir: " << file.m_is_dir << std::endl;
+        os << "modTime: " << file.m_mod_time.toString().toStdString() << std::endl;
+        os << "remoteInfo: " << file.m_remote_info->name() << std::endl;
         return os;
     }
 };

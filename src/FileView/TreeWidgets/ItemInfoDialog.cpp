@@ -1,5 +1,5 @@
 //
-// Created by sr-71 on 11/02/2023.
+// Created by Rahman on 11/02/2023.
 //
 
 #include "ItemInfoDialog.hpp"
@@ -41,11 +41,11 @@ ItemInfoDialog::ItemInfoDialog(TreeFileItem *item, QWidget *parent) : QDialog(pa
     m_layout->addWidget(m_name, row, 1, 1, 1);
     row++;
 
-    if (m_item->index().model()->index(0,0) == m_item->index())
+    if (m_item->index().model()->index(0, 0) == m_item->index())
     {
         m_name->setText(m_file->getRemoteInfo()->name().c_str());
         auto rclone = RcloneManager::get();
-        m_modTime->hide();
+        m_mod_time->hide();
         m_loading1 = new ProgressBar(ProgressBar::Circular, this);
         m_loading1->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
         m_loading1->setFixedSize(100, 100);
@@ -60,17 +60,23 @@ ItemInfoDialog::ItemInfoDialog(TreeFileItem *item, QWidget *parent) : QDialog(pa
                 auto json = boost::json::parse(rclone->getData().find("json")->second);
                 m_layout->addWidget(new QLabel(tr("Total : ")), row, 0, 1, 2);
                 uint64_t size = json.at("total").as_int64();
-                m_layout->addWidget(new QLabel((Iridium::Utility::numberToString(size) + " octets (" + Iridium::Utility::sizeToString(size) +")").c_str()), row, 1, 1, 1);
+                m_layout->addWidget(new QLabel(
+                        (Iridium::Utility::numberToString(size) + " octets (" + Iridium::Utility::sizeToString(size) +
+                         ")").c_str()), row, 1, 1, 1);
                 row++;
 
                 m_layout->addWidget(new QLabel(tr("Utilisé : ")), row, 0, 1, 2);
                 size = json.at("used").as_int64();
-                m_layout->addWidget(new QLabel((Iridium::Utility::numberToString(size)+ " octets (" + Iridium::Utility::sizeToString(size) +")").c_str()), row, 1, 1, 1);
+                m_layout->addWidget(new QLabel(
+                        (Iridium::Utility::numberToString(size) + " octets (" + Iridium::Utility::sizeToString(size) +
+                         ")").c_str()), row, 1, 1, 1);
                 row++;
 
                 m_layout->addWidget(new QLabel(tr("Libre : ")), row, 0, 1, 2);
                 size = json.at("free").as_int64();
-                m_layout->addWidget(new QLabel((Iridium::Utility::numberToString(size) + " octets (" + Iridium::Utility::sizeToString(size) +")").c_str()), row, 1, 1, 1);
+                m_layout->addWidget(new QLabel(
+                        (Iridium::Utility::numberToString(size) + " octets (" + Iridium::Utility::sizeToString(size) +
+                         ")").c_str()), row, 1, 1, 1);
 
                 // label wrap
                 for (auto const &lab: findChildren<QLabel *>())
@@ -84,7 +90,7 @@ ItemInfoDialog::ItemInfoDialog(TreeFileItem *item, QWidget *parent) : QDialog(pa
     initSize();
 
     m_layout->addWidget(new QLabel(tr("Date de modification: ")), row, 0, 1, 1);
-    m_layout->addWidget(m_modTime, row, 1, 1, 1);
+    m_layout->addWidget(m_mod_time, row, 1, 1, 1);
     row++;
 
     if (m_file->isDir())
@@ -123,9 +129,9 @@ void ItemInfoDialog::initLabel()
     m_name->setWordWrap(true);
     m_name->setAlignment(Qt::AlignLeft);
 
-    m_modTime = new QLabel(m_file->getModTimeString(), this);
-    m_modTime->setWordWrap(true);
-    m_modTime->setAlignment(Qt::AlignLeft);
+    m_mod_time = new QLabel(m_file->getModTimeString(), this);
+    m_mod_time->setWordWrap(true);
+    m_mod_time->setAlignment(Qt::AlignLeft);
 
     if (m_file->isDir())
     {

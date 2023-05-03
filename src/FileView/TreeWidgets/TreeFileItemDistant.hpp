@@ -1,5 +1,5 @@
 //
-// Created by sr-71 on 31/03/2023.
+// Created by Rahman on 31/03/2023.
 //
 
 #ifndef IRIDIUM_TREEFILEITEMDISTANT_HPP
@@ -12,8 +12,8 @@
 class TreeFileItemDistant : public TreeFileItem
 {
 public:
-	explicit TreeFileItemDistant(const QString &path, const RemoteInfoPtr &remoteInfo, const QJsonObject &data,
-								 TreeFileItem * = nullptr);
+    explicit TreeFileItemDistant(const QString &path, const RemoteInfoPtr &remoteInfo, const QJsonObject &data,
+                                 TreeFileItem * = nullptr);
 
 };
 

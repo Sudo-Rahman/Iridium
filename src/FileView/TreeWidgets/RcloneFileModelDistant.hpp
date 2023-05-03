@@ -14,47 +14,44 @@ class RcloneFileModelDistant : public RcloneFileModel
 Q_OBJECT
 
 public:
-	enum Load
-	{
-		 Dynamic,Static
-	};
+    enum Load
+    {
+        Dynamic, Static
+    };
 private:
-	static Load m_load;
+    static Load m_load;
 
-	static uint8_t m_maxDepth;
+    static uint8_t m_max_depth;
 
-	std::deque<RcloneLocked> m_lockedRclone{};
+    std::deque<RcloneLocked> m_locked_rclone{};
 
 public:
-	explicit RcloneFileModelDistant(const RemoteInfoPtr &remoteInfo, QTreeView *parent);
+    explicit RcloneFileModelDistant(const RemoteInfoPtr &remoteInfo, QTreeView *parent);
 
-	static void setLoadType(Load load)
-	{ RcloneFileModelDistant::m_load = load;}
+    static void setLoadType(Load load) { RcloneFileModelDistant::m_load = load; }
 
-	static void setMaxDepth(uint8_t maxDepth)
-	{ RcloneFileModelDistant::m_maxDepth = maxDepth;}
+    static void setMaxDepth(uint8_t maxDepth) { RcloneFileModelDistant::m_max_depth = maxDepth; }
 
-	static Load loadType()
-	{ return RcloneFileModelDistant::m_load; }
+    static Load loadType() { return RcloneFileModelDistant::m_load; }
 
-	static uint8_t maxDepth()
-	{ return RcloneFileModelDistant::m_maxDepth; }
+    static uint8_t maxDepth() { return RcloneFileModelDistant::m_max_depth; }
 
-	~RcloneFileModelDistant() override{
-		RcloneManager::stop(m_lockedRclone);
-	};
+    ~RcloneFileModelDistant() override
+    {
+        RcloneManager::stop(m_locked_rclone);
+    };
 
 
 protected:
-	void init() override;
+    void init() override;
 
-	void addItem(const RcloneFilePtr &file, TreeFileItem *parent) override;
+    void addItem(const RcloneFilePtr &file, TreeFileItem *parent) override;
 
 private:
-	void addItemDynamic(const QString &path, TreeFileItem *parent);
+    void addItemDynamic(const QString &path, TreeFileItem *parent);
 
 
-	void addItemStatic(const QString &path, TreeFileItem *parent, uint8_t depth = m_maxDepth);
+    void addItemStatic(const QString &path, TreeFileItem *parent, uint8_t depth = m_max_depth);
 
 };
 

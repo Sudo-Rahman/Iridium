@@ -1,5 +1,5 @@
 //
-// Created by sr-71 on 14/04/2023.
+// Created by Rahman on 14/04/2023.
 //
 
 #ifndef IRIDIUM_DROPBOXREMOTECONFIGPARAMSFRAME_HPP
@@ -12,10 +12,10 @@ class DropboxRemoteConfigParamsFrame : public RemoteConfigParamsFrame
 Q_OBJECT
 
 public:
-	explicit DropboxRemoteConfigParamsFrame(QWidget *parent = nullptr);
+    explicit DropboxRemoteConfigParamsFrame(QWidget *parent = nullptr);
 
 protected:
-	void addRemote() override;
+    void addRemote() override;
 
 };
 

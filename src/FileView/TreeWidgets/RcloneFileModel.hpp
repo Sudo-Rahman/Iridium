@@ -1,5 +1,5 @@
 //
-// Created by sr-71 on 02/02/2023.
+// Created by Rahman on 02/02/2023.
 //
 
 #ifndef IRIDIUM_RCLONEFILEMODEL_HPP
@@ -16,33 +16,34 @@ class RcloneFileModel : public QStandardItemModel
 Q_OBJECT
 
 protected:
-	RemoteInfoPtr m_remoteInfo{};
-	QModelIndex m_root_index{};
+    RemoteInfoPtr m_remote_info{};
+    QModelIndex m_root_index{};
 
-	QTreeView *m_view{};
+    QTreeView *m_view{};
 
-	bool m_expandOrDoubleClick{};
+    bool m_expand_or_double_click{};
 
     bool m_check_is_valid = false;
 
-	virtual void init() = 0;
+    virtual void init() = 0;
 
     explicit RcloneFileModel();
 
-	explicit RcloneFileModel(const RemoteInfoPtr &remoteInfo, QTreeView *View);
+    explicit RcloneFileModel(const RemoteInfoPtr &remoteInfo, QTreeView *View);
 
-	void addProgressBar(const QModelIndex &index);
+    void addProgressBar(const QModelIndex &index);
 
 public:
-	virtual void addItem(const RcloneFilePtr &file, TreeFileItem *parent);
+    virtual void addItem(const RcloneFilePtr &file, TreeFileItem *parent);
 
-	[[nodiscard]] const QModelIndex &getRootIndex() const;
+    [[nodiscard]] const QModelIndex &getRootIndex() const;
 
-	static QList<QStandardItem *> getItemList(TreeFileItem *item);
+    static QList<QStandardItem *> getItemList(TreeFileItem *item);
 
-	void setExpandOrDoubleClick(bool expandOrDoubleClick){
-		m_expandOrDoubleClick = expandOrDoubleClick;
-	}
+    void setExpandOrDoubleClick(bool expandOrDoubleClick)
+    {
+        m_expand_or_double_click = expandOrDoubleClick;
+    }
 
 protected:
 public:

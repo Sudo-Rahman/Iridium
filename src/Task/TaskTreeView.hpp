@@ -1,5 +1,5 @@
 //
-// Created by sr-71 on 12/04/2023.
+// Created by Rahman on 12/04/2023.
 //
 
 #ifndef IRIDIUM_TASKTREEVIEW_HPP
@@ -13,28 +13,28 @@
 
 struct Tasks
 {
-	TaskRowPtr parent;
-	std::map<size_t, TaskRowPtr> children;
-	bool isFinished = false;
+    TaskRowPtr parent;
+    std::map<size_t, TaskRowPtr> children;
+    bool isFinished = false;
 };
 
 class TaskTreeView : public QTreeView
 {
 Q_OBJECT
 
-	std::unordered_map<size_t, Tasks> m_tasks{};
+    std::unordered_map<size_t, Tasks> m_tasks{};
 
-	QStandardItemModel *m_model{};
+    QStandardItemModel *m_model{};
 
 public:
-	explicit TaskTreeView(QWidget *parent = nullptr);
+    explicit TaskTreeView(QWidget *parent = nullptr);
 
-	void addTask(const QString &src, const QString &dst, const RclonePtr &rclone, const std::function<void()> &callable,
-				 const Rclone::TaskType &type = Rclone::Unknown);
+    void addTask(const QString &src, const QString &dst, const RclonePtr &rclone, const std::function<void()> &callable,
+                 const Rclone::TaskType &type = Rclone::Unknown);
 
 signals:
 
-	void taskFinished(std::pair<size_t, Tasks>);
+    void taskFinished(std::pair<size_t, Tasks>);
 
 };
 

@@ -1,5 +1,5 @@
 //
-// Created by sr-71 on 30/03/2023.
+// Created by Rahman on 30/03/2023.
 //
 
 #ifndef IRIDIUM_FILEVIEWWIDGET_HPP
@@ -16,23 +16,24 @@ class FileViewWidget : public QWidget
 Q_OBJECT
 
 private:
-	TreeFileViewContainer *m_treeFileView1{},*m_treeFileView2{};
-	QHBoxLayout *m_layout{};
+    TreeFileViewContainer *m_treeFileView1{}, *m_treeFileView2{};
+    QHBoxLayout *m_layout{};
 
-	QSplitter *m_splitter{};
+    QSplitter *m_splitter{};
 
-	QList<TreeFileItem *> m_currentFileList{};
+    QList<TreeFileItem *> m_current_file_list{};
 
 public:
-	explicit FileViewWidget(QWidget *parent = nullptr);
+    explicit FileViewWidget(QWidget *parent = nullptr);
 
-	void changeRemote(const std::shared_ptr<remotes_selected> &);
+    void changeRemote(const std::shared_ptr<remotes_selected> &);
 
 
 signals:
 
-	void taskAdded(const QString &src, const QString &dst, const RclonePtr &rclone, const std::function<void()> &callable,
-			  const Rclone::TaskType &type = Rclone::Unknown);
+    void
+    taskAdded(const QString &src, const QString &dst, const RclonePtr &rclone, const std::function<void()> &callable,
+              const Rclone::TaskType &type = Rclone::Unknown);
 };
 
 

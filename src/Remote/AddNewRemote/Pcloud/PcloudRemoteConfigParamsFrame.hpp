@@ -1,5 +1,5 @@
 //
-// Created by sr-71 on 19/04/2023.
+// Created by Rahman on 19/04/2023.
 //
 
 #ifndef IRIDIUM_PCLOUDREMOTECONFIGPARAMSFRAME_HPP
@@ -12,10 +12,10 @@ class PcloudRemoteConfigParamsFrame : public RemoteConfigParamsFrame
 Q_OBJECT
 
 public:
-	explicit PcloudRemoteConfigParamsFrame(QWidget *parent = nullptr);
+    explicit PcloudRemoteConfigParamsFrame(QWidget *parent = nullptr);
 
 protected:
-	void addRemote() override;
+    void addRemote() override;
 };
 
 

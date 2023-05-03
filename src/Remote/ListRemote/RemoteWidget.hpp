@@ -1,5 +1,5 @@
 //
-// Created by sr-71 on 29/03/2023.
+// Created by Rahman on 29/03/2023.
 //
 
 #ifndef IRIDIUM_REMOTEWIDGET_HPP
@@ -17,45 +17,45 @@ class RemoteWidget : public QGroupBox
 Q_OBJECT
 
 protected:
-	QHBoxLayout *m_layout{};
+    QHBoxLayout *m_layout{};
 
-	RemoteInfoPtr m_remoteInfo{};
-	QLabel *m_selected{};
+    RemoteInfoPtr m_remote_info{};
+    QLabel *m_selected{};
 
-	bool m_hover{};
-	bool m_click{};
+    bool m_hover{};
+    bool m_click{};
 
-    bool deletable = true;
+    bool m_deletable = true;
 
 protected:
-	void paintEvent(QPaintEvent *event) override;
+    void paintEvent(QPaintEvent *event) override;
 
-	virtual bool event(QEvent *event) override;
+    virtual bool event(QEvent *event) override;
 
 private:
-	void init();
+    void init();
 
-	void addBlur();
+    void addBlur();
 
 public:
-	explicit RemoteWidget(const RemoteInfo &remoteInfo, bool deletable = true,QWidget *parent = nullptr);
+    explicit RemoteWidget(const RemoteInfo &remoteInfo, bool deletable = true, QWidget *parent = nullptr);
 
-	explicit RemoteWidget(const RemoteInfoPtr &remoteInfo,bool deletable = true, QWidget *parent = nullptr);
+    explicit RemoteWidget(const RemoteInfoPtr &remoteInfo, bool deletable = true, QWidget *parent = nullptr);
 
-	[[nodiscard]] const RemoteInfoPtr &remoteInfo() const;
+    [[nodiscard]] const RemoteInfoPtr &remoteInfo() const;
 
-	void setSelectedText(const QString &text);
+    void setSelectedText(const QString &text);
 
     bool operator==(const RemoteWidget &other) const
     {
-        return m_remoteInfo == other.m_remoteInfo;
+        return m_remote_info == other.m_remote_info;
     }
 
 signals:
 
-	void clicked(RemoteWidget *);
+    void clicked(RemoteWidget *);
 
-	void deleted(RemoteWidget *);
+    void deleted(RemoteWidget *);
 };
 
 

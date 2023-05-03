@@ -1,5 +1,5 @@
 //
-// Created by sr-71 on 29/03/2023.
+// Created by Rahman on 29/03/2023.
 //
 
 #ifndef IRIDIUM_LISTREMOTEWIDGET_HPP
@@ -20,8 +20,8 @@
 
 struct remotes_selected
 {
-	RemoteWidget *first{};
-	RemoteWidget *second{};
+    RemoteWidget *first{};
+    RemoteWidget *second{};
 };
 
 class ListRemoteWidget : public QScrollArea
@@ -29,43 +29,42 @@ class ListRemoteWidget : public QScrollArea
 Q_OBJECT
 
 private:
-	 QVBoxLayout *m_layout{}, *m_remoteLayout{};
+    QVBoxLayout *m_layout{}, *m_remoteLayout{};
 
-	RoundedLineEdit *m_recherche{};
-	RoundedButton *m_add{};
+    RoundedLineEdit *m_recherche{};
+    RoundedButton *m_add{};
 
-	QList<RemoteWidget *> m_listRemote{};
+    QList<RemoteWidget *> m_listRemote{};
 
-	std::shared_ptr<remotes_selected> m_remoteSelected{};
+    std::shared_ptr<remotes_selected> m_remoteSelected{};
 
-	QPushButton *m_expand{};
+    QPushButton *m_expand{};
 
-	bool m_selected{};
+    bool m_selected{};
 
 
-	int m_width{};
-	bool m_isExpand = true;
+    int m_width{};
+    bool m_isExpand = true;
 
 public:
-	explicit ListRemoteWidget(QWidget *parent = nullptr);
+    explicit ListRemoteWidget(QWidget *parent = nullptr);
 
-	void expand();
+    void expand();
 
-	const std::shared_ptr<remotes_selected> &remoteSelected()
-	{ return m_remoteSelected; }
+    const std::shared_ptr<remotes_selected> &remoteSelected() { return m_remoteSelected; }
 
 private:
-	void getAllRemote();
+    void getAllRemote();
 
-	void searchRemote(const QString &name);
+    void searchRemote(const QString &name);
 
-	 void showAnimation(QWidget *widget) const;
+    void showAnimation(QWidget *widget) const;
 
-	 void hideAnimation(QWidget *widget)const;
+    void hideAnimation(QWidget *widget) const;
 
 signals:
 
-	void remoteClicked(const std::shared_ptr<remotes_selected> &);
+    void remoteClicked(const std::shared_ptr<remotes_selected> &);
 };
 
 

@@ -1,5 +1,5 @@
 //
-// Created by sr-71 on 16/04/2023.
+// Created by Rahman on 16/04/2023.
 //
 
 #ifndef IRIDIUM_SETTINGSDIALOG_HPP
@@ -13,17 +13,17 @@ class SettingsDialog : public QDialog
 {
 Q_OBJECT
 
-	QScrollArea *m_leftScrollArea;
-	QWidget *m_leftScrollAreaWidget;
-	QVBoxLayout *m_leftScrollAreaLayout;
+    QScrollArea *m_left_scrollArea;
+    QWidget *m_left_scrollAreaWidget;
+    QVBoxLayout *m_left_scrollAreaLayout;
 
-	QScrollArea *m_rightScrollArea;
-	QWidget *m_rightScrollAreaWidget;
-	QVBoxLayout *m_rightScrollAreaLayout;
+    QScrollArea *m_right_scrollArea;
+    QWidget *m_right_scrollAreaWidget;
+    QVBoxLayout *m_right_scrollAreaLayout;
 
 
 public:
-	explicit SettingsDialog(QWidget *parent = nullptr);
+    explicit SettingsDialog(QWidget *parent = nullptr);
 
 };
 

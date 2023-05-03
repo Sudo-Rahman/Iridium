@@ -1,5 +1,5 @@
 //
-// Created by sr-71 on 19/04/2023.
+// Created by Rahman on 19/04/2023.
 //
 
 #ifndef IRIDIUM_APPEARANCEFRAME_HPP
@@ -15,7 +15,7 @@ class AppearanceFrame : public QFrame
 Q_OBJECT
 
 public:
-	explicit AppearanceFrame(QWidget *parent = nullptr);
+    explicit AppearanceFrame(QWidget *parent = nullptr);
 
 };
 

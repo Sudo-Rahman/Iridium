@@ -1,5 +1,5 @@
 //
-// Created by sr-71 on 08/03/2023.
+// Created by Rahman on 08/03/2023.
 //
 
 #include "RcloneProxy.hpp"
@@ -21,7 +21,7 @@ bool RcloneProxy::lessThan(const QModelIndex &source_left, const QModelIndex &so
     auto model = dynamic_cast<RcloneFileModel *>(sourceModel());
     auto item_left = dynamic_cast<TreeFileItem *>(model->itemFromIndex(source_left));
     auto item_right = dynamic_cast<TreeFileItem *>(model->itemFromIndex(source_right));
-    if(item_left not_eq nullptr and item_right not_eq nullptr)
+    if (item_left not_eq nullptr and item_right not_eq nullptr)
     {
         auto column = source_left.column() == source_right.column() ? source_left.column() : -1;
         // get column
