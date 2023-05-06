@@ -157,8 +157,7 @@ void ItemInfoDialog::initSize()
                 {
 //			 qDirIerator recursive
                     QDirIterator it(m_file->getPath(),
-                                    QDir::NoSymLinks | QDir::NoDotAndDotDot |
-                                    QDir::AllEntries,
+                                    QDir::Files|QDir::System|QDir::Hidden,
                                     QDirIterator::Subdirectories);
                     for (; it.hasNext(); it.next())
                     {

@@ -30,6 +30,8 @@ TaskRow::TaskRow(const QString &src, const QString &dest, const boost::json::obj
         case Finished:
             m_data = data.at("stats").as_object();
             break;
+        case Cancelled:
+            break;
     }
 
     m_src = src;
@@ -340,6 +342,10 @@ void TaskRow::setState(const TaskRow::State &state)
             break;
         case TaskRow::Error:
             error();
+            break;
+        case TaskRow::Cancelled:
+            if (m_state not_eq TaskRow::Finished and m_state not_eq TaskRow::Error)
+                at(5)->setText(QObject::tr("Annulé"));
             break;
     }
 }

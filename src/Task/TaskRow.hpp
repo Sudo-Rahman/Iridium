@@ -33,7 +33,8 @@ public:
     {
         Normal,
         Finished,
-        Error
+        Error,
+        Cancelled
     };
 
     enum Type
@@ -60,6 +61,7 @@ private:
     void updateDataParent();
 
     void updateDataChild();
+
 
 public:
 

@@ -5,6 +5,7 @@
 #include <QStandardItemModel>
 #include <QHeaderView>
 #include <QMenu>
+#include <QMessageBox>
 #include "TaskTreeView.hpp"
 #include "TaskRow.hpp"
 #include <boost/chrono.hpp>
@@ -29,7 +30,7 @@ TaskTreeView::TaskTreeView(QWidget *parent) : QTreeView(parent)
     setHeaderHidden(false);
     setRootIsDecorated(true);
     setSortingEnabled(true);
-    setSelectionMode(QAbstractItemView::SingleSelection);
+    setSelectionMode(QAbstractItemView::ExtendedSelection);
     setSelectionBehavior(QAbstractItemView::SelectRows);
     setEditTriggers(QAbstractItemView::NoEditTriggers);
 
@@ -43,16 +44,60 @@ TaskTreeView::TaskTreeView(QWidget *parent) : QTreeView(parent)
 
     // set Menu context
     setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(this, &TaskTreeView::customContextMenuRequested, this, [this]
+    connect(this, &TaskTreeView::customContextMenuRequested, this, [=, this]
     {
         if (QTreeView::selectedIndexes().empty())
             return;
-        QMenu menu;
-        menu.addAction(QObject::tr("Supprimer"));
-        connect(&menu, &QMenu::triggered, this, [this](QAction *action)
+        for (const auto &index: QTreeView::selectedIndexes())
         {
+            if (index.parent().isValid())
+                return;
+        }
+        QMenu menu;
+        auto cancel = menu.addAction(QObject::tr("Annuler la tâche"));
+        cancel->setIcon(style()->standardIcon(QStyle::SP_DialogCancelButton));
+
+        auto remove = menu.addAction(QObject::tr("Supprimer la tâche"));
+        remove->setIcon(style()->standardIcon(QStyle::SP_TrashIcon));
+        connect(remove, &QAction::triggered, this, [this]()
+        {
+            auto indexes = QTreeView::selectedIndexes();
+            for (long long i = indexes.size()/10; i >0; i--)
+                m_model->removeRows(indexes[i].row(), 1, indexes[i].parent());
         });
-        menu.exec(QCursor::pos());
+
+        auto action = menu.exec(QCursor::pos());
+
+        if (action == cancel)
+        {
+
+            QMessageBox info = QMessageBox(QMessageBox::Information, tr("Annuler la tâche"),
+                                           tr("Voulez-vous vraiment annuler la tâche ?"));
+            info.addButton(tr("Oui"), QMessageBox::YesRole);
+            info.addButton(tr("Non"), QMessageBox::NoRole);
+            if (info.exec() == QMessageBox::NRoles)
+            {
+                return;
+            }
+
+            auto indexes = QTreeView::selectedIndexes();
+            for (int i = 0; i < indexes.size(); i = i + 10)
+            {
+                auto id = indexes[i].siblingAtColumn(0);
+                auto it = m_tasks.find(id.data(Qt::UserRole + 1).toULongLong());
+                if (it not_eq m_tasks.end())
+                {
+                    // disconnect all signals
+                    disconnect(it->second.rclone.get(), nullptr, this, nullptr);
+                    RcloneManager::release(it->second.rclone);
+                    it->second.parent->setState(TaskRow::State::Cancelled);
+                    for(const auto &child: it->second.children)
+                        child.second->setState(TaskRow::State::Cancelled);
+                    erase_if(m_tasks, [it](const auto &t) { return t.first == it->first; });
+                }
+            }
+            return;
+        }
     });
 
     connect(this, &TaskTreeView::taskFinished, this, [this](std::pair<size_t, Tasks> task)
@@ -76,8 +121,9 @@ void TaskTreeView::addTask(const QString &src, const QString &dst, const RcloneP
     if (m_tasks.find(idParent) != m_tasks.end())
         return;
     auto task = std::make_shared<TaskRow>(src, dst, boost::json::object(), type, TaskRow::Normal, TaskRow::Parent);
-    m_tasks.insert({idParent, Tasks{task, {}}});
+    m_tasks.insert({idParent, Tasks{task, rclone, {}}});
     m_model->appendRow(*task);
+    task->first()->setData((uint64_t) idParent, Qt::UserRole + 1);
     setIndexWidget(task->progressBarIndex(), task->progressBar());
 
 
@@ -212,7 +258,6 @@ void TaskTreeView::addTask(const QString &src, const QString &dst, const RcloneP
                     (*it).second.parent->setMessageToolTip(rclone->readAllError().back());
                     (*it).second.parent->progressBar()->error();
                 }
-                m_tasks[id].isFinished = true;
                 emit taskFinished(*m_tasks.find(id));
                 RcloneManager::release(rclone);
             });

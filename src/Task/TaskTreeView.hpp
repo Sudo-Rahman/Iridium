@@ -9,13 +9,14 @@
 #include <QTreeView>
 #include <QLayout>
 #include <QThread>
+#include <QModelIndex>
 #include "TaskRow.hpp"
 
 struct Tasks
 {
     TaskRowPtr parent;
+    RclonePtr rclone;
     std::map<size_t, TaskRowPtr> children;
-    bool isFinished = false;
 };
 
 class TaskTreeView : public QTreeView

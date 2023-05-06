@@ -429,7 +429,17 @@ void TreeFileView::keyPressEvent(QKeyEvent *event)
 {
     // if ctrl + f
     if (QKeySequence(event->modifiers() | event->key()).matches(Qt::CTRL + Qt::Key_F))
+    {
         emit ctrlFPressed();
+        return;
+    }
+
+    // if ctrl + r for reload
+    if (QKeySequence(event->modifiers() | event->key()).matches(Qt::CTRL + Qt::Key_R))
+    {
+        reload();
+        return;
+    }
 
     auto lisItem = getSelectedItems(true);
 
@@ -850,7 +860,7 @@ void TreeFileView::dragMoveEvent(QDragMoveEvent *event)
  */
 void TreeFileView::search(const QString &text)
 {
-    if(not QTreeView::rootIndex().isValid())
+    if (not QTreeView::rootIndex().isValid())
         return;
     for (int i = 0; i < m_model->itemFromIndex(QTreeView::rootIndex())->rowCount(); i++)
     {

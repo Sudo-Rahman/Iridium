@@ -3,7 +3,7 @@ project(Iridium)
 
 set(Iridium_VERSION_MAJOR 0)
 set(Iridium_VERSION_MINOR 7)
-set(Iridium_VERSION_PATCH 4)
+set(Iridium_VERSION_PATCH 5)
 set(Iridium_VERSION "${Iridium_VERSION_MAJOR}.${Iridium_VERSION_MINOR}.${Iridium_VERSION_PATCH}")
 
 configure_file (src/Config/Version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/src/Config/Version.h @ONLY)
@@ -36,7 +36,9 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS
 message(STATUS "Qt version: ${Qt${QT_VERSION_MAJOR}_VERSION}")
 
 file(GLOB_RECURSE SRC
-        src/*
+        src/*.cpp
+        src/*.h
+        src/*.hpp
         )
 
 include_directories(src
@@ -44,6 +46,7 @@ include_directories(src
         src/Config
         src/FileView
         src/FileView/TreeWidgets
+        src/LeftSideBar
         src/MainWindow
         src/Other
         src/Rclone
@@ -111,5 +114,6 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
             MACOSX_BUNDLE_BUNDLE_NAME ${PROJECT_NAME}
             MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_NAME} ${Iridium_VERSION}"
             MACOSX_BUNDLE_COPYRIGHT "© 2023 ${PROJECT_NAME}"
+            MACOSX_BUNDLE_ICON_FILE Iridium.icns
             )
 endif ()
