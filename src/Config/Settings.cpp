@@ -184,7 +184,10 @@ void Settings::loadSettings()
         pt::read_json(getPathSettings().string(), m_settings);
         initValues();
     } else
+    {
+        bf::create_directories(path.parent_path());
         resetSettings(All);
+    }
 
 }
 
@@ -210,8 +213,10 @@ boost::filesystem::path Settings::getPathSettings()
         path /= "settings.iridium";
     } else
     {
+        QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Iridium", "Iridium");
+        path = settings.fileName().toStdString();
         path = dll::program_location().parent_path();
-        path /= "settings.iridium";
+        path += "/settings.iridium";
     }
     return path;
 }

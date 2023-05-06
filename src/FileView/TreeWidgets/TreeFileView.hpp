@@ -21,7 +21,7 @@ class TreeFileView : public QTreeView
 {
 Q_OBJECT
 
-    RcloneFileModel *model{};
+    RcloneFileModel *m_model{};
     QList<QModelIndex> m_index_back{}, m_index_front{};
     RemoteInfoPtr m_remote_info{};
 
@@ -51,6 +51,8 @@ public:
     [[nodiscard]] RemoteInfoPtr remoteInfo() const { return m_remote_info; };
 
     [[nodiscard]] QList<TreeFileItem *> getDragItems() const { return m_dragItems; }
+
+    void search(const QString &text);
 
 protected:
     void resizeEvent(QResizeEvent *event) override;
@@ -107,6 +109,8 @@ signals:
     void
     taskAdded(const QString &src, const QString &dst, const RclonePtr &rclone, const std::function<void()> &callable,
               const Rclone::TaskType &type = Rclone::Unknown);
+
+    void ctrlFPressed();
 
 };
 

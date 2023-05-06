@@ -9,6 +9,8 @@
 #include <QHBoxLayout>
 #include <QPushButton>
 #include <QLabel>
+#include <QLineEdit>
+#include <QDialog>
 
 #include <RoundedButton.hpp>
 
@@ -22,6 +24,7 @@ private:
     QVBoxLayout *m_layout{};
     RoundedButton *m_back_button{}, *m_front_button{}, *m_refresh_button{};
     QLabel *m_path_label{};
+    QLineEdit *m_search_line_edit{};
 
     void initUI();
 

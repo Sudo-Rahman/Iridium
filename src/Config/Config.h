@@ -7,8 +7,9 @@
 
 #include <string>
 #include <vector>
+#include "Version.h"
 
-static std::string const IRIDIUM_VERSION = "0.7.4";
+static std::string const IRIDIUM_VERSION = Iridium_VERSION;
 static std::string const AUTHOR = "Rahman YILMAZ";
 
 static std::vector<std::string> const OTHER_RESSOURCES_AUHTOR = {

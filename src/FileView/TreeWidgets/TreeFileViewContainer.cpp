@@ -4,6 +4,8 @@
 
 #include "TreeFileViewContainer.hpp"
 
+#include <QKeyEvent>
+
 /**
  * @brief Construct a new Tree File View Container:: Tree File View Container object
  * @param remoteInfo
@@ -62,6 +64,19 @@ void TreeFileViewContainer::initUI()
     m_layout->addWidget(m_treeFileView);
 
 
+    auto search_dialog = new QDialog(this);
+    search_dialog->setWindowFlags(Qt::FramelessWindowHint | Qt::Popup);
+
+    // rounded corners
+
+    m_search_line_edit = new QLineEdit(this);
+    m_search_line_edit->setPlaceholderText("...");
+    m_search_line_edit->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+
+    auto search_layout = new QHBoxLayout(search_dialog);
+    search_layout->setContentsMargins(0, 0, 0, 0);
+    search_layout->addWidget(m_search_line_edit);
+
     connect(m_back_button, &QPushButton::clicked, m_treeFileView, &TreeFileView::back);
     connect(m_front_button, &QPushButton::clicked, m_treeFileView, &TreeFileView::front);
     connect(m_treeFileView, &TreeFileView::pathChanged, this, [this](const QString &path)
@@ -74,4 +89,17 @@ void TreeFileViewContainer::initUI()
     });
 
     connect(m_refresh_button, &QPushButton::clicked, this, [this] { m_treeFileView->reload(); });
+    connect(m_treeFileView, &TreeFileView::ctrlFPressed, this, [search_dialog, this]()
+    {
+        m_search_line_edit->clear();
+        search_dialog->show();
+        m_search_line_edit->setFocus();
+        auto pos = m_treeFileView->mapToGlobal(m_treeFileView->rect().bottomRight() - QPoint(5, 5));
+        search_dialog->move(pos.x() - search_dialog->width(), pos.y() - search_dialog->height());
+    });
+    connect(m_search_line_edit, &QLineEdit::textChanged, this, [this](const QString &text)
+    {
+        m_treeFileView->search(text);
+    });
+
 }

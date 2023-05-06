@@ -1,0 +1,9 @@
+#ifndef VERSION_H_IN
+#define VERSION_H_IN
+
+#define Iridium_VERSION_MAJOR "@Iridium_VERSION_MAJOR@"
+#define Iridium_VERSION_MINOR "@Iridium_VERSION_MINOR@"
+#define Iridium_VERSION_PATCH "@Iridium_VERSION_PATCH@"
+#define Iridium_VERSION "@Iridium_VERSION@"
+
+#endif // VERSION_H_IN
