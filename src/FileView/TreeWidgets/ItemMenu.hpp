@@ -20,6 +20,7 @@ public:
 
     enum Action
     {
+        None,
         Copy,
         Paste,
         Info,
@@ -41,7 +42,7 @@ public:
     }
 
 private:
-    Action m_action{};
+    Action m_action{None};
 
 signals:
 

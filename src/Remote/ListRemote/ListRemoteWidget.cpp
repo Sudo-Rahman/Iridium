@@ -87,26 +87,14 @@ void ListRemoteWidget::getAllRemote()
         delete item->widget();
         delete item;
     }
-    auto rclone = RcloneManager::get();
-    rclone->listRemotes();
-    rclone->waitForFinished();
-    for (const auto &pair: rclone->getData())
-    {
-        auto *remote = new RemoteWidget({pair.first, stringToRemoteType.find(pair.second)->second,
-                                        }, true, this);
-        remote->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
-        m_listRemote << remote;
-    }
 
-//	 ajout du local
-    auto *local = new RemoteWidget({"/", RemoteType::LocalHardDrive, "Local"}, false, this);
-    m_listRemote.push_front(local);
-
-    for (const auto &localRemote: Settings::getLocalRemotes())
-    {
-        auto *remote = new RemoteWidget(localRemote, true, this);
-        m_listRemote << remote;
-    }
+//     cration des remoteWidget
+    auto remotes = Settings::getRemotes();
+    auto it = remotes.begin();
+    m_listRemote << new RemoteWidget(*it, false, this);
+    it++;
+    for (; it not_eq remotes.end(); ++it)
+        m_listRemote << new RemoteWidget(*it, true, this);
 
     for (auto *remote: m_listRemote)
     {

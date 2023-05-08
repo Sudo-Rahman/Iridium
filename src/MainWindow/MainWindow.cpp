@@ -9,7 +9,7 @@
 #include <Settings.hpp>
 #include <Menu/MenuBar.hpp>
 #include <TaskTreeView.hpp>
-#include <ProgressBar.hpp>
+#include <SearchWidget.hpp>
 
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
@@ -19,6 +19,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     setMinimumSize(1000, 500);
     QIcon::setThemeName("fluent");
 
+    //todo: search feature in progress
+//    auto *loading = new QDialog(this);
+//    auto lay = new QVBoxLayout(loading);
+//    lay->addWidget(new SearchWidget(loading));
+//    loading->show();
 
     setMenuBar(new MenuBar(this));
 

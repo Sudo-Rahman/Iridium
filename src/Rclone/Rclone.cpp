@@ -10,6 +10,7 @@
 #include <Utility/Utility.hpp>
 #include <boost/algorithm/string/join.hpp>
 #include <boost/chrono.hpp>
+#include <regex>
 
 
 #ifdef _WIN32
@@ -71,7 +72,6 @@ void Rclone::lsJson(const string &path)
  */
 void Rclone::copyTo(const RcloneFile &src, const RcloneFile &dest)
 {
-    connectTaskSignalFinishedJson();
     vector<string> arguments(
             {"copyto", src.getPath().toStdString(), dest.getPath().toStdString()});
     Iridium::Utility::pushBack(arguments, {getFlag(Transfers).to_vector(), getFlag(Stats).to_vector(),
@@ -100,7 +100,6 @@ void Rclone::deleteFile(const RcloneFile &file)
 {
     vector<string> arguments({file.getPath().toStdString()});
     Iridium::Utility::pushBack(arguments, {getFlag(Verbose).to_vector(), getFlag(LogType).to_vector()});
-    connectTaskSignalFinishedJson();
     if (!file.isDir())
         arguments.emplace(arguments.begin(), "deletefile");
     else
@@ -194,6 +193,36 @@ void Rclone::listRemotes()
             });
     execute({"listremotes", "--long"});
 }
+
+void Rclone::search(const std::string &name, const RemoteInfo &info)
+{
+    m_readyRead.connect(
+            [this](const string &line)
+            {
+                try
+                {
+                    bj::object json;
+                    std::regex size_regex("([0-9]+ )");
+                    std::regex date_regex("([0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{9})");
+                    std::smatch match;
+                    std::regex_search(line, match, size_regex);
+                    json.emplace("Size", stoi(match[0].str()));
+                    std::regex_search(line, match, date_regex);
+                    json.emplace("ModTime", match[0].str());
+                    auto path = match.suffix().str().substr(1, match.suffix().str().size() - 1);
+                    json.emplace("Path", path);
+                    auto name = path.substr(path.find_last_of('/') + 1, path.size() - 1);
+                    json.emplace("Name", name);
+                    json.emplace("IsDir", false);
+                    emit searchRefresh(json);
+                } catch (std::out_of_range &e)
+                {
+                    std::cerr << e.what() << "probleme search" << std::endl;
+                }
+            });
+    execute({"lsl", info.m_path, "--filter=+ *" + name + "*", "--filter=- *"});
+}
+
 
 /**
  * @brief Rclone::deleteRemote, permet de supprimer un remote
@@ -304,6 +333,9 @@ Rclone::~Rclone()
  */
 void Rclone::terminate()
 {
+    m_finished.disconnect_all_slots();
+    m_readyRead.disconnect_all_slots();
+    disconnect();
     if (m_state == Running)
     {
         cout << "process rclone kill" << endl;
@@ -403,7 +435,6 @@ uint8_t Rclone::exitCode() const
  */
 void Rclone::mkdir(const RcloneFile &dir)
 {
-    connectTaskSignalFinishedJson();
     vector<string> arguments = {"mkdir", dir.getPath().toStdString()};
     Iridium::Utility::pushBack(
             arguments, {getFlag(Verbose).to_vector(), getFlag(LogType).to_vector(), getFlag(Stats).to_vector()});
@@ -413,7 +444,6 @@ void Rclone::mkdir(const RcloneFile &dir)
 
 void Rclone::moveto(const RcloneFile &src, const RcloneFile &dest)
 {
-    connectTaskSignalFinishedJson();
     vector<string> arguments = {"moveto", src.getPath().toStdString(), dest.getPath().toStdString()};
     Iridium::Utility::pushBack(
             arguments, {getFlag(Verbose).to_vector(), getFlag(LogType).to_vector(), getFlag(Stats).to_vector()});
@@ -435,37 +465,10 @@ bj::object Rclone::parseJson(const string &str)
     return json;
 }
 
-void Rclone::connectTaskSignalFinishedJson()
-{
-    m_finished.connect(
-            [this](int exit)
-            {
-                bj::object json;
-                if (exit == 0)
-                {
-                    auto out = m_out;
-                    auto err = m_error;
-                    out.insert(out.end(), err.begin(), err.end());
-                    json = parseJson(out.back());
-                    if (not json.contains("error"))
-                    {
-                        m_map_data.clear();
-                        m_map_data.emplace("json", boost::json::serialize(json));
-                    }
-                } else
-                {
-                    json = bj::object();
-                    json.emplace("error", m_error.back());
-                }
-                emit taskFinished(exit, json);
-            });
-}
-
 std::atomic_int_fast8_t RcloneManager::m_nb_rclone_locked;
 uint8_t RcloneManager::m_nb_max_process = thread::hardware_concurrency();
 mutex RcloneManager::m_launch_mutex, RcloneManager::m_stop_mutex, RcloneManager::m_mutex_start;
 condition_variable RcloneManager::m_launch_cv, RcloneManager::m_stop_cv;
-deque<RclonePtr> RcloneManager::m_rclone_vector;
 deque<RcloneLocked> RcloneManager::m_launch_queue, RcloneManager::m_stop_queue;
 
 boost::thread RcloneManager::m_launch_thread = boost::thread(
@@ -509,8 +512,6 @@ boost::thread RcloneManager::m_stop_thread = boost::thread(
                     auto obj = *it;
                     if (obj.rclone->state() not_eq Rclone::Running)
                         obj.rclone->terminate();
-                    erase_if(RcloneManager::m_rclone_vector,
-                             [obj](const RclonePtr &rclone) { return rclone == obj.rclone; });
                     erase_if(RcloneManager::m_launch_queue,
                              [obj](const RcloneLocked &rcloneLocked) { return rcloneLocked.rclone == obj.rclone; });
                     RcloneManager::m_stop_queue.erase(it);
@@ -526,9 +527,7 @@ boost::thread RcloneManager::m_stop_thread = boost::thread(
  */
 RclonePtr RcloneManager::get()
 {
-    auto rclone = RclonePtr(new Rclone());
-    RcloneManager::m_rclone_vector.push_back(rclone);
-    return rclone;
+    return RclonePtr(new Rclone());
 }
 
 void RcloneManager::launch(const RcloneLocked &rcloneLocked)
@@ -543,30 +542,9 @@ void RcloneManager::launch(const RcloneLocked &rcloneLocked)
 void RcloneManager::finished(const Rclone *rclone)
 {
     --RcloneManager::m_nb_rclone_locked;
-    auto it = std::find_if(m_rclone_vector.begin(), m_rclone_vector.end(),
-                           [rclone](const RclonePtr &rclonePtr) { return rclonePtr.get() == rclone; });
-    if (it not_eq m_rclone_vector.end())
-        m_rclone_vector.erase(it);
     RcloneManager::m_launch_cv.notify_one();
 }
 
-/**
- * @brief RcloneManager::release, libère un processus rclone
- * @param rclone
- */
-void RcloneManager::release(const RclonePtr &rclone)
-{
-    // erase rclone from vector
-    rclone->terminate();
-    for (auto it = m_rclone_vector.begin(); it != m_rclone_vector.end(); ++it)
-    {
-        if (it->get() == rclone.get())
-        {
-            m_rclone_vector.erase(it);
-            break;
-        }
-    }
-}
 
 void RcloneManager::stop(const std::deque<RcloneLocked> &lst)
 {

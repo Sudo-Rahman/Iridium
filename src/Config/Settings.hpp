@@ -75,7 +75,9 @@ public:
 
     static QIcon hardDriveIcon() { return HARDDRIVE_ICON; }
 
-    static QList<RemoteInfoPtr> getLocalRemotes();
+    static std::vector<RemoteInfoPtr> getLocalRemotes();
+
+    static std::vector<RemoteInfoPtr> getRemotes();
 
     static void addLocalRemote(const RemoteInfo &remoteInfo);
 

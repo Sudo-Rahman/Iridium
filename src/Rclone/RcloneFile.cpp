@@ -5,6 +5,7 @@
 #include "RcloneFile.hpp"
 
 #include <QMimeDatabase>
+#include <Settings.hpp>
 #include <Utility/Utility.hpp>
 
 void RcloneFile::init()
@@ -164,5 +165,29 @@ void RcloneFile::changeName(const QString &newName)
     m_path.append(newName);
     if (m_is_dir)
         m_path.append("/");
+}
+
+QIcon RcloneFile::getIcon()
+{
+    QIcon ico;
+    if (m_is_dir)
+    {
+        if (QFileInfo(getName()).suffix() == "app")
+            ico = QIcon::fromTheme(getName().toLower().remove(".app").replace(" ", "-"),
+                                   QIcon::fromTheme("application-default-icon"));
+        else ico = Settings::dirIcon();
+        m_size = 0;
+    } else
+    {
+        if (QFileInfo(getName()).suffix() == "exe")
+            ico = QIcon::fromTheme(getName().toLower().remove(".exe").replace(" ", "-"));
+        if (ico.isNull())
+            ico = QIcon::fromTheme(QMimeDatabase().mimeTypeForFile(getPath()).iconName(),
+                                   QIcon::fromTheme(
+                                           QMimeDatabase().mimeTypeForFile(getPath()).genericIconName()));
+        if (ico.isNull())
+            ico = QIcon::fromTheme("unknown");
+    }
+    return ico;
 }
 

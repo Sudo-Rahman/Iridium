@@ -9,6 +9,7 @@
 #include <boost/dll.hpp>
 #include <fstream>
 #include <QTranslator>
+#include <memory>
 
 using namespace std;
 using namespace boost;
@@ -82,9 +83,9 @@ void Settings::changeDirIcon(const Settings::ThemeColor &color)
  * @brief get list of local remotes
  * @return list of local remotes
  */
-QList<RemoteInfoPtr> Settings::getLocalRemotes()
+std::vector<RemoteInfoPtr> Settings::getLocalRemotes()
 {
-    QList<RemoteInfoPtr> remotes;
+    std::vector<RemoteInfoPtr> remotes;
     try { auto remote_ptree = m_settings.get_child(m_nodes.at(Remotes)); }
     catch (boost::wrapexcept<boost::property_tree::ptree_bad_path> &e)
     {
@@ -97,13 +98,27 @@ QList<RemoteInfoPtr> Settings::getLocalRemotes()
     {
         try
         {
-            remotes.append(std::make_shared<RemoteInfo>(
+            remotes.emplace_back(std::make_shared<RemoteInfo>(
                     remote.second.get<string>("path"), RemoteType::LocalHardDrive, remote.first));
         }
         catch (boost::wrapexcept<boost::property_tree::ptree_bad_path> &e) { continue; }
     }
     return remotes;
 }
+
+std::vector<RemoteInfoPtr> Settings::getRemotes()
+{
+    std::vector<RemoteInfoPtr> remotes;
+    auto locales = getLocalRemotes();
+    remotes.insert(remotes.end(), locales.begin(), locales.end());
+    auto rclone = RcloneManager::get();
+    rclone->listRemotes();
+    rclone->waitForFinished();
+    for (const auto &pair: rclone->getData())
+        remotes.emplace_back(std::make_shared<RemoteInfo>(pair.first, stringToRemoteType.find(pair.second)->second));
+    return remotes;
+}
+
 
 /**
  * @brief add a local remote and save it
@@ -215,7 +230,7 @@ boost::filesystem::path Settings::getPathSettings()
     {
         QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Iridium", "Iridium");
         path = settings.fileName().toStdString();
-        path = dll::program_location().parent_path();
+        path = path.parent_path();
         path += "/settings.iridium";
     }
     return path;
@@ -232,8 +247,16 @@ void Settings::initSettings()
     m_settings.put(m_nodes.at(Remotes), "");
     m_settings.put(m_nodes.at(Flags), "");
 
-    // init flags
+    pt::ptree remote, ptree_path;
+    RemoteInfo remoteInfo = {"/", RemoteType::LocalHardDrive, "Local"};
+    ptree_path.put("", remoteInfo.m_path);
+    remote.add_child("path", ptree_path);
 
+    pt::ptree array = m_settings.get_child(m_nodes.at(Remotes));
+    array.push_back(std::make_pair(remoteInfo.name(), remote));
+    m_settings.put_child(m_nodes.at(Remotes), array);
+
+    // init flags
     pt::ptree flags;
     for (int i = 0; i < 100; ++i)
     {

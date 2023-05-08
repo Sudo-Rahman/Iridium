@@ -88,8 +88,7 @@ TaskTreeView::TaskTreeView(QWidget *parent) : QTreeView(parent)
                 if (it not_eq m_tasks.end())
                 {
                     // disconnect all signals
-                    disconnect(it->second.rclone.get(), nullptr, this, nullptr);
-                    RcloneManager::release(it->second.rclone);
+                    it->second.rclone->terminate();
                     it->second.parent->setState(TaskRow::State::Cancelled);
                     for(const auto &child: it->second.children)
                         child.second->setState(TaskRow::State::Cancelled);
@@ -153,7 +152,6 @@ void TaskTreeView::addTask(const QString &src, const QString &dst, const RcloneP
                             if (m_tasks[idParent].children.size() > 0)
                                 for (auto &child: m_tasks[idParent].children)
                                     child.second->setState(TaskRow::Error);
-                            RcloneManager::release(rclone);
                             return;
                         }
                         auto it = m_tasks[idParent].children.find(errId);
@@ -239,8 +237,8 @@ void TaskTreeView::addTask(const QString &src, const QString &dst, const RcloneP
                 }
             });
 
-    connect(rclone.get(), &Rclone::taskFinished, this,
-            [src, dst, rclone, this](int exit, const boost::json::object &obj)
+    connect(rclone.get(), &Rclone::finished, this,
+            [src, dst, rclone, this](int exit)
             {
                 boost::json::object json;
                 size_t id;
@@ -259,7 +257,6 @@ void TaskTreeView::addTask(const QString &src, const QString &dst, const RcloneP
                     (*it).second.parent->progressBar()->error();
                 }
                 emit taskFinished(*m_tasks.find(id));
-                RcloneManager::release(rclone);
             });
     callable();
 }

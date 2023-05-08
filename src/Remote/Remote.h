@@ -20,7 +20,7 @@ const std::string PCLOUD = ":/ressources/pcloud.png";
 const std::string BOX = ":/ressources/box.png";
 const std::string SMB = ":/ressources/smb.png";
 
-const std::string HARDDRIVEICON = "drive-harddisk-solidstate";
+const std::string HARDDRIVEICON = ":/ressources/drive-harddisk-solidstate.svg";
 
 enum RemoteType
 {
@@ -66,9 +66,7 @@ public:
     std::string m_path;
 
     auto setName(std::string name)
-    {
-        m_name = std::move(name);
-    }
+    {m_name = std::move(name);}
 
     RemoteInfo(std::string path, RemoteType type, std::string name = "")
             : m_name(std::move(name)), m_type(type), m_path(std::move(path))

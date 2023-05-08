@@ -20,29 +20,6 @@ FileViewWidget::FileViewWidget(QWidget *parent) : QWidget(parent)
     m_treeFileView2 = new TreeFileViewContainer(this);
     m_splitter->addWidget(m_treeFileView2);
 
-    connect(m_treeFileView1->treeFileView(), &TreeFileView::fileCopied, this,
-            [this](const QList<TreeFileItem *> &lst) { m_current_file_list = lst; });
-    connect(m_treeFileView2->treeFileView(), &TreeFileView::fileCopied, this,
-            [this](const QList<TreeFileItem *> &lst) { m_current_file_list = lst; });
-    connect(m_treeFileView1->treeFileView(), &TreeFileView::pasted, this, [this](const RcloneFilePtr &file)
-    {
-        if (m_current_file_list.empty())
-            return;
-        QList<RcloneFilePtr> lst;
-        for (auto item: m_current_file_list)
-            lst << item->getFile();
-        m_treeFileView1->treeFileView()->copyto(m_current_file_list);
-    });
-    connect(m_treeFileView2->treeFileView(), &TreeFileView::pasted, this, [this](const RcloneFilePtr &file)
-    {
-        if (m_current_file_list.empty())
-            return;
-        QList<RcloneFilePtr> lst;
-        for (auto item: m_current_file_list)
-            lst << item->getFile();
-        m_treeFileView2->treeFileView()->copyto(m_current_file_list);
-    });
-
     connect(m_treeFileView1->treeFileView(), &TreeFileView::taskAdded, this,
             [this](const QString &src, const QString &dst, const RclonePtr &rclone,
                    const std::function<void()> &callable, const Rclone::TaskType &type)

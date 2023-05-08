@@ -28,8 +28,6 @@ void RcloneFileModelDistant::init()
                       new TreeFileItem(2, drive->getFile(), drive),
                       new TreeFileItem(3, drive->getFile(), drive),
               });
-    if (m_load == Static)
-        addItemStatic(m_remote_info->m_path.c_str(), drive);
 }
 
 void RcloneFileModelDistant::addItem(const RcloneFilePtr &file, TreeFileItem *parent)

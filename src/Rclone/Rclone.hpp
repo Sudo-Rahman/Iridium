@@ -145,6 +145,8 @@ public:
 
     void about(const RemoteInfo &info);
 
+    void search(const std::string &name, const RemoteInfo &info);
+
 private:
     boost::signals2::signal<void(const std::string &)> m_readyRead{};
 
@@ -154,7 +156,6 @@ private:
 
     static boost::json::object parseJson(const std::string &str);
 
-    void connectTaskSignalFinishedJson();
 
 
 signals:
@@ -169,7 +170,7 @@ signals:
 
     void sizeFinished(const uint32_t &objs, const uint64_t &size, const std::string &strSize);
 
-    void taskFinished(const int &exit, const boost::json::object &);
+    void searchRefresh(const boost::json::object &file);
 
 };
 
@@ -191,7 +192,6 @@ private:
     static uint8_t m_nb_max_process;
     static std::mutex m_launch_mutex, m_stop_mutex, m_mutex_start;
     static std::condition_variable m_launch_cv, m_stop_cv;
-    static std::deque<RclonePtr> m_rclone_vector;
     static boost::thread m_launch_thread, m_stop_thread;
     static std::deque<RcloneLocked> m_launch_queue, m_stop_queue;
 
@@ -205,9 +205,6 @@ public:
         rclone->m_lockable = true;
         return rclone;
     }
-
-    static void release(const RclonePtr &rclone);
-
 
     static uint16_t maxProcess() { return m_nb_max_process; }
 

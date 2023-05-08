@@ -62,26 +62,7 @@ TreeFileItem *TreeFileItem::getParent() const
 
 void TreeFileItem::initIcon()
 {
-    QIcon ico;
-    if (m_file->isDir())
-    {
-        if (QFileInfo(m_file->getName()).suffix() == "app")
-            ico = QIcon::fromTheme(m_file->getName().toLower().remove(".app").replace(" ", "-"),
-                                   QIcon::fromTheme("application-default-icon"));
-        else ico = Settings::dirIcon();
-        m_file->setSize(0);
-    } else
-    {
-        if (QFileInfo(m_file->getName()).suffix() == "exe")
-            ico = QIcon::fromTheme(m_file->getName().toLower().remove(".exe").replace(" ", "-"));
-        if (ico.isNull())
-            ico = QIcon::fromTheme(QMimeDatabase().mimeTypeForFile(m_file->getPath()).iconName(),
-                                   QIcon::fromTheme(
-                                           QMimeDatabase().mimeTypeForFile(m_file->getPath()).genericIconName()));
-        if (ico.isNull())
-            ico = QIcon::fromTheme("unknown");
-    }
-    setIcon(ico);
+    setIcon(m_file->getIcon());
     setToolTip(m_file->getName());
 }
 

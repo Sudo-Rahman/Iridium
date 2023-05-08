@@ -65,9 +65,9 @@ void RcloneFileModel::addProgressBar(const QModelIndex &index)
         progressBar->setFixedSize(100, 15);
     }
 
+    progressBar->setRange(0, 0);
     layout->setAlignment(Qt::AlignLeft);
     layout->addWidget(progressBar);
-    progressBar->setRange(0, 0);
     m_view->setIndexWidget(index, container);
 }
 
@@ -77,12 +77,6 @@ RcloneFileModel::RcloneFileModel()
     setRowCount(0);
 
     setHorizontalHeaderLabels({tr("Nom"), tr("Taille"), tr("Date de modification"), tr("Type")});
-}
-
-bool RcloneFileModel::setData(const QModelIndex &index, const QVariant &value, int role)
-{
-    emit beforeDataChanged(value, role);
-    return QStandardItemModel::setData(index, value, role);
 }
 
 void RcloneFileModel::addItem(const RcloneFilePtr &file, TreeFileItem *parent)
@@ -104,7 +98,6 @@ void RcloneFileModel::addItem(const RcloneFilePtr &file, TreeFileItem *parent)
                 msgBox.exec();
             }
             m_check_is_valid = true;
-            RcloneManager::release(rclone);
         });
         rclone->about(m_remote_info.operator*());
     }

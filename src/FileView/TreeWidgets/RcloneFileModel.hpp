@@ -21,7 +21,7 @@ protected:
 
     QTreeView *m_view{};
 
-    bool m_expand_or_double_click{};
+    bool m_expand_or_double_click = false;
 
     bool m_check_is_valid = false;
 
@@ -45,13 +45,6 @@ public:
         m_expand_or_double_click = expandOrDoubleClick;
     }
 
-protected:
-public:
-    bool setData(const QModelIndex &index, const QVariant &value, int role) override;
-
-signals:
-
-    void beforeDataChanged(const QVariant &value, int role);
 };
 
 

@@ -44,7 +44,6 @@ RemoteConfigParamsFrame::RemoteConfigParamsFrame(QWidget *parent) : QFrame(paren
             msgBox.setStandardButtons(QMessageBox::Ok);
             msgBox.exec();
         }
-        RcloneManager::release(m_rclone);
     });
 }
 

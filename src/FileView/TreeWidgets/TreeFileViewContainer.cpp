@@ -65,15 +65,23 @@ void TreeFileViewContainer::initUI()
 
 
     auto search_dialog = new QDialog(this);
-    search_dialog->setWindowFlags(Qt::FramelessWindowHint | Qt::Popup);
+    search_dialog->setWindowFlags(Qt::FramelessWindowHint | Qt::Tool | Qt::WindowStaysOnTopHint);
 
-    // rounded corners
 
     m_search_line_edit = new QLineEdit(this);
+    auto hide = m_search_line_edit->addAction(style()->standardIcon(QStyle::SP_LineEditClearButton),
+                                              QLineEdit::LeadingPosition);
     m_search_line_edit->setPlaceholderText("...");
-    m_search_line_edit->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    m_search_line_edit->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+
+    connect(hide, &QAction::triggered, m_search_line_edit, [search_dialog, this]()
+    {
+        m_search_line_edit->clear();
+        search_dialog->hide();
+    });
 
     auto search_layout = new QHBoxLayout(search_dialog);
+    search_layout->setSizeConstraint(QLayout::SetFixedSize);
     search_layout->setContentsMargins(0, 0, 0, 0);
     search_layout->addWidget(m_search_line_edit);
 
@@ -92,14 +100,34 @@ void TreeFileViewContainer::initUI()
     connect(m_treeFileView, &TreeFileView::ctrlFPressed, this, [search_dialog, this]()
     {
         m_search_line_edit->clear();
-        search_dialog->show();
-        m_search_line_edit->setFocus();
-        auto pos = m_treeFileView->mapToGlobal(m_treeFileView->rect().bottomRight() - QPoint(5, 5));
-        search_dialog->move(pos.x() - search_dialog->width(), pos.y() - search_dialog->height());
+        m_search_line_edit->setFixedWidth(m_treeFileView->width() * .4);
+        if (search_dialog->isHidden())
+        {
+            search_dialog->show();
+            auto pos = m_treeFileView->mapToGlobal(m_treeFileView->rect().bottomRight() -
+                                                   QPoint(m_treeFileView->width() * .06,
+                                                          m_treeFileView->height() * .05));
+            search_dialog->move(pos.x() - search_dialog->width(), pos.y() - search_dialog->height());
+        }
     });
     connect(m_search_line_edit, &QLineEdit::textChanged, this, [this](const QString &text)
     {
         m_treeFileView->search(text);
+        m_treeFileView->setFocus();
     });
-
+    connect(m_treeFileView, &TreeFileView::pathChanged, this, [search_dialog, this]()
+    {
+        m_search_line_edit->clear();
+        search_dialog->hide();
+    });
+    connect(m_treeFileView, &TreeFileView::resized, this, [search_dialog,this]()
+    {
+        m_search_line_edit->setFixedWidth(m_treeFileView->width() * .4);
+        if(m_treeFileView->size().width() <search_dialog->size().width()*1.1 )
+            search_dialog->hide();
+        auto pos = m_treeFileView->mapToGlobal(m_treeFileView->rect().bottomRight() -
+                                               QPoint(m_treeFileView->width() * .06,
+                                                      m_treeFileView->height() * .05));
+        search_dialog->move(pos.x() - search_dialog->width(), pos.y() - search_dialog->height());
+    });
 }

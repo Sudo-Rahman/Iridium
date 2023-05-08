@@ -49,6 +49,6 @@ void SftpRemoteConfigParamsFrame::createUi()
 
 void SftpRemoteConfigParamsFrame::reset()
 {
-    m_port->setValue(22);
     RemoteConfigParamsFrame::reset();
+    m_port->setValue(22);
 }

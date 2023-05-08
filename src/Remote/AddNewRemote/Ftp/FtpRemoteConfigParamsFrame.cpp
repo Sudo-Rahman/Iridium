@@ -76,7 +76,7 @@ void FtpRemoteConfigParamsFrame::addRemote()
 
 void FtpRemoteConfigParamsFrame::reset()
 {
+    RemoteConfigParamsFrame::reset();
     m_portSpinBox->setValue(21);
     m_tls->setCurrentIndex(0);
-    RemoteConfigParamsFrame::reset();
 }

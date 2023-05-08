@@ -80,6 +80,9 @@ void ItemMenu::setActionEnabled(const QList<QPair<Action, bool>> &lst)
             case NewFolder:
                 m_new_folder->setEnabled(pair.second);
                 break;
+            case None:
+            default:
+                break;
         }
     }
 

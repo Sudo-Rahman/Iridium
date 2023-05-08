@@ -14,6 +14,7 @@
 #include <thread>
 #include <QMessageBox>
 #include <Rclone.hpp>
+#include <Variable.hpp>
 
 
 class TreeFileView : public QTreeView
@@ -27,10 +28,9 @@ Q_OBJECT
     uint64_t m_clickTime{};
     QModelIndex m_clickIndex{};
 
-    TreeFileItem *m_editingItem{};
     QList<TreeFileItem *> m_dragItems{};
 
-    bool m_dragable{}, m_editable = false;
+    bool m_dragable{},m_ctrl_presed{};
 
 public:
     explicit TreeFileView(const RemoteInfoPtr &remoteInfo, QWidget *parent = nullptr);
@@ -43,13 +43,11 @@ public:
 
     void changeRemote(const RemoteInfoPtr &info);
 
-    void copyto(const QList<TreeFileItem *> &, TreeFileItem *item = nullptr);
+    void copyto(const std::vector<RcloneFilePtr> &, TreeFileItem *item = nullptr);
 
     void reload(TreeFileItem *item = nullptr);
 
     [[nodiscard]] RemoteInfoPtr remoteInfo() const { return m_remote_info; };
-
-    [[nodiscard]] QList<TreeFileItem *> getDragItems() const { return m_dragItems; }
 
     void search(const QString &text);
 
@@ -57,6 +55,8 @@ protected:
     void resizeEvent(QResizeEvent *event) override;
 
     void keyPressEvent(QKeyEvent *event) override;
+
+    void keyReleaseEvent(QKeyEvent *event) override;
 
     void mousePressEvent(QMouseEvent *event) override;
 
@@ -101,8 +101,6 @@ signals:
 
     void pathChanged(const QString &);
 
-    void fileCopied(const QList<TreeFileItem *> &);
-
     void pasted(const RcloneFilePtr &);
 
     void
@@ -110,6 +108,8 @@ signals:
               const Rclone::TaskType &type = Rclone::Unknown);
 
     void ctrlFPressed();
+
+    void resized();
 
 };
 

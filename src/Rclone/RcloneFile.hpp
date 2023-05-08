@@ -10,6 +10,7 @@
 #include <QDateTime>
 #include <QFile>
 #include <QDir>
+#include <QIcon>
 #include <QJsonDocument>
 #include <Remote.h>
 
@@ -66,6 +67,8 @@ public:
     void setObjs(uint32_t objs);
 
     [[nodiscard]] QString getFileType() const;
+
+    [[nodiscard]] QIcon getIcon();
 
     // define copy operator and copy constructor
     RcloneFile(const RcloneFile &other)
