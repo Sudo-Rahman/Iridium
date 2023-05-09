@@ -64,6 +64,8 @@ protected:
 
     void dragMoveEvent(QDragMoveEvent *event) override;
 
+    bool event(QEvent *event) override;
+
 protected slots:
 
     void doubleClick(const QModelIndex &index);

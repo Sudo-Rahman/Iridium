@@ -29,7 +29,7 @@ void RoundedButton::paintEvent(QPaintEvent *event)
 
     painter.setPen(QPushButton::palette().color(QPalette::Light));
     m_click ? painter.setBrush(QPushButton::palette().color(QPalette::Window)) : painter.setBrush(
-            QPushButton::palette().color(QPalette::Light));
+            QPushButton::palette().color(QPalette::Mid).lighter(130));
 
     // draw rounded rect
     QRect rect = this->rect().marginsRemoved(QMargins(5, 5, 5, 5));

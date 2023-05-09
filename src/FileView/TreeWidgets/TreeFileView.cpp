@@ -78,11 +78,10 @@ void TreeFileView::initUI()
     setDragDropMode(QAbstractItemView::DragDrop);
 
     auto p = QTreeView::palette();
-    p.setColor(QPalette::Highlight, QWidget::palette().color(QPalette::Midlight));
     p.setColor(QPalette::HighlightedText, QWidget::palette().color(QPalette::Text));
     // if other than macos change alternate base color
     if (QSysInfo::productType() not_eq "macos")
-        p.setColor(QPalette::AlternateBase, QWidget::palette().color(QPalette::Mid));
+        p.setColor(QPalette::AlternateBase, QWidget::palette().color(QPalette::Midlight));
     setPalette(p);
 }
 
@@ -912,4 +911,11 @@ void TreeFileView::search(const QString &text)
         else
             setRowHidden(i, QTreeView::rootIndex(), true);
     }
+}
+
+bool TreeFileView::event(QEvent *event) {
+    if(event->type() == QEvent::FocusOut){
+        selectionModel()->clearSelection();
+    }
+    return QTreeView::event(event);
 }

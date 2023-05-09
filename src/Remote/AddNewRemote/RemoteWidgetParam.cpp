@@ -96,8 +96,8 @@ void RemoteWidgetParam::paintEvent(QPaintEvent *event)
     painter.setRenderHint(QPainter::Antialiasing);
 
     painter.setPen(QGroupBox::palette().color(QPalette::Light));
-    m_click ? painter.setBrush(QGroupBox::palette().color(QPalette::Window)) : painter.setBrush(
-            QGroupBox::palette().color(QPalette::Light));
+    m_click ? painter.setBrush(QApplication::palette().color(QPalette::Window)) : painter.setBrush(
+            QApplication::palette().color(QPalette::Mid).lighter(130));
 
     // draw rounded rect
     QRect rect = this->rect().marginsRemoved(QMargins(5, 5, 5, 5));
