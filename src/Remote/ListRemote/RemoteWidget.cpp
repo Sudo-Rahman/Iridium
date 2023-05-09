@@ -159,10 +159,11 @@ void RemoteWidget::init()
             return;
         }
         auto msgbox = QMessageBox(QMessageBox::Question, "Suppression",
-                                  "Voulez-vous vraiment supprimer ce remote ?",
-                                  QMessageBox::Yes | QMessageBox::No, this);
+                                  "Voulez-vous vraiment supprimer ce remote ?");
+        msgbox.addButton(tr("Oui"), QMessageBox::YesRole);
+        msgbox.addButton(tr("Non"), QMessageBox::NoRole);
 
-        if (msgbox.exec() == QMessageBox::Yes)
+        if (msgbox.exec() == QMessageBox::YesRole)
         {
             if (m_remote_info->isLocal())
                 Settings::deleteRemote(m_remote_info);

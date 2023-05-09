@@ -24,12 +24,15 @@ Q_OBJECT
     std::vector<RemoteInfoPtr> m_remotes{};
     QComboBox *m_remotes_comboBox{};
     QLineEdit *m_search{};
-    QPushButton *m_button{};
+    QPushButton *m_start{}, *m_stop;
     QVBoxLayout *m_layout{};
     SearchTableView *m_search_view{};
 
 public:
     explicit SearchWidget(QWidget *parent = nullptr);
+
+protected:
+    bool event(QEvent *event) override;
 };
 
 

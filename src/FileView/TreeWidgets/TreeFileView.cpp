@@ -13,6 +13,7 @@
 #include <chrono>
 #include <QLineEdit>
 #include <QLayout>
+#include <QPushButton>
 #include <QDialogButtonBox>
 #include <QDropEvent>
 #include <QDrag>
@@ -70,6 +71,7 @@ void TreeFileView::initUI()
 
     connectSignals();
 
+    header()->setMinimumSectionSize(50);
     setColumnWidth(0, 200);
     setColumnWidth(1, 50);
 
@@ -124,10 +126,8 @@ void TreeFileView::connectSignals()
     {
         if (logicalIndex == 0 and newSize < 200)
             setColumnWidth(0, 200);
-        if (logicalIndex == 1 and newSize < 50)
-            setColumnWidth(1, 50);
-        if (logicalIndex == 2 and newSize < 100)
-            setColumnWidth(2, 100);
+        if (logicalIndex == 2 and newSize < 120)
+            setColumnWidth(2, 120);
         if (logicalIndex == 3 and newSize < 100)
         {
             setColumnWidth(3, 100);
@@ -527,13 +527,15 @@ void TreeFileView::deleteFile(const QList<TreeFileItem *> &items)
     if (files.isEmpty())
         return;
     auto msgb = QMessageBox(QMessageBox::Question, tr("Suppression"),
-                            tr("Suppression de ") + QString::number(files.size()) + tr(" fichiers"),
-                            QMessageBox::Yes | QMessageBox::No, this);
+                            tr("Suppression de ") + QString::number(files.size()) + (files.size() > 1 ? tr(" fichiers") : tr(" fichier")) + " ?");
 
-    msgb.setDefaultButton(QMessageBox::No);
-    msgb.setDetailedText(files.join("\n"));
+    msgb.addButton(tr("Supprimer"), QMessageBox::YesRole);
+    auto cancel = msgb.addButton(tr("Annuler"), QMessageBox::NoRole);
+    if (files.size()<5){
+        msgb.setDetailedText(files.join("\n"));
+    }
     msgb.setInformativeText(tr("Cette action est irréversible."));
-    if (msgb.exec() == QMessageBox::No)
+    if (msgb.exec() == QMessageBox::NoRole)
         return;
     for (auto item: items)
     {
@@ -622,7 +624,7 @@ bool TreeFileView::fileIsInFolder(const QString &name, TreeFileItem *folder)
     // for each all children
     for (int i = 0; i < folder->rowCount(); i++)
     {
-        auto *item = dynamic_cast<TreeFileItem *>(folder->child(i));
+        auto *item = dynamic_cast<TreeFileItem *>(folder->child(i,0));
         if (item == nullptr)
             continue;
         if (name == item->getFile()->getName())

@@ -7,6 +7,7 @@
 #include "ListRemoteWidget.hpp"
 #include <AddNewRemoteDialog.hpp>
 #include <Settings.hpp>
+#include <QPalette>
 
 /**
  * @brief constructeur
@@ -14,6 +15,10 @@
  */
 ListRemoteWidget::ListRemoteWidget(QWidget *parent) : QScrollArea(parent)
 {
+    // background transparent
+    auto pal = this->palette();
+    pal.setColor(QPalette::Window, Qt::transparent);
+    setPalette(pal);
     setWidgetResizable(true);
     auto *widget = new QWidget(this);
     setWidget(widget);

@@ -22,29 +22,6 @@ RemoteConfigParamsFrame::RemoteConfigParamsFrame(QWidget *parent) : QFrame(paren
 
     m_remoteName = new QLineEdit(this);
     m_formLayout->addRow(tr("Nom : "), m_remoteName);
-
-
-    m_rclone = RcloneManager::get();
-    connect(m_rclone.get(), &Rclone::finished, this, [this](int exit)
-    {
-        if (exit == 0)
-        {
-            emit remoteAdded();
-            QMessageBox::information(this, tr("Succès"),
-                                     tr("Le disque %1 a été ajouté avec succès").arg(m_remoteName->text()));
-            clearAllFields();
-            m_cancel->hide();
-            m_login->show();
-        } else
-        {
-            auto msgBox = QMessageBox();
-            msgBox.setWindowTitle(tr("Erreur"));
-            msgBox.setText(tr("Une erreur est survenue lors de la configuration du serveur distant !"));
-            msgBox.setDetailedText(m_rclone->readAllError().back().c_str());
-            msgBox.setStandardButtons(QMessageBox::Ok);
-            msgBox.exec();
-        }
-    });
 }
 
 /**
@@ -74,10 +51,7 @@ void RemoteConfigParamsFrame::createUi()
     connect(m_cancel, &QPushButton::clicked, this, [this]()
     {
         if (m_rclone->state() == Rclone::Running)
-        {
-            m_rclone->disconnect();
             m_rclone->terminate();
-        }
         m_cancel->hide();
         m_login->show();
     });
@@ -108,6 +82,28 @@ void RemoteConfigParamsFrame::addRemote()
         m_messLabel->setText(tr("Les champs en rouge sont obligatoires !"));
         return;
     }
+
+    m_rclone = RcloneManager::get();
+    connect(m_rclone.get(), &Rclone::finished, this, [this](int exit)
+    {
+        if (exit == 0)
+        {
+            emit remoteAdded();
+            QMessageBox::information(this, tr("Succès"),
+                                     tr("Le disque %1 a été ajouté avec succès").arg(m_remoteName->text()));
+            clearAllFields();
+            m_cancel->hide();
+            m_login->show();
+        } else
+        {
+            auto msgBox = QMessageBox();
+            msgBox.setWindowTitle(tr("Erreur"));
+            msgBox.setText(tr("Une erreur est survenue lors de la configuration du serveur distant !"));
+            msgBox.setDetailedText(m_rclone->readAllError().back().c_str());
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.exec();
+        }
+    });
 
     auto rclone_liste_remote = RcloneManager::get();
     rclone_liste_remote->listRemotes();

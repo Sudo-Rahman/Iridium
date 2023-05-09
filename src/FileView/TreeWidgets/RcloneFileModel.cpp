@@ -88,13 +88,10 @@ void RcloneFileModel::addItem(const RcloneFilePtr &file, TreeFileItem *parent)
         {
             if (exit not_eq 0)
             {
-                auto msgBox = QMessageBox();
-                msgBox.setWindowTitle(tr("Erreur"));
-                msgBox.setText(
-                        tr("Impossible de se connecter au remote %1 !").QString::arg(m_remote_info->name().c_str()));
-                msgBox.setIcon(QMessageBox::Critical);
+                auto msgBox = QMessageBox(QMessageBox::Critical, tr("Erreur"),
+                                          tr("Impossible de se connecter au remote %1 !").arg(
+                                                  m_remote_info->name().c_str()), QMessageBox::Ok);
                 msgBox.setDetailedText(rclone->readAllError().back().c_str());
-                msgBox.setStandardButtons(QMessageBox::Ok);
                 msgBox.exec();
             }
             m_check_is_valid = true;

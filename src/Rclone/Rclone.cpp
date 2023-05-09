@@ -206,7 +206,7 @@ void Rclone::search(const std::string &name, const RemoteInfo &info)
                     std::regex date_regex("([0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{9})");
                     std::smatch match;
                     std::regex_search(line, match, size_regex);
-                    json.emplace("Size", stoi(match[0].str()));
+                    json.emplace("Size", std::stoll(match[0].str()));
                     std::regex_search(line, match, date_regex);
                     json.emplace("ModTime", match[0].str());
                     auto path = match.suffix().str().substr(1, match.suffix().str().size() - 1);
@@ -217,10 +217,10 @@ void Rclone::search(const std::string &name, const RemoteInfo &info)
                     emit searchRefresh(json);
                 } catch (std::out_of_range &e)
                 {
-                    std::cerr << e.what() << "probleme search" << std::endl;
+                    std::cerr << e.what() << " probleme search " <<line<< std::endl;
                 }
             });
-    execute({"lsl", info.m_path, "--filter=+ *" + name + "*", "--filter=- *"});
+    execute({"lsl", info.m_path, "--filter=+ *"+name+"*", "--filter=- *", "--ignore-case"});
 }
 
 
@@ -279,7 +279,7 @@ void Rclone::execute(const vector<string> &args)
                 auto th1 = boost::thread(
                         [this, &err, &line_err]
                         {
-                            while (getline(err, line_err))
+                            while (getline(err, line_err) )
                             {
                                 if (m_error.size() > 1000)
                                     m_error.clear();
@@ -339,6 +339,7 @@ void Rclone::terminate()
     if (m_state == Running)
     {
         cout << "process rclone kill" << endl;
+        m_thread->interrupt();
         m_child.detach();
 #ifdef _WIN32
         const auto explorer = OpenProcess(PROCESS_TERMINATE, false, m_child.id());

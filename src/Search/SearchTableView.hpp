@@ -19,18 +19,26 @@ class SearchTableView : public QTableView
 Q_OBJECT
 
     QStandardItemModel *m_model{};
-    RclonePtr m_rclone{};
-    boost::thread m_thread{};
+    std::vector<RclonePtr> m_rclones{};
+    std::vector<boost::thread> m_threads{};
+    std::atomic_uint8_t m_searching = 0;
 
 public :
     explicit SearchTableView(QWidget *parent = nullptr);
 
     void search(const QString &text, const RemoteInfoPtr &remoteInfo);
 
+    void stopAllSearch();
+
 private:
     void addFile(const boost::json::object &file, const RemoteInfoPtr &remoteInfo);
 
     void showCustomContextMenu();
+
+    void terminateSearch();
+
+protected:
+    void resizeEvent(QResizeEvent *event) override;
 
     signals:
     void searchFinished();

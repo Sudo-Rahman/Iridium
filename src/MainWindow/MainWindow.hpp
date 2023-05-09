@@ -7,24 +7,16 @@
 
 #include <QMainWindow>
 #include <QCoreApplication>
-#include <QSettings>
 #include <QLayout>
-#include <QSplitter>
-#include <Rclone.hpp>
-#include <ListRemoteWidget.hpp>
-#include <FileViewWidget.hpp>
-#include <TaskTreeView.hpp>
+#include <QTabWidget>
 
 
 class MainWindow : public QMainWindow
 {
 Q_OBJECT
 
-    ListRemoteWidget *m_list_remoteWidget{};
-    FileViewWidget *m_file_viewWidget{};
     QHBoxLayout *m_layout{};
-    QSplitter *m_splitter{};
-    TaskTreeView *m_task_treeView{};
+    QTabWidget *m_tabWidget{};
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
