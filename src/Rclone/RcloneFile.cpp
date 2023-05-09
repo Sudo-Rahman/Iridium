@@ -191,3 +191,18 @@ QIcon RcloneFile::getIcon()
     return ico;
 }
 
+RcloneFile RcloneFile::getParentDir() const
+{
+    auto rcloneFile = *this;
+    auto lst = rcloneFile.getPath().split("/");
+    if(lst.size() == 1)
+        return rcloneFile;
+    if(lst.last().isEmpty())
+        lst.removeLast();
+    lst.removeLast();
+    rcloneFile.m_path = lst.join("/");
+    rcloneFile.m_path +="/";
+    rcloneFile.setIsDir(true);
+    return rcloneFile;
+}
+

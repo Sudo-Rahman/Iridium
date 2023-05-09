@@ -30,8 +30,8 @@ ListRemoteWidget::ListRemoteWidget(QWidget *parent) : QScrollArea(parent)
     m_layout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
     m_layout->setSpacing(10);
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum);
-    // padding
-    m_layout->setContentsMargins(10, 10, 5, 10);
+
+    m_layout->setContentsMargins(5, 10, 5, 10);
 
     m_expand = new QPushButton(this);
     m_expand->setCheckable(true);

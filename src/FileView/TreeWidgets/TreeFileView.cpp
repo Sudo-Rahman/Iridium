@@ -278,7 +278,6 @@ void TreeFileView::showContextMenu()
             }
             break;
         case ItemMenu::Action::Copy:
-            qDebug() << "copy";
             Iridium::Variable::clear_and_swap_copy_files(
                     [lisItem]
                     {

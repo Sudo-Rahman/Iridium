@@ -70,6 +70,8 @@ public:
 
     [[nodiscard]] QIcon getIcon();
 
+    [[nodiscard]] RcloneFile getParentDir() const;
+
     // define copy operator and copy constructor
     RcloneFile(const RcloneFile &other)
     {

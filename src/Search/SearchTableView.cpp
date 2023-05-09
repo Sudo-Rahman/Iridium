@@ -9,6 +9,7 @@
 #include <QMenu>
 #include <Variable.hpp>
 #include <QDirIterator>
+#include <memory>
 
 
 SearchTableView::SearchTableView(QWidget *parent) : QTableView(parent)
@@ -63,6 +64,11 @@ void SearchTableView::showCustomContextMenu()
             auto parent = menu.addAction(tr("Copier le dossier parent"));
             parent->setIcon(style()->standardIcon(QStyle::SP_DirIcon));
             copie->setText(tr("Copier le fichier"));
+            connect(parent, &QAction::triggered, this, [this, items]()
+            {
+                auto item = dynamic_cast<SearchTableItem *>(m_model->itemFromIndex(items[0]));
+                Iridium::Variable::clear_and_swap_copy_files({std::make_shared<RcloneFile>(item->getFile()->getParentDir())});
+            });
         }
             break;
         default:
@@ -80,8 +86,8 @@ void SearchTableView::showCustomContextMenu()
             files.push_back(item_cast->getFile());
         }
         Iridium::Variable::clear_and_swap_copy_files(files);
+        return;
     }
-
 }
 
 void SearchTableView::addFile(const boost::json::object &file, const RemoteInfoPtr &remoteInfo)
