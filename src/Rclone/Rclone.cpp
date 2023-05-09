@@ -217,10 +217,10 @@ void Rclone::search(const std::string &name, const RemoteInfo &info)
                     emit searchRefresh(json);
                 } catch (std::out_of_range &e)
                 {
-                    std::cerr << e.what() << " probleme search " <<line<< std::endl;
+                    std::cerr << e.what() << " probleme search " << line << std::endl;
                 }
             });
-    execute({"lsl", info.m_path, "--filter=+ *"+name+"*", "--filter=- *", "--ignore-case"});
+    execute({"lsl", info.m_path, "--filter=+ *" + name + "*", "--filter=- *", "--ignore-case"});
 }
 
 
@@ -279,7 +279,7 @@ void Rclone::execute(const vector<string> &args)
                 auto th1 = boost::thread(
                         [this, &err, &line_err]
                         {
-                            while (getline(err, line_err) )
+                            while (getline(err, line_err))
                             {
                                 if (m_error.size() > 1000)
                                     m_error.clear();
@@ -305,7 +305,7 @@ void Rclone::execute(const vector<string> &args)
                 m_finished(m_exit);
                 emit finished(m_exit);
                 m_state = Finsished;
-                if (m_lockable) { RcloneManager::finished(this); }
+                RcloneManager::finished(this);
             });
 }
 
@@ -471,6 +471,7 @@ uint8_t RcloneManager::m_nb_max_process = thread::hardware_concurrency();
 mutex RcloneManager::m_launch_mutex, RcloneManager::m_stop_mutex, RcloneManager::m_mutex_start;
 condition_variable RcloneManager::m_launch_cv, RcloneManager::m_stop_cv;
 deque<RcloneLocked> RcloneManager::m_launch_queue, RcloneManager::m_stop_queue;
+std::deque<RclonePtr> RcloneManager::m_rclones;
 
 boost::thread RcloneManager::m_launch_thread = boost::thread(
         []
@@ -528,7 +529,9 @@ boost::thread RcloneManager::m_stop_thread = boost::thread(
  */
 RclonePtr RcloneManager::get()
 {
-    return RclonePtr(new Rclone());
+    auto rclone = RclonePtr(new Rclone());
+    m_rclones.push_back(rclone);
+    return rclone;
 }
 
 void RcloneManager::launch(const RcloneLocked &rcloneLocked)
@@ -542,8 +545,17 @@ void RcloneManager::launch(const RcloneLocked &rcloneLocked)
  */
 void RcloneManager::finished(const Rclone *rclone)
 {
-    --RcloneManager::m_nb_rclone_locked;
-    RcloneManager::m_launch_cv.notify_one();
+    if (rclone->m_lockable)
+    {
+        --RcloneManager::m_nb_rclone_locked;
+        RcloneManager::m_launch_cv.notify_one();
+    } else
+    {
+        erase_if(m_rclones, [rclone](const RclonePtr &rclonePtr)
+        {
+            return rclonePtr.get() == rclone;
+        });
+    }
 }
 
 

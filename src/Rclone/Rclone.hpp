@@ -194,6 +194,7 @@ private:
     static std::condition_variable m_launch_cv, m_stop_cv;
     static boost::thread m_launch_thread, m_stop_thread;
     static std::deque<RcloneLocked> m_launch_queue, m_stop_queue;
+    static std::deque<RclonePtr> m_rclones;
 
 public:
 
