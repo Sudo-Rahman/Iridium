@@ -141,9 +141,12 @@ void RemoteWidget::init()
     rightLayout->setContentsMargins(0, 0, 0, 0);
     m_selected = new QLabel(this);
 
+
     auto *m_delete = new RoundedButton("✕", this);
     m_delete->setFixedSize(25, 25);
-    m_delete->setFont(QFont("Arial", 15));
+    // get max font size for m_delete
+    auto size = m_delete->fontMetrics().boundingRect(m_delete->text()).size();
+    m_delete->setFont(QFont("Arial", size.height() - 5));
     m_delete->setToolTip("Delete");
 
     rightLayout->addWidget(m_delete, 0, Qt::AlignTop | Qt::AlignRight);

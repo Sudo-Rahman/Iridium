@@ -9,12 +9,26 @@
 #include <QMenu>
 #include <Variable.hpp>
 #include <QDirIterator>
+#include <QProxyStyle>
 #include <memory>
 
+// https://stackoverflow.com/questions/74929660/qtableview-how-to-hide-dotted-line-border-when-no-items-are-selected
+class NoFocusOutlineStyle : public QProxyStyle
+{
+public:
+    void drawPrimitive(PrimitiveElement element,
+                       const QStyleOption* option,
+                       QPainter* painter,
+                       const QWidget* widget) const override
+    {
+        if (element == QStyle::PE_FrameFocusRect)
+            return;
+        QProxyStyle::drawPrimitive(element, option, painter, widget);
+    }
+};
 
 SearchTableView::SearchTableView(QWidget *parent) : QTableView(parent)
 {
-
     m_model = new QStandardItemModel(0, 6, this);
 
     m_model->setHorizontalHeaderLabels(
@@ -47,6 +61,10 @@ SearchTableView::SearchTableView(QWidget *parent) : QTableView(parent)
         if (size < horizontalHeader()->size().width())
             setColumnWidth(horizontalHeader()->count()-1, horizontalHeader()->size().width() - size + horizontalHeader()->sectionSize(horizontalHeader()->count()-1));
     });
+
+    setStyle(new NoFocusOutlineStyle());
+    setFrameStyle(QFrame::NoFrame);
+    setShowGrid(false);
 }
 
 void SearchTableView::showCustomContextMenu()

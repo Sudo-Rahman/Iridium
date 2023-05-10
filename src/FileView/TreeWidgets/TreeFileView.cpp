@@ -19,6 +19,7 @@
 #include <QDrag>
 #include <QMimeData>
 #include <QSysInfo>
+#include <QProxyStyle>
 #include <Settings.hpp>
 
 
@@ -38,6 +39,21 @@ public:
     [[nodiscard]] QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override
     {
         return {35, 35};
+    }
+};
+
+// https://stackoverflow.com/questions/74929660/qtableview-how-to-hide-dotted-line-border-when-no-items-are-selected
+class NoFocusOutlineStyle : public QProxyStyle
+{
+public:
+    void drawPrimitive(PrimitiveElement element,
+                       const QStyleOption *option,
+                       QPainter *painter,
+                       const QWidget *widget) const override
+    {
+        if (element == QStyle::PE_FrameFocusRect)
+            return;
+        QProxyStyle::drawPrimitive(element, option, painter, widget);
     }
 };
 
@@ -72,8 +88,7 @@ void TreeFileView::initUI()
     connectSignals();
 
     header()->setMinimumSectionSize(50);
-    setColumnWidth(0, 200);
-    setColumnWidth(1, 50);
+    setColumnWidth(0, 0);
 
     setDragDropMode(QAbstractItemView::DragDrop);
 
@@ -83,6 +98,8 @@ void TreeFileView::initUI()
     if (QSysInfo::productType() not_eq "macos")
         p.setColor(QPalette::AlternateBase, QWidget::palette().color(QPalette::Midlight));
     setPalette(p);
+
+    setStyle(new NoFocusOutlineStyle());
 }
 
 TreeFileView::TreeFileView(QWidget *parent) : QTreeView(parent)
@@ -123,8 +140,8 @@ void TreeFileView::connectSignals()
 
     connect(header(), &QHeaderView::sectionResized, this, [this](int logicalIndex, int oldSize, int newSize)
     {
-        if (logicalIndex == 0 and newSize < 200)
-            setColumnWidth(0, 200);
+        if (logicalIndex == 0 and newSize < QWidget::width() * .35)
+            setColumnWidth(0, QWidget::width() * .35);
         if (logicalIndex == 2 and newSize < 120)
             setColumnWidth(2, 120);
         if (logicalIndex == 3 and newSize < 100)
@@ -154,8 +171,8 @@ void TreeFileView::resizeEvent(QResizeEvent *event)
     QAbstractItemView::resizeEvent(event);
     if (header()->count() > 0)
         header()->setSectionResizeMode(0, QHeaderView::Interactive);
-    if (header()->sectionSize(0) < 200)
-        setColumnWidth(0, 200);
+    if (header()->sectionSize(0) < QWidget::width() * .35)
+        setColumnWidth(0, QWidget::width() * .35);
     emit resized();
 }
 
@@ -164,6 +181,7 @@ void TreeFileView::resizeEvent(QResizeEvent *event)
  */
 void TreeFileView::back()
 {
+    if (not m_model) return;
     if (m_index_back.length() > 0)
     {
         auto index = m_index_back.back();
@@ -180,6 +198,7 @@ void TreeFileView::back()
  */
 void TreeFileView::front()
 {
+    if (not m_model) return;
     if (m_index_front.length() > 0)
     {
         auto index = m_index_front.back();
@@ -196,6 +215,8 @@ void TreeFileView::front()
  */
 void TreeFileView::expand(const QModelIndex &index)
 {
+    if (not m_model) return;
+
     auto *item = dynamic_cast<TreeFileItem *>(m_model->itemFromIndex(index));
     m_model->setExpandOrDoubleClick(false);
 
@@ -210,6 +231,8 @@ void TreeFileView::expand(const QModelIndex &index)
  */
 void TreeFileView::doubleClick(const QModelIndex &index)
 {
+    if (not m_model) return;
+
     auto *item = dynamic_cast<TreeFileItem *>(m_model->itemFromIndex(index));
 
     if (item == nullptr)
@@ -315,14 +338,16 @@ void TreeFileView::showContextMenu()
  */
 void TreeFileView::changeRemote(const RemoteInfoPtr &info)
 {
-    if (m_remote_info == info)
-        return;
-
     if (info == nullptr)
     {
-        QTreeView::setModel(new QStandardItemModel(this));
+        auto model = new QStandardItemModel(this);
+        model->setHorizontalHeaderLabels({tr("Nom"), tr("Taille"), tr("Date de modification"), tr("Type")});
+        QTreeView::setModel(model);
         return;
     }
+
+    if (m_remote_info == info)
+        return;
 
     m_remote_info = info;
     delete m_model;
@@ -525,11 +550,13 @@ void TreeFileView::deleteFile(const QList<TreeFileItem *> &items)
     if (files.isEmpty())
         return;
     auto msgb = QMessageBox(QMessageBox::Question, tr("Suppression"),
-                            tr("Suppression de ") + QString::number(files.size()) + (files.size() > 1 ? tr(" fichiers") : tr(" fichier")) + " ?");
+                            tr("Suppression de ") + QString::number(files.size()) +
+                            (files.size() > 1 ? tr(" fichiers") : tr(" fichier")) + " ?");
 
     msgb.addButton(tr("Supprimer"), QMessageBox::YesRole);
     auto cancel = msgb.addButton(tr("Annuler"), QMessageBox::NoRole);
-    if (files.size()<5){
+    if (files.size() < 5)
+    {
         msgb.setDetailedText(files.join("\n"));
     }
     msgb.setInformativeText(tr("Cette action est irréversible."));
@@ -578,6 +605,8 @@ void TreeFileView::removeItem(TreeFileItem *item)
  */
 void TreeFileView::reload(TreeFileItem *treeItem)
 {
+    if (not m_model) return;
+
     auto lstItem = treeItem == nullptr ? getSelectedItems() : QList<TreeFileItem *>{treeItem};
 
     // all tree selected
@@ -622,7 +651,7 @@ bool TreeFileView::fileIsInFolder(const QString &name, TreeFileItem *folder)
     // for each all children
     for (int i = 0; i < folder->rowCount(); i++)
     {
-        auto *item = dynamic_cast<TreeFileItem *>(folder->child(i,0));
+        auto *item = dynamic_cast<TreeFileItem *>(folder->child(i, 0));
         if (item == nullptr)
             continue;
         if (name == item->getFile()->getName())
@@ -805,8 +834,8 @@ void TreeFileView::mousePressEvent(QMouseEvent *event)
 
     // get items to drag
     m_dragItems = getSelectedItems(true);
-    if(not m_dragItems.contains(m_model->itemFromIndex(m_clickIndex)))
-        m_dragItems<<dynamic_cast<TreeFileItem *>(m_model->itemFromIndex(m_clickIndex));
+    if (not m_dragItems.contains(m_model->itemFromIndex(m_clickIndex)))
+        m_dragItems << dynamic_cast<TreeFileItem *>(m_model->itemFromIndex(m_clickIndex));
 
     m_clickTime = QDateTime::currentMSecsSinceEpoch();
     QTreeView::mousePressEvent(event);
@@ -913,8 +942,10 @@ void TreeFileView::search(const QString &text)
     }
 }
 
-bool TreeFileView::event(QEvent *event) {
-    if(event->type() == QEvent::FocusOut){
+bool TreeFileView::event(QEvent *event)
+{
+    if (event->type() == QEvent::FocusOut)
+    {
         selectionModel()->clearSelection();
     }
     return QTreeView::event(event);

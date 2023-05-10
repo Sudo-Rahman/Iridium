@@ -62,7 +62,7 @@ TreeFileItem *TreeFileItem::getParent() const
 
 void TreeFileItem::initIcon()
 {
-    setIcon(m_file->getIcon());
+    setIcon(m_file->getIcon().pixmap(32, 32));
     setToolTip(m_file->getName());
 }
 
