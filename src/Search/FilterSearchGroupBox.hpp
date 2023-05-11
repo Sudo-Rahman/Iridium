@@ -16,7 +16,7 @@ class FilterSearchGroupBox : public QGroupBox
 Q_OBJECT
 
     QListView *m_listView{};
-    QPushButton *m_add_include, *m_add_exclude{}, *m_remove{};
+    QPushButton *m_add_include, *m_add_exclude{}, *m_remove{},*m_up{},*m_down{},*m_edit{};
     QVBoxLayout *m_layout{};
 
 public:

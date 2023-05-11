@@ -16,6 +16,9 @@
         <file>ressources/smb.png</file>
         <file>ressources/add.png</file>
         <file>ressources/remove.png</file>
+        <file>ressources/arrow-down.png</file>
+        <file>ressources/arrow-up.png</file>
+        <file>ressources/edit.png</file>
         <file>icons/fluent/index.theme</file>
         <file>icons/fluent/scalable/places</file>
         <file>icons/fluent/scalable/mimetypes</file>
