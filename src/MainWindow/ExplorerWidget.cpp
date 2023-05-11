@@ -2,10 +2,10 @@
 // Created by sr-71 on 09/05/2023.
 //
 
-#include "MainWidget.hpp"
+#include "ExplorerWidget.hpp"
 
 
-MainWidget::MainWidget(QWidget *parent) : QWidget(parent)
+ExplorerWidget::ExplorerWidget(QWidget *parent) : QWidget(parent)
 {
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     m_layout = new QHBoxLayout(this);
@@ -35,7 +35,7 @@ MainWidget::MainWidget(QWidget *parent) : QWidget(parent)
     connectSignals();
 }
 
-void MainWidget::connectSignals()
+void ExplorerWidget::connectSignals()
 {
     connect(m_list_remoteWidget, &ListRemoteWidget::remoteClicked, this,
             [this](const std::shared_ptr<remotes_selected> &remotes)

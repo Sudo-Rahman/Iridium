@@ -37,7 +37,7 @@ ListRemoteWidget::ListRemoteWidget(QWidget *parent) : QScrollArea(parent)
     m_expand->setCheckable(true);
     m_expand->setChecked(true);
     m_expand->setIcon(Settings::hardDriveIcon());
-    m_expand->setMaximumWidth(35);
+    m_expand->setFixedWidth(35);
     // rounded button
     m_layout->addWidget(m_expand);
 

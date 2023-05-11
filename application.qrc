@@ -14,6 +14,8 @@
         <file>ressources/pcloud.png</file>
         <file>ressources/box.png</file>
         <file>ressources/smb.png</file>
+        <file>ressources/add.png</file>
+        <file>ressources/remove.png</file>
         <file>icons/fluent/index.theme</file>
         <file>icons/fluent/scalable/places</file>
         <file>icons/fluent/scalable/mimetypes</file>

@@ -17,9 +17,9 @@ class NoFocusOutlineStyle : public QProxyStyle
 {
 public:
     void drawPrimitive(PrimitiveElement element,
-                       const QStyleOption* option,
-                       QPainter* painter,
-                       const QWidget* widget) const override
+                       const QStyleOption *option,
+                       QPainter *painter,
+                       const QWidget *widget) const override
     {
         if (element == QStyle::PE_FrameFocusRect)
             return;
@@ -32,7 +32,7 @@ SearchTableView::SearchTableView(QWidget *parent) : QTableView(parent)
     m_model = new QStandardItemModel(0, 6, this);
 
     m_model->setHorizontalHeaderLabels(
-            {tr("Nom"),tr("Remote"), tr("Chemin"), tr("Taille"), tr("Date de modification"), tr("Type")});
+            {tr("Nom"), tr("Remote"), tr("Chemin"), tr("Taille"), tr("Date de modification"), tr("Type")});
 
     QTableView::setModel(m_model);
     QTableView::setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -41,7 +41,7 @@ SearchTableView::SearchTableView(QWidget *parent) : QTableView(parent)
     QTableView::setContextMenuPolicy(Qt::CustomContextMenu);
     horizontalHeader()->setMinimumSectionSize(120);
 
-    setColumnWidth(0,0);
+    setColumnWidth(0, 0);
 
     QTableView::setSortingEnabled(true);
 
@@ -52,14 +52,16 @@ SearchTableView::SearchTableView(QWidget *parent) : QTableView(parent)
     connect(horizontalHeader(), &QHeaderView::sectionResized, this, [this](int logicalIndex, int oldSize, int newSize)
     {
 
-        if (logicalIndex == 0 and newSize < QWidget::width()*.4)
-            setColumnWidth(0, QWidget::width()*.4);
+        if (logicalIndex == 0 and newSize < QWidget::width() * .4)
+            setColumnWidth(0, QWidget::width() * .4);
         // get size of all columns
         int size = 0;
         for (int i = 0; i < horizontalHeader()->count(); i++)
             size += horizontalHeader()->sectionSize(i);
         if (size < horizontalHeader()->size().width())
-            setColumnWidth(horizontalHeader()->count()-1, horizontalHeader()->size().width() - size + horizontalHeader()->sectionSize(horizontalHeader()->count()-1));
+            setColumnWidth(horizontalHeader()->count() - 1, horizontalHeader()->size().width() - size +
+                                                            horizontalHeader()->sectionSize(
+                                                                    horizontalHeader()->count() - 1));
     });
 
     setStyle(new NoFocusOutlineStyle());
@@ -85,7 +87,8 @@ void SearchTableView::showCustomContextMenu()
             connect(parent, &QAction::triggered, this, [this, items]()
             {
                 auto item = dynamic_cast<SearchTableItem *>(m_model->itemFromIndex(items[0]));
-                Iridium::Variable::clear_and_swap_copy_files({std::make_shared<RcloneFile>(item->getFile()->getParentDir())});
+                Iridium::Variable::clear_and_swap_copy_files(
+                        {std::make_shared<RcloneFile>(item->getFile()->getParentDir())});
             });
         }
             break;
@@ -128,26 +131,16 @@ void SearchTableView::addFile(const boost::json::object &file, const RemoteInfoP
     m_model->appendRow(row);
 }
 
-void SearchTableView::search(const QString &text, const RemoteInfoPtr &remoteInfo)
+void SearchTableView::searchLocal(const QString &text, const RemoteInfoPtr &remoteInfo)
 {
-    if (text.isEmpty())
+    if (text.size() < 3)
         return;
-    if (not remoteInfo->isLocal())
-    {
-        auto rclone = RcloneManager::getLockable();
-        connect(rclone.get(), &Rclone::searchRefresh, this, [this, remoteInfo](const boost::json::object &file)
-        {
-            addFile(file, remoteInfo);
-        });
-        connect(rclone.get(), &Rclone::finished, this, &SearchTableView::terminateSearch);
-        rclone->search(text.toStdString(), *remoteInfo);
-        m_searching++;
-        m_rclones.push_back(rclone);
-    } else
-    {
-        auto th = boost::thread(
-                [this, text, remoteInfo]
+    auto th = boost::thread(
+            [this, text, remoteInfo]
+            {
+                try
                 {
+                    emit searchStarted();
                     m_searching++;
                     QDirIterator it(remoteInfo->m_path.c_str(),
                                     QDir::Files | QDir::System | QDir::Hidden | QDir::NoDotAndDotDot,
@@ -174,28 +167,62 @@ void SearchTableView::search(const QString &text, const RemoteInfoPtr &remoteInf
                                                        new SearchTableItem(5, rcloneFile)
                                                });
                         }
+                        boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
                     }
                     terminateSearch();
-                });
-        m_threads.push_back(std::move(th));
-    }
+                }catch(boost::thread_interrupted &e){}
+            });
+    m_threads.push_back(std::move(th));
+}
+
+void SearchTableView::searchDistant(const std::vector<Rclone::Filter> &filters, const RemoteInfoPtr &remoteInfo)
+{
+    if (filters.empty())
+        return;
+    auto th = boost::thread(
+            [this, filters, remoteInfo]
+            {
+                auto rclone = RcloneManager::get();
+                try
+                {
+                    emit searchStarted();
+                    connect(rclone.get(), &Rclone::searchRefresh,
+                            [this, remoteInfo](const boost::json::object &file)
+                            {
+                                addFile(file, remoteInfo);
+                            });
+                    connect(rclone.get(), &Rclone::finished, this, &SearchTableView::terminateSearch);
+                    rclone->search(filters, *remoteInfo);
+                    m_searching++;
+                    m_rclones.push_back(rclone);
+                    while (not boost::this_thread::interruption_requested())
+                    {
+                        boost::this_thread::interruption_point();
+                        boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
+                    }
+                } catch (const boost::thread_interrupted &e) { rclone->terminate(); }
+            }
+    );
+    m_threads.push_back(std::move(th));
 }
 
 void SearchTableView::terminateSearch()
 {
-    if ((m_searching--) ==1)
+    if ((m_searching--) == 1)
         emit searchFinished();
 }
 
-void SearchTableView::stopAllSearch() {
-    for(auto &thread : m_threads){
+void SearchTableView::stopAllSearch()
+{
+    m_searching = 0;
+    for (auto &thread: m_threads)
+    {
         thread.interrupt();
         thread.join();
     }
-    for(auto &rclone : m_rclones)
-        rclone->terminate();
-    m_threads.clear();
     m_rclones.clear();
+    m_threads.clear();
+    emit searchFinished();
 }
 
 /**
@@ -209,6 +236,6 @@ void SearchTableView::resizeEvent(QResizeEvent *event)
     QAbstractItemView::resizeEvent(event);
     if (horizontalHeader()->count() > 0)
         horizontalHeader()->setSectionResizeMode(0, QHeaderView::Interactive);
-    if (horizontalHeader()->sectionSize(0) < QWidget::width()*.4)
-        setColumnWidth(0, QWidget::width()*.4);
+    if (horizontalHeader()->sectionSize(0) < QWidget::width() * .4)
+        setColumnWidth(0, QWidget::width() * .4);
 }

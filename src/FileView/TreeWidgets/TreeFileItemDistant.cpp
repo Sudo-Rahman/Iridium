@@ -16,4 +16,6 @@ TreeFileItemDistant::TreeFileItemDistant(const QString &path, const RemoteInfoPt
     setText(m_file->getName());
     QStandardItem::setData(m_file->getName(), SORT_ROLE);
     initIcon();
+    if(not m_file->isDir())
+        setFlags(flags() & ~Qt::ItemIsDropEnabled);
 }

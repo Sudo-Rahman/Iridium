@@ -2,8 +2,8 @@
 // Created by sr-71 on 09/05/2023.
 //
 
-#ifndef IRIDIUM_MAINWIDGET_HPP
-#define IRIDIUM_MAINWIDGET_HPP
+#ifndef IRIDIUM_EXPLORERWIDGET_HPP
+#define IRIDIUM_EXPLORERWIDGET_HPP
 
 #include <QLayout>
 #include <QSplitter>
@@ -14,7 +14,7 @@
 #include <TaskTreeView.hpp>
 
 
-class MainWidget : public QWidget
+class ExplorerWidget : public QWidget
 {
 Q_OBJECT
 
@@ -25,7 +25,7 @@ Q_OBJECT
     TaskTreeView *m_task_treeView{};
 
 public:
-    explicit MainWidget(QWidget *parent = nullptr);
+    explicit ExplorerWidget(QWidget *parent = nullptr);
 
 private:
     void connectSignals();
@@ -33,4 +33,4 @@ private:
 };
 
 
-#endif //IRIDIUM_MAINWIDGET_HPP
+#endif //IRIDIUM_EXPLORERWIDGET_HPP

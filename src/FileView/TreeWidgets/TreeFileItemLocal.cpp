@@ -14,4 +14,6 @@ TreeFileItemLocal::TreeFileItemLocal(const QString &path, const RemoteInfoPtr &r
     setText(m_file->getName());
     QStandardItem::setData(m_file->getName(), SORT_ROLE);
     initIcon();
+    if(not m_file->isDir())
+        setFlags(flags() & ~Qt::ItemIsDropEnabled);
 }

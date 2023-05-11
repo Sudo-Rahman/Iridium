@@ -26,7 +26,9 @@ Q_OBJECT
 public :
     explicit SearchTableView(QWidget *parent = nullptr);
 
-    void search(const QString &text, const RemoteInfoPtr &remoteInfo);
+    void searchLocal(const QString &text, const RemoteInfoPtr &remoteInfo);
+
+    void searchDistant(const std::vector<Rclone::Filter> &filters, const RemoteInfoPtr &remoteInfo);
 
     void stopAllSearch();
 
@@ -40,8 +42,11 @@ private:
 protected:
     void resizeEvent(QResizeEvent *event) override;
 
-    signals:
+signals:
+
     void searchFinished();
+
+    void searchStarted();
 
 };
 

@@ -33,7 +33,7 @@ Q_OBJECT
     friend class RcloneManager;
 
 private:
-    bool m_lockable = false;
+    bool m_lockable;
 
     Rclone() = default;
 
@@ -79,16 +79,34 @@ public:
         LogType
     };
 
+    enum FilterType
+    {
+        Include, Exclude
+    };
+
+    struct Filter
+    {
+        FilterType filter;
+        std::string value;
+
+        [[nodiscard]] std::string str() const{
+            std::string str = "--filter=";
+            filter == Include ? str += "+ " : str += "- ";
+            return {str + value};
+        }
+    };
+
 private:
 
     boost::process::child m_child{};
 
     static std::string m_path_rclone;
-    std::shared_ptr<boost::thread> m_thread{};
+    std::shared_ptr<boost::thread> m_thread{}, m_thread_out{}, m_thread_err{};
     std::vector<std::string> m_out{}, m_error{};
     std::map<std::string, std::string> m_map_data{};
     uint8_t m_exit{};
     Rclone::State m_state{Rclone::NotLaunched};
+    boost::process::ipstream m_out_ipstream{}, m_err_ipstream{};
 
     std::mutex m_mutex;
     std::condition_variable m_cv;
@@ -96,6 +114,7 @@ private:
     static std::map<Flag, flags_str> m_map_flags;
 
 public:
+    void terminate();
 
     static void setPathRclone(const std::string &pathRclone);
 
@@ -121,8 +140,6 @@ public:
 
     void waitForFinished();
 
-    void terminate();
-
     [[nodiscard]] State state() const;
 
     void waitForStarted();
@@ -145,7 +162,7 @@ public:
 
     void about(const RemoteInfo &info);
 
-    void search(const std::string &name, const RemoteInfo &info);
+    void search(const std::vector<Filter> &filters, const RemoteInfo &info);
 
 private:
     boost::signals2::signal<void(const std::string &)> m_readyRead{};
@@ -155,7 +172,6 @@ private:
     boost::signals2::signal<void(const int exit)> m_finished{};
 
     static boost::json::object parseJson(const std::string &str);
-
 
 
 signals:
@@ -190,9 +206,9 @@ class RcloneManager
 private:
     static std::atomic_int_fast8_t m_nb_rclone_locked;
     static uint8_t m_nb_max_process;
-    static std::mutex m_launch_mutex, m_stop_mutex, m_mutex_start;
+    static std::mutex m_launch_mutex, m_stop_mutex;
     static std::condition_variable m_launch_cv, m_stop_cv;
-    static boost::thread m_launch_thread, m_stop_thread;
+    static boost::thread m_launch_thread, m_stop_thread, m_terminate_thread;
     static std::deque<RcloneLocked> m_launch_queue, m_stop_queue;
     static std::deque<RclonePtr> m_rclones;
 
@@ -217,7 +233,7 @@ public:
 
 private:
 
-    static void finished(const Rclone *);
+    static void finished(Rclone *);
 
 };
 

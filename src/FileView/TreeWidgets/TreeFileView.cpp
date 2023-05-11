@@ -74,6 +74,7 @@ void TreeFileView::initUI()
     setFont(QFont("Arial", 15));
     setAlternatingRowColors(true);
     setUniformRowHeights(true);
+    setFocusPolicy(Qt::StrongFocus);
 
     header()->setSectionsMovable(true);
     header()->setFont(QFont("Arial", 13));
@@ -91,6 +92,7 @@ void TreeFileView::initUI()
     setColumnWidth(0, 0);
 
     setDragDropMode(QAbstractItemView::DragDrop);
+    setDropIndicatorShown(true);
 
     auto p = QTreeView::palette();
     p.setColor(QPalette::HighlightedText, QWidget::palette().color(QPalette::Text));
@@ -314,14 +316,7 @@ void TreeFileView::showContextMenu()
             break;
         case ItemMenu::Action::Delete:
         {
-            QList<TreeFileItem *> lst;
-            for (int i = 0; i < QTreeView::selectedIndexes().length(); i = i + m_model->columnCount())
-            {
-                auto index = QTreeView::selectedIndexes().at(i);
-                auto *item = dynamic_cast<TreeFileItem *>(m_model->itemFromIndex(index));
-                lst << item;
-            }
-            deleteFile(lst);
+            deleteFile(lisItem);
             break;
         }
         case ItemMenu::Action::NewFolder:
@@ -560,7 +555,8 @@ void TreeFileView::deleteFile(const QList<TreeFileItem *> &items)
         msgb.setDetailedText(files.join("\n"));
     }
     msgb.setInformativeText(tr("Cette action est irréversible."));
-    if (msgb.exec() == QMessageBox::NoRole)
+    msgb.exec();
+    if (msgb.clickedButton() == cancel)
         return;
     for (auto item: items)
     {
@@ -946,7 +942,7 @@ bool TreeFileView::event(QEvent *event)
 {
     if (event->type() == QEvent::FocusOut)
     {
-        selectionModel()->clearSelection();
+//        selectionModel()->clearSelection();
     }
     return QTreeView::event(event);
 }

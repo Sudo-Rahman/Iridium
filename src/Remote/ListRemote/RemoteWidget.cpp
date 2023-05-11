@@ -161,12 +161,13 @@ void RemoteWidget::init()
             QMessageBox::warning(this, tr("Suppression"), tr("Vous ne pouvez pas supprimer ce remote."));
             return;
         }
-        auto msgbox = QMessageBox(QMessageBox::Question, "Suppression",
-                                  "Voulez-vous vraiment supprimer ce remote ?");
-        msgbox.addButton(tr("Oui"), QMessageBox::YesRole);
-        msgbox.addButton(tr("Non"), QMessageBox::NoRole);
+        auto msgbox = QMessageBox(QMessageBox::Question, tr("Suppression"),
+                                  tr("Êtes-vous sûr de vouloir supprimer ce remote ?"));
+        auto yes = msgbox.addButton(tr("Oui"), QMessageBox::YesRole);
+        auto no = msgbox.addButton(tr("Non"), QMessageBox::NoRole);
+        msgbox.exec();
 
-        if (msgbox.exec() == QMessageBox::YesRole)
+        if (msgbox.clickedButton() == yes)
         {
             if (m_remote_info->isLocal())
                 Settings::deleteRemote(m_remote_info);
@@ -177,8 +178,8 @@ void RemoteWidget::init()
                 rclone->waitForFinished();
                 if (rclone->exitCode() != 0)
                 {
-                    auto msgb = QMessageBox(QMessageBox::Critical, "Suppression",
-                                            "Une erreur est survenue lors de la suppression du remote",
+                    auto msgb = QMessageBox(QMessageBox::Critical, tr("Suppression"),
+                                            tr("Une erreur est survenue lors de la suppression du remote"),
                                             QMessageBox::Ok, this);
                     msgb.setDetailedText(QString::fromStdString(rclone->readAllError().back()));
                     msgb.exec();

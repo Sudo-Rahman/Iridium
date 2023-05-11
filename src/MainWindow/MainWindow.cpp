@@ -7,8 +7,8 @@
 #include <QTimer>
 #include <Settings.hpp>
 #include <Menu/MenuBar.hpp>
-#include <SearchWidget.hpp>
-#include <MainWidget.hpp>
+#include "SearchWidget.hpp"
+#include <ExplorerWidget.hpp>
 
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
@@ -25,7 +25,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     m_tabWidget = new QTabWidget(this);
     setCentralWidget(m_tabWidget);
     m_tabWidget->setContentsMargins(0, 0, 0, 0);
-    m_tabWidget->addTab(new MainWidget(this), tr("Explorateur"));
+    m_tabWidget->addTab(new ExplorerWidget(this), tr("Explorateur"));
     m_tabWidget->addTab(new SearchWidget(this), tr("Recherche"));
 
 

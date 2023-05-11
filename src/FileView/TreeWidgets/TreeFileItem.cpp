@@ -23,6 +23,7 @@ TreeFileItem::TreeFileItem(const QString &path, const RemoteInfoPtr &remoteInfo,
     );
     setText(path);
     QStandardItem::setData(path, SORT_ROLE);
+    setFlags(flags() & ~Qt::ItemIsDropEnabled);
 }
 
 TreeFileItem::TreeFileItem(const int &column, const std::shared_ptr<RcloneFile> &file, TreeFileItem *parent) : m_parent(
@@ -53,6 +54,8 @@ TreeFileItem::TreeFileItem(const int &column, const std::shared_ptr<RcloneFile> 
         default:
             break;
     }
+    if(not m_file->isDir())
+        setFlags(flags() & ~Qt::ItemIsDropEnabled);
 }
 
 TreeFileItem *TreeFileItem::getParent() const
