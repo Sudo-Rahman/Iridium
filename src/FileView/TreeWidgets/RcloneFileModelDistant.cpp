@@ -67,22 +67,27 @@ void RcloneFileModelDistant::addItemStatic(const QString &path, TreeFileItem *pa
 {
     if (depth == 0)
         return;
-    if (depth == m_max_depth)
-        RcloneManager::stop(m_locked_rclone);
+    if (depth == m_max_depth) {
+        for(auto &item: m_locked_rclone)
+            item.cancel();
+        m_locked_rclone.clear();
+    }
 
     auto *tree_item = (parent->getParent() == nullptr ? parent : parent->getParent());
-    auto rclone = RcloneManager::getLockable();
+    auto rclone = RcloneManager::get(true);
     if (tree_item->state() == TreeFileItem::NotLoaded)
     {
         addProgressBar(tree_item->child(0, 0)->index());
         connect(rclone.get(), &Rclone::lsJsonFinished, this,
-                [depth, tree_item, path, parent, this](const QJsonDocument &doc)
+                [depth, tree_item, path, this](const QJsonDocument &doc)
                 {
+//            qDebug() << path << "loaded";
+//            qDebug() << doc;
                     tree_item->removeRow(0);
                     for (const auto &file: doc.array())
                     {
                         auto *item = new TreeFileItemDistant(path, m_remote_info, file.toObject());
-                        parent->appendRow(getItemList(item));
+                        tree_item->appendRow(getItemList(item));
                         if (item->getFile()->isDir())
                         {
                             item->appendRow(
@@ -94,7 +99,6 @@ void RcloneFileModelDistant::addItemStatic(const QString &path, TreeFileItem *pa
                 });
         connect(rclone.get(), &Rclone::started, this,
                 [tree_item] { tree_item->setState(TreeFileItem::Loading); });
-
         RcloneLocked rcloneLocked = {rclone, [rclone, path] { rclone->lsJson(path.toStdString()); }};
 
         m_locked_rclone.push_back(rcloneLocked);

@@ -180,7 +180,8 @@ void FilterSearchGroupBox::connectSignals()
     {
         auto model = dynamic_cast<QStandardItemModel *>(m_listView->model());
         auto item = dynamic_cast<FilterItem *>(model->item(m_listView->currentIndex().row()));
-        func(item,model);
+        if (item)
+            func(item,model);
     });
 }
 

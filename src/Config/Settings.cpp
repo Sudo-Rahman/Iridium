@@ -171,11 +171,11 @@ void Settings::init()
     loadSettings();
     Settings::changeDirIcon(static_cast<ThemeColor>(getValue<uint8_t>(DirIconColor)));
 
-
     boost::filesystem::path translation_dir;
     if (QSysInfo::productType() == "macos")
+    {
         translation_dir = dll::program_location().parent_path().parent_path().append("Translations");
-    else
+    }    else
         translation_dir = dll::program_location().parent_path().append("Translations");
 
     auto *translator = new QTranslator();

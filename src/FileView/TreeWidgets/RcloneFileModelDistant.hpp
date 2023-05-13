@@ -36,11 +36,6 @@ public:
 
     static uint8_t maxDepth() { return RcloneFileModelDistant::m_max_depth; }
 
-    ~RcloneFileModelDistant() override
-    {
-        RcloneManager::stop(m_locked_rclone);
-    };
-
 
 protected:
     void init() override;

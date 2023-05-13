@@ -10,6 +10,7 @@
 #include <boost/algorithm/string/join.hpp>
 #include <boost/chrono.hpp>
 #include <regex>
+#include <boost/asio.hpp>
 
 
 #ifdef _WIN32
@@ -19,6 +20,7 @@
 
 namespace bp = boost::process;
 namespace bj = boost::json;
+namespace ba = boost::asio;
 using namespace std;
 
 std::map<Rclone::Flag, Rclone::flags_str> Rclone::m_map_flags{
@@ -57,6 +59,7 @@ void Rclone::lsJson(const string &path)
                     } catch (boost::exception &e)
                     {
                         emit lsJsonFinished(QJsonDocument());
+                        cerr << boost::algorithm::join(m_out, "") << endl;
                         cerr << "Error: " << boost::diagnostic_information(e) << endl;
                     }
                 }
@@ -82,7 +85,7 @@ void Rclone::copyTo(const RcloneFile &src, const RcloneFile &dest)
                 bj::object json = parseJson(data);
                 if (not json.contains("error"))
                 {
-                    emit taskProgress(json);
+                    emit taskProgress(std::move(json));
                     m_map_data.clear();
                     m_map_data.emplace("json", boost::json::serialize(json));
                 }
@@ -216,7 +219,7 @@ void Rclone::search(const vector<Filter> &filters, const RemoteInfo &info)
                     auto name = path.substr(path.find_last_of('/') + 1, path.size() - 1);
                     json.emplace("Name", name);
                     json.emplace("IsDir", false);
-                    emit searchRefresh(json);
+                    emit searchRefresh(std::move(json));
                 } catch (std::out_of_range &e)
                 {
                     std::cerr << e.what() << " probleme search " << line << std::endl;
@@ -245,7 +248,7 @@ void Rclone::deleteRemote(const string &remote)
  */
 void Rclone::execute(const vector<string> &args)
 {
-    if (m_state == Stopped or m_state == Finsished)
+    if (m_state not_eq NotLaunched)
     {
         std::exception_ptr eptr = std::make_exception_ptr(
                 std::runtime_error("Rclone is not reusable"));
@@ -262,61 +265,80 @@ void Rclone::execute(const vector<string> &args)
     auto exe = m_path_rclone;
     const auto &argsEncoding = args;
 #endif
-    m_thread = make_shared<boost::thread>(
-            [this, exe, argsEncoding]
+    emit started();
+    m_state = Running;
+
+    m_ioc = make_unique<boost::asio::io_context>();
+    boost::asio::executor_work_guard<boost::asio::io_context::executor_type> work(m_ioc->get_executor());
+    m_pipe_err = make_unique<bp::async_pipe>(*m_ioc);
+    m_pipe_out = make_unique<bp::async_pipe>(*m_ioc);
+
+    m_child = bp::child(exe, bp::args(argsEncoding),
+                        bp::std_out > *m_pipe_out,
+                        bp::std_err > *m_pipe_err,
+                        bp::on_exit([this](int exit, const std::error_code &ec)
+                                    {
+                                        m_state = Finsished;
+                                        m_ioc->stop();
+                                        m_exit = exit;
+                                        m_finished(m_exit);
+                                        emit finished(m_exit);
+                                        m_cv.notify_one();
+                                    }), *m_ioc
+#ifdef _WIN32
+            , bp::windows::hide
+#endif
+    );
+    // notify that the process has started
+    m_cv.notify_one();
+
+    read_loop =
+            [this](bp::async_pipe &pipe, vector<string> &vec)
             {
-                emit started();
-                m_state = Running;
+                static boost::asio::streambuf buffer;
+                ba::async_read_until(
+                        pipe,
+                        buffer,
+                        '\n',
+                        [&](boost::system::error_code error_code, std::size_t bytes)
+                        {
+                            if (not error_code)
+                            {
+                                istream is(&buffer);
+                                string line;
+                                if (std::getline(is, line))
+                                {
+                                    m_readyRead(line);
+                                    vec.emplace_back(line);
+                                }
+                                read_loop(pipe, vec);
+                            }
+                        }
+                );
+            };
+
+    m_thread = make_unique<boost::thread>(
+            [this]
+            {
                 try
                 {
-                    m_child = bp::child(exe, bp::args(argsEncoding),
-                                        bp::std_out > m_out_ipstream,
-                                        bp::std_err > m_err_ipstream
-#ifdef _WIN32
-                            , bp::windows::hide
-#endif
-                    );
-                    // notify that the process has started
-                    m_cv.notify_one();
-
-                    m_thread_err = make_shared<boost::thread>(
-                            [this]
-                            {
-                                string line_err;
-                                while (not boost::this_thread::interruption_requested()
-                                       and getline(m_err_ipstream, line_err) and not line_err.empty() and
-                                       m_child.running())
-                                {
-                                    boost::this_thread::interruption_point();
-                                    if (m_error.size() > 1000)
-                                        m_error.clear();
-                                    m_error.emplace_back(line_err);
-                                    m_readyRead(line_err);
-                                }
-                            });
-                    m_thread_out = make_shared<boost::thread>(
-                            [this]
-                            {
-                                string line_out;
-                                while (not boost::this_thread::interruption_requested() and
-                                       getline(m_out_ipstream, line_out) and not line_out.empty() and m_child.running())
-                                {
-                                    boost::this_thread::interruption_point();
-                                    if (m_out.size() > 1000)
-                                        m_out.clear();
-                                    m_out.emplace_back(line_out);
-                                    m_readyRead(line_out);
-                                }
-                            });
-                    m_child.wait();
-                    m_exit = m_child.exit_code();
-                    m_finished(m_exit);
-                    emit finished(m_exit);
-                    m_state = Finsished;
+                    ba::post(*m_ioc, [this]
+                    {
+                        read_loop(*m_pipe_out, m_out);
+                        read_loop(*m_pipe_err, m_error);
+                    });
+                    m_ioc->run();
+                    m_pipe_out->close();
+                    m_pipe_err->close();
+                    RcloneManager::finished(this);
+                } catch (...)
+                {
+                    cerr << "Exception in thread: " << endl;
+                    m_pipe_out->close();
+                    m_pipe_err->close();
+                    m_ioc->stop();
                     RcloneManager::finished(this);
                 }
-                catch (boost::process::process_error &e)
-                {std::cerr << e.what() << std::endl;}
             });
 }
 
@@ -327,8 +349,11 @@ void Rclone::waitForFinished()
 {
     if (m_state not_eq Running)
         waitForStarted();
-    if (m_state == Running and m_thread->joinable())
-        m_thread->join();
+    if (m_state == Running)
+    {
+        unique_lock<mutex> lock(m_mutex);
+        m_cv.wait(lock, [this] { return m_state == Finsished; });
+    }
 }
 
 /**
@@ -336,39 +361,29 @@ void Rclone::waitForFinished()
  */
 Rclone::~Rclone()
 {
+    cout << "destructeur rclone" << endl;
     if (m_state == Running)
         terminate();
-    else{
-        m_finished.disconnect_all_slots();
-        m_readyRead.disconnect_all_slots();
-        disconnect(this, nullptr, nullptr, nullptr);
-        m_out_ipstream.close();
-        m_err_ipstream.close();
+    else
+    {
+        m_ioc->stop();
     }
 }
 
 /**
  * @brief Rclone::terminate, termine le processus rclone
  */
-void Rclone::terminate()
+void Rclone::kill()
 {
     if (m_state == Running)
     {
         cout << "process rclone kill" << endl;
-        m_out_ipstream.close();
-        m_err_ipstream.close();
         m_child.detach();
-        m_child.terminate();
-        m_thread_err->interrupt();
-        m_thread_out->interrupt();
+        bp::detail::api::terminate(bp::child::child_handle{m_child.native_handle()});
         m_thread->interrupt();
         m_exit = 1;
-        emit finished(m_exit);
     }
     m_state = Stopped;
-    m_finished.disconnect_all_slots();
-    m_readyRead.disconnect_all_slots();
-    disconnect(this, nullptr, nullptr, nullptr);
 }
 
 /**
@@ -411,7 +426,7 @@ void Rclone::size(const string &path)
                             auto count = json.at("count").as_int64();
                             auto sizeBytes = json.at("bytes").as_int64();
                             auto humanReadable = Iridium::Utility::sizeToString((double64_t) sizeBytes);
-                            emit sizeFinished(count, sizeBytes, humanReadable);
+                            emit sizeFinished(count, sizeBytes, std::move(humanReadable));
                         } catch (boost::exception &e)
                         {
                             cerr << "Erreur parse json" << endl;
@@ -476,6 +491,7 @@ bj::object Rclone::parseJson(const string &str)
     } catch (boost::exception &e)
     {
         cerr << "Erreur parse json" << endl;
+        cerr << str << endl;
     }
     auto json = bj::object();
     json.emplace("error", true);
@@ -484,15 +500,15 @@ bj::object Rclone::parseJson(const string &str)
 
 std::atomic_int_fast8_t RcloneManager::m_nb_rclone_locked;
 uint8_t RcloneManager::m_nb_max_process = thread::hardware_concurrency();
-mutex RcloneManager::m_launch_mutex, RcloneManager::m_stop_mutex;
-condition_variable RcloneManager::m_launch_cv, RcloneManager::m_stop_cv;
-deque<RcloneLocked> RcloneManager::m_launch_queue, RcloneManager::m_stop_queue;
-std::deque<RclonePtr> RcloneManager::m_rclones;
+mutex RcloneManager::m_launch_mutex;
+condition_variable RcloneManager::m_launch_cv;
+std::vector<RcloneLocked> RcloneManager::m_launch_queue;
+std::vector<RclonePtr> RcloneManager::m_rclones;
 
 boost::thread RcloneManager::m_launch_thread = boost::thread(
         []
         {
-            while (true)
+            while (not boost::this_thread::interruption_requested())
             {
                 // On attend que le nombre de processus rclone soit inférieur au nombre max
                 unique_lock<mutex> lock(RcloneManager::m_launch_mutex);
@@ -504,55 +520,31 @@ boost::thread RcloneManager::m_launch_thread = boost::thread(
                 if (not RcloneManager::m_launch_queue.empty())
                 {
                     auto rclone_locked = RcloneManager::m_launch_queue.front();
-                    rclone_locked.func();
-                    ++RcloneManager::m_nb_rclone_locked;
-                    std::erase_if(RcloneManager::m_launch_queue, [rclone_locked](const RcloneLocked &rclone)
+                    RcloneManager::m_launch_queue.erase(RcloneManager::m_launch_queue.begin());
+                    if (not rclone_locked.isCanceled())
                     {
-                        return rclone.rclone == rclone_locked.rclone;
-                    });
+                        rclone_locked.func();
+                        ++RcloneManager::m_nb_rclone_locked;
+                    }
                 }
             }
         });
-
-boost::thread RcloneManager::m_stop_thread = boost::thread(
-        []
-        {
-            while (true)
-            {
-                // On attend que le nombre de processus rclone soit inférieur au nombre max
-                unique_lock<mutex> lock(RcloneManager::m_stop_mutex);
-                RcloneManager::m_stop_cv.wait(lock, []
-                {
-                    return not RcloneManager::m_stop_queue.empty();
-                });
-                for (auto it = RcloneManager::m_stop_queue.begin(); it not_eq RcloneManager::m_stop_queue.end(); ++it)
-                {
-                    auto obj = *it;
-                    if (obj.rclone->state() not_eq Rclone::Running)
-                        obj.rclone->terminate();
-                    erase_if(RcloneManager::m_launch_queue,
-                             [obj](const RcloneLocked &rcloneLocked) { return rcloneLocked.rclone == obj.rclone; });
-                    RcloneManager::m_stop_queue.erase(it);
-                    RcloneManager::m_launch_cv.notify_one();
-                }
-            }
-        });
-
 
 /**
  * @brief RcloneManager::get, retourne un pointeur vers un rclone
  * @return un pointeur vers un rclone
  */
-RclonePtr RcloneManager::get()
+RclonePtr RcloneManager::get(bool lockable)
 {
     auto rclone = RclonePtr(new Rclone());
     m_rclones.push_back(rclone);
+    rclone->m_lockable = lockable;
     return rclone;
 }
 
 void RcloneManager::launch(const RcloneLocked &rcloneLocked)
 {
-    m_launch_queue.push_back(rcloneLocked);
+    m_launch_queue.insert(m_launch_queue.end(), rcloneLocked);
     m_launch_cv.notify_one();
 }
 
@@ -565,15 +557,9 @@ void RcloneManager::finished(Rclone *rclone)
     {
         --RcloneManager::m_nb_rclone_locked;
         RcloneManager::m_launch_cv.notify_one();
-    } else
-    {
-        erase_if(m_rclones, [rclone](const RclonePtr &rclonePtr) { return rclonePtr.get() == rclone; });
     }
-}
-
-
-void RcloneManager::stop(const std::deque<RcloneLocked> &lst)
-{
-    m_stop_queue.insert(m_stop_queue.end(), lst.begin(), lst.end());
-    m_stop_cv.notify_one();
+    m_rclones.erase(std::remove_if(m_rclones.begin(), m_rclones.end(), [rclone](const RclonePtr &rclonePtr)
+    {
+        return rclonePtr.get() == rclone;
+    }), m_rclones.end());
 }

@@ -51,7 +51,7 @@ void RemoteConfigParamsFrame::createUi()
     connect(m_cancel, &QPushButton::clicked, this, [this]()
     {
         if (m_rclone->state() == Rclone::Running)
-            m_rclone->terminate();
+            m_rclone->kill();
         m_cancel->hide();
         m_login->show();
     });

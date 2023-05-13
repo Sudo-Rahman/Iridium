@@ -88,7 +88,7 @@ TaskTreeView::TaskTreeView(QWidget *parent) : QTreeView(parent)
                 if (it not_eq m_tasks.end())
                 {
                     // disconnect all signals
-                    it->second.rclone->terminate();
+                    it->second.rclone->kill();
                     it->second.parent->setState(TaskRow::State::Cancelled);
                     for(const auto &child: it->second.children)
                         child.second->setState(TaskRow::State::Cancelled);

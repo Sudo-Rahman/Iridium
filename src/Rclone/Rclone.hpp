@@ -13,6 +13,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <boost/intrusive/list.hpp>
 #include <boost/signals2.hpp>
 #include <boost/process.hpp>
 #include <boost/thread.hpp>
@@ -101,20 +102,22 @@ private:
     boost::process::child m_child{};
 
     static std::string m_path_rclone;
-    std::shared_ptr<boost::thread> m_thread{}, m_thread_out{}, m_thread_err{};
+    std::unique_ptr<boost::thread> m_thread{};
     std::vector<std::string> m_out{}, m_error{};
     std::map<std::string, std::string> m_map_data{};
     uint8_t m_exit{};
     Rclone::State m_state{Rclone::NotLaunched};
-    boost::process::ipstream m_out_ipstream{}, m_err_ipstream{};
-
+    std::function<void(boost::process::async_pipe &pipe, std::vector<std::string> &vec)> read_loop;
     std::mutex m_mutex;
     std::condition_variable m_cv;
+
+    std::unique_ptr<boost::process::async_pipe> m_pipe_out, m_pipe_err;
+    std::unique_ptr<boost::asio::io_context> m_ioc;
 
     static std::map<Flag, flags_str> m_map_flags;
 
 public:
-    void terminate();
+    void kill();
 
     static void setPathRclone(const std::string &pathRclone);
 
@@ -180,13 +183,13 @@ signals:
 
     void finished(int exit);
 
-    void lsJsonFinished(const QJsonDocument &);
+    void lsJsonFinished(const QJsonDocument );
 
-    void taskProgress(const boost::json::object &);
+    void taskProgress(const boost::json::object );
 
-    void sizeFinished(const uint32_t &objs, const uint64_t &size, const std::string &strSize);
+    void sizeFinished(uint32_t objs, uint64_t size, std::string strSize);
 
-    void searchRefresh(const boost::json::object &file);
+    void searchRefresh(boost::json::object obj);
 
 };
 
@@ -194,8 +197,14 @@ typedef std::shared_ptr<Rclone> RclonePtr;
 
 struct RcloneLocked
 {
+    private :
+    bool m_cancel{false};
+    public :
     RclonePtr rclone;
     std::function<void()> func;
+    RcloneLocked(RclonePtr rclone, std::function<void()> func) : rclone(std::move(rclone)), func(std::move(func)){}
+    [[nodiscard]] bool isCanceled() const {return m_cancel;}
+    void cancel(){m_cancel = true;}
 };
 
 class RcloneManager
@@ -206,30 +215,20 @@ class RcloneManager
 private:
     static std::atomic_int_fast8_t m_nb_rclone_locked;
     static uint8_t m_nb_max_process;
-    static std::mutex m_launch_mutex, m_stop_mutex;
-    static std::condition_variable m_launch_cv, m_stop_cv;
-    static boost::thread m_launch_thread, m_stop_thread, m_terminate_thread;
-    static std::deque<RcloneLocked> m_launch_queue, m_stop_queue;
-    static std::deque<RclonePtr> m_rclones;
+    static std::mutex m_launch_mutex;
+    static std::condition_variable m_launch_cv;
+    static boost::thread m_launch_thread;
+    static std::vector<RcloneLocked> m_launch_queue;
+    static std::vector<RclonePtr> m_rclones;
 
 public:
-
-    static RclonePtr get();
-
-    static RclonePtr getLockable()
-    {
-        auto rclone = get();
-        rclone->m_lockable = true;
-        return rclone;
-    }
+    static RclonePtr get(bool lockable = false);
 
     static uint16_t maxProcess() { return m_nb_max_process; }
 
     static void setMaxProcess(uint16_t nbMaxProcess) { m_nb_max_process = nbMaxProcess; }
 
     static void launch(const RcloneLocked &func);
-
-    static void stop(const std::deque<RcloneLocked> &lst);
 
 private:
 
