@@ -31,7 +31,6 @@ struct addRow{
     std::vector<addRow> m_rows{};
     std::mutex m_mutex{};
     std::condition_variable m_cv{};
-    QThreadPool m_pool{};
     std::atomic_uint8_t m_searching = 0;
 
 public :

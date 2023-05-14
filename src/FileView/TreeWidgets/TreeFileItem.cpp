@@ -41,7 +41,7 @@ TreeFileItem::TreeFileItem(const int &column, const std::shared_ptr<RcloneFile> 
             break;
         case 1:
             setText(file->getSizeString());
-            QStandardItem::setData(file->getSize(), SORT_ROLE);
+            QStandardItem::setData((qulonglong)file->getSize(), SORT_ROLE);
             break;
         case 2:
             setText(file->getModTimeString());

@@ -48,8 +48,6 @@ FilterSearchGroupBox::FilterSearchGroupBox(QWidget *parent) : QGroupBox(parent)
     auto model = new QStandardItemModel(this);
     m_listView->setSelectionBehavior(QAbstractItemView::SelectRows);
     m_listView->setSelectionMode(QAbstractItemView::SingleSelection);
-    // todo: drag and drop internal works but transform FilterItem to QStandardItem
-//    m_listView->setDragDropMode(QAbstractItemView::InternalMove);
     m_listView->setEditTriggers(QAbstractItemView::NoEditTriggers);
     m_listView->setDropIndicatorShown(true);
     m_listView->setModel(model);

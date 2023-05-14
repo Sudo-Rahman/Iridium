@@ -133,6 +133,7 @@ void SearchTableView::addFile(const boost::json::object &file, const RemoteInfoP
     m_model->appendRow(row);
 }
 
+
 void SearchTableView::searchLocal(const QString &text, const RemoteInfoPtr &remoteInfo)
 {
     if (text.size() < 3)
@@ -168,6 +169,7 @@ void SearchTableView::searchLocal(const QString &text, const RemoteInfoPtr &remo
                                                        new SearchTableItem(4, rcloneFile),
                                                        new SearchTableItem(5, rcloneFile)
                                                });
+
                         }
                         boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
                     }
@@ -203,6 +205,7 @@ void SearchTableView::terminateSearch()
 
 void SearchTableView::stopAllSearch()
 {
+    m_rows.clear();
     m_searching = 0;
     for (auto &thread: m_threads)
     {
@@ -211,7 +214,6 @@ void SearchTableView::stopAllSearch()
     }
     for (auto &rclone: m_rclones)
         rclone->kill();
-    m_pool.clear();
     m_rclones.clear();
     m_threads.clear();
     emit searchFinished();
@@ -241,13 +243,13 @@ void SearchTableView::initThread()
                 {
                     boost::this_thread::interruption_point();
                     std::unique_lock<std::mutex> lock(m_mutex);
-                    m_cv.wait(lock, [this]() { return m_searching > 0; });
+                    m_cv.wait(lock, [this]() { return not m_rows.empty() or m_searching >0; });
                     if(m_rows.empty())
                         continue;
                     auto row = m_rows.front();
                     m_rows.erase(m_rows.begin());
                     addFile(row.file, row.remoteInfo);
-                    boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
+                    boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
                 }
             });
 }

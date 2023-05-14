@@ -90,7 +90,8 @@ public:
         FilterType filter;
         std::string value;
 
-        [[nodiscard]] std::string str() const{
+        [[nodiscard]] std::string str() const
+        {
             std::string str = "--filter=";
             filter == Include ? str += "+ " : str += "- ";
             return {str + value};
@@ -143,25 +144,28 @@ public:
 
     void waitForFinished();
 
-    [[nodiscard]] State state() const;
+    [[nodiscard]] State state() const { return m_state; }
+
+    [[nodiscard]] bool isRunning() const { return m_state == Running; }
 
     void waitForStarted();
 
-    [[nodiscard]] std::map<std::string, std::string> getData() const;
+    [[nodiscard]] std::map<std::string, std::string> getData() const { return m_map_data; }
 
-    [[nodiscard]] std::vector<std::string> readAllError() const;
+    [[nodiscard]] std::vector<std::string> readAllError() const { return m_error; }
 
-    [[nodiscard]] uint8_t exitCode() const;
+    [[nodiscard]] uint8_t exitCode() const { return m_exit; }
 
-    static Rclone::flags_str getFlag(const Flag &key)
+    [[nodiscard]] std::vector<std::string> readAll() const
     {
-        return m_map_flags[key];
+        auto vec = m_out;
+        vec.insert(vec.end(), m_error.begin(), m_error.end());
+        return vec;
     }
 
-    static void setFlag(const Flag &key, const std::string &value)
-    {
-        m_map_flags[key].value = value;
-    }
+    static Rclone::flags_str getFlag(const Flag &key){return m_map_flags[key];}
+
+    static void setFlag(const Flag &key, const std::string &value){m_map_flags[key].value = value;}
 
     void about(const RemoteInfo &info);
 
@@ -183,9 +187,9 @@ signals:
 
     void finished(int exit);
 
-    void lsJsonFinished(const QJsonDocument );
+    void lsJsonFinished(const boost::json::array);
 
-    void taskProgress(const boost::json::object );
+    void taskProgress(const boost::json::object);
 
     void sizeFinished(uint32_t objs, uint64_t size, std::string strSize);
 
@@ -197,14 +201,17 @@ typedef std::shared_ptr<Rclone> RclonePtr;
 
 struct RcloneLocked
 {
-    private :
+private :
     bool m_cancel{false};
-    public :
+public :
     RclonePtr rclone;
     std::function<void()> func;
-    RcloneLocked(RclonePtr rclone, std::function<void()> func) : rclone(std::move(rclone)), func(std::move(func)){}
-    [[nodiscard]] bool isCanceled() const {return m_cancel;}
-    void cancel(){m_cancel = true;}
+
+    RcloneLocked(RclonePtr rclone, std::function<void()> func) : rclone(std::move(rclone)), func(std::move(func)) {}
+
+    [[nodiscard]] bool isCanceled() const { return m_cancel; }
+
+    void cancel() { m_cancel = true; }
 };
 
 class RcloneManager
@@ -229,6 +236,13 @@ public:
     static void setMaxProcess(uint16_t nbMaxProcess) { m_nb_max_process = nbMaxProcess; }
 
     static void launch(const RcloneLocked &func);
+
+    static void stopAll()
+    {
+        for (auto &rclone: m_rclones)
+            rclone->kill();
+        m_rclones.clear();
+    }
 
 private:
 

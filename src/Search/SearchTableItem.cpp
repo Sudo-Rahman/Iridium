@@ -27,7 +27,7 @@ SearchTableItem::SearchTableItem(const int &col, const RcloneFilePtr &file)
             break;
         case 3:
             setText(Iridium::Utility::sizeToString(file->getSize()).c_str());
-            SearchTableItem::setData(file->getSize(), Qt::UserRole+1);
+            SearchTableItem::setData((qulonglong)file->getSize(), Qt::UserRole+1);
             break;
         case 4:
             setText(file->getModTimeString());

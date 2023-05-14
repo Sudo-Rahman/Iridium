@@ -47,12 +47,12 @@ void RcloneFileModelDistant::addItemDynamic(const QString &path, TreeFileItem *p
     {
         addProgressBar(tree_item->child(0, 0)->index());
         tree_item->setState(TreeFileItem::Loading);
-        connect(rclone.get(), &Rclone::lsJsonFinished, this, [tree_item, path, this](const QJsonDocument &doc)
+        connect(rclone.get(), &Rclone::lsJsonFinished, this, [tree_item, path, this](const boost::json::array &array)
         {
             tree_item->removeRow(0);
-            for (const auto &file: doc.array())
+            for (const auto &file: array)
             {
-                auto *item = new TreeFileItemDistant(path, m_remote_info, file.toObject());
+                auto *item = new TreeFileItemDistant(path, m_remote_info, file.as_object());
                 tree_item->appendRow(getItemList(item));
                 if (item->getFile()->isDir())
                     item->appendRow({new QStandardItem, new QStandardItem, new QStandardItem, new QStandardItem});
@@ -79,14 +79,14 @@ void RcloneFileModelDistant::addItemStatic(const QString &path, TreeFileItem *pa
     {
         addProgressBar(tree_item->child(0, 0)->index());
         connect(rclone.get(), &Rclone::lsJsonFinished, this,
-                [depth, tree_item, path, this](const QJsonDocument &doc)
+                [depth, tree_item, path, this](const boost::json::array &array)
                 {
 //            qDebug() << path << "loaded";
 //            qDebug() << doc;
                     tree_item->removeRow(0);
-                    for (const auto &file: doc.array())
+                    for (const auto &file: array)
                     {
-                        auto *item = new TreeFileItemDistant(path, m_remote_info, file.toObject());
+                        auto *item = new TreeFileItemDistant(path, m_remote_info, file.as_object());
                         tree_item->appendRow(getItemList(item));
                         if (item->getFile()->isDir())
                         {

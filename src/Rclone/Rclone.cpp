@@ -55,10 +55,11 @@ void Rclone::lsJson(const string &path)
                     try
                     {
                         auto joinStr = boost::algorithm::join(m_out, "");
-                        lsJsonFinished(QJsonDocument::fromJson(joinStr.c_str()));
+                        auto array = boost::json::parse(joinStr).as_array();
+                        emit lsJsonFinished(std::move(array));
                     } catch (boost::exception &e)
                     {
-                        emit lsJsonFinished(QJsonDocument());
+                        emit lsJsonFinished(std::move(bj::array()));
                         cerr << boost::algorithm::join(m_out, "") << endl;
                         cerr << "Error: " << boost::diagnostic_information(e) << endl;
                     }
@@ -157,6 +158,10 @@ void Rclone::config(RemoteType type, const string &name, const vector<string> &p
     execute(args);
 }
 
+/**
+ * @brief Rclone::about, permet de récupérer des informations sur un remote
+ * @param info
+ */
 void Rclone::about(const RemoteInfo &info)
 {
     m_finished.connect(
@@ -199,6 +204,11 @@ void Rclone::listRemotes()
     execute({"listremotes", "--long"});
 }
 
+/**
+ * @brief Rclone::search, permet de rechercher des fichiers dans un remote
+ * @param filters
+ * @param info
+ */
 void Rclone::search(const vector<Filter> &filters, const RemoteInfo &info)
 {
     m_readyRead.connect(
@@ -211,8 +221,12 @@ void Rclone::search(const vector<Filter> &filters, const RemoteInfo &info)
                     std::regex date_regex("([0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{9})");
                     std::smatch match;
                     std::regex_search(line, match, size_regex);
+                    if (match.empty())
+                        return;
                     json.emplace("Size", std::stoll(match[0].str()));
                     std::regex_search(line, match, date_regex);
+                    if (match.empty())
+                        return;
                     json.emplace("ModTime", match[0].str());
                     auto path = match.suffix().str().substr(1, match.suffix().str().size() - 1);
                     json.emplace("Path", path);
@@ -220,9 +234,9 @@ void Rclone::search(const vector<Filter> &filters, const RemoteInfo &info)
                     json.emplace("Name", name);
                     json.emplace("IsDir", false);
                     emit searchRefresh(std::move(json));
-                } catch (std::out_of_range &e)
+                } catch (...)
                 {
-                    std::cerr << e.what() << " probleme search " << line << std::endl;
+                    std::cerr << " probleme search " << line << std::endl;
                 }
             });
     vector<string> args = {"lsl", info.m_path};
@@ -250,8 +264,7 @@ void Rclone::execute(const vector<string> &args)
 {
     if (m_state not_eq NotLaunched)
     {
-        std::exception_ptr eptr = std::make_exception_ptr(
-                std::runtime_error("Rclone is not reusable"));
+        throw std::runtime_error("Rclone is not reusable");
     }
 
 #ifdef _WIN32
@@ -265,8 +278,6 @@ void Rclone::execute(const vector<string> &args)
     auto exe = m_path_rclone;
     const auto &argsEncoding = args;
 #endif
-    emit started();
-    m_state = Running;
 
     m_ioc = make_unique<boost::asio::io_context>();
     boost::asio::executor_work_guard<boost::asio::io_context::executor_type> work(m_ioc->get_executor());
@@ -278,38 +289,35 @@ void Rclone::execute(const vector<string> &args)
                         bp::std_err > *m_pipe_err,
                         bp::on_exit([this](int exit, const std::error_code &ec)
                                     {
-                                        m_state = Finsished;
-                                        m_ioc->stop();
                                         m_exit = exit;
-                                        m_finished(m_exit);
-                                        emit finished(m_exit);
-                                        m_cv.notify_one();
                                     }), *m_ioc
 #ifdef _WIN32
             , bp::windows::hide
 #endif
     );
+    emit started();
+    m_state = Running;
     // notify that the process has started
     m_cv.notify_one();
 
+    auto buffer = make_shared<ba::streambuf>();
     read_loop =
-            [this](bp::async_pipe &pipe, vector<string> &vec)
+            [this, buffer](bp::async_pipe &pipe, vector<string> &vec)
             {
-                static boost::asio::streambuf buffer;
                 ba::async_read_until(
                         pipe,
-                        buffer,
+                        *buffer,
                         '\n',
                         [&](boost::system::error_code error_code, std::size_t bytes)
                         {
                             if (not error_code)
                             {
-                                istream is(&buffer);
                                 string line;
-                                if (std::getline(is, line))
+                                if (std::getline(std::istream(&(*buffer)), line))
                                 {
                                     m_readyRead(line);
                                     vec.emplace_back(line);
+//                                    cout << line << endl;
                                 }
                                 read_loop(pipe, vec);
                             }
@@ -328,15 +336,22 @@ void Rclone::execute(const vector<string> &args)
                         read_loop(*m_pipe_err, m_error);
                     });
                     m_ioc->run();
+                    m_child.wait();
+                    m_state = Finsished;
+                    m_finished(m_exit);
+                    emit finished(m_exit);
+                    m_cv.notify_one();
                     m_pipe_out->close();
                     m_pipe_err->close();
                     RcloneManager::finished(this);
                 } catch (...)
                 {
                     cerr << "Exception in thread: " << endl;
+                    m_finished(m_exit);
+                    emit finished(m_exit);
+                    m_cv.notify_one();
                     m_pipe_out->close();
                     m_pipe_err->close();
-                    m_ioc->stop();
                     RcloneManager::finished(this);
                 }
             });
@@ -362,37 +377,24 @@ void Rclone::waitForFinished()
 Rclone::~Rclone()
 {
     cout << "destructeur rclone" << endl;
-    if (m_state == Running)
-        terminate();
-    else
-    {
-        m_ioc->stop();
-    }
+    Rclone::kill();
 }
 
 /**
- * @brief Rclone::terminate, termine le processus rclone
+ * @brief Rclone::kill, tue le processus rclone
  */
 void Rclone::kill()
 {
     if (m_state == Running)
     {
         cout << "process rclone kill" << endl;
+        m_ioc->stop();
         m_child.detach();
         bp::detail::api::terminate(bp::child::child_handle{m_child.native_handle()});
         m_thread->interrupt();
         m_exit = 1;
     }
     m_state = Stopped;
-}
-
-/**
- * @brief Rclone::state, retourne l'état du processus m_rclone
- * @return
- */
-Rclone::State Rclone::state() const
-{
-    return m_state;
 }
 
 /**
@@ -439,6 +441,10 @@ void Rclone::size(const string &path)
 
 }
 
+/**
+ * @brief retourne la version de rclone
+ * @return version
+ */
 string Rclone::version()
 {
     execute({"version"});
@@ -446,20 +452,6 @@ string Rclone::version()
     return m_out[0];
 }
 
-map<string, string> Rclone::getData() const
-{
-    return m_map_data;
-}
-
-std::vector<std::string> Rclone::readAllError() const
-{
-    return m_error;
-}
-
-uint8_t Rclone::exitCode() const
-{
-    return m_exit;
-}
 
 /**
  * @brief mkdir, crée un dossier
@@ -474,6 +466,11 @@ void Rclone::mkdir(const RcloneFile &dir)
 
 }
 
+/**
+ * @brief deplace un fichier src vers dest
+ * @param src
+ * @param dest
+ */
 void Rclone::moveto(const RcloneFile &src, const RcloneFile &dest)
 {
     vector<string> arguments = {"moveto", src.getPath().toStdString(), dest.getPath().toStdString()};
@@ -482,6 +479,9 @@ void Rclone::moveto(const RcloneFile &src, const RcloneFile &dest)
     execute(arguments);
 }
 
+/**
+ * @brief Parse une chaine de caractère en json
+ */
 bj::object Rclone::parseJson(const string &str)
 {
     try
@@ -542,6 +542,10 @@ RclonePtr RcloneManager::get(bool lockable)
     return rclone;
 }
 
+/**
+ * @brief RcloneManager::launch, ajout le processus rclone à la queue de lancement
+ * @param rcloneLocked
+ */
 void RcloneManager::launch(const RcloneLocked &rcloneLocked)
 {
     m_launch_queue.insert(m_launch_queue.end(), rcloneLocked);
@@ -549,7 +553,7 @@ void RcloneManager::launch(const RcloneLocked &rcloneLocked)
 }
 
 /**
- * @brief RcloneManager:: finished, un processus rclone appel cette fonction lorsqu’il se termine, pour notifier le manager
+ * @brief RcloneManager::finished, un processus rclone appel cette fonction lorsqu’il se termine, pour notifier le manager
  */
 void RcloneManager::finished(Rclone *rclone)
 {
