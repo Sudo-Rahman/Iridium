@@ -17,7 +17,10 @@ TreeFileItemDistant::TreeFileItemDistant(const QString &path, const RemoteInfoPt
         setText(m_file->getName());
         QStandardItem::setData(m_file->getName(), SORT_ROLE);
         initIcon();
-        if(not m_file->isDir())
+        if(m_file->isDir()) {
+            appendRow({new QStandardItem, new QStandardItem, new QStandardItem, new QStandardItem});
+        }
+        else
             setFlags(flags() & ~Qt::ItemIsDropEnabled);
     }catch(...){
         qDebug() << "Error while creating TreeFileItemDistant";}

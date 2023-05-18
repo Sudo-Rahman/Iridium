@@ -23,7 +23,7 @@ private:
 
     static uint8_t m_max_depth;
 
-    std::deque<RcloneLocked> m_locked_rclone{};
+    std::vector<RclonePtr> m_locked_rclone{};
 
 public:
     explicit RcloneFileModelDistant(const RemoteInfoPtr &remoteInfo, QTreeView *parent);
@@ -35,6 +35,12 @@ public:
     static Load loadType() { return RcloneFileModelDistant::m_load; }
 
     static uint8_t maxDepth() { return RcloneFileModelDistant::m_max_depth; }
+
+    ~RcloneFileModelDistant() override{
+        for (auto &rclone : m_locked_rclone)
+            rclone->kill();
+        m_locked_rclone.clear();
+    }
 
 
 protected:

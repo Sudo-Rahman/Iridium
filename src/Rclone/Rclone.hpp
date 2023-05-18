@@ -34,7 +34,6 @@ Q_OBJECT
     friend class RcloneManager;
 
 private:
-    bool m_lockable;
 
     Rclone() = default;
 
@@ -104,12 +103,12 @@ private:
 
     static std::string m_path_rclone;
     std::unique_ptr<boost::thread> m_thread{};
-    std::vector<std::string> m_out{}, m_error{};
+    std::vector<std::string> _args{},m_out{}, m_error{};
     std::map<std::string, std::string> m_map_data{};
     uint8_t m_exit{};
     Rclone::State m_state{Rclone::NotLaunched};
     std::function<void(boost::process::async_pipe &pipe, std::vector<std::string> &vec)> read_loop;
-    std::mutex m_mutex;
+    std::mutex m_mutex{};
     std::condition_variable m_cv;
 
     std::unique_ptr<boost::process::async_pipe> m_pipe_out, m_pipe_err;
@@ -117,8 +116,15 @@ private:
 
     static std::map<Flag, flags_str> m_map_flags;
 
+    bool m_lockable, m_cancel = false;
+
+
 public:
     void kill();
+
+    void cancel(){m_cancel = true;}
+
+    [[nodiscard]] bool isCanceled() const { return m_cancel; }
 
     static void setPathRclone(const std::string &pathRclone);
 
@@ -163,9 +169,9 @@ public:
         return vec;
     }
 
-    static Rclone::flags_str getFlag(const Flag &key){return m_map_flags[key];}
+    static Rclone::flags_str getFlag(const Flag &key) { return m_map_flags[key]; }
 
-    static void setFlag(const Flag &key, const std::string &value){m_map_flags[key].value = value;}
+    static void setFlag(const Flag &key, const std::string &value) { m_map_flags[key].value = value; }
 
     void about(const RemoteInfo &info);
 
@@ -174,7 +180,7 @@ public:
 private:
     boost::signals2::signal<void(const std::string &)> m_readyRead{};
 
-    void execute(const std::vector<std::string> &args);
+    void execute();
 
     boost::signals2::signal<void(const int exit)> m_finished{};
 
@@ -199,21 +205,6 @@ signals:
 
 typedef std::shared_ptr<Rclone> RclonePtr;
 
-struct RcloneLocked
-{
-private :
-    bool m_cancel{false};
-public :
-    RclonePtr rclone;
-    std::function<void()> func;
-
-    RcloneLocked(RclonePtr rclone, std::function<void()> func) : rclone(std::move(rclone)), func(std::move(func)) {}
-
-    [[nodiscard]] bool isCanceled() const { return m_cancel; }
-
-    void cancel() { m_cancel = true; }
-};
-
 class RcloneManager
 {
 
@@ -225,8 +216,7 @@ private:
     static std::mutex m_launch_mutex;
     static std::condition_variable m_launch_cv;
     static boost::thread m_launch_thread;
-    static std::vector<RcloneLocked> m_launch_queue;
-    static std::vector<RclonePtr> m_rclones;
+    static std::vector<RclonePtr> m_rclones,m_launch_queue;
 
 public:
     static RclonePtr get(bool lockable = false);
@@ -235,14 +225,23 @@ public:
 
     static void setMaxProcess(uint16_t nbMaxProcess) { m_nb_max_process = nbMaxProcess; }
 
-    static void launch(const RcloneLocked &func);
+    static void addLockable(const RclonePtr &);
 
-    static void stopAll()
+    static void stopThread()
     {
-        for (auto &rclone: m_rclones)
-            rclone->kill();
-        m_rclones.clear();
+        m_launch_thread.interrupt();
+        m_launch_cv.notify_one();
     }
+
+    static void release(const Rclone *rclone)
+    {
+        std::erase_if(m_rclones, [&](const auto &ptr) { return ptr.get() == rclone; });
+        std::erase_if(m_launch_queue, [&](const auto &ptr) { return ptr.get() == rclone; });
+    }
+
+    static void release(const RclonePtr &rclone) { release(rclone.get()); }
+
+    static void release(const std::vector<RclonePtr> &lst) { for (const auto &rclone: lst) release(rclone); }
 
 private:
 

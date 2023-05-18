@@ -42,6 +42,11 @@ public :
 
     void stopAllSearch();
 
+    ~SearchTableView() override{
+        m_adder->interrupt();
+        m_cv.notify_one();
+    }
+
 private:
     void addFile(const boost::json::object &file, const RemoteInfoPtr &remoteInfo);
 

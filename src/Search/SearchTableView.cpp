@@ -241,15 +241,19 @@ void SearchTableView::initThread()
             {
                 while (not boost::this_thread::interruption_requested())
                 {
-                    boost::this_thread::interruption_point();
-                    std::unique_lock<std::mutex> lock(m_mutex);
-                    m_cv.wait(lock, [this]() { return not m_rows.empty() or m_searching >0; });
-                    if(m_rows.empty())
-                        continue;
-                    auto row = m_rows.front();
-                    m_rows.erase(m_rows.begin());
-                    addFile(row.file, row.remoteInfo);
-                    boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
+                    try{
+                        boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
+                        std::unique_lock<std::mutex> lock(m_mutex);
+                        m_cv.wait(lock, [this]() {
+                            boost::this_thread::interruption_point();
+                            return not m_rows.empty() or m_searching >0;
+                        });
+                        if(m_rows.empty())
+                            continue;
+                        auto row = m_rows.front();
+                        m_rows.erase(m_rows.begin());
+                        addFile(row.file, row.remoteInfo);
+                    }catch (boost::thread_interrupted &e) { break; }
                 }
             });
 }

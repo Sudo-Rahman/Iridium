@@ -65,7 +65,9 @@ void Rclone::lsJson(const string &path)
                     }
                 }
             });
-    execute({"lsjson", path, "--drive-skip-gdocs", "--fast-list"});
+    _args = {"lsjson", path, "--drive-skip-gdocs", "--fast-list"};
+    if(not m_lockable)
+        execute();
 }
 
 /**
@@ -75,10 +77,10 @@ void Rclone::lsJson(const string &path)
  */
 void Rclone::copyTo(const RcloneFile &src, const RcloneFile &dest)
 {
-    vector<string> arguments(
-            {"copyto", src.getPath().toStdString(), dest.getPath().toStdString()});
-    Iridium::Utility::pushBack(arguments, {getFlag(Transfers).to_vector(), getFlag(Stats).to_vector(),
-                                           getFlag(Verbose).to_vector(), getFlag(LogType).to_vector()});
+    _args =
+            {"copyto", src.getPath().toStdString(), dest.getPath().toStdString()};
+    Iridium::Utility::pushBack(_args, {getFlag(Transfers).to_vector(), getFlag(Stats).to_vector(),
+                                       getFlag(Verbose).to_vector(), getFlag(LogType).to_vector()});
 
     m_readyRead.connect(
             [this](const string &data)
@@ -86,12 +88,13 @@ void Rclone::copyTo(const RcloneFile &src, const RcloneFile &dest)
                 bj::object json = parseJson(data);
                 if (not json.contains("error"))
                 {
-                    emit taskProgress(std::move(json));
                     m_map_data.clear();
                     m_map_data.emplace("json", boost::json::serialize(json));
+                    emit taskProgress(std::move(json));
                 }
             });
-    execute(arguments);
+    if(not m_lockable)
+        execute();
 }
 
 
@@ -101,13 +104,14 @@ void Rclone::copyTo(const RcloneFile &src, const RcloneFile &dest)
  */
 void Rclone::deleteFile(const RcloneFile &file)
 {
-    vector<string> arguments({file.getPath().toStdString()});
-    Iridium::Utility::pushBack(arguments, {getFlag(Verbose).to_vector(), getFlag(LogType).to_vector()});
+    _args = {file.getPath().toStdString()};
+    Iridium::Utility::pushBack(_args, {getFlag(Verbose).to_vector(), getFlag(LogType).to_vector()});
     if (!file.isDir())
-        arguments.emplace(arguments.begin(), "deletefile");
+        _args.emplace(_args.begin(), "deletefile");
     else
-        arguments.emplace(arguments.begin(), "purge");
-    execute(arguments);
+        _args.emplace(_args.begin(), "purge");
+    if(not m_lockable)
+        execute();
 }
 
 
@@ -155,7 +159,9 @@ void Rclone::config(RemoteType type, const string &name, const vector<string> &p
             break;
     }
     args.insert(args.end(), params.begin(), params.end());
-    execute(args);
+    _args = args;
+    if(not m_lockable)
+        execute();
 }
 
 /**
@@ -173,7 +179,9 @@ void Rclone::about(const RemoteInfo &info)
                     m_map_data["json"] = boost::json::serialize(json);
                 }
             });
-    execute({"about", info.m_path, "--json"});
+    _args = {"about", info.m_path, "--json"};
+    if(not m_lockable)
+        execute();
 }
 
 /**
@@ -201,7 +209,9 @@ void Rclone::listRemotes()
                     m_map_data = map;
                 }
             });
-    execute({"listremotes", "--long"});
+    _args = {"listremotes", "--long"};
+    if(not m_lockable)
+        execute();
 }
 
 /**
@@ -239,11 +249,12 @@ void Rclone::search(const vector<Filter> &filters, const RemoteInfo &info)
                     std::cerr << " probleme search " << line << std::endl;
                 }
             });
-    vector<string> args = {"lsl", info.m_path};
+    _args = {"lsl", info.m_path};
     for (auto &filter: filters)
-        args.emplace_back(filter.str());
-    args.emplace_back("--ignore-case");
-    execute(args);
+        _args.emplace_back(filter.str());
+    _args.emplace_back("--ignore-case");
+    if(not m_lockable)
+        execute();
 }
 
 
@@ -253,30 +264,35 @@ void Rclone::search(const vector<Filter> &filters, const RemoteInfo &info)
  */
 void Rclone::deleteRemote(const string &remote)
 {
-    execute({"config", "delete", remote});
+    _args = {"config", "delete", remote};
+    if(not m_lockable)
+        execute();
 }
 
 /**
  * @brief Rclone::execute, execute la commande m_rclone avec les arguments args
  * @param args
  */
-void Rclone::execute(const vector<string> &args)
+void Rclone::execute()
 {
     if (m_state not_eq NotLaunched)
     {
         throw std::runtime_error("Rclone is not reusable");
     }
+    if (m_cancel)
+        return;
+//    cout << "execute " << boost::algorithm::join(_args, " ") << endl;
 
 #ifdef _WIN32
     std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
     std::wstring exe = converter.from_bytes(m_path_rclone);
     vector<std::wstring> argsEncoding;
-    argsEncoding.reserve(args.size());
-    for (auto &arg: args)
-        argsEncoding.emplace_back(converter.from_bytes(arg));
+    argsEncoding.reserve(_args.size());
+    for (auto &arg: _args)
+        argsEncoding.emplace_back(converter.from_bytes(_args));
 #else
     auto exe = m_path_rclone;
-    const auto &argsEncoding = args;
+    const auto &argsEncoding = _args;
 #endif
 
     m_ioc = make_unique<boost::asio::io_context>();
@@ -343,6 +359,7 @@ void Rclone::execute(const vector<string> &args)
                     m_cv.notify_one();
                     m_pipe_out->close();
                     m_pipe_err->close();
+                    disconnect();
                     RcloneManager::finished(this);
                 } catch (...)
                 {
@@ -352,6 +369,7 @@ void Rclone::execute(const vector<string> &args)
                     m_cv.notify_one();
                     m_pipe_out->close();
                     m_pipe_err->close();
+                    disconnect();
                     RcloneManager::finished(this);
                 }
             });
@@ -395,6 +413,7 @@ void Rclone::kill()
         m_exit = 1;
     }
     m_state = Stopped;
+    disconnect();
 }
 
 /**
@@ -437,8 +456,9 @@ void Rclone::size(const string &path)
                     }
                 }
             });
-    execute({"size", path, "--json"});
-
+    _args = {"size", path, "--json"};
+    if(not m_lockable)
+        execute();
 }
 
 /**
@@ -447,7 +467,9 @@ void Rclone::size(const string &path)
  */
 string Rclone::version()
 {
-    execute({"version"});
+    _args = {"version"};
+    if(not m_lockable)
+        execute();
     waitForFinished();
     return m_out[0];
 }
@@ -459,10 +481,11 @@ string Rclone::version()
  */
 void Rclone::mkdir(const RcloneFile &dir)
 {
-    vector<string> arguments = {"mkdir", dir.getPath().toStdString()};
+    _args = {"mkdir", dir.getPath().toStdString()};
     Iridium::Utility::pushBack(
-            arguments, {getFlag(Verbose).to_vector(), getFlag(LogType).to_vector(), getFlag(Stats).to_vector()});
-    execute(arguments);
+            _args, {getFlag(Verbose).to_vector(), getFlag(LogType).to_vector(), getFlag(Stats).to_vector()});
+    if(not m_lockable)
+        execute();
 
 }
 
@@ -473,10 +496,11 @@ void Rclone::mkdir(const RcloneFile &dir)
  */
 void Rclone::moveto(const RcloneFile &src, const RcloneFile &dest)
 {
-    vector<string> arguments = {"moveto", src.getPath().toStdString(), dest.getPath().toStdString()};
+    _args = {"moveto", src.getPath().toStdString(), dest.getPath().toStdString()};
     Iridium::Utility::pushBack(
-            arguments, {getFlag(Verbose).to_vector(), getFlag(LogType).to_vector(), getFlag(Stats).to_vector()});
-    execute(arguments);
+            _args, {getFlag(Verbose).to_vector(), getFlag(LogType).to_vector(), getFlag(Stats).to_vector()});
+    if(not m_lockable)
+        execute();
 }
 
 /**
@@ -502,7 +526,7 @@ std::atomic_int_fast8_t RcloneManager::m_nb_rclone_locked;
 uint8_t RcloneManager::m_nb_max_process = thread::hardware_concurrency();
 mutex RcloneManager::m_launch_mutex;
 condition_variable RcloneManager::m_launch_cv;
-std::vector<RcloneLocked> RcloneManager::m_launch_queue;
+std::vector<RclonePtr> RcloneManager::m_launch_queue;
 std::vector<RclonePtr> RcloneManager::m_rclones;
 
 boost::thread RcloneManager::m_launch_thread = boost::thread(
@@ -510,23 +534,28 @@ boost::thread RcloneManager::m_launch_thread = boost::thread(
         {
             while (not boost::this_thread::interruption_requested())
             {
-                // On attend que le nombre de processus rclone soit inférieur au nombre max
-                unique_lock<mutex> lock(RcloneManager::m_launch_mutex);
-                RcloneManager::m_launch_cv.wait(lock, []
+                try
                 {
-                    return not RcloneManager::m_launch_queue.empty() and
-                           RcloneManager::m_nb_rclone_locked < RcloneManager::m_nb_max_process;
-                });
-                if (not RcloneManager::m_launch_queue.empty())
-                {
-                    auto rclone_locked = RcloneManager::m_launch_queue.front();
-                    RcloneManager::m_launch_queue.erase(RcloneManager::m_launch_queue.begin());
-                    if (not rclone_locked.isCanceled())
+                    // On attend que le nombre de processus rclone soit inférieur au nombre max
+                    boost::this_thread::interruption_point();
+                    unique_lock<mutex> lock(RcloneManager::m_launch_mutex);
+                    RcloneManager::m_launch_cv.wait(lock, []
                     {
-                        rclone_locked.func();
-                        ++RcloneManager::m_nb_rclone_locked;
+                        boost::this_thread::interruption_point();
+                        return not RcloneManager::m_launch_queue.empty() and
+                               RcloneManager::m_nb_rclone_locked < RcloneManager::m_nb_max_process;
+                    });
+                    if (not RcloneManager::m_launch_queue.empty())
+                    {
+                        auto rclone = RcloneManager::m_launch_queue.front();
+                        release(rclone);
+                        if (not rclone->isCanceled())
+                        {
+                            rclone->execute();
+                            ++RcloneManager::m_nb_rclone_locked;
+                        }
                     }
-                }
+                } catch (boost::thread_interrupted &e) { break; }
             }
         });
 
@@ -536,6 +565,15 @@ boost::thread RcloneManager::m_launch_thread = boost::thread(
  */
 RclonePtr RcloneManager::get(bool lockable)
 {
+    for (auto rclone: m_rclones)
+    {
+        if (rclone->isCanceled() and rclone.use_count() == 1)
+        {
+            rclone->m_lockable = lockable;
+            rclone->m_cancel = false;
+            return rclone;
+        }
+    }
     auto rclone = RclonePtr(new Rclone());
     m_rclones.push_back(rclone);
     rclone->m_lockable = lockable;
@@ -546,7 +584,7 @@ RclonePtr RcloneManager::get(bool lockable)
  * @brief RcloneManager::launch, ajout le processus rclone à la queue de lancement
  * @param rcloneLocked
  */
-void RcloneManager::launch(const RcloneLocked &rcloneLocked)
+void RcloneManager::addLockable(const RclonePtr &rcloneLocked)
 {
     m_launch_queue.insert(m_launch_queue.end(), rcloneLocked);
     m_launch_cv.notify_one();
@@ -561,9 +599,5 @@ void RcloneManager::finished(Rclone *rclone)
     {
         --RcloneManager::m_nb_rclone_locked;
         RcloneManager::m_launch_cv.notify_one();
-    }
-    m_rclones.erase(std::remove_if(m_rclones.begin(), m_rclones.end(), [rclone](const RclonePtr &rclonePtr)
-    {
-        return rclonePtr.get() == rclone;
-    }), m_rclones.end());
+    } else release(rclone);
 }
