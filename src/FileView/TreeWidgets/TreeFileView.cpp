@@ -333,6 +333,7 @@ void TreeFileView::showContextMenu()
  */
 void TreeFileView::changeRemote(const RemoteInfoPtr &info)
 {
+    emit pathChanged("");
     if (info == nullptr)
     {
         auto model = new QStandardItemModel(this);

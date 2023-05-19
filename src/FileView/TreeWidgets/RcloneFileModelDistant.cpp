@@ -64,7 +64,10 @@ void RcloneFileModelDistant::addItemDynamic(const QString &path, TreeFileItem *p
 void RcloneFileModelDistant::addItemStatic(const QString &path, TreeFileItem *parent, uint8_t depth)
 {
     if (depth == 0)
+    {
+        qDebug() << "depth == 0";
         return;
+    }
     if (depth == m_max_depth) {
         for(auto &rclone: m_locked_rclone) { rclone->cancel(); }
         m_locked_rclone.clear();
@@ -94,6 +97,7 @@ void RcloneFileModelDistant::addItemStatic(const QString &path, TreeFileItem *pa
         connect(rclone.get(), &Rclone::finished, this,[rclone,this]{
 //            remove rclone from m_locked_rclone
             m_locked_rclone.erase(std::remove(m_locked_rclone.begin(), m_locked_rclone.end(), rclone), m_locked_rclone.end());
+            rclone->disconnect();
         });
         rclone->lsJson(path.toStdString());
         m_locked_rclone.push_back(rclone);

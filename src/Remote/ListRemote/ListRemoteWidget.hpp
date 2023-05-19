@@ -22,6 +22,10 @@ struct remotes_selected
 {
     RemoteWidget *first{};
     RemoteWidget *second{};
+    void clear(){
+        first = nullptr;
+        second = nullptr;
+    }
 };
 
 class ListRemoteWidget : public QScrollArea
@@ -33,6 +37,8 @@ private:
 
     RoundedLineEdit *m_recherche{};
     RoundedButton *m_add{};
+
+    RclonePtr _rclone{};
 
     QList<RemoteWidget *> m_listRemote{};
 

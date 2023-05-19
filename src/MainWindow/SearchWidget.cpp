@@ -45,25 +45,16 @@ SearchWidget::SearchWidget(QWidget *parent) : QWidget(parent)
     m_remotes_comboBox->setView(view);
     view->setMinimumWidth(150);
     m_remotes_comboBox->setMaxVisibleItems(3);
-    m_remotes = Settings::getRemotes();
 
+    m_remotes = Iridium::Variable::remotes;
+    fillRemotesComboBox();
 
-    auto it = m_remotes.begin();
-    auto *item = new QStandardItem(it->get()->name().c_str());
-    item->setIcon(QIcon(it->get()->m_icon.c_str()));
-    item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
-    item->setData(Qt::Checked, Qt::CheckStateRole);
-    model->appendRow(item);
-    it++;
-    for (; it not_eq m_remotes.end(); it++)
-    {
-        auto *item = new QStandardItem(it->get()->name().c_str());
-        item->setToolTip(it->get()->name().c_str());
-        item->setIcon(QIcon(it->get()->m_icon.c_str()));
-        item->setData(Qt::Unchecked, Qt::CheckStateRole);
-        item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
-        model->appendRow(item);
-    }
+    Settings::list_remote_changed.connect(
+            [this]()
+            {
+                m_remotes = Iridium::Variable::remotes;
+                fillRemotesComboBox();
+            });
 
     m_search = new QLineEdit(this);
     m_start = new QPushButton(tr("Rechercher"), this);
@@ -173,4 +164,25 @@ bool SearchWidget::event(QEvent *event)
         m_remotes_comboBox->findChildren<QWidget *>().first()->hide();
     }
     return QWidget::event(event);
+}
+
+void SearchWidget::fillRemotesComboBox() {
+    auto model = dynamic_cast<QStandardItemModel *>(m_remotes_comboBox->model());
+    model->clear();
+    auto it = m_remotes.begin();
+    auto *item = new QStandardItem(it->get()->name().c_str());
+    item->setIcon(QIcon(it->get()->m_icon.c_str()));
+    item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
+    item->setData(Qt::Checked, Qt::CheckStateRole);
+    model->appendRow(item);
+    it++;
+    for (; it not_eq m_remotes.end(); it++)
+    {
+        auto *item = new QStandardItem(it->get()->name().c_str());
+        item->setToolTip(it->get()->name().c_str());
+        item->setIcon(QIcon(it->get()->m_icon.c_str()));
+        item->setData(Qt::Unchecked, Qt::CheckStateRole);
+        item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
+        model->appendRow(item);
+    }
 }

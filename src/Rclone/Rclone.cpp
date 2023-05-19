@@ -66,7 +66,7 @@ void Rclone::lsJson(const string &path)
                 }
             });
     _args = {"lsjson", path, "--drive-skip-gdocs", "--fast-list"};
-    if(not m_lockable)
+    if (not m_lockable)
         execute();
 }
 
@@ -93,7 +93,7 @@ void Rclone::copyTo(const RcloneFile &src, const RcloneFile &dest)
                     emit taskProgress(std::move(json));
                 }
             });
-    if(not m_lockable)
+    if (not m_lockable)
         execute();
 }
 
@@ -110,7 +110,7 @@ void Rclone::deleteFile(const RcloneFile &file)
         _args.emplace(_args.begin(), "deletefile");
     else
         _args.emplace(_args.begin(), "purge");
-    if(not m_lockable)
+    if (not m_lockable)
         execute();
 }
 
@@ -160,7 +160,7 @@ void Rclone::config(RemoteType type, const string &name, const vector<string> &p
     }
     args.insert(args.end(), params.begin(), params.end());
     _args = args;
-    if(not m_lockable)
+    if (not m_lockable)
         execute();
 }
 
@@ -180,7 +180,7 @@ void Rclone::about(const RemoteInfo &info)
                 }
             });
     _args = {"about", info.m_path, "--json"};
-    if(not m_lockable)
+    if (not m_lockable)
         execute();
 }
 
@@ -210,7 +210,7 @@ void Rclone::listRemotes()
                 }
             });
     _args = {"listremotes", "--long"};
-    if(not m_lockable)
+    if (not m_lockable)
         execute();
 }
 
@@ -253,7 +253,7 @@ void Rclone::search(const vector<Filter> &filters, const RemoteInfo &info)
     for (auto &filter: filters)
         _args.emplace_back(filter.str());
     _args.emplace_back("--ignore-case");
-    if(not m_lockable)
+    if (not m_lockable)
         execute();
 }
 
@@ -265,7 +265,7 @@ void Rclone::search(const vector<Filter> &filters, const RemoteInfo &info)
 void Rclone::deleteRemote(const string &remote)
 {
     _args = {"config", "delete", remote};
-    if(not m_lockable)
+    if (not m_lockable)
         execute();
 }
 
@@ -359,7 +359,6 @@ void Rclone::execute()
                     m_cv.notify_one();
                     m_pipe_out->close();
                     m_pipe_err->close();
-                    disconnect();
                     RcloneManager::finished(this);
                 } catch (...)
                 {
@@ -369,7 +368,6 @@ void Rclone::execute()
                     m_cv.notify_one();
                     m_pipe_out->close();
                     m_pipe_err->close();
-                    disconnect();
                     RcloneManager::finished(this);
                 }
             });
@@ -406,14 +404,16 @@ void Rclone::kill()
     if (m_state == Running)
     {
         cout << "process rclone kill" << endl;
+        m_readyRead.disconnect_all_slots();
+        m_finished.disconnect_all_slots();
         m_ioc->stop();
         m_child.detach();
         bp::detail::api::terminate(bp::child::child_handle{m_child.native_handle()});
         m_thread->interrupt();
         m_exit = 1;
+        disconnect();
     }
-    m_state = Stopped;
-    disconnect();
+        m_state = Stopped;
 }
 
 /**
@@ -457,7 +457,7 @@ void Rclone::size(const string &path)
                 }
             });
     _args = {"size", path, "--json"};
-    if(not m_lockable)
+    if (not m_lockable)
         execute();
 }
 
@@ -468,7 +468,7 @@ void Rclone::size(const string &path)
 string Rclone::version()
 {
     _args = {"version"};
-    if(not m_lockable)
+    if (not m_lockable)
         execute();
     waitForFinished();
     return m_out[0];
@@ -484,7 +484,7 @@ void Rclone::mkdir(const RcloneFile &dir)
     _args = {"mkdir", dir.getPath().toStdString()};
     Iridium::Utility::pushBack(
             _args, {getFlag(Verbose).to_vector(), getFlag(LogType).to_vector(), getFlag(Stats).to_vector()});
-    if(not m_lockable)
+    if (not m_lockable)
         execute();
 
 }
@@ -499,7 +499,7 @@ void Rclone::moveto(const RcloneFile &src, const RcloneFile &dest)
     _args = {"moveto", src.getPath().toStdString(), dest.getPath().toStdString()};
     Iridium::Utility::pushBack(
             _args, {getFlag(Verbose).to_vector(), getFlag(LogType).to_vector(), getFlag(Stats).to_vector()});
-    if(not m_lockable)
+    if (not m_lockable)
         execute();
 }
 
@@ -574,9 +574,8 @@ RclonePtr RcloneManager::get(bool lockable)
             return rclone;
         }
     }
-    auto rclone = RclonePtr(new Rclone());
+    auto rclone = RclonePtr(new Rclone(lockable));
     m_rclones.push_back(rclone);
-    rclone->m_lockable = lockable;
     return rclone;
 }
 
