@@ -183,7 +183,6 @@ void SearchTableView::searchDistant(const std::vector<Rclone::Filter> &filters, 
 {
     if (filters.empty())
         return;
-    m_cv.notify_one();
     auto rclone = RcloneManager::get();
     m_rclones.push_back(rclone);
     emit searchStarted();
@@ -195,6 +194,7 @@ void SearchTableView::searchDistant(const std::vector<Rclone::Filter> &filters, 
     connect(rclone.get(), &Rclone::finished, this, &SearchTableView::terminateSearch);
     rclone->search(filters, *remoteInfo);
     m_searching++;
+    m_cv.notify_one();
 }
 
 void SearchTableView::terminateSearch()
@@ -242,7 +242,6 @@ void SearchTableView::initThread()
                 while (not boost::this_thread::interruption_requested())
                 {
                     try{
-                        boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
                         std::unique_lock<std::mutex> lock(m_mutex);
                         m_cv.wait(lock, [this]() {
                             boost::this_thread::interruption_point();
@@ -253,6 +252,7 @@ void SearchTableView::initThread()
                         auto row = m_rows.front();
                         m_rows.erase(m_rows.begin());
                         addFile(row.file, row.remoteInfo);
+                        boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
                     }catch (boost::thread_interrupted &e) { break; }
                 }
             });
