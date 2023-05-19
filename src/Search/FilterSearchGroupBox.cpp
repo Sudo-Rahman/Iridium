@@ -148,6 +148,8 @@ void FilterSearchGroupBox::connectSignals()
 
     connect(m_up, &QPushButton::clicked, this, [this]
     {
+        if(m_listView->model()->rowCount() < 2)
+            return;
         auto model = dynamic_cast<QStandardItemModel *>(m_listView->model());
         auto index = m_listView->currentIndex();
         if (index.row() > 0)
@@ -162,6 +164,8 @@ void FilterSearchGroupBox::connectSignals()
 
     connect(m_down, &QPushButton::clicked, this, [this]
     {
+        if(m_listView->model()->rowCount() < 2)
+            return;
         auto model = dynamic_cast<QStandardItemModel *>(m_listView->model());
         auto index = m_listView->currentIndex();
         if (index.row() < model->rowCount() - 1)

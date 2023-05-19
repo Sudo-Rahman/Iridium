@@ -72,9 +72,9 @@ void RcloneFileModelDistant::addItemStatic(const QString &path, TreeFileItem *pa
     }
 
     auto *tree_item = (parent->getParent() == nullptr ? parent : parent->getParent());
-    auto rclone = RcloneManager::get(true);
     if (tree_item->state() == TreeFileItem::NotLoaded)
     {
+        auto rclone = RcloneManager::get(true);
         addProgressBar(tree_item->child(0, 0)->index());
         connect(rclone.get(), &Rclone::lsJsonFinished, this,
                 [depth, tree_item, rclone, path, this](const boost::json::array &array)
@@ -102,5 +102,11 @@ void RcloneFileModelDistant::addItemStatic(const QString &path, TreeFileItem *pa
         rclone->lsJson(path.toStdString());
         m_locked_rclone.push_back(rclone);
         RcloneManager::addLockable(rclone);
+    }else{
+        for (int i = 0; i < tree_item->rowCount(); ++i) {
+            auto *item = dynamic_cast<TreeFileItemDistant*>(tree_item->child(i, 0));
+            if (item->getFile()->isDir())
+                addItemStatic(item->getFile()->getPath(), item, depth - 1);
+        }
     }
 }

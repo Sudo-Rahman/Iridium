@@ -99,7 +99,7 @@ public:
 
 private:
 
-    boost::process::child m_child{};
+    boost::process::child *_child{};
 
     static std::string m_path_rclone;
     std::unique_ptr<boost::thread> m_thread{};
@@ -107,12 +107,12 @@ private:
     std::map<std::string, std::string> m_map_data{};
     uint8_t m_exit{};
     Rclone::State m_state{Rclone::NotLaunched};
-    std::function<void(boost::process::async_pipe &pipe, std::vector<std::string> &vec)> read_loop;
+    std::function<void(boost::process::async_pipe &pipe, std::vector<std::string> &vec)> _read_loop;
     std::mutex m_mutex{};
     std::condition_variable m_cv;
 
-    std::unique_ptr<boost::process::async_pipe> m_pipe_out, m_pipe_err;
-    std::unique_ptr<boost::asio::io_context> m_ioc;
+    boost::process::async_pipe *m_pipe_out, *m_pipe_err;
+    boost::asio::io_context *m_ioc;
 
     static std::map<Flag, flags_str> m_map_flags;
 
@@ -186,18 +186,17 @@ private:
 
     static boost::json::object parseJson(const std::string &str);
 
-    void closePipes()
+    void closeAll()
     {
+        m_readyRead.disconnect_all_slots();
+        m_finished.disconnect_all_slots();
+        if (m_ioc)
+            m_ioc->stop();
         if (m_pipe_out)
-        {
             m_pipe_out->close();
-            m_pipe_out.release();
-        }
         if (m_pipe_err)
-        {
             m_pipe_err->close();
-            m_pipe_err.release();
-        }
+        disconnect();
     }
 
 

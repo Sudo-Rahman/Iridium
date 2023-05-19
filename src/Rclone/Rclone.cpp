@@ -56,6 +56,8 @@ void Rclone::lsJson(const string &path)
                 {
                     try
                     {
+                        if(m_out.front() not_eq "[")
+                            m_out.front() = "[";
                         auto joinStr = boost::algorithm::join(m_out, "");
                         auto array = boost::json::parse(joinStr).as_array();
                         emit lsJsonFinished(std::move(array));
@@ -297,12 +299,12 @@ void Rclone::execute()
     const auto &argsEncoding = _args;
 #endif
 
-    m_ioc = make_unique<boost::asio::io_context>();
+    m_ioc = new ba::io_context();
     boost::asio::executor_work_guard<boost::asio::io_context::executor_type> work(m_ioc->get_executor());
-    m_pipe_err = make_unique<bp::async_pipe>(*m_ioc);
-    m_pipe_out = make_unique<bp::async_pipe>(*m_ioc);
+    m_pipe_err = new bp::async_pipe(*m_ioc);
+    m_pipe_out = new bp::async_pipe(*m_ioc);
 
-    m_child = bp::child(exe, bp::args(argsEncoding),
+    _child =new bp::child(exe, bp::args(argsEncoding),
                         bp::std_out > *m_pipe_out,
                         bp::std_err > *m_pipe_err,
                         bp::on_exit([this](int exit, const std::error_code &ec)
@@ -319,7 +321,7 @@ void Rclone::execute()
     m_cv.notify_one();
 
     auto buffer = make_shared<ba::streambuf>();
-    read_loop =
+    _read_loop =
             [this, buffer](bp::async_pipe &pipe, vector<string> &vec)
             {
                 ba::async_read_until(
@@ -337,7 +339,7 @@ void Rclone::execute()
                                     vec.emplace_back(line);
 //                                    cout << line << endl;
                                 }
-                                read_loop(pipe, vec);
+                                _read_loop(pipe, vec);
                             }
                         }
                 );
@@ -350,16 +352,16 @@ void Rclone::execute()
                 {
                     ba::post(*m_ioc, [this]
                     {
-                        read_loop(*m_pipe_out, m_out);
-                        read_loop(*m_pipe_err, m_error);
+                        _read_loop(*m_pipe_out, m_out);
+                        _read_loop(*m_pipe_err, m_error);
                     });
                     m_ioc->run();
-                    m_child.wait();
+                    _child->wait();
                     m_state = Finsished;
                     m_finished(m_exit);
                     emit finished(m_exit);
                     m_cv.notify_one();
-                    closePipes();
+                    closeAll();
                     RcloneManager::finished(this);
                 } catch (...)
                 {
@@ -367,7 +369,7 @@ void Rclone::execute()
                     m_finished(m_exit);
                     emit finished(m_exit);
                     m_cv.notify_one();
-                    closePipes();
+                    closeAll();
                     RcloneManager::finished(this);
                 }
             });
@@ -394,6 +396,10 @@ Rclone::~Rclone()
 {
     cout << "destructeur rclone" << endl;
     Rclone::kill();
+    delete _child;
+    delete m_ioc;
+    delete m_pipe_err;
+    delete m_pipe_out;
 }
 
 /**
@@ -404,19 +410,16 @@ void Rclone::kill()
     if (m_state == Running)
     {
         cout << "process rclone kill" << endl;
-        m_readyRead.disconnect_all_slots();
-        m_finished.disconnect_all_slots();
         m_ioc->stop();
-        m_child.detach();
+        _child->detach();
 #ifdef _WIN32
-        boost::winapi::TerminateProcess(m_child.native_handle(), EXIT_FAILURE);
+        boost::winapi::TerminateProcess(_child->native_handle(), EXIT_FAILURE);
 #else
-        bp::detail::api::terminate(bp::child::child_handle{m_child.native_handle()});
+        bp::detail::api::terminate(bp::child::child_handle{_child->native_handle()});
 #endif
         m_thread->interrupt();
         m_exit = 1;
-        disconnect();
-        closePipes();
+        closeAll();
     }
     m_state = Stopped;
 }

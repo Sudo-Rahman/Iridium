@@ -120,7 +120,6 @@ void SearchWidget::connectSignals()
         auto model = dynamic_cast<QStandardItemModel *>(m_remotes_comboBox->model());
         m_search_view->stopAllSearch();
         m_search_view->model()->removeRows(0, m_search_view->model()->rowCount());
-        auto remote_count = 0;
         for (int i = 0; i < model->rowCount(); i++)
         {
             auto item = model->item(i);
