@@ -51,7 +51,7 @@ void RemoteConfigParamsFrame::createUi()
     connect(m_cancel, &QPushButton::clicked, this, [this]()
     {
         if (m_rclone->state() == Rclone::Running)
-            m_rclone->terminate();
+            m_rclone->kill();
         m_cancel->hide();
         m_login->show();
     });
@@ -67,6 +67,15 @@ void RemoteConfigParamsFrame::createUi()
     m_layout->setAlignment(m_messLabel, Qt::AlignTop);
 
     m_remoteName->setStyleSheet("border: 1px solid gray; border-radius: 5px;");
+
+    for(auto &field : findChildren<QLineEdit *>())
+    {
+        connect(field, &QLineEdit::textChanged, this, [this, field]()
+        {
+            field->setStyleSheet("border: 1px solid gray; border-radius: 5px;");
+            m_messLabel->hide();
+        });
+    }
 
 }
 
@@ -92,8 +101,6 @@ void RemoteConfigParamsFrame::addRemote()
             QMessageBox::information(this, tr("Succès"),
                                      tr("Le disque %1 a été ajouté avec succès").arg(m_remoteName->text()));
             clearAllFields();
-            m_cancel->hide();
-            m_login->show();
         } else
         {
             auto msgBox = QMessageBox();
@@ -103,6 +110,8 @@ void RemoteConfigParamsFrame::addRemote()
             msgBox.setStandardButtons(QMessageBox::Ok);
             msgBox.exec();
         }
+        m_cancel->hide();
+        m_login->show();
     });
 
     auto rclone_liste_remote = RcloneManager::get();

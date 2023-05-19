@@ -48,8 +48,6 @@ FilterSearchGroupBox::FilterSearchGroupBox(QWidget *parent) : QGroupBox(parent)
     auto model = new QStandardItemModel(this);
     m_listView->setSelectionBehavior(QAbstractItemView::SelectRows);
     m_listView->setSelectionMode(QAbstractItemView::SingleSelection);
-    // todo: drag and drop internal works but transform FilterItem to QStandardItem
-//    m_listView->setDragDropMode(QAbstractItemView::InternalMove);
     m_listView->setEditTriggers(QAbstractItemView::NoEditTriggers);
     m_listView->setDropIndicatorShown(true);
     m_listView->setModel(model);
@@ -180,7 +178,8 @@ void FilterSearchGroupBox::connectSignals()
     {
         auto model = dynamic_cast<QStandardItemModel *>(m_listView->model());
         auto item = dynamic_cast<FilterItem *>(model->item(m_listView->currentIndex().row()));
-        func(item,model);
+        if (item)
+            func(item,model);
     });
 }
 

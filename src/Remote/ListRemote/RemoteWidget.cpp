@@ -147,7 +147,7 @@ void RemoteWidget::init()
     // get max font size for m_delete
     auto size = m_delete->fontMetrics().boundingRect(m_delete->text()).size();
     m_delete->setFont(QFont("Arial", size.height() - 5));
-    m_delete->setToolTip("Delete");
+    m_delete->setToolTip(tr("Supprimer"));
 
     rightLayout->addWidget(m_delete, 0, Qt::AlignTop | Qt::AlignRight);
     rightLayout->addWidget(m_selected, 0, Qt::AlignBottom | Qt::AlignCenter);

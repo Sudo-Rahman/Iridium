@@ -13,6 +13,8 @@
 #include <Remote.h>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/signals2.hpp>
+#include <Variable.hpp>
 
 
 class Settings
@@ -62,8 +64,12 @@ private:
     static QIcon DIR_ICON;
 
     static QIcon HARDDRIVE_ICON;
+
+    static std::vector<RemoteInfoPtr> getLocalRemotes();
+
 public:
 
+    static boost::signals2::signal<void()> list_remote_changed;
 
     static void init();
 
@@ -75,9 +81,7 @@ public:
 
     static QIcon hardDriveIcon() { return HARDDRIVE_ICON; }
 
-    static std::vector<RemoteInfoPtr> getLocalRemotes();
-
-    static std::vector<RemoteInfoPtr> getRemotes();
+    static void refreshRemotesList();
 
     static void addLocalRemote(const RemoteInfo &remoteInfo);
 
@@ -107,6 +111,7 @@ public:
     static std::string getRcloneFlag(const Rclone::Flag &);
 
     static void setLanguage(const QLocale::Language &);
+
 
 };
 

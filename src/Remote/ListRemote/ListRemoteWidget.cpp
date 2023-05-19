@@ -52,7 +52,7 @@ ListRemoteWidget::ListRemoteWidget(QWidget *parent) : QScrollArea(parent)
         auto *addRemote = new AddNewRemoteDialog(this);
         connect(addRemote, &AddNewRemoteDialog::newRemoteAdded, this, [this]()
         {
-            getAllRemote();
+            Settings::refreshRemotesList();
             emit remoteClicked(m_remoteSelected);
         });
         addRemote->setModal(true);
@@ -72,11 +72,17 @@ ListRemoteWidget::ListRemoteWidget(QWidget *parent) : QScrollArea(parent)
     m_layout->addLayout(m_remoteLayout);
 
     m_remoteSelected = std::make_shared<remotes_selected>();
+
+    Settings::refreshRemotesList();
     getAllRemote();
+
     // no border
     setFrameShape(QFrame::NoFrame);
 
     m_width = QScrollArea::sizeHint().width();
+
+    Settings::list_remote_changed.connect([this]{getAllRemote();});
+
 }
 
 /**
@@ -84,17 +90,17 @@ ListRemoteWidget::ListRemoteWidget(QWidget *parent) : QScrollArea(parent)
  */
 void ListRemoteWidget::getAllRemote()
 {
+    // clear layout
+    for (auto *remote: m_listRemote)
+        m_layout->removeWidget(remote);
+    qDeleteAll(m_listRemote);
     m_listRemote.clear();
-    for (int i = m_remoteLayout->count() - 1; i >= 0; --i)
-    {
-        auto *item = m_remoteLayout->itemAt(i);
-        m_remoteLayout->removeItem(item);
-        delete item->widget();
-        delete item;
-    }
+    m_remoteSelected->clear();
 
 //     cration des remoteWidget
-    auto remotes = Settings::getRemotes();
+    auto remotes = Iridium::Variable::remotes;
+    if (remotes.empty())
+        return;
     auto it = remotes.begin();
     m_listRemote << new RemoteWidget(*it, false, this);
     it++;
@@ -135,8 +141,7 @@ void ListRemoteWidget::getAllRemote()
                 m_remoteLayout->removeItem(item);
                 item->widget()->deleteLater();
             }
-            getAllRemote();
-            emit remoteClicked(m_remoteSelected);
+            Settings::refreshRemotesList();
         });
 
         m_remoteLayout->addWidget(remote);
@@ -151,6 +156,7 @@ void ListRemoteWidget::getAllRemote()
             m_remoteSelected->second->setSelectedText("➁");
         }
     }
+    emit remoteClicked(m_remoteSelected);
 }
 
 /**

@@ -20,6 +20,7 @@ QIcon Settings::DIR_ICON;
 QIcon Settings::HARDDRIVE_ICON;
 string Rclone::m_path_rclone;
 property_tree::ptree Settings::m_settings, Settings::m_default;
+signals2::signal<void()> Settings::list_remote_changed;
 const map<Settings::Node, string> Settings::m_nodes = {
         {Settings::Node::All,          ""},
         {Settings::Node::General,      "general"},
@@ -106,17 +107,19 @@ std::vector<RemoteInfoPtr> Settings::getLocalRemotes()
     return remotes;
 }
 
-std::vector<RemoteInfoPtr> Settings::getRemotes()
+void Settings::refreshRemotesList()
 {
-    std::vector<RemoteInfoPtr> remotes;
-    auto locales = getLocalRemotes();
-    remotes.insert(remotes.end(), locales.begin(), locales.end());
     auto rclone = RcloneManager::get();
     rclone->listRemotes();
     rclone->waitForFinished();
+    std::vector<RemoteInfoPtr> remotes;
+    auto locales = getLocalRemotes();
+    remotes.insert(remotes.end(), locales.begin(), locales.end());
     for (const auto &pair: rclone->getData())
-        remotes.emplace_back(std::make_shared<RemoteInfo>(pair.first, stringToRemoteType.find(pair.second)->second));
-    return remotes;
+        remotes.emplace_back(
+                std::make_shared<RemoteInfo>(pair.first, stringToRemoteType.find(pair.second)->second));
+    Iridium::Variable::remotes = remotes;
+    list_remote_changed();
 }
 
 
@@ -171,15 +174,16 @@ void Settings::init()
     loadSettings();
     Settings::changeDirIcon(static_cast<ThemeColor>(getValue<uint8_t>(DirIconColor)));
 
-
     boost::filesystem::path translation_dir;
     if (QSysInfo::productType() == "macos")
+    {
         translation_dir = dll::program_location().parent_path().parent_path().append("Translations");
-    else
+    } else
         translation_dir = dll::program_location().parent_path().append("Translations");
 
     auto *translator = new QTranslator();
-    translator->load(QLocale(getValue<string>(Language).c_str()), "iridium", "_", translation_dir.string().c_str());
+    auto ok = translator->load(QLocale(getValue<string>(Language).c_str()), "iridium", "_",
+                               translation_dir.string().c_str());
     QApplication::installTranslator(translator);
     QLocale::setDefault(QLocale(getValue<string>(Language).c_str()));
 

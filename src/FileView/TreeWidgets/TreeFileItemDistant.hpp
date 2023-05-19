@@ -6,13 +6,13 @@
 #define IRIDIUM_TREEFILEITEMDISTANT_HPP
 
 #include "TreeFileItem.hpp"
-#include <QJsonObject>
+#include <boost/json.hpp>
 #include <QDateTime>
 
 class TreeFileItemDistant : public TreeFileItem
 {
 public:
-    explicit TreeFileItemDistant(const QString &path, const RemoteInfoPtr &remoteInfo, const QJsonObject &data,
+    explicit TreeFileItemDistant(const QString &path, const RemoteInfoPtr &remoteInfo, const boost::json::object &data,
                                  TreeFileItem * = nullptr);
 
 };

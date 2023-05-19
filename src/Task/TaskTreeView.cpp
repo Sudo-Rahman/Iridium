@@ -88,7 +88,7 @@ TaskTreeView::TaskTreeView(QWidget *parent) : QTreeView(parent)
                 if (it not_eq m_tasks.end())
                 {
                     // disconnect all signals
-                    it->second.rclone->terminate();
+                    it->second.rclone->kill();
                     it->second.parent->setState(TaskRow::State::Cancelled);
                     for(const auto &child: it->second.children)
                         child.second->setState(TaskRow::State::Cancelled);
@@ -122,7 +122,7 @@ void TaskTreeView::addTask(const QString &src, const QString &dst, const RcloneP
     auto task = std::make_shared<TaskRow>(src, dst, boost::json::object(), type, TaskRow::Normal, TaskRow::Parent);
     m_tasks.insert({idParent, Tasks{task, rclone, {}}});
     m_model->appendRow(*task);
-    task->first()->setData((uint64_t) idParent, Qt::UserRole + 1);
+    task->first()->setData((qulonglong) idParent, Qt::UserRole + 1);
     setIndexWidget(task->progressBarIndex(), task->progressBar());
 
 

@@ -41,4 +41,5 @@ void MainWindow::closeEvent(QCloseEvent *event)
 {
     Settings::saveSettings();
     QMainWindow::closeEvent(event);
+    RcloneManager::stopThread();
 }

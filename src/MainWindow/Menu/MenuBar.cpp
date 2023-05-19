@@ -14,10 +14,10 @@
 
 MenuBar::MenuBar(QWidget *parent) : QMenuBar(parent)
 {
-    m_about_menu = addMenu("About");
+    m_about_menu = addMenu(tr("À propos"));
     m_about_action = m_about_menu->addAction("About");
 
-    m_settings_menu = addMenu("Settings");
+    m_settings_menu = addMenu(tr("Paramètres"));
     m_settings_action = m_settings_menu->addAction("Settings");
 
     connectSignals();
@@ -28,7 +28,7 @@ void MenuBar::connectSignals()
     connect(m_about_action, &QAction::triggered, this, [this]()
     {
         auto dialog = QDialog(this);
-        dialog.setWindowTitle(tr("A propos d'Iridium"));
+        dialog.setWindowTitle(tr("À propos d'Iridium"));
         dialog.setModal(true);
 
         auto formLayout = QFormLayout(&dialog);

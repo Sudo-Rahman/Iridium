@@ -47,6 +47,8 @@ SearchTableView::SearchTableView(QWidget *parent) : QTableView(parent)
 
     m_model->setSortRole(Qt::UserRole + 1);
 
+    initThread();
+
     connect(this, &QTableView::customContextMenuRequested, this, &SearchTableView::showCustomContextMenu);
 
     connect(horizontalHeader(), &QHeaderView::sectionResized, this, [this](int logicalIndex, int oldSize, int newSize)
@@ -131,6 +133,7 @@ void SearchTableView::addFile(const boost::json::object &file, const RemoteInfoP
     m_model->appendRow(row);
 }
 
+
 void SearchTableView::searchLocal(const QString &text, const RemoteInfoPtr &remoteInfo)
 {
     if (text.size() < 3)
@@ -166,11 +169,12 @@ void SearchTableView::searchLocal(const QString &text, const RemoteInfoPtr &remo
                                                        new SearchTableItem(4, rcloneFile),
                                                        new SearchTableItem(5, rcloneFile)
                                                });
+
                         }
                         boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
                     }
                     terminateSearch();
-                }catch(boost::thread_interrupted &e){}
+                } catch (boost::thread_interrupted &e) {}
             });
     m_threads.push_back(std::move(th));
 }
@@ -179,31 +183,18 @@ void SearchTableView::searchDistant(const std::vector<Rclone::Filter> &filters, 
 {
     if (filters.empty())
         return;
-    auto th = boost::thread(
-            [this, filters, remoteInfo]
+    m_cv.notify_one();
+    auto rclone = RcloneManager::get();
+    m_rclones.push_back(rclone);
+    emit searchStarted();
+    connect(rclone.get(), &Rclone::searchRefresh,
+            [this, remoteInfo](const boost::json::object &file)
             {
-                auto rclone = RcloneManager::get();
-                try
-                {
-                    emit searchStarted();
-                    connect(rclone.get(), &Rclone::searchRefresh,
-                            [this, remoteInfo](const boost::json::object &file)
-                            {
-                                addFile(file, remoteInfo);
-                            });
-                    connect(rclone.get(), &Rclone::finished, this, &SearchTableView::terminateSearch);
-                    rclone->search(filters, *remoteInfo);
-                    m_searching++;
-                    m_rclones.push_back(rclone);
-                    while (not boost::this_thread::interruption_requested())
-                    {
-                        boost::this_thread::interruption_point();
-                        boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
-                    }
-                } catch (const boost::thread_interrupted &e) { rclone->terminate(); }
-            }
-    );
-    m_threads.push_back(std::move(th));
+                m_rows.push_back({file, remoteInfo});
+            });
+    connect(rclone.get(), &Rclone::finished, this, &SearchTableView::terminateSearch);
+    rclone->search(filters, *remoteInfo);
+    m_searching++;
 }
 
 void SearchTableView::terminateSearch()
@@ -214,12 +205,15 @@ void SearchTableView::terminateSearch()
 
 void SearchTableView::stopAllSearch()
 {
+    m_rows.clear();
     m_searching = 0;
     for (auto &thread: m_threads)
     {
         thread.interrupt();
         thread.join();
     }
+    for (auto &rclone: m_rclones)
+        rclone->kill();
     m_rclones.clear();
     m_threads.clear();
     emit searchFinished();
@@ -238,4 +232,28 @@ void SearchTableView::resizeEvent(QResizeEvent *event)
         horizontalHeader()->setSectionResizeMode(0, QHeaderView::Interactive);
     if (horizontalHeader()->sectionSize(0) < QWidget::width() * .4)
         setColumnWidth(0, QWidget::width() * .4);
+}
+
+void SearchTableView::initThread()
+{
+    m_adder = std::make_unique<boost::thread>(
+            [this]()
+            {
+                while (not boost::this_thread::interruption_requested())
+                {
+                    try{
+                        boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
+                        std::unique_lock<std::mutex> lock(m_mutex);
+                        m_cv.wait(lock, [this]() {
+                            boost::this_thread::interruption_point();
+                            return not m_rows.empty() or m_searching >0;
+                        });
+                        if(m_rows.empty())
+                            continue;
+                        auto row = m_rows.front();
+                        m_rows.erase(m_rows.begin());
+                        addFile(row.file, row.remoteInfo);
+                    }catch (boost::thread_interrupted &e) { break; }
+                }
+            });
 }

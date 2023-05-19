@@ -38,6 +38,8 @@ protected:
 
 private:
     void connectSignals();
+
+    void fillRemotesComboBox();
 };
 
 
