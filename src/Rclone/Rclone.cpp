@@ -14,8 +14,10 @@
 
 
 #ifdef _WIN32
+
 #include <boost/process/windows.hpp>
 #include <codecvt>
+
 #endif
 
 namespace bp = boost::process;
@@ -289,7 +291,7 @@ void Rclone::execute()
     vector<std::wstring> argsEncoding;
     argsEncoding.reserve(_args.size());
     for (auto &arg: _args)
-        argsEncoding.emplace_back(converter.from_bytes(_args));
+        argsEncoding.emplace_back(converter.from_bytes(arg));
 #else
     auto exe = m_path_rclone;
     const auto &argsEncoding = _args;
@@ -357,8 +359,7 @@ void Rclone::execute()
                     m_finished(m_exit);
                     emit finished(m_exit);
                     m_cv.notify_one();
-                    m_pipe_out->close();
-                    m_pipe_err->close();
+                    closePipes();
                     RcloneManager::finished(this);
                 } catch (...)
                 {
@@ -366,8 +367,7 @@ void Rclone::execute()
                     m_finished(m_exit);
                     emit finished(m_exit);
                     m_cv.notify_one();
-                    m_pipe_out->close();
-                    m_pipe_err->close();
+                    closePipes();
                     RcloneManager::finished(this);
                 }
             });
@@ -408,12 +408,17 @@ void Rclone::kill()
         m_finished.disconnect_all_slots();
         m_ioc->stop();
         m_child.detach();
+#ifdef _WIN32
+        boost::winapi::TerminateProcess(m_child.native_handle(), EXIT_FAILURE);
+#else
         bp::detail::api::terminate(bp::child::child_handle{m_child.native_handle()});
+#endif
         m_thread->interrupt();
         m_exit = 1;
         disconnect();
+        closePipes();
     }
-        m_state = Stopped;
+    m_state = Stopped;
 }
 
 /**

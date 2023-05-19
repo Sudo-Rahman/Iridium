@@ -103,7 +103,7 @@ private:
 
     static std::string m_path_rclone;
     std::unique_ptr<boost::thread> m_thread{};
-    std::vector<std::string> _args{},m_out{}, m_error{};
+    std::vector<std::string> _args{}, m_out{}, m_error{};
     std::map<std::string, std::string> m_map_data{};
     uint8_t m_exit{};
     Rclone::State m_state{Rclone::NotLaunched};
@@ -122,7 +122,7 @@ private:
 public:
     void kill();
 
-    void cancel(){m_cancel = true;}
+    void cancel() { m_cancel = true; }
 
     [[nodiscard]] bool isCanceled() const { return m_cancel; }
 
@@ -186,6 +186,20 @@ private:
 
     static boost::json::object parseJson(const std::string &str);
 
+    void closePipes()
+    {
+        if (m_pipe_out)
+        {
+            m_pipe_out->close();
+            m_pipe_out.release();
+        }
+        if (m_pipe_err)
+        {
+            m_pipe_err->close();
+            m_pipe_err.release();
+        }
+    }
+
 
 signals:
 
@@ -216,7 +230,7 @@ private:
     static std::mutex m_launch_mutex;
     static std::condition_variable m_launch_cv;
     static boost::thread m_launch_thread;
-    static std::vector<RclonePtr> m_rclones,m_launch_queue;
+    static std::vector<RclonePtr> m_rclones, m_launch_queue;
 
 public:
     static RclonePtr get(bool lockable = false);
