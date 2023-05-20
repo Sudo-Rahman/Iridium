@@ -23,8 +23,8 @@ TaskTreeView::TaskTreeView(QWidget *parent) : QTreeView(parent)
     setUniformRowHeights(true);
 
 
-    m_model = new QStandardItemModel(0, 10, this);
-    QTreeView::setModel(m_model);
+    _model = new QStandardItemModel(0, 10, this);
+    QTreeView::setModel(_model);
 
     setIndentation(30);
     setHeaderHidden(false);
@@ -34,7 +34,7 @@ TaskTreeView::TaskTreeView(QWidget *parent) : QTreeView(parent)
     setSelectionBehavior(QAbstractItemView::SelectRows);
     setEditTriggers(QAbstractItemView::NoEditTriggers);
 
-    m_model->setHorizontalHeaderLabels(
+    _model->setHorizontalHeaderLabels(
             {tr("Source"), tr("Destination"), tr("Taille"), tr("Type"), tr("Progression"),
              tr("Statut"), tr("Temps restant"),
              tr("Temps écoulé"), tr("Vitesse"), tr("Vitesse moyenne")});
@@ -62,8 +62,8 @@ TaskTreeView::TaskTreeView(QWidget *parent) : QTreeView(parent)
         connect(remove, &QAction::triggered, this, [this]()
         {
             auto indexes = QTreeView::selectedIndexes();
-            for (long long i = indexes.size()/10; i >0; i--)
-                m_model->removeRows(indexes[i].row(), 1, indexes[i].parent());
+            for (long long i = indexes.size() / 10; i > 0; i--)
+                _model->removeRows(indexes[i].row(), 1, indexes[i].parent());
         });
 
         auto action = menu.exec(QCursor::pos());
@@ -84,15 +84,14 @@ TaskTreeView::TaskTreeView(QWidget *parent) : QTreeView(parent)
             for (int i = 0; i < indexes.size(); i = i + 10)
             {
                 auto id = indexes[i].siblingAtColumn(0);
-                auto it = m_tasks.find(id.data(Qt::UserRole + 1).toULongLong());
-                if (it not_eq m_tasks.end())
+                auto it = _tasks.find(id.data(Qt::UserRole + 1).toULongLong());
+                if (it not_eq _tasks.end())
                 {
-                    // disconnect all signals
                     it->second.rclone->kill();
                     it->second.parent->setState(TaskRow::State::Cancelled);
-                    for(const auto &child: it->second.children)
+                    for (const auto &child: it->second.children)
                         child.second->setState(TaskRow::State::Cancelled);
-                    erase_if(m_tasks, [it](const auto &t) { return t.first == it->first; });
+                    erase_if(_tasks, [it](const auto &t) { return t.first == it->first; });
                 }
             }
             return;
@@ -103,7 +102,7 @@ TaskTreeView::TaskTreeView(QWidget *parent) : QTreeView(parent)
     {
         if (task.second.parent->state() not_eq TaskRow::State::Error)
             task.second.parent->terminate();
-        erase_if(m_tasks, [task](const auto &t) { return t.first == task.first; });
+        erase_if(_tasks, [task](const auto &t) { return t.first == task.first; });
     });
 }
 
@@ -117,11 +116,11 @@ void TaskTreeView::addTask(const QString &src, const QString &dst, const RcloneP
                            const std::function<void()> &callable, const Rclone::TaskType &type)
 {
     auto idParent = boost::hash<std::string>{}(src.toStdString() + dst.toStdString());
-    if (m_tasks.find(idParent) != m_tasks.end())
+    if (_tasks.find(idParent) != _tasks.end())
         return;
     auto task = std::make_shared<TaskRow>(src, dst, boost::json::object(), type, TaskRow::Normal, TaskRow::Parent);
-    m_tasks.insert({idParent, Tasks{task, rclone, {}}});
-    m_model->appendRow(*task);
+    _tasks.insert({idParent, Tasks{task, rclone, {}}});
+    _model->appendRow(*task);
     task->first()->setData((qulonglong) idParent, Qt::UserRole + 1);
     setIndexWidget(task->progressBarIndex(), task->progressBar());
 
@@ -135,7 +134,7 @@ void TaskTreeView::addTask(const QString &src, const QString &dst, const RcloneP
                     if (obj.at("level").as_string() == "error")
                     {
 //				cout << obj << endl;
-                        if (m_tasks.find(idParent) == m_tasks.end())
+                        if (_tasks.find(idParent) == _tasks.end())
                             return;
                         auto object = obj.at("object").as_string();
                         size_t errId;
@@ -147,15 +146,15 @@ void TaskTreeView::addTask(const QString &src, const QString &dst, const RcloneP
                             errId = boost::hash<std::string>{}(src.toStdString() + dst.toStdString());
                         if (idParent == errId)
                         {
-                            m_tasks[idParent].parent->setState(TaskRow::Error);
-                            m_tasks[idParent].parent->setMessageToolTip(obj.at("msg").as_string().c_str());
-                            if (m_tasks[idParent].children.size() > 0)
-                                for (auto &child: m_tasks[idParent].children)
+                            _tasks[idParent].parent->setState(TaskRow::Error);
+                            _tasks[idParent].parent->setMessageToolTip(obj.at("msg").as_string().c_str());
+                            if (not _tasks[idParent].children.empty())
+                                for (auto &child: _tasks[idParent].children)
                                     child.second->setState(TaskRow::Error);
                             return;
                         }
-                        auto it = m_tasks[idParent].children.find(errId);
-                        if (it != m_tasks[idParent].children.end())
+                        auto it = _tasks[idParent].children.find(errId);
+                        if (it != _tasks[idParent].children.end())
                         {
                             it->second->setState(TaskRow::Error);
                             it->second->setMessageToolTip(obj.at("msg").as_string().c_str());
@@ -163,16 +162,16 @@ void TaskTreeView::addTask(const QString &src, const QString &dst, const RcloneP
                         }
                         auto task = std::make_shared<TaskRow>(src + object.c_str(), dst + object.c_str(), obj, type,
                                                               TaskRow::Error, TaskRow::Child);
-                        m_tasks[idParent].children.insert({errId, task});
-                        m_tasks[idParent].parent->first()->appendRow(*task);
+                        _tasks[idParent].children.insert({errId, task});
+                        _tasks[idParent].parent->first()->appendRow(*task);
                         setIndexWidget(task->progressBarIndex(), task->progressBar());
                         return;
                     }
                     if (not obj.contains("stats"))
                         return;
 
-                    auto it = m_tasks.find(idParent);
-                    if (it != m_tasks.end())
+                    auto it = _tasks.find(idParent);
+                    if (it != _tasks.end())
                         it->second.parent->updateData(obj.at("stats").as_object());
 
                     transfer = obj.at("stats").at("transferring").as_array();
@@ -200,15 +199,15 @@ void TaskTreeView::addTask(const QString &src, const QString &dst, const RcloneP
                     hashList.emplace_back(childId);
 
                     // if parent task not exist, return
-                    if (m_tasks.find(idParent) == m_tasks.end())
+                    if (_tasks.find(idParent) == _tasks.end())
                         return;
 
-                    auto it = m_tasks[idParent].children.find(childId);
+                    auto it = _tasks[idParent].children.find(childId);
 
                     if (std::find(hashList.begin(), hashList.end(), childId) != hashList.end())
                     {
                         // if the child task already exist and is json data
-                        if (it != m_tasks[idParent].children.end())
+                        if (it != _tasks[idParent].children.end())
                             it->second->updateData(item.as_object());
                             // if the child task not exist in the task list, create it
                         else
@@ -222,14 +221,14 @@ void TaskTreeView::addTask(const QString &src, const QString &dst, const RcloneP
                             else
                                 task = std::make_shared<TaskRow>(src, dst, item.as_object(),
                                                                  type, TaskRow::Normal, TaskRow::Child);
-                            m_tasks[idParent].children.insert({childId, task});
-                            m_tasks[idParent].parent->first()->appendRow(*task);
+                            _tasks[idParent].children.insert({childId, task});
+                            _tasks[idParent].parent->first()->appendRow(*task);
                             setIndexWidget(task->progressBarIndex(), task->progressBar());
                         }
                     }
                 }
                 // if the child task already in the list but not in the json data, terminate it
-                for (auto it = m_tasks[idParent].children.begin(); it != m_tasks[idParent].children.end(); ++it)
+                for (auto it = _tasks[idParent].children.begin(); it != _tasks[idParent].children.end(); ++it)
                 {
                     if (std::find(hashList.begin(), hashList.end(), it->first) == hashList.end())
                         if (it->second->state() != TaskRow::Error)
@@ -247,7 +246,7 @@ void TaskTreeView::addTask(const QString &src, const QString &dst, const RcloneP
                     id = boost::hash<std::string>{}(
                             src.toStdString() + dst.toStdString());
                 } catch (const boost::wrapexcept<std::invalid_argument> &e) { return; }
-                auto it = m_tasks.find(id);
+                auto it = _tasks.find(id);
                 if (exit == 0)
                     (*it).second.parent->setState(TaskRow::Finished);
                 else
@@ -256,7 +255,7 @@ void TaskTreeView::addTask(const QString &src, const QString &dst, const RcloneP
                     (*it).second.parent->setMessageToolTip(rclone->readAllError().back());
                     (*it).second.parent->progressBar()->error();
                 }
-                emit taskFinished(*m_tasks.find(id));
+                emit taskFinished(*_tasks.find(id));
             });
     callable();
 }

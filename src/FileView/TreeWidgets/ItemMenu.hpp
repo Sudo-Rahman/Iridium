@@ -14,7 +14,7 @@ class ItemMenu : public QMenu
 Q_OBJECT
 
 private:
-    QAction *m_info{}, *m_copy{}, *m_paste{}, *m_delete{}, *m_new_folder{};
+    QAction *_info{}, *_copy{}, *_paste{}, *_delete{}, *_new_folder{};
 
 public:
 
@@ -28,7 +28,7 @@ public:
         NewFolder
     };
 
-    [[nodiscard]] Action action() const { return m_action; }
+    [[nodiscard]] Action action() const { return _action; }
 
     explicit ItemMenu(QWidget *parent = nullptr);
 
@@ -38,11 +38,11 @@ public:
     Action exec(const QPoint &pos)
     {
         QMenu::exec(pos);
-        return m_action;
+        return _action;
     }
 
 private:
-    Action m_action{None};
+    Action _action{None};
 
 signals:
 

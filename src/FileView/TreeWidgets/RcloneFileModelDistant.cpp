@@ -6,8 +6,8 @@
 #include "RcloneFileModelDistant.hpp"
 #include "TreeFileItemDistant.hpp"
 
-uint8_t RcloneFileModelDistant::m_max_depth = 2;
-RcloneFileModelDistant::Load RcloneFileModelDistant::m_load = Dynamic;
+uint8_t RcloneFileModelDistant::_max_depth = 2;
+RcloneFileModelDistant::Load RcloneFileModelDistant::_load = Dynamic;
 
 RcloneFileModelDistant::RcloneFileModelDistant(const RemoteInfoPtr &remoteInfo, QTreeView *View)
         : RcloneFileModel(remoteInfo, View)
@@ -17,10 +17,10 @@ RcloneFileModelDistant::RcloneFileModelDistant(const RemoteInfoPtr &remoteInfo, 
 
 void RcloneFileModelDistant::init()
 {
-    auto *drive = new TreeFileItem(m_remote_info->m_path.c_str(), m_remote_info);
+    auto *drive = new TreeFileItem(_remote_info->path.c_str(), _remote_info);
     drive->getFile()->setSize(0);
-    drive->setIcon(QIcon(m_remote_info->m_icon.c_str()));
-    m_root_index = drive->index();
+    drive->setIcon(QIcon(_remote_info->icon.c_str()));
+    _root_index = drive->index();
     drive->appendRow({new QStandardItem, new QStandardItem, new QStandardItem, new QStandardItem});
     appendRow({
                       drive,
@@ -33,7 +33,7 @@ void RcloneFileModelDistant::init()
 void RcloneFileModelDistant::addItem(const RcloneFilePtr &file, TreeFileItem *parent)
 {
     RcloneFileModel::addItem(file, parent);
-    if (m_load == Dynamic)
+    if (_load == Dynamic)
         addItemDynamic(file->getPath(), parent);
     else
         addItemStatic(file->getPath(), parent);
@@ -52,7 +52,7 @@ void RcloneFileModelDistant::addItemDynamic(const QString &path, TreeFileItem *p
             tree_item->removeRow(0);
             for (const auto &file: array)
             {
-                auto *item = new TreeFileItemDistant(path, m_remote_info, file.as_object());
+                auto *item = new TreeFileItemDistant(path, _remote_info, file.as_object());
                 tree_item->appendRow(getItemList(item));
             }
             tree_item->setState(TreeFileItem::Loaded);
@@ -65,10 +65,10 @@ void RcloneFileModelDistant::addItemStatic(const QString &path, TreeFileItem *pa
 {
     if (depth == 0)
         return;
-    if (depth == m_max_depth)
+    if (depth == _max_depth)
     {
-        for (auto &rclone: m_locked_rclone) { rclone->cancel(); }
-        m_locked_rclone.clear();
+        for (auto &rclone: _locked_rclone) { rclone->cancel(); }
+        _locked_rclone.clear();
     }
 
     auto *tree_item = (parent->getParent() == nullptr ? parent : parent->getParent());
@@ -82,7 +82,7 @@ void RcloneFileModelDistant::addItemStatic(const QString &path, TreeFileItem *pa
                     tree_item->removeRow(0);
                     for (const auto &file: array)
                     {
-                        auto *item = new TreeFileItemDistant(path, m_remote_info, file.as_object());
+                        auto *item = new TreeFileItemDistant(path, _remote_info, file.as_object());
                         tree_item->appendRow(getItemList(item));
                         if (item->getFile()->isDir() and not rclone->isCanceled())
                             addItemStatic(item->getFile()->getPath(), item, depth - 1);
@@ -95,16 +95,20 @@ void RcloneFileModelDistant::addItemStatic(const QString &path, TreeFileItem *pa
         connect(rclone.get(), &Rclone::finished, this, [rclone, this]
         {
 //            remove rclone from m_locked_rclone
-            m_locked_rclone.erase(std::remove(m_locked_rclone.begin(), m_locked_rclone.end(), rclone),
-                                  m_locked_rclone.end());
+            _locked_rclone.erase(std::remove(_locked_rclone.begin(), _locked_rclone.end(), rclone),
+                                 _locked_rclone.end());
             rclone->disconnect();
         });
         rclone->lsJson(path.toStdString());
-        m_locked_rclone.push_back(rclone);
+        _locked_rclone.push_back(rclone);
         RcloneManager::addLockable(rclone);
-    }else{
-        for (int i = 0; i < tree_item->rowCount(); ++i) {
-            auto *item = dynamic_cast<TreeFileItemDistant*>(tree_item->child(i, 0));
+    } else
+    {
+        for (int i = 0; i < tree_item->rowCount(); ++i)
+        {
+            auto *item = dynamic_cast<TreeFileItemDistant *>(tree_item->child(i, 0));
+            if (item == nullptr)
+                continue;
             if (item->getFile()->isDir())
                 addItemStatic(item->getFile()->getPath(), item, depth - 1);
         }

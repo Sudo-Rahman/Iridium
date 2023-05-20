@@ -21,16 +21,16 @@ class TreeFileView : public QTreeView
 {
 Q_OBJECT
 
-    RcloneFileModel *m_model{};
-    QList<QModelIndex> m_index_back{}, m_index_front{};
-    RemoteInfoPtr m_remote_info{};
+    RcloneFileModel *_model{};
+    QList<QModelIndex> _index_back{}, _index_front{};
+    RemoteInfoPtr _remote_info{};
 
-    uint64_t m_clickTime{};
-    QModelIndex m_clickIndex{};
+    uint64_t _clickTime{};
+    QModelIndex _clickIndex{};
 
-    QList<TreeFileItem *> m_dragItems{};
+    QList<TreeFileItem *> _dragItems{};
 
-    bool m_dragable{},m_ctrl_presed{};
+    bool _dragable{}, _ctrl_presed{};
 
 public:
     explicit TreeFileView(const RemoteInfoPtr &remoteInfo, QWidget *parent = nullptr);
@@ -47,7 +47,7 @@ public:
 
     void reload(TreeFileItem *item = nullptr);
 
-    [[nodiscard]] RemoteInfoPtr remoteInfo() const { return m_remote_info; };
+    [[nodiscard]] RemoteInfoPtr remoteInfo() const { return _remote_info; };
 
     void search(const QString &text);
 

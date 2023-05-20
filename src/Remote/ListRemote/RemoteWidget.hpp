@@ -17,7 +17,7 @@ class RemoteWidget : public QGroupBox
 Q_OBJECT
 
 protected:
-    QHBoxLayout *m_layout{};
+    QHBoxLayout *_layout{};
 
     RemoteInfoPtr m_remote_info{};
     QLabel *m_selected{};

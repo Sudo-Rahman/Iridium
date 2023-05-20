@@ -20,11 +20,11 @@ class TreeFileViewContainer : public QWidget
 Q_OBJECT
 
 private:
-    TreeFileView *m_treeFileView{};
-    QVBoxLayout *m_layout{};
-    RoundedButton *m_back_button{}, *m_front_button{}, *m_refresh_button{};
-    QLabel *m_path_label{};
-    QLineEdit *m_search_line_edit{};
+    TreeFileView *_treeFileView{};
+    QVBoxLayout *_layout{};
+    RoundedButton *_back_button{}, *_front_button{}, *_refresh_button{};
+    QLabel *_path_label{};
+    QLineEdit *_search_line_edit{};
 
     void initUI();
 
@@ -33,7 +33,7 @@ public:
 
     explicit TreeFileViewContainer(QWidget *parent = nullptr);
 
-    [[nodiscard]] TreeFileView *treeFileView() const { return m_treeFileView; }
+    [[nodiscard]] TreeFileView *treeFileView() const { return _treeFileView; }
 };
 
 

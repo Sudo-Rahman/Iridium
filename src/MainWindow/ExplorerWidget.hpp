@@ -18,11 +18,11 @@ class ExplorerWidget : public QWidget
 {
 Q_OBJECT
 
-    ListRemoteWidget *m_list_remoteWidget{};
-    FileViewWidget *m_file_viewWidget{};
-    QHBoxLayout *m_layout{};
-    QSplitter *m_splitter{};
-    TaskTreeView *m_task_treeView{};
+    ListRemoteWidget *_list_remoteWidget{};
+    FileViewWidget *_file_viewWidget{};
+    QHBoxLayout *_layout{};
+    QSplitter *_splitter{};
+    TaskTreeView *_task_treeView{};
 
 public:
     explicit ExplorerWidget(QWidget *parent = nullptr);

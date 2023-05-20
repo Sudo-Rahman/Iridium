@@ -37,7 +37,7 @@ private:
 
     Rclone() = default;
 
-    explicit Rclone(bool lockable) { m_lockable = lockable; }
+    explicit Rclone(bool lockable) { _lockable = lockable; }
 
 public:
     Rclone(const Rclone &) = delete;
@@ -101,30 +101,30 @@ private:
 
     boost::process::child *_child{};
 
-    static std::string m_path_rclone;
-    std::unique_ptr<boost::thread> m_thread{};
-    std::vector<std::string> _args{}, m_out{}, m_error{};
-    std::map<std::string, std::string> m_map_data{};
-    uint8_t m_exit{};
-    Rclone::State m_state{Rclone::NotLaunched};
+    static std::string _path_rclone;
+    std::unique_ptr<boost::thread> _thread{};
+    std::vector<std::string> _args{}, _out{}, _err{};
+    std::map<std::string, std::string> _map_data{};
+    uint8_t _exit{};
+    Rclone::State _state{Rclone::NotLaunched};
     std::function<void(boost::process::async_pipe &pipe, std::vector<std::string> &vec)> _read_loop;
-    std::mutex m_mutex{};
-    std::condition_variable m_cv;
+    std::mutex _mutex{};
+    std::condition_variable _cv;
 
-    boost::process::async_pipe *m_pipe_out, *m_pipe_err;
-    boost::asio::io_context *m_ioc;
+    boost::process::async_pipe *_pipe_out, *_pipe_err;
+    boost::asio::io_context *_ioc;
 
-    static std::map<Flag, flags_str> m_map_flags;
+    static std::map<Flag, flags_str> _map_flags;
 
-    bool m_lockable, m_cancel = false;
+    bool _lockable, _cancel = false;
 
 
 public:
     void kill();
 
-    void cancel() { m_cancel = true; }
+    void cancel() { _cancel = true; }
 
-    [[nodiscard]] bool isCanceled() const { return m_cancel; }
+    [[nodiscard]] bool isCanceled() const { return _cancel; }
 
     static void setPathRclone(const std::string &pathRclone);
 
@@ -150,52 +150,52 @@ public:
 
     void waitForFinished();
 
-    [[nodiscard]] State state() const { return m_state; }
+    [[nodiscard]] State state() const { return _state; }
 
-    [[nodiscard]] bool isRunning() const { return m_state == Running; }
+    [[nodiscard]] bool isRunning() const { return _state == Running; }
 
     void waitForStarted();
 
-    [[nodiscard]] std::map<std::string, std::string> getData() const { return m_map_data; }
+    [[nodiscard]] std::map<std::string, std::string> getData() const { return _map_data; }
 
-    [[nodiscard]] std::vector<std::string> readAllError() const { return m_error; }
+    [[nodiscard]] std::vector<std::string> readAllError() const { return _err; }
 
-    [[nodiscard]] uint8_t exitCode() const { return m_exit; }
+    [[nodiscard]] uint8_t exitCode() const { return _exit; }
 
     [[nodiscard]] std::vector<std::string> readAll() const
     {
-        auto vec = m_out;
-        vec.insert(vec.end(), m_error.begin(), m_error.end());
+        auto vec = _out;
+        vec.insert(vec.end(), _err.begin(), _err.end());
         return vec;
     }
 
-    static Rclone::flags_str getFlag(const Flag &key) { return m_map_flags[key]; }
+    static Rclone::flags_str getFlag(const Flag &key) { return _map_flags[key]; }
 
-    static void setFlag(const Flag &key, const std::string &value) { m_map_flags[key].value = value; }
+    static void setFlag(const Flag &key, const std::string &value) { _map_flags[key].value = value; }
 
     void about(const RemoteInfo &info);
 
     void search(const std::vector<Filter> &filters, const RemoteInfo &info);
 
 private:
-    boost::signals2::signal<void(const std::string &)> m_readyRead{};
+    boost::signals2::signal<void(const std::string &)> _readyRead{};
 
     void execute();
 
-    boost::signals2::signal<void(const int exit)> m_finished{};
+    boost::signals2::signal<void(const int exit)> _finished{};
 
     static boost::json::object parseJson(const std::string &str);
 
     void closeAll()
     {
-        m_readyRead.disconnect_all_slots();
-        m_finished.disconnect_all_slots();
-        if (m_ioc)
-            m_ioc->stop();
-        if (m_pipe_out)
-            m_pipe_out->close();
-        if (m_pipe_err)
-            m_pipe_err->close();
+        _readyRead.disconnect_all_slots();
+        _finished.disconnect_all_slots();
+        if (_ioc)
+            _ioc->stop();
+        if (_pipe_out)
+            _pipe_out->close();
+        if (_pipe_err)
+            _pipe_err->close();
         disconnect();
     }
 
@@ -224,32 +224,32 @@ class RcloneManager
     friend class Rclone;
 
 private:
-    static std::atomic_int_fast8_t m_nb_rclone_locked;
-    static uint8_t m_nb_max_process;
-    static std::mutex m_launch_mutex;
-    static std::condition_variable m_launch_cv;
-    static boost::thread m_launch_thread;
-    static std::vector<RclonePtr> m_rclones, m_launch_queue;
+    static std::atomic_int_fast8_t _rclone_locked;
+    static uint8_t _max_process;
+    static std::mutex _launch_mutex;
+    static std::condition_variable _launch_cv;
+    static boost::thread _launch_thread;
+    static std::vector<RclonePtr> _rclones, _launch_queue;
 
 public:
     static RclonePtr get(bool lockable = false);
 
-    static uint16_t maxProcess() { return m_nb_max_process; }
+    static uint16_t maxProcess() { return _max_process; }
 
-    static void setMaxProcess(uint16_t nbMaxProcess) { m_nb_max_process = nbMaxProcess; }
+    static void setMaxProcess(uint16_t nbMaxProcess) { _max_process = nbMaxProcess; }
 
     static void addLockable(const RclonePtr &);
 
     static void stopThread()
     {
-        m_launch_thread.interrupt();
-        m_launch_cv.notify_one();
+        _launch_thread.interrupt();
+        _launch_cv.notify_one();
     }
 
     static void release(const Rclone *rclone)
     {
-        std::erase_if(m_rclones, [&](const auto &ptr) { return ptr.get() == rclone; });
-        std::erase_if(m_launch_queue, [&](const auto &ptr) { return ptr.get() == rclone; });
+        std::erase_if(_rclones, [&](const auto &ptr) { return ptr.get() == rclone; });
+        std::erase_if(_launch_queue, [&](const auto &ptr) { return ptr.get() == rclone; });
     }
 
     static void release(const RclonePtr &rclone) { release(rclone.get()); }

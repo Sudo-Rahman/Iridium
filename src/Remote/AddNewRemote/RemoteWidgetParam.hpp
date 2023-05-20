@@ -15,10 +15,10 @@ class RemoteWidgetParam : public QGroupBox
 Q_OBJECT
 
 private:
-    RemoteType type;
-    QIcon m_icon{};
-    bool m_hover{}, m_click{};
-    RemoteConfigParamsFrame *paramsFrame{};
+    RemoteType _type;
+    QIcon _icon{};
+    bool _hover{}, _click{};
+    RemoteConfigParamsFrame *_paramsFrame{};
 
     void initParamsFrame();
 

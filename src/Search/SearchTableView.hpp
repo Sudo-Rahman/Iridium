@@ -19,19 +19,20 @@ class SearchTableView : public QTableView
 {
 Q_OBJECT
 
-struct addRow{
-    boost::json::object file;
-    RemoteInfoPtr remoteInfo;
-};
+    struct addRow
+    {
+        boost::json::object file;
+        RemoteInfoPtr remoteInfo;
+    };
 
-    QStandardItemModel *m_model{};
-    std::vector<RclonePtr> m_rclones{};
-    std::vector<boost::thread> m_threads{};
-    std::unique_ptr<boost::thread> m_adder{};
-    std::vector<addRow> m_rows{};
-    std::mutex m_mutex{};
-    std::condition_variable m_cv{};
-    std::atomic_uint8_t m_searching = 0;
+    QStandardItemModel *_model{};
+    std::vector<RclonePtr> _rclones{};
+    std::vector<boost::thread> _threads{};
+    std::unique_ptr<boost::thread> _adder{};
+    std::vector<addRow> _rows{};
+    std::mutex _mutex{};
+    std::condition_variable _cv{};
+    std::atomic_uint8_t _searching = 0;
 
 public :
     explicit SearchTableView(QWidget *parent = nullptr);
@@ -42,9 +43,10 @@ public :
 
     void stopAllSearch();
 
-    ~SearchTableView() override{
-        m_adder->interrupt();
-        m_cv.notify_one();
+    ~SearchTableView() override
+    {
+        _adder->interrupt();
+        _cv.notify_one();
     }
 
 private:

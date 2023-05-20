@@ -16,14 +16,14 @@ class RcloneFileModel : public QStandardItemModel
 Q_OBJECT
 
 protected:
-    RemoteInfoPtr m_remote_info{};
-    QModelIndex m_root_index{};
+    RemoteInfoPtr _remote_info{};
+    QModelIndex _root_index{};
 
-    QTreeView *m_view{};
+    QTreeView *_view{};
 
-    bool m_expand_or_double_click = false;
+    bool _expand_or_double_click = false;
 
-    bool m_check_is_valid = false;
+    bool _check_is_valid = false;
 
     virtual void init() = 0;
 
@@ -42,7 +42,7 @@ public:
 
     void setExpandOrDoubleClick(bool expandOrDoubleClick)
     {
-        m_expand_or_double_click = expandOrDoubleClick;
+        _expand_or_double_click = expandOrDoubleClick;
     }
 
 };

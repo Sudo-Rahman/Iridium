@@ -19,20 +19,20 @@ GeneralFrame::GeneralFrame(QWidget *parent)
     auto box1 = new QGroupBox(this);
     box1->setTitle(tr("Le changement de langue nécessite un redémarrage de l’application."));
     auto *box1Layout = new QFormLayout(box1);
-    m_language = new QComboBox(this);
-    m_language->addItems({"English", "Français"});
-    m_language->setItemData(0, QLocale::English, Qt::UserRole);
-    m_language->setItemData(1, QLocale::French, Qt::UserRole);
-    for (int i = 0; i < m_language->count(); ++i)
+    _language = new QComboBox(this);
+    _language->addItems({"English", "Français"});
+    _language->setItemData(0, QLocale::English, Qt::UserRole);
+    _language->setItemData(1, QLocale::French, Qt::UserRole);
+    for (int i = 0; i < _language->count(); ++i)
     {
-        if (m_language->itemData(i, Qt::UserRole).value<QLocale::Language>() ==
+        if (_language->itemData(i, Qt::UserRole).value<QLocale::Language>() ==
             QLocale(Settings::getValue<std::string>(Settings::Language).c_str()).language())
         {
-            m_language->setCurrentIndex(i);
+            _language->setCurrentIndex(i);
             break;
         }
     }
-    box1Layout->addRow(tr("Langue : "), m_language);
+    box1Layout->addRow(tr("Langue : "), _language);
 
     layout->addWidget(box1);
 
@@ -45,9 +45,9 @@ GeneralFrame::GeneralFrame(QWidget *parent)
 
 void GeneralFrame::connectSignals()
 {
-    connect(m_language, &QComboBox::currentIndexChanged, [this](const int &index)
+    connect(_language, &QComboBox::currentIndexChanged, [this](const int &index)
     {
-        auto lang = m_language->itemData(index, Qt::UserRole).value<QLocale::Language>();
+        auto lang = _language->itemData(index, Qt::UserRole).value<QLocale::Language>();
         Settings::setLanguage(lang);
     });
 }

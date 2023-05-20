@@ -20,19 +20,19 @@ class ItemInfoDialog : public QDialog
 Q_OBJECT
 
 private:
-    QGridLayout *m_layout{};
+    QGridLayout *_layout{};
 
-    std::shared_ptr<RcloneFile> m_file{};
-    TreeFileItem *m_item{};
-    QLabel *m_icon{}, *m_name{}, *m_size{}, *m_type{}, *m_path{}, *m_mod_time{}, *m_objs{};
+    std::shared_ptr<RcloneFile> _file{};
+    TreeFileItem *_item{};
+    QLabel *_icon{}, *_name{}, *_size{}, *_type{}, *_path{}, *_mod_time{}, *_objs{};
 
-    ProgressBar *m_loading1{}, *m_loading2{};
+    ProgressBar *_loading1{}, *_loading2{};
 
-    QTimer m_timer{};
+    QTimer _timer{};
 
-    int row{};
+    int _row{};
 
-    boost::shared_ptr<boost::thread> m_thread{};
+    boost::shared_ptr<boost::thread> _thread{};
 
 public:
     explicit ItemInfoDialog(TreeFileItem *item, QWidget *parent = nullptr);

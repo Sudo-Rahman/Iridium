@@ -16,12 +16,12 @@ class FileViewWidget : public QWidget
 Q_OBJECT
 
 private:
-    TreeFileViewContainer *m_treeFileView1{}, *m_treeFileView2{};
-    QHBoxLayout *m_layout{};
+    TreeFileViewContainer *_treeFileView1{}, *_treeFileView2{};
+    QHBoxLayout *_layout{};
 
-    QSplitter *m_splitter{};
+    QSplitter *_splitter{};
 
-    QList<TreeFileItem *> m_current_file_list{};
+    QList<TreeFileItem *> _current_file_list{};
 
 public:
     explicit FileViewWidget(QWidget *parent = nullptr);

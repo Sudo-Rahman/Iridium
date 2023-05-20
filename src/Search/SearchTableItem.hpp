@@ -11,12 +11,11 @@
 
 class SearchTableItem : public QStandardItem
 {
-    RcloneFilePtr m_file;
+    RcloneFilePtr _file;
 public:
-    explicit SearchTableItem(const int &col,const RcloneFilePtr &file);
+    explicit SearchTableItem(const int &col, const RcloneFilePtr &file);
 
-    [[nodiscard]] const RcloneFilePtr &getFile() const
-    {return m_file;}
+    [[nodiscard]] const RcloneFilePtr &getFile() const { return _file; }
 };
 
 

@@ -11,11 +11,11 @@ class MenuBar : public QMenuBar
 {
 Q_OBJECT
 
-    QMenu *m_about_menu{};
-    QAction *m_about_action{};
+    QMenu *_about_menu{};
+    QAction *_about_action{};
 
-    QMenu *m_settings_menu{};
-    QAction *m_settings_action{};
+    QMenu *_settings_menu{};
+    QAction *_settings_action{};
 
 public:
     explicit MenuBar(QWidget *parent = nullptr);

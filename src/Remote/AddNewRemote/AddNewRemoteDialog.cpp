@@ -9,8 +9,8 @@
 AddNewRemoteDialog::AddNewRemoteDialog(QWidget *parent) : QDialog(parent)
 {
     setWindowTitle(tr("Ajout remote"));
-    layout = new QHBoxLayout(this);
-    layout->setContentsMargins(5, 20, 5, 20);
+    _layout = new QHBoxLayout(this);
+    _layout->setContentsMargins(5, 20, 5, 20);
 
     setMinimumSize(600, 500);
 
@@ -35,9 +35,9 @@ AddNewRemoteDialog::AddNewRemoteDialog(QWidget *parent) : QDialog(parent)
         scrollWidgetLayout->addWidget(widget);
     }
 
-    layout->addWidget(scrollArea);
-    paramsFrame = findChildren<RemoteWidgetParam *>().first()->getParamsFrame();
-    layout->addWidget(paramsFrame);
+    _layout->addWidget(scrollArea);
+    _paramsFrame = findChildren<RemoteWidgetParam *>().first()->getParamsFrame();
+    _layout->addWidget(_paramsFrame);
 
     for (auto *widget: scrollWidget->findChildren<RemoteWidgetParam *>())
     {
@@ -50,14 +50,14 @@ AddNewRemoteDialog::AddNewRemoteDialog(QWidget *parent) : QDialog(parent)
 void AddNewRemoteDialog::changeParamsFrame(RemoteConfigParamsFrame *frame)
 {
     frame->reset();
-    if (frame == paramsFrame)
+    if (frame == _paramsFrame)
         return;
-    if (paramsFrame not_eq nullptr)
+    if (_paramsFrame not_eq nullptr)
     {
-        layout->removeWidget(paramsFrame);
-        paramsFrame->hide();
+        _layout->removeWidget(_paramsFrame);
+        _paramsFrame->hide();
     }
-    layout->addWidget(frame);
-    paramsFrame = frame;
-    paramsFrame->show();
+    _layout->addWidget(frame);
+    _paramsFrame = frame;
+    _paramsFrame->show();
 }

@@ -17,16 +17,16 @@ RcloneFileModelLocal::RcloneFileModelLocal(const RemoteInfoPtr &remoteInfo, QTre
 void RcloneFileModelLocal::addItem(const RcloneFilePtr &file, TreeFileItem *parent)
 {
     RcloneFileModel::addItem(file, parent);
-    if (m_thread not_eq nullptr)
+    if (_thread not_eq nullptr)
     {
-        m_thread->interrupt();
-        m_thread->join();
+        _thread->interrupt();
+        _thread->join();
     }
     auto *tree_item = (parent->getParent() == nullptr ? parent : parent->getParent());
     if (tree_item->state() == TreeFileItem::NotLoaded)
     {
         tree_item->setState(TreeFileItem::Loading);
-        m_thread = std::make_unique<boost::thread>(
+        _thread = std::make_unique<boost::thread>(
                 [this, tree_item, file]()
                 {
                     tree_item->removeRow(0);
@@ -34,7 +34,7 @@ void RcloneFileModelLocal::addItem(const RcloneFilePtr &file, TreeFileItem *pare
                     for (const QFileInfo &info: list_file)
                     {
                         boost::this_thread::interruption_point();
-                        auto *item = new TreeFileItemLocal(info.filePath(), m_remote_info);
+                        auto *item = new TreeFileItemLocal(info.filePath(), _remote_info);
                         tree_item->appendRow(getItemList(item));
                     }
                     tree_item->setState(TreeFileItem::Loaded);
@@ -44,10 +44,10 @@ void RcloneFileModelLocal::addItem(const RcloneFilePtr &file, TreeFileItem *pare
 
 void RcloneFileModelLocal::init()
 {
-    auto *drive = new TreeFileItem(QString::fromStdString(m_remote_info->m_path), m_remote_info);
+    auto *drive = new TreeFileItem(_remote_info->path.c_str(), _remote_info);
     drive->getFile()->setSize(0);
     drive->setIcon(Settings::hardDriveIcon());
-    m_root_index = drive->index();
+    _root_index = drive->index();
     drive->appendRow({new QStandardItem, new QStandardItem, new QStandardItem, new QStandardItem});
     appendRow({
                       drive,

@@ -15,8 +15,8 @@ class MainWindow : public QMainWindow
 {
 Q_OBJECT
 
-    QHBoxLayout *m_layout{};
-    QTabWidget *m_tabWidget{};
+    QHBoxLayout *_layout{};
+    QTabWidget *_tabWidget{};
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);

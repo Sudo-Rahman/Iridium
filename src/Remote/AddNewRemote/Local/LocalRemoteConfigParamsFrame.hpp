@@ -12,7 +12,7 @@ class LocalRemoteConfigParamsFrame : public RemoteConfigParamsFrame
 Q_OBJECT
 
 private:
-    QString m_path{};
+    QString _path{};
 
 public:
     explicit LocalRemoteConfigParamsFrame(QWidget *parent = nullptr);

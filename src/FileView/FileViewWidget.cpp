@@ -6,28 +6,28 @@
 
 FileViewWidget::FileViewWidget(QWidget *parent) : QWidget(parent)
 {
-    m_layout = new QHBoxLayout(this);
+    _layout = new QHBoxLayout(this);
     setContentsMargins(0, 0, 0, 0);
-    m_layout->setContentsMargins(0, 0, 0, 0);
+    _layout->setContentsMargins(0, 0, 0, 0);
 
-    m_splitter = new QSplitter(this);
-    m_splitter->setOrientation(Qt::Horizontal);
-    m_layout->addWidget(m_splitter);
+    _splitter = new QSplitter(this);
+    _splitter->setOrientation(Qt::Horizontal);
+    _layout->addWidget(_splitter);
 
-    m_treeFileView1 = new TreeFileViewContainer(this);
-    m_splitter->addWidget(m_treeFileView1);
+    _treeFileView1 = new TreeFileViewContainer(this);
+    _splitter->addWidget(_treeFileView1);
 
-    m_treeFileView2 = new TreeFileViewContainer(this);
-    m_splitter->addWidget(m_treeFileView2);
+    _treeFileView2 = new TreeFileViewContainer(this);
+    _splitter->addWidget(_treeFileView2);
 
-    connect(m_treeFileView1->treeFileView(), &TreeFileView::taskAdded, this,
+    connect(_treeFileView1->treeFileView(), &TreeFileView::taskAdded, this,
             [this](const QString &src, const QString &dst, const RclonePtr &rclone,
                    const std::function<void()> &callable, const Rclone::TaskType &type)
             {
                 emit taskAdded(src, dst, rclone, callable, type);
             });
 
-    connect(m_treeFileView2->treeFileView(), &TreeFileView::taskAdded, this,
+    connect(_treeFileView2->treeFileView(), &TreeFileView::taskAdded, this,
             [this](const QString &src, const QString &dst, const RclonePtr &rclone,
                    const std::function<void()> &callable, const Rclone::TaskType &type)
             {
@@ -37,24 +37,24 @@ FileViewWidget::FileViewWidget(QWidget *parent) : QWidget(parent)
 
 void FileViewWidget::changeRemote(const std::shared_ptr<remotes_selected> &remotes)
 {
-    m_current_file_list.clear();
+    _current_file_list.clear();
 
     if (remotes->first not_eq nullptr)
     {
-        if (remotes->first->remoteInfo().get() != m_treeFileView1->treeFileView()->remoteInfo().get())
+        if (remotes->first->remoteInfo().get() != _treeFileView1->treeFileView()->remoteInfo().get())
         {
-            m_treeFileView1->treeFileView()->changeRemote(remotes->first->remoteInfo());
+            _treeFileView1->treeFileView()->changeRemote(remotes->first->remoteInfo());
         }
     } else
-        m_treeFileView1->treeFileView()->changeRemote(nullptr);
+        _treeFileView1->treeFileView()->changeRemote(nullptr);
 
 
     if (remotes->second not_eq nullptr)
     {
-        if (remotes->second->remoteInfo().get() != m_treeFileView2->treeFileView()->remoteInfo().get())
+        if (remotes->second->remoteInfo().get() != _treeFileView2->treeFileView()->remoteInfo().get())
         {
-            m_treeFileView2->treeFileView()->changeRemote(remotes->second->remoteInfo());
+            _treeFileView2->treeFileView()->changeRemote(remotes->second->remoteInfo());
         }
     } else
-        m_treeFileView2->treeFileView()->changeRemote(nullptr);
+        _treeFileView2->treeFileView()->changeRemote(nullptr);
 }

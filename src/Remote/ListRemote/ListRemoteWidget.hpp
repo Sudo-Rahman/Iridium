@@ -22,7 +22,9 @@ struct remotes_selected
 {
     RemoteWidget *first{};
     RemoteWidget *second{};
-    void clear(){
+
+    void clear()
+    {
         first = nullptr;
         second = nullptr;
     }
@@ -33,7 +35,7 @@ class ListRemoteWidget : public QScrollArea
 Q_OBJECT
 
 private:
-    QVBoxLayout *m_layout{}, *m_remoteLayout{};
+    QVBoxLayout *_layout{}, *m_remoteLayout{};
 
     RoundedLineEdit *m_recherche{};
     RoundedButton *m_add{};
@@ -42,7 +44,7 @@ private:
 
     QList<RemoteWidget *> m_listRemote{};
 
-    std::shared_ptr<remotes_selected> m_remoteSelected{};
+    std::shared_ptr<remotes_selected> _remoteselected{};
 
     QPushButton *m_expand{};
 
@@ -57,7 +59,7 @@ public:
 
     void expand();
 
-    const std::shared_ptr<remotes_selected> &remoteSelected() { return m_remoteSelected; }
+    const std::shared_ptr<remotes_selected> &remoteSelected() { return _remoteselected; }
 
 private:
     void getAllRemote();

@@ -10,8 +10,8 @@
 
 void RcloneFile::init()
 {
-    QFileInfo info(m_path);
-    if (m_remote_info->isLocal())
+    QFileInfo info(_path);
+    if (_remote_info->isLocal())
     {
         setSize(info.size());
         setModTime(info.lastModified());
@@ -19,121 +19,121 @@ void RcloneFile::init()
 
     }
     setIsDir(info.isDir());
-    if (m_remote_info->isLocal() and m_is_dir)
-        setPath(m_path);
+    if (_remote_info->isLocal() and _is_dir)
+        setPath(_path);
 }
 
 
 RcloneFile::RcloneFile(const QString &pathFile, const RemoteInfoPtr &remoteInfo)
 {
-    m_path = pathFile;
-    m_remote_info = remoteInfo;
+    _path = pathFile;
+    _remote_info = remoteInfo;
     init();
 }
 
 RcloneFile::RcloneFile(const QString &pathFile, uint64_t size, bool isDir, QDateTime modTime,
                        const RemoteInfoPtr &remoteInfo)
-        : m_size(size), m_is_dir(isDir), m_mod_time(std::move(modTime))
+        : _size(size), _is_dir(isDir), _mod_time(std::move(modTime))
 {
-    m_remote_info = remoteInfo;
+    _remote_info = remoteInfo;
     setPath(pathFile);
 }
 
 
 const QString &RcloneFile::getPath() const
 {
-    return m_path;
+    return _path;
 }
 
 void RcloneFile::setPath(const QString &path)
 {
-    RcloneFile::m_path = path;
-    if (not path.endsWith("/") and not path.isEmpty() and m_is_dir)
-        RcloneFile::m_path += "/";
+    RcloneFile::_path = path;
+    if (not path.endsWith("/") and not path.isEmpty() and _is_dir)
+        RcloneFile::_path += "/";
 }
 
 uint64_t RcloneFile::getSize() const
 {
-    return m_size;
+    return _size;
 }
 
 void RcloneFile::setSize(uint64_t size)
 {
-    RcloneFile::m_size = size;
+    RcloneFile::_size = size;
 }
 
 const QDateTime &RcloneFile::getModTime() const
 {
-    return m_mod_time;
+    return _mod_time;
 }
 
 void RcloneFile::setModTime(const QDateTime &modTime)
 {
-    RcloneFile::m_mod_time = modTime;
+    RcloneFile::_mod_time = modTime;
 }
 
 QString RcloneFile::getName() const
 {
     QString name;
-    if (m_is_dir)
+    if (_is_dir)
         return getPathString();
-    m_path.contains(":") ? name = QFileInfo(m_path.split(":")[1]).fileName() : name = QFileInfo(m_path).fileName();
+    _path.contains(":") ? name = QFileInfo(_path.split(":")[1]).fileName() : name = QFileInfo(_path).fileName();
     return name;
 }
 
 bool RcloneFile::isDir() const
 {
-    return m_is_dir;
+    return _is_dir;
 }
 
 void RcloneFile::setIsDir(bool isDir)
 {
-    if (m_path.endsWith(":"))
-        RcloneFile::m_is_dir = true;
+    if (_path.endsWith(":"))
+        RcloneFile::_is_dir = true;
     else
-        RcloneFile::m_is_dir = isDir;
+        RcloneFile::_is_dir = isDir;
 }
 
 QString RcloneFile::getSizeString() const
 {
-    if (m_size == 0)
+    if (_size == 0)
         return "--";
-    return QString::fromStdString(Iridium::Utility::sizeToString(m_size));
+    return QString::fromStdString(Iridium::Utility::sizeToString(_size));
 }
 
 QString RcloneFile::getPathString() const
 {
-    QString tmpPath = m_path;
-    if (m_is_dir and !m_remote_info->isLocal() and m_path.contains(":"))
+    QString tmpPath = _path;
+    if (_is_dir and !_remote_info->isLocal() and _path.contains(":"))
     {
-        tmpPath = m_path.split(":")[1];
+        tmpPath = _path.split(":")[1];
     }
     return QDir(tmpPath).dirName();
 }
 
 QString RcloneFile::getModTimeString() const
 {
-    return QLocale().toString(m_mod_time, tr("dd MMM yyyy - hh:mm:ss"));
+    return QLocale().toString(_mod_time, tr("dd MMM yyyy - hh:mm:ss"));
 }
 
 uint32_t RcloneFile::getObjs() const
 {
-    return m_objs;
+    return _objs;
 }
 
 void RcloneFile::setObjs(uint32_t objs)
 {
-    RcloneFile::m_objs = objs;
+    RcloneFile::_objs = objs;
 }
 
 std::shared_ptr<RemoteInfo> RcloneFile::getRemoteInfo() const
 {
-    return m_remote_info;
+    return _remote_info;
 }
 
 QString RcloneFile::getFileType() const
 {
-    if (m_is_dir)
+    if (_is_dir)
         return tr("Dossier");
     auto mime = QMimeDatabase().mimeTypeForFile(getPath());
     if (mime.name() != "application/octet-stream")
@@ -151,32 +151,32 @@ QString RcloneFile::getFileType() const
  */
 void RcloneFile::changeName(const QString &newName)
 {
-    if (not m_remote_info->isLocal() and not m_path.contains("/"))
+    if (not _remote_info->isLocal() and not _path.contains("/"))
     {
-        m_path = m_path.split(":")[0] + ":" + newName;
+        _path = _path.split(":")[0] + ":" + newName;
         return;
     }
-    if (m_is_dir and m_path.endsWith("/"))
-        m_path.remove(m_path.size() - 1, 1);
-    if (m_path.contains("/"))
-        m_path = m_path.remove(m_path.lastIndexOf("/") + 1, m_path.split("/").last().size());
-    else if (not m_remote_info->isLocal())
-        m_path = m_path.remove(m_path.lastIndexOf(":") + 1, m_path.split(":").last().size());
-    m_path.append(newName);
-    if (m_is_dir)
-        m_path.append("/");
+    if (_is_dir and _path.endsWith("/"))
+        _path.remove(_path.size() - 1, 1);
+    if (_path.contains("/"))
+        _path = _path.remove(_path.lastIndexOf("/") + 1, _path.split("/").last().size());
+    else if (not _remote_info->isLocal())
+        _path = _path.remove(_path.lastIndexOf(":") + 1, _path.split(":").last().size());
+    _path.append(newName);
+    if (_is_dir)
+        _path.append("/");
 }
 
 QIcon RcloneFile::getIcon()
 {
     QIcon ico;
-    if (m_is_dir)
+    if (_is_dir)
     {
         if (QFileInfo(getName()).suffix() == "app")
             ico = QIcon::fromTheme(getName().toLower().remove(".app").replace(" ", "-"),
                                    QIcon::fromTheme("application-default-icon"));
         else ico = Settings::dirIcon();
-        m_size = 0;
+        _size = 0;
     } else
     {
         if (QFileInfo(getName()).suffix() == "exe")
@@ -195,13 +195,13 @@ RcloneFile RcloneFile::getParentDir() const
 {
     auto rcloneFile = *this;
     auto lst = rcloneFile.getPath().split("/");
-    if(lst.size() == 1)
+    if (lst.size() == 1)
         return rcloneFile;
-    if(lst.last().isEmpty())
+    if (lst.last().isEmpty())
         lst.removeLast();
     lst.removeLast();
-    rcloneFile.m_path = lst.join("/");
-    rcloneFile.m_path +="/";
+    rcloneFile._path = lst.join("/");
+    rcloneFile._path += "/";
     rcloneFile.setIsDir(true);
     return rcloneFile;
 }

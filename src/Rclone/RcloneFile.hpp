@@ -18,12 +18,12 @@ class RcloneFile : public QObject
 {
 Q_OBJECT
 
-    RemoteInfoPtr m_remote_info{};
-    QString m_path{};
-    uint64_t m_size{};
-    uint32_t m_objs{};
-    bool m_is_dir{};
-    QDateTime m_mod_time{};
+    RemoteInfoPtr _remote_info{};
+    QString _path{};
+    uint64_t _size{};
+    uint32_t _objs{};
+    bool _is_dir{};
+    QDateTime _mod_time{};
 
     void init();
 
@@ -75,21 +75,21 @@ public:
     // define copy operator and copy constructor
     RcloneFile(const RcloneFile &other)
     {
-        setPath(other.m_path);
-        m_size = other.m_size;
-        m_is_dir = other.m_is_dir;
-        m_mod_time = other.m_mod_time;
-        m_remote_info = other.m_remote_info;
+        setPath(other._path);
+        _size = other._size;
+        _is_dir = other._is_dir;
+        _mod_time = other._mod_time;
+        _remote_info = other._remote_info;
     }
 
     // ostream operator
     friend std::ostream &operator<<(std::ostream &os, const RcloneFile &file)
     {
-        os << "path: " << file.m_path.toStdString() << std::endl;
-        os << "size: " << file.m_size << std::endl;
-        os << "m_is_dir: " << file.m_is_dir << std::endl;
-        os << "modTime: " << file.m_mod_time.toString().toStdString() << std::endl;
-        os << "remoteInfo: " << file.m_remote_info->name() << std::endl;
+        os << "path: " << file._path.toStdString() << std::endl;
+        os << "size: " << file._size << std::endl;
+        os << "m_is_dir: " << file._is_dir << std::endl;
+        os << "modTime: " << file._mod_time.toString().toStdString() << std::endl;
+        os << "remoteInfo: " << file._remote_info->name() << std::endl;
         return os;
     }
 };

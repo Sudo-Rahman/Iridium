@@ -29,12 +29,12 @@ public:
 
 SearchTableView::SearchTableView(QWidget *parent) : QTableView(parent)
 {
-    m_model = new QStandardItemModel(0, 6, this);
+    _model = new QStandardItemModel(0, 6, this);
 
-    m_model->setHorizontalHeaderLabels(
+    _model->setHorizontalHeaderLabels(
             {tr("Nom"), tr("Remote"), tr("Chemin"), tr("Taille"), tr("Date de modification"), tr("Type")});
 
-    QTableView::setModel(m_model);
+    QTableView::setModel(_model);
     QTableView::setSelectionBehavior(QAbstractItemView::SelectRows);
     QTableView::setSelectionMode(QAbstractItemView::ContiguousSelection);
     QTableView::setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -45,7 +45,7 @@ SearchTableView::SearchTableView(QWidget *parent) : QTableView(parent)
 
     QTableView::setSortingEnabled(true);
 
-    m_model->setSortRole(Qt::UserRole + 1);
+    _model->setSortRole(Qt::UserRole + 1);
 
     initThread();
 
@@ -88,7 +88,7 @@ void SearchTableView::showCustomContextMenu()
             copie->setText(tr("Copier le fichier"));
             connect(parent, &QAction::triggered, this, [this, items]()
             {
-                auto item = dynamic_cast<SearchTableItem *>(m_model->itemFromIndex(items[0]));
+                auto item = dynamic_cast<SearchTableItem *>(_model->itemFromIndex(items[0]));
                 Iridium::Variable::clear_and_swap_copy_files(
                         {std::make_shared<RcloneFile>(item->getFile()->getParentDir())});
             });
@@ -105,7 +105,7 @@ void SearchTableView::showCustomContextMenu()
         std::vector<RcloneFilePtr> files;
         for (auto &item: items)
         {
-            auto item_cast = dynamic_cast<SearchTableItem *>(m_model->itemFromIndex(item));
+            auto item_cast = dynamic_cast<SearchTableItem *>(_model->itemFromIndex(item));
             files.push_back(item_cast->getFile());
         }
         Iridium::Variable::clear_and_swap_copy_files(files);
@@ -116,7 +116,7 @@ void SearchTableView::showCustomContextMenu()
 void SearchTableView::addFile(const boost::json::object &file, const RemoteInfoPtr &remoteInfo)
 {
     RcloneFilePtr rcloneFile = std::make_shared<RcloneFile>(
-            (remoteInfo->m_path + std::string(file.at("Path").as_string())).c_str(),
+            (remoteInfo->path + std::string(file.at("Path").as_string())).c_str(),
             file.at("Size").as_int64(),
             file.at("IsDir").as_bool(),
             QDateTime::fromString(file.at("ModTime").as_string().c_str(), Qt::ISODate),
@@ -130,7 +130,7 @@ void SearchTableView::addFile(const boost::json::object &file, const RemoteInfoP
             new SearchTableItem(4, rcloneFile),
             new SearchTableItem(5, rcloneFile)
     };
-    m_model->appendRow(row);
+    _model->appendRow(row);
 }
 
 
@@ -144,8 +144,8 @@ void SearchTableView::searchLocal(const QString &text, const RemoteInfoPtr &remo
                 try
                 {
                     emit searchStarted();
-                    m_searching++;
-                    QDirIterator it(remoteInfo->m_path.c_str(),
+                    _searching++;
+                    QDirIterator it(remoteInfo->path.c_str(),
                                     QDir::Files | QDir::System | QDir::Hidden | QDir::NoDotAndDotDot,
                                     QDirIterator::Subdirectories);
                     while (it.hasNext())
@@ -161,14 +161,14 @@ void SearchTableView::searchLocal(const QString &text, const RemoteInfoPtr &remo
                                     it.fileInfo().lastModified(),
                                     remoteInfo
                             );
-                            m_model->appendRow({
-                                                       new SearchTableItem(0, rcloneFile),
-                                                       new SearchTableItem(1, rcloneFile),
-                                                       new SearchTableItem(2, rcloneFile),
-                                                       new SearchTableItem(3, rcloneFile),
-                                                       new SearchTableItem(4, rcloneFile),
-                                                       new SearchTableItem(5, rcloneFile)
-                                               });
+                            _model->appendRow({
+                                                      new SearchTableItem(0, rcloneFile),
+                                                      new SearchTableItem(1, rcloneFile),
+                                                      new SearchTableItem(2, rcloneFile),
+                                                      new SearchTableItem(3, rcloneFile),
+                                                      new SearchTableItem(4, rcloneFile),
+                                                      new SearchTableItem(5, rcloneFile)
+                                              });
 
                         }
                         boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
@@ -176,7 +176,7 @@ void SearchTableView::searchLocal(const QString &text, const RemoteInfoPtr &remo
                     terminateSearch();
                 } catch (boost::thread_interrupted &e) {}
             });
-    m_threads.push_back(std::move(th));
+    _threads.push_back(std::move(th));
 }
 
 void SearchTableView::searchDistant(const std::vector<Rclone::Filter> &filters, const RemoteInfoPtr &remoteInfo)
@@ -184,38 +184,38 @@ void SearchTableView::searchDistant(const std::vector<Rclone::Filter> &filters, 
     if (filters.empty())
         return;
     auto rclone = RcloneManager::get();
-    m_rclones.push_back(rclone);
+    _rclones.push_back(rclone);
     emit searchStarted();
     connect(rclone.get(), &Rclone::searchRefresh,
             [this, remoteInfo](const boost::json::object &file)
             {
-                m_rows.push_back({file, remoteInfo});
+                _rows.push_back({file, remoteInfo});
             });
     connect(rclone.get(), &Rclone::finished, this, &SearchTableView::terminateSearch);
     rclone->search(filters, *remoteInfo);
-    m_searching++;
-    m_cv.notify_one();
+    _searching++;
+    _cv.notify_one();
 }
 
 void SearchTableView::terminateSearch()
 {
-    if ((m_searching--) == 1)
+    if ((_searching--) == 1)
         emit searchFinished();
 }
 
 void SearchTableView::stopAllSearch()
 {
-    m_rows.clear();
-    m_searching = 0;
-    for (auto &thread: m_threads)
+    _rows.clear();
+    _searching = 0;
+    for (auto &thread: _threads)
     {
         thread.interrupt();
         thread.join();
     }
-    for (auto &rclone: m_rclones)
+    for (auto &rclone: _rclones)
         rclone->kill();
-    m_rclones.clear();
-    m_threads.clear();
+    _rclones.clear();
+    _threads.clear();
     emit searchFinished();
 }
 
@@ -236,24 +236,26 @@ void SearchTableView::resizeEvent(QResizeEvent *event)
 
 void SearchTableView::initThread()
 {
-    m_adder = std::make_unique<boost::thread>(
+    _adder = std::make_unique<boost::thread>(
             [this]()
             {
                 while (not boost::this_thread::interruption_requested())
                 {
-                    try{
-                        std::unique_lock<std::mutex> lock(m_mutex);
-                        m_cv.wait(lock, [this]() {
+                    try
+                    {
+                        std::unique_lock<std::mutex> lock(_mutex);
+                        _cv.wait(lock, [this]()
+                        {
                             boost::this_thread::interruption_point();
-                            return not m_rows.empty() or m_searching >0;
+                            return not _rows.empty() or _searching > 0;
                         });
-                        if(m_rows.empty())
+                        if (_rows.empty())
                             continue;
-                        auto row = m_rows.front();
-                        m_rows.erase(m_rows.begin());
+                        auto row = _rows.front();
+                        _rows.erase(_rows.begin());
                         addFile(row.file, row.remoteInfo);
                         boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
-                    }catch (boost::thread_interrupted &e) { break; }
+                    } catch (boost::thread_interrupted &e) { break; }
                 }
             });
 }

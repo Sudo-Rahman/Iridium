@@ -17,8 +17,8 @@ void GoogleDriveRemoteConfigParamsFrame::addRemote()
     RemoteConfigParamsFrame::addRemote();
     if (not checkFields())
         return;
-    m_rclone->config(RemoteType::Drive, m_remoteName->text().toStdString());
-    m_rclone->waitForStarted();
-    m_login->hide();
-    m_cancel->show();
+    _rclone->config(RemoteType::Drive, _remote_name->text().toStdString());
+    _rclone->waitForStarted();
+    _login->hide();
+    _cancel->show();
 }

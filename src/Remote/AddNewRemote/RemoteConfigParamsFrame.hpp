@@ -22,13 +22,13 @@ class RemoteConfigParamsFrame : public QFrame
 Q_OBJECT
 
 protected:
-    QPushButton *m_login{}, *m_cancel{};
-    QLabel *m_messLabel{};
-    QVBoxLayout *m_layout{};
-    QFormLayout *m_formLayout{};
-    QLineEdit *m_remoteName{};
-    RclonePtr m_rclone{};
-    std::map<std::string, std::string> m_lstRemote{};
+    QPushButton *_login{}, *_cancel{};
+    QLabel *_mess_label{};
+    QVBoxLayout *_layout{};
+    QFormLayout *_form_layout{};
+    QLineEdit *_remote_name{};
+    RclonePtr _rclone{};
+    std::map<std::string, std::string> _lst_remote{};
 
 public:
     explicit RemoteConfigParamsFrame(QWidget *parent = nullptr);

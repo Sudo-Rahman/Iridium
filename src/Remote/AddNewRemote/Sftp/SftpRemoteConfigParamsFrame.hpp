@@ -12,8 +12,8 @@ class SftpRemoteConfigParamsFrame : public RemoteConfigParamsFrame
 {
 Q_OBJECT
 
-    QLineEdit *m_host{}, *m_user{}, *m_password{};
-    QSpinBox *m_port{};
+    QLineEdit *_host{}, *_user{}, *_password{};
+    QSpinBox *_port{};
 
 public:
     explicit SftpRemoteConfigParamsFrame(QWidget *parent = nullptr);

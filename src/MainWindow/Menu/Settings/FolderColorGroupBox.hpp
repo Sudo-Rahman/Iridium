@@ -18,8 +18,8 @@ class FolderColorGroupBox : public QGroupBox
 {
 Q_OBJECT
 
-    QFormLayout *m_layout;
-    QList<FolderColorButton *> m_buttons;
+    QFormLayout *_layout;
+    QList<FolderColorButton *> _buttons;
 
 public:
 
@@ -30,15 +30,15 @@ public:
 
 class FolderColorButton : public QPushButton
 {
-    QColor m_color, m_colorDarker, m_colorNormal;
-    bool m_checked = false;
+    QColor _color, _color_darker, _color_normal;
+    bool _checked = false;
 
 public:
     explicit FolderColorButton(const QColor &color, QWidget *parent = nullptr);
 
     void check(bool checked)
     {
-        m_checked = checked;
+        _checked = checked;
         update();
     }
 

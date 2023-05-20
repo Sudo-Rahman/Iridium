@@ -12,32 +12,32 @@ SmbRemoteConfigParamsFrame::SmbRemoteConfigParamsFrame(QWidget *parent) : Remote
 
 void SmbRemoteConfigParamsFrame::createUi()
 {
-    m_host = new QLineEdit(this);
-    m_host->setPlaceholderText(tr("example.com"));
-    m_formLayout->addRow(tr("Hôte :"), m_host);
+    _host = new QLineEdit(this);
+    _host->setPlaceholderText(tr("example.com"));
+    _form_layout->addRow(tr("Hôte :"), _host);
 
-    m_user = new QLineEdit(this);
-    m_user->setPlaceholderText("toto");
-    m_formLayout->addRow(tr("Utilisateur :"), m_user);
+    _user = new QLineEdit(this);
+    _user->setPlaceholderText("toto");
+    _form_layout->addRow(tr("Utilisateur :"), _user);
 
-    m_password = new QLineEdit(this);
-    m_password->setPlaceholderText("*********");
-    m_password->setEchoMode(QLineEdit::Password);
-    m_formLayout->addRow(tr("Mot de passe :"), m_password);
+    _password = new QLineEdit(this);
+    _password->setPlaceholderText("*********");
+    _password->setEchoMode(QLineEdit::Password);
+    _form_layout->addRow(tr("Mot de passe :"), _password);
 
-    m_domain = new QLineEdit(this);
-    m_domain->setPlaceholderText("domain");
-    m_domain->setText("WORKGROUP");
-    auto action = m_domain->addAction(QIcon::fromTheme("reload"),
-                                      QLineEdit::TrailingPosition);
-    connect(action, &QAction::triggered, [this]() { m_domain->setText("WORKGROUP"); });
+    _domain = new QLineEdit(this);
+    _domain->setPlaceholderText("domain");
+    _domain->setText("WORKGROUP");
+    auto action = _domain->addAction(QIcon::fromTheme("reload"),
+                                     QLineEdit::TrailingPosition);
+    connect(action, &QAction::triggered, [this]() { _domain->setText("WORKGROUP"); });
     action->setIconVisibleInMenu(true);
-    m_formLayout->addRow(tr("Domaine :"), m_domain);
+    _form_layout->addRow(tr("Domaine :"), _domain);
 
-    m_port = new QSpinBox(this);
-    m_port->setRange(1, 65535);
-    m_port->setValue(445);
-    m_formLayout->addRow(tr("Port :"), m_port);
+    _port = new QSpinBox(this);
+    _port->setRange(1, 65535);
+    _port->setValue(445);
+    _form_layout->addRow(tr("Port :"), _port);
 
     RemoteConfigParamsFrame::createUi();
 }
@@ -48,20 +48,20 @@ void SmbRemoteConfigParamsFrame::addRemote()
     RemoteConfigParamsFrame::addRemote();
     if (not checkFields())
         return;
-    m_rclone->config(RemoteType::Smb, m_remoteName->text().toStdString(),
-                     {"host=" + m_host->text().toStdString(),
-                      "user=" + m_user->text().toStdString(),
-                      "pass=" + m_password->text().toStdString(),
-                      "domain=" + m_domain->text().toStdString(),
-                      "port=" + std::to_string(m_port->value())});
-    m_rclone->waitForStarted();
-    m_login->hide();
-    m_cancel->show();
+    _rclone->config(RemoteType::Smb, _remote_name->text().toStdString(),
+                    {"host=" + _host->text().toStdString(),
+                     "user=" + _user->text().toStdString(),
+                     "pass=" + _password->text().toStdString(),
+                     "domain=" + _domain->text().toStdString(),
+                     "port=" + std::to_string(_port->value())});
+    _rclone->waitForStarted();
+    _login->hide();
+    _cancel->show();
 }
 
 void SmbRemoteConfigParamsFrame::reset()
 {
     RemoteConfigParamsFrame::reset();
-    m_port->setValue(445);
-    m_domain->setText("WORKGROUP");
+    _port->setValue(445);
+    _domain->setText("WORKGROUP");
 }

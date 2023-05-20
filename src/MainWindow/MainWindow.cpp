@@ -22,11 +22,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     setMenuBar(new MenuBar(this));
 
 
-    m_tabWidget = new QTabWidget(this);
-    setCentralWidget(m_tabWidget);
-    m_tabWidget->setContentsMargins(0, 0, 0, 0);
-    m_tabWidget->addTab(new ExplorerWidget(this), tr("Explorateur"));
-    m_tabWidget->addTab(new SearchWidget(this), tr("Recherche"));
+    _tabWidget = new QTabWidget(this);
+    setCentralWidget(_tabWidget);
+    _tabWidget->setContentsMargins(0, 0, 0, 0);
+    _tabWidget->addTab(new ExplorerWidget(this), tr("Explorateur"));
+    _tabWidget->addTab(new SearchWidget(this), tr("Recherche"));
 
 
     connectSignals();

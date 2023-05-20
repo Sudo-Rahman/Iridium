@@ -10,7 +10,7 @@
  * @brief TaskRow::TaskRow
  * @param src
  * @param dest
- * @param m_data
+ * @param _data
  * @param id
  * @param state
  */
@@ -25,17 +25,17 @@ TaskRow::TaskRow(const QString &src, const QString &dest, const boost::json::obj
     {
         case Normal:
         case Error:
-            m_data = data;
+            _data = data;
             break;
         case Finished:
-            m_data = data.at("stats").as_object();
+            _data = data.at("stats").as_object();
             break;
         case Cancelled:
             break;
     }
 
-    m_src = src;
-    m_dest = dest;
+    _src = src;
+    _dest = dest;
 
     init();
 
@@ -65,13 +65,13 @@ TaskRow::TaskRow(const QString &src, const QString &dest, const boost::json::obj
             break;
     }
 
-    QObject::connect(&m_elapsed_time, &QTimer::timeout, [this]()
+    QObject::connect(&_elapsed_time, &QTimer::timeout, [this]()
     {
-        m_elapsed_time_count++;
-        // m_elapsed_time_count to hh:mm:ss
-        auto seconds = m_elapsed_time_count % 60;
-        auto minutes = (m_elapsed_time_count / 60) % 60;
-        auto hours = (m_elapsed_time_count / 3600) % 24;
+        _elapsed_time_count++;
+        // _elapsed_time_count to hh:mm:ss
+        auto seconds = _elapsed_time_count % 60;
+        auto minutes = (_elapsed_time_count / 60) % 60;
+        auto hours = (_elapsed_time_count / 3600) % 24;
         at(7)->setText(
                 QString("%1:%2:%3")
                         .arg(hours, 2, 10, QChar('0'))
@@ -89,7 +89,7 @@ void TaskRow::updateData(const boost::json::object &data)
     if (m_state == TaskRow::Finished)
         return;
 
-    m_data = data;
+    _data = data;
 
     if (Type::Parent == m_type)
         updateDataParent();
@@ -101,29 +101,29 @@ void TaskRow::updateDataParent()
 {
     try
     {
-        auto tmp = m_data.at("totalBytes").as_int64();
-        if (tmp != m_size)
+        auto tmp = _data.at("totalBytes").as_int64();
+        if (tmp != _size)
         {
-            m_size = tmp;
-            at(2)->setText(Iridium::Utility::sizeToString(m_size).c_str());
+            _size = tmp;
+            at(2)->setText(Iridium::Utility::sizeToString(_size).c_str());
         }
-        auto bytes = m_data.at("bytes").as_int64();
+        auto bytes = _data.at("bytes").as_int64();
 
-        if (m_size not_eq 0)
-            m_progressBar->setValue((int) (bytes * 100 / m_size));
-        auto speed = m_data.at("speed").as_double();
-        m_avg.push_back(speed);
+        if (_size not_eq 0)
+            _progressBar->setValue((int) (bytes * 100 / _size));
+        auto speed = _data.at("speed").as_double();
+        _avg.push_back(speed);
         at(8)->setText((Iridium::Utility::sizeToString(speed) + "/s").c_str());
 
-        if (m_avg.empty())
+        if (_avg.empty())
             return;
 
-        auto avg = std::accumulate(m_avg.begin(), m_avg.end(), 0.0) / m_avg.size();
+        auto avg = std::accumulate(_avg.begin(), _avg.end(), 0.0) / _avg.size();
         at(9)->setText((Iridium::Utility::sizeToString(avg) + "/s").c_str());
 
 
         // time remaining with avg speed
-        auto remainingTime = double64_t(m_size - m_data.at("bytes").as_int64()) / avg;
+        auto remainingTime = double64_t(_size - _data.at("bytes").as_int64()) / avg;
 
         auto seconds = (uint64_t) remainingTime % 60;
         auto minutes = ((uint64_t) remainingTime / 60) % 60;
@@ -142,8 +142,8 @@ void TaskRow::updateDataChild()
 {
     try
     {
-        m_progressBar->setValue(
-                m_data.at("percentage").as_int64());
+        _progressBar->setValue(
+                _data.at("percentage").as_int64());
 
     }
     catch (boost::wrapexcept<std::invalid_argument> &e) { return; }
@@ -155,11 +155,11 @@ void TaskRow::updateDataChild()
 
     try
     {
-        speed = m_data.at("speed").as_double();
+        speed = _data.at("speed").as_double();
         if (speed == 0)
             return;
-        speedAvg = m_data.at("speedAvg").as_double();
-        remainingTime = double64_t(m_size - m_data.at("bytes").as_int64()) / speed;
+        speedAvg = _data.at("speedAvg").as_double();
+        remainingTime = double64_t(_size - _data.at("bytes").as_int64()) / speed;
     }
     catch (boost::wrapexcept<std::invalid_argument> &e) {}
     catch (boost::wrapexcept<std::out_of_range> &e) {}
@@ -185,9 +185,9 @@ void TaskRow::updateDataChild()
  */
 void TaskRow::terminate()
 {
-    m_elapsed_time.stop();
-    m_progressBar->setValue(100);
-    m_progressBar->setToolTip("100%");
+    _elapsed_time.stop();
+    _progressBar->setValue(100);
+    _progressBar->setToolTip("100%");
     this->at(5)->setText(QObject::tr("Terminé"));
     this->at(6)->setText(QObject::tr("00:00:00"));
     m_state = TaskRow::Finished;
@@ -201,7 +201,7 @@ void TaskRow::setSpeed()
     try
     {
         double64_t speedValue;
-        speedValue = m_data.at("speed").as_double();
+        speedValue = _data.at("speed").as_double();
         at(8)->setText((Iridium::Utility::sizeToString(speedValue) + "/s").c_str());
     } catch (boost::wrapexcept<std::invalid_argument> &e) {}
     catch (boost::wrapexcept<std::out_of_range> &e) {}
@@ -216,11 +216,11 @@ void TaskRow::normal()
     double64_t averageSpeedValue = 0;
     try
     {
-        m_size = m_data.at("size").as_int64();
-        at(2)->setText(Iridium::Utility::sizeToString(m_size).c_str());
-        m_progressBar->setValue(m_data.at("percentage").as_int64());
+        _size = _data.at("size").as_int64();
+        at(2)->setText(Iridium::Utility::sizeToString(_size).c_str());
+        _progressBar->setValue(_data.at("percentage").as_int64());
         setSpeed();
-        averageSpeedValue = m_data.at("speedAvg").as_double();
+        averageSpeedValue = _data.at("speedAvg").as_double();
     }
     catch (boost::wrapexcept<std::invalid_argument> &e) {}
     catch (boost::wrapexcept<std::out_of_range> &e) {}
@@ -232,13 +232,13 @@ void TaskRow::normal()
  */
 void TaskRow::finished()
 {
-    try { m_size = m_data.at("totalBytes").as_int64(); }
+    try { _size = _data.at("totalBytes").as_int64(); }
     catch (boost::wrapexcept<std::invalid_argument> &e) {}
     catch (boost::wrapexcept<std::out_of_range> &e) {}
 
-    at(2)->setText(Iridium::Utility::sizeToString(m_size).c_str());
+    at(2)->setText(Iridium::Utility::sizeToString(_size).c_str());
 
-    m_progressBar->setValue(100);
+    _progressBar->setValue(100);
 
     setSpeed();
 
@@ -251,14 +251,14 @@ void TaskRow::finished()
 void TaskRow::error()
 {
     m_state = TaskRow::Error;
-    m_elapsed_time.stop();
-    m_progressBar->setValue(0);
-    m_progressBar->setToolTip("0%");
-    m_progressBar->error();
+    _elapsed_time.stop();
+    _progressBar->setValue(0);
+    _progressBar->setToolTip("0%");
+    _progressBar->error();
     this->at(5)->setText(QObject::tr("Erreur"));
     try
     {
-        this->at(5)->setToolTip(m_data.at("msg").as_string().c_str());
+        this->at(5)->setToolTip(_data.at("msg").as_string().c_str());
 
     } catch (boost::wrapexcept<std::invalid_argument> &e) {}
     catch (boost::wrapexcept<std::out_of_range> &e) {}
@@ -270,14 +270,14 @@ void TaskRow::error()
  */
 void TaskRow::init()
 {
-    m_progressBar = new ProgressBar(ProgressBar::Linear);
-    m_progressBar->setRange(0, 100);
-    m_progressBar->setValue(0);
-    m_progressBar->setShowProgress(true);
-    m_progressBar->setMaximumHeight(20);
+    _progressBar = new ProgressBar(ProgressBar::Linear);
+    _progressBar->setRange(0, 100);
+    _progressBar->setValue(0);
+    _progressBar->setShowProgress(true);
+    _progressBar->setMaximumHeight(20);
 
-    m_elapsed_time.setInterval(1000);
-    m_elapsed_time.start();
+    _elapsed_time.setInterval(1000);
+    _elapsed_time.start();
 
     auto *source = new QStandardItem;
 
@@ -313,11 +313,11 @@ void TaskRow::init()
     for (int i = 0; i < this->size() and (i not_eq 4); ++i)
         this->at(i)->setText("--");
 
-    source->setText(m_src);
-    source->setToolTip(m_src);
+    source->setText(_src);
+    source->setToolTip(_src);
 
-    destination->setText(m_dest);
-    destination->setToolTip(m_dest);
+    destination->setText(_dest);
+    destination->setToolTip(_dest);
 
     status->setText(QObject::tr("En cours"));
 

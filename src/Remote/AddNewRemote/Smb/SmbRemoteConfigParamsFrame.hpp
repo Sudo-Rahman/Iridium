@@ -11,8 +11,8 @@ class SmbRemoteConfigParamsFrame : public RemoteConfigParamsFrame
 {
 Q_OBJECT
 
-    QLineEdit *m_host{}, *m_user{}, *m_password{}, *m_domain{};
-    QSpinBox *m_port{};
+    QLineEdit *_host{}, *_user{}, *_password{}, *_domain{};
+    QSpinBox *_port{};
 
 public:
     explicit SmbRemoteConfigParamsFrame(QWidget *parent = nullptr);

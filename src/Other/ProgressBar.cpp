@@ -8,20 +8,20 @@
 
 ProgressBar::ProgressBar(const ProgressBar::Type &type, QWidget *parent) : QWidget(parent)
 {
-    m_type = type;
-    m_max_value = 100;
-    m_min_value = 0;
-    m_value = 0;
-    m_timer = new QTimer(this);
-    m_timer->setInterval(5);
-    connect(m_timer, &QTimer::timeout, this, [this]()
+    _type = type;
+    _max_value = 100;
+    _min_value = 0;
+    _value = 0;
+    _timer = new QTimer(this);
+    _timer->setInterval(5);
+    connect(_timer, &QTimer::timeout, this, [this]()
     {
-        if (m_type == Circular)
-            m_timer_counter += 10;
+        if (_type == Circular)
+            _timer_counter += 10;
         else
-            m_timer_counter += QWidget::width() * 0.005;
-        if (m_type == Linear and m_timer_counter > QWidget::width() * 1.2)
-            m_timer_counter = 0;
+            _timer_counter += QWidget::width() * 0.005;
+        if (_type == Linear and _timer_counter > QWidget::width() * 1.2)
+            _timer_counter = 0;
         update();
     });
     setContentsMargins(0, 0, 0, 0);
@@ -29,8 +29,8 @@ ProgressBar::ProgressBar(const ProgressBar::Type &type, QWidget *parent) : QWidg
 
 void ProgressBar::setValue(double_t mValue)
 {
-    m_value = mValue;
-    if (m_max_value == m_value)
+    _value = mValue;
+    if (_max_value == _value)
         success();
     else
         update();
@@ -40,11 +40,11 @@ void ProgressBar::setMaxValue(double_t max)
 {
     if (max < 0)
     {
-        m_max_value = 0;
+        _max_value = 0;
         return;
     }
-    if (max > m_min_value)
-        m_max_value = max;
+    if (max > _min_value)
+        _max_value = max;
     update();
 }
 
@@ -52,30 +52,30 @@ void ProgressBar::setMinValue(double_t min)
 {
     if (min < 0)
     {
-        m_min_value = 0;
+        _min_value = 0;
         return;
     }
-    if (min < m_max_value)
-        m_min_value = min;
+    if (min < _max_value)
+        _min_value = min;
     update();
 }
 
 void ProgressBar::setType(ProgressBar::Type type)
 {
-    m_type = type;
+    _type = type;
     update();
 }
 
 void ProgressBar::setIsIndeterminate(bool isIndeterminate)
 {
     if (isIndeterminate)
-        m_timer->start();
+        _timer->start();
     else
     {
-        m_timer->stop();
-        m_timer_counter = 0;
+        _timer->stop();
+        _timer_counter = 0;
     }
-    m_is_indeterminate = isIndeterminate;
+    _is_indeterminate = isIndeterminate;
     update();
 }
 
@@ -92,7 +92,7 @@ void ProgressBar::drawCircular(QPainter &painter)
     pen.setWidth(int(QWidget::height() * 0.15));
     pen.setCapStyle(Qt::RoundCap);
 
-    if (m_state == Error)
+    if (_state == Error)
         pen.setColor(QColor(255, 118, 118));
     else
         pen.setColor(QWidget::palette().color(QPalette::Mid));
@@ -104,30 +104,30 @@ void ProgressBar::drawCircular(QPainter &painter)
     painter.drawEllipse(marginRect);
 
 
-    if (m_state == Progress)
+    if (_state == Progress)
         pen.setColor(QColor(69, 164, 235));
-    else if (m_state == Success)
+    else if (_state == Success)
         pen.setColor(QColor(128, 211, 132));
 
-    if (m_is_indeterminate)
+    if (_is_indeterminate)
     {
         // draw indeterminate progress circle
         painter.setPen(pen);
         // start at 90° and advance 1° every 10 ms start and end
-        painter.drawArc(marginRect, -int(90 * 16 + m_timer_counter),
+        painter.drawArc(marginRect, -int(90 * 16 + _timer_counter),
                         int(-(360 * 16 * 0.3)));
     } else
     {
         // draw progress circle
         painter.setPen(pen);
         painter.drawArc(marginRect, 90 * 16,
-                        int(-(360 * 16 * m_value) / m_max_value));
+                        int(-(360 * 16 * _value) / _max_value));
 
-        if (not m_show_progress)
+        if (not _show_progress)
             return;
         // draw text percentage
         painter.setPen(QColor(255, 255, 255, 255));
-        painter.drawText(rect(), Qt::AlignCenter, QString::number((m_value * 100) / m_max_value) + "%");
+        painter.drawText(rect(), Qt::AlignCenter, QString::number((_value * 100) / _max_value) + "%");
 
     }
 
@@ -137,7 +137,7 @@ void ProgressBar::paintEvent(QPaintEvent *event)
 {
     QPainter painter(this);
 
-    switch (m_type)
+    switch (_type)
     {
         case ProgressBar::Circular:
             drawCircular(painter);
@@ -150,7 +150,7 @@ void ProgressBar::paintEvent(QPaintEvent *event)
 }
 
 /**
- * @brief draw linear progress bar with m_value and m_max_value
+ * @brief draw linear progress bar with _value and _max_value
  * @param painter
  */
 void ProgressBar::drawLinear(QPainter &painter)
@@ -160,7 +160,7 @@ void ProgressBar::drawLinear(QPainter &painter)
     QPen pen;
     pen.setWidth(QWidget::height() / 2);
     pen.setCapStyle(Qt::RoundCap);
-    if (m_state == Error)
+    if (_state == Error)
         pen.setColor(QColor(255, 118, 118));
     else
         pen.setColor(QWidget::palette().color(QPalette::Mid));
@@ -176,18 +176,18 @@ void ProgressBar::drawLinear(QPainter &painter)
     painter.drawLine(start, end);
     pen.setWidth(QWidget::height() / 2);
 
-    if (m_state == Progress)
+    if (_state == Progress)
         pen.setColor(QColor(69, 164, 235));
-    else if (m_state == Success)
+    else if (_state == Success)
         pen.setColor(QColor(128, 211, 132));
 
-    if (m_is_indeterminate)
+    if (_is_indeterminate)
     {
         // draw indeterminate progress line
         painter.setPen(pen);
 
         // start in front of progress line
-        start += QPoint(m_timer_counter - (QWidget::width() * 0.25), 0);
+        start += QPoint(_timer_counter - (QWidget::width() * 0.25), 0);
 
         if (start.x() < marginRect.topLeft().x())
             start.setX(marginRect.topLeft().x());
@@ -197,7 +197,7 @@ void ProgressBar::drawLinear(QPainter &painter)
 
 
         end = QPoint(marginRect.topLeft().x(), y) +
-              QPoint(m_timer_counter, 0);
+              QPoint(_timer_counter, 0);
         if (end.x() > marginRect.topRight().x())
             end.setX(marginRect.topRight().x());
 
@@ -209,19 +209,19 @@ void ProgressBar::drawLinear(QPainter &painter)
         painter.setPen(pen);
 
         end = QPoint(marginRect.topLeft().x(), y) +
-              QPoint((m_value * QWidget::width()) / m_max_value, 0);
+              QPoint((_value * QWidget::width()) / _max_value, 0);
 
         if (end.x() > marginRect.topRight().x())
             end.setX(marginRect.topRight().x());
 
-        if (m_value > m_min_value)
+        if (_value > _min_value)
             painter.drawLine(QPoint(marginRect.topLeft().x(), y), end);
 
-        if (not m_show_progress)
+        if (not _show_progress)
             return;
 
         painter.setPen(QWidget::palette().color(QPalette::Text));
-        auto text = QString::number((m_value * 100) / m_max_value) + "%";
+        auto text = QString::number((_value * 100) / _max_value) + "%";
         QRectF textRect = painter.boundingRect(rect(), Qt::AlignCenter, text);
         painter.drawText(textRect, Qt::AlignCenter, text);
     }
@@ -229,7 +229,7 @@ void ProgressBar::drawLinear(QPainter &painter)
 
 void ProgressBar::setShowProgress(bool showProgress)
 {
-    m_show_progress = showProgress;
+    _show_progress = showProgress;
     update();
 }
 
@@ -245,7 +245,7 @@ void ProgressBar::error()
 {
     setIsIndeterminate(false);
     setShowProgress(true);
-    m_state = Error;
+    _state = Error;
     update();
 }
 
@@ -253,6 +253,6 @@ void ProgressBar::success()
 {
     setIsIndeterminate(false);
     setShowProgress(true);
-    m_state = Success;
+    _state = Success;
     update();
 }

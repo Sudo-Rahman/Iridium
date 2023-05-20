@@ -28,7 +28,7 @@ void RoundedButton::paintEvent(QPaintEvent *event)
     painter.setRenderHint(QPainter::Antialiasing);
 
     painter.setPen(QPushButton::palette().color(QPalette::Light));
-    m_click ? painter.setBrush(QPushButton::palette().color(QPalette::Window)) : painter.setBrush(
+    _click ? painter.setBrush(QPushButton::palette().color(QPalette::Window)) : painter.setBrush(
             QPushButton::palette().color(QPalette::Mid).lighter(130));
 
     // draw rounded rect
@@ -49,22 +49,22 @@ bool RoundedButton::event(QEvent *event)
     {
         // mouse hover repaint
         case QEvent::Enter:
-            m_hover = true;
+            _hover = true;
             addBlur();
             break;
         case QEvent::Leave:
-            m_hover = false;
+            _hover = false;
             addBlur();
             break;
         case QEvent::MouseButtonPress:
             // change cursor
-            m_click = true;
+            _click = true;
             repaint();
             setCursor(Qt::PointingHandCursor);
             break;
         case QEvent::MouseButtonRelease:
             // change cursor
-            m_click = false;
+            _click = false;
             repaint();
             setCursor(Qt::ArrowCursor);
             break;
@@ -77,7 +77,7 @@ bool RoundedButton::event(QEvent *event)
 void RoundedButton::addBlur()
 {
     // if not hover remove effect
-    if (!m_hover)
+    if (!_hover)
     {
         this->setGraphicsEffect(nullptr);
         return;

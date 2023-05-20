@@ -21,10 +21,10 @@ public:
         Loading
     };
 protected:
-    RcloneFilePtr m_file{};
-    TreeFileItem *m_parent{};
-    QList<TreeFileItem *> m_children{};
-    State m_state{NotLoaded};
+    RcloneFilePtr _file{};
+    TreeFileItem *_parent{};
+    QList<TreeFileItem *> _children{};
+    State _state{NotLoaded};
 
 public:
     explicit TreeFileItem(TreeFileItem * = nullptr);
@@ -37,13 +37,13 @@ public:
 
     [[nodiscard]] TreeFileItem *getParent() const;
 
-    [[nodiscard]] const QList<TreeFileItem *> &getChildren() const { return m_children; }
+    [[nodiscard]] const QList<TreeFileItem *> &getChildren() const { return _children; }
 
-    void addChild(TreeFileItem *child) { m_children << child; }
+    void addChild(TreeFileItem *child) { _children << child; }
 
-    [[nodiscard]] State state() const { return m_state; }
+    [[nodiscard]] State state() const { return _state; }
 
-    void setState(const State &state) { TreeFileItem::m_state = state; }
+    void setState(const State &state) { TreeFileItem::_state = state; }
 
 protected:
 

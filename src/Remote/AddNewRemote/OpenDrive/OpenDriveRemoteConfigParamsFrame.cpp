@@ -11,17 +11,17 @@ OpenDriveRemoteConfigParamsFrame::OpenDriveRemoteConfigParamsFrame(QWidget *pare
 
 void OpenDriveRemoteConfigParamsFrame::createUi()
 {
-    m_userLineEdit = new QLineEdit(this);
-    m_passwordLineEdit = new QLineEdit(this);
+    _user = new QLineEdit(this);
+    _password = new QLineEdit(this);
 
-    m_userLineEdit->setPlaceholderText("Toto");
-    m_passwordLineEdit->setPlaceholderText("********");
+    _user->setPlaceholderText("Toto");
+    _password->setPlaceholderText("********");
 
-    m_passwordLineEdit->setEchoMode(QLineEdit::Password);
+    _password->setEchoMode(QLineEdit::Password);
 
 
-    m_formLayout->addRow(tr("Utilisateur"), m_userLineEdit);
-    m_formLayout->addRow(tr("Mot de passe"), m_passwordLineEdit);
+    _form_layout->addRow(tr("Utilisateur"), _user);
+    _form_layout->addRow(tr("Mot de passe"), _password);
 
     RemoteConfigParamsFrame::createUi();
 }
@@ -31,11 +31,11 @@ void OpenDriveRemoteConfigParamsFrame::addRemote()
     RemoteConfigParamsFrame::addRemote();
     if (not checkFields())
         return;
-    m_rclone->config(RemoteType::OpenDrive, m_remoteName->text().toStdString(), {
-            "username=" + m_userLineEdit->text().toStdString(),
-            "password=" + m_passwordLineEdit->text().toStdString()
+    _rclone->config(RemoteType::OpenDrive, _remote_name->text().toStdString(), {
+            "username=" + _user->text().toStdString(),
+            "password=" + _password->text().toStdString()
     });
-    m_rclone->waitForStarted();
-    m_login->hide();
-    m_cancel->show();
+    _rclone->waitForStarted();
+    _login->hide();
+    _cancel->show();
 }

@@ -26,12 +26,12 @@ ListRemoteWidget::ListRemoteWidget(QWidget *parent) : QScrollArea(parent)
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 
-    m_layout = new QVBoxLayout(widget);
-    m_layout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
-    m_layout->setSpacing(10);
+    _layout = new QVBoxLayout(widget);
+    _layout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
+    _layout->setSpacing(10);
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum);
 
-    m_layout->setContentsMargins(5, 10, 5, 10);
+    _layout->setContentsMargins(5, 10, 5, 10);
 
     m_expand = new QPushButton(this);
     m_expand->setCheckable(true);
@@ -39,7 +39,7 @@ ListRemoteWidget::ListRemoteWidget(QWidget *parent) : QScrollArea(parent)
     m_expand->setIcon(Settings::hardDriveIcon());
     m_expand->setFixedWidth(35);
     // rounded button
-    m_layout->addWidget(m_expand);
+    _layout->addWidget(m_expand);
 
     connect(m_expand, &QPushButton::clicked, this, [this]() { expand(); });
 
@@ -53,7 +53,7 @@ ListRemoteWidget::ListRemoteWidget(QWidget *parent) : QScrollArea(parent)
         connect(addRemote, &AddNewRemoteDialog::newRemoteAdded, this, [this]()
         {
             Settings::refreshRemotesList();
-            emit remoteClicked(m_remoteSelected);
+            emit remoteClicked(_remoteselected);
         });
         addRemote->setModal(true);
         addRemote->show();
@@ -65,13 +65,13 @@ ListRemoteWidget::ListRemoteWidget(QWidget *parent) : QScrollArea(parent)
     connect(m_recherche, &QLineEdit::textChanged, this, &ListRemoteWidget::searchRemote);
     toplayout->addWidget(m_recherche);
 
-    m_layout->addLayout(toplayout);
+    _layout->addLayout(toplayout);
 
 
     m_remoteLayout = new QVBoxLayout;
-    m_layout->addLayout(m_remoteLayout);
+    _layout->addLayout(m_remoteLayout);
 
-    m_remoteSelected = std::make_shared<remotes_selected>();
+    _remoteselected = std::make_shared<remotes_selected>();
 
     Settings::refreshRemotesList();
     getAllRemote();
@@ -81,7 +81,7 @@ ListRemoteWidget::ListRemoteWidget(QWidget *parent) : QScrollArea(parent)
 
     m_width = QScrollArea::sizeHint().width();
 
-    Settings::list_remote_changed.connect([this]{getAllRemote();});
+    Settings::list_remote_changed.connect([this] { getAllRemote(); });
 
 }
 
@@ -92,10 +92,10 @@ void ListRemoteWidget::getAllRemote()
 {
     // clear layout
     for (auto *remote: m_listRemote)
-        m_layout->removeWidget(remote);
+        _layout->removeWidget(remote);
     qDeleteAll(m_listRemote);
     m_listRemote.clear();
-    m_remoteSelected->clear();
+    _remoteselected->clear();
 
 //     cration des remoteWidget
     auto remotes = Iridium::Variable::remotes;
@@ -111,25 +111,25 @@ void ListRemoteWidget::getAllRemote()
     {
         connect(remote, &RemoteWidget::clicked, this, [this](RemoteWidget *remoteWidget)
         {
-            if (m_remoteSelected->first not_eq nullptr)
-                m_remoteSelected->first->setSelectedText("");
-            if (m_remoteSelected->second not_eq nullptr)
-                m_remoteSelected->second->setSelectedText("");
+            if (_remoteselected->first not_eq nullptr)
+                _remoteselected->first->setSelectedText("");
+            if (_remoteselected->second not_eq nullptr)
+                _remoteselected->second->setSelectedText("");
             if (m_selected)
-                m_remoteSelected->first = remoteWidget;
+                _remoteselected->first = remoteWidget;
             else
-                m_remoteSelected->second = remoteWidget;
-            if (m_remoteSelected->first == m_remoteSelected->second)
-                m_remoteSelected->first->setSelectedText("➀➁");
+                _remoteselected->second = remoteWidget;
+            if (_remoteselected->first == _remoteselected->second)
+                _remoteselected->first->setSelectedText("➀➁");
             else
             {
-                if (m_remoteSelected->first not_eq nullptr)
-                    m_remoteSelected->first->setSelectedText("➀");
-                if (m_remoteSelected->second not_eq nullptr)
-                    m_remoteSelected->second->setSelectedText("➁");
+                if (_remoteselected->first not_eq nullptr)
+                    _remoteselected->first->setSelectedText("➀");
+                if (_remoteselected->second not_eq nullptr)
+                    _remoteselected->second->setSelectedText("➁");
             }
             m_selected = !m_selected;
-            emit remoteClicked(m_remoteSelected);
+            emit remoteClicked(_remoteselected);
         });
 
         connect(remote, &RemoteWidget::deleted, this, [this](auto *remoteWidget)
@@ -147,16 +147,16 @@ void ListRemoteWidget::getAllRemote()
         m_remoteLayout->addWidget(remote);
         if (!m_listRemote.isEmpty())
         {
-            m_remoteSelected->first = m_listRemote.first();
-            m_remoteSelected->first->setSelectedText("➀");
+            _remoteselected->first = m_listRemote.first();
+            _remoteselected->first->setSelectedText("➀");
         }
         if (m_listRemote.size() > 1)
         {
-            m_remoteSelected->second = m_listRemote[1];
-            m_remoteSelected->second->setSelectedText("➁");
+            _remoteselected->second = m_listRemote[1];
+            _remoteselected->second->setSelectedText("➁");
         }
     }
-    emit remoteClicked(m_remoteSelected);
+    emit remoteClicked(_remoteselected);
 }
 
 /**

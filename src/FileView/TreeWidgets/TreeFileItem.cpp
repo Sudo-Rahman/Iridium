@@ -9,15 +9,15 @@
 
 const std::shared_ptr<RcloneFile> &TreeFileItem::getFile() const
 {
-    return m_file;
+    return _file;
 }
 
-TreeFileItem::TreeFileItem(const QString &path, const RemoteInfoPtr &remoteInfo, TreeFileItem *parent) : m_parent(
+TreeFileItem::TreeFileItem(const QString &path, const RemoteInfoPtr &remoteInfo, TreeFileItem *parent) : _parent(
         parent), QStandardItem()
 {
     if (parent not_eq nullptr)
         parent->addChild(this);
-    TreeFileItem::m_file = std::make_shared<RcloneFile>(
+    TreeFileItem::_file = std::make_shared<RcloneFile>(
             path,
             remoteInfo
     );
@@ -26,12 +26,12 @@ TreeFileItem::TreeFileItem(const QString &path, const RemoteInfoPtr &remoteInfo,
     setFlags(flags() & ~Qt::ItemIsDropEnabled);
 }
 
-TreeFileItem::TreeFileItem(const int &column, const std::shared_ptr<RcloneFile> &file, TreeFileItem *parent) : m_parent(
+TreeFileItem::TreeFileItem(const int &column, const std::shared_ptr<RcloneFile> &file, TreeFileItem *parent) : _parent(
         parent)
 {
     if (parent not_eq nullptr)
         parent->addChild(this);
-    TreeFileItem::m_file = file;
+    TreeFileItem::_file = file;
     switch (column)
     {
         case 0:
@@ -41,7 +41,7 @@ TreeFileItem::TreeFileItem(const int &column, const std::shared_ptr<RcloneFile> 
             break;
         case 1:
             setText(file->getSizeString());
-            QStandardItem::setData((qulonglong)file->getSize(), SORT_ROLE);
+            QStandardItem::setData((qulonglong) file->getSize(), SORT_ROLE);
             break;
         case 2:
             setText(file->getModTimeString());
@@ -54,22 +54,22 @@ TreeFileItem::TreeFileItem(const int &column, const std::shared_ptr<RcloneFile> 
         default:
             break;
     }
-    if(not m_file->isDir())
+    if (not _file->isDir())
         setFlags(flags() & ~Qt::ItemIsDropEnabled);
 }
 
 TreeFileItem *TreeFileItem::getParent() const
 {
-    return m_parent;
+    return _parent;
 }
 
 void TreeFileItem::initIcon()
 {
-    setIcon(m_file->getIcon().pixmap(32, 32));
-    setToolTip(m_file->getName());
+    setIcon(_file->getIcon().pixmap(32, 32));
+    setToolTip(_file->getName());
 }
 
-TreeFileItem::TreeFileItem(TreeFileItem *parent) : m_parent(parent)
+TreeFileItem::TreeFileItem(TreeFileItem *parent) : _parent(parent)
 {
     if (parent not_eq nullptr)
         parent->addChild(this);

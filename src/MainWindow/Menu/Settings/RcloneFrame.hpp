@@ -13,8 +13,8 @@ class RcloneFrame : public QFrame
 {
 Q_OBJECT
 
-    QSpinBox *m_max_rclone_execution{}, *m_parallel_transfers{}, *m_max_depth{}, *m_stats_refresh{};
-    QComboBox *m_load_type{};
+    QSpinBox *_max_rclone_execution{}, *_parallel_transfers{}, *_max_depth{}, *_stats_refresh{};
+    QComboBox *_load_type{};
 
 
 public:

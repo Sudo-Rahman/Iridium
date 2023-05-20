@@ -11,8 +11,7 @@ class RoundedButton : public QPushButton
 {
 Q_OBJECT
 
-    bool m_hover{};
-    bool m_click{};
+    bool _hover{}, _click{};
 
     void addBlur();
 

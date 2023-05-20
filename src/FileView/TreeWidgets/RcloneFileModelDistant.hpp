@@ -19,27 +19,28 @@ public:
         Dynamic, Static
     };
 private:
-    static Load m_load;
+    static Load _load;
 
-    static uint8_t m_max_depth;
+    static uint8_t _max_depth;
 
-    std::vector<RclonePtr> m_locked_rclone{};
+    std::vector<RclonePtr> _locked_rclone{};
 
 public:
     explicit RcloneFileModelDistant(const RemoteInfoPtr &remoteInfo, QTreeView *parent);
 
-    static void setLoadType(Load load) { RcloneFileModelDistant::m_load = load; }
+    static void setLoadType(Load load) { RcloneFileModelDistant::_load = load; }
 
-    static void setMaxDepth(uint8_t maxDepth) { RcloneFileModelDistant::m_max_depth = maxDepth; }
+    static void setMaxDepth(uint8_t maxDepth) { RcloneFileModelDistant::_max_depth = maxDepth; }
 
-    static Load loadType() { return RcloneFileModelDistant::m_load; }
+    static Load loadType() { return RcloneFileModelDistant::_load; }
 
-    static uint8_t maxDepth() { return RcloneFileModelDistant::m_max_depth; }
+    static uint8_t maxDepth() { return RcloneFileModelDistant::_max_depth; }
 
-    ~RcloneFileModelDistant() override{
-        for (auto &rclone : m_locked_rclone)
+    ~RcloneFileModelDistant() override
+    {
+        for (auto &rclone: _locked_rclone)
             rclone->kill();
-        m_locked_rclone.clear();
+        _locked_rclone.clear();
     }
 
 
@@ -52,7 +53,7 @@ private:
     void addItemDynamic(const QString &path, TreeFileItem *parent);
 
 
-    void addItemStatic(const QString &path, TreeFileItem *parent, uint8_t depth = m_max_depth);
+    void addItemStatic(const QString &path, TreeFileItem *parent, uint8_t depth = _max_depth);
 
 };
 

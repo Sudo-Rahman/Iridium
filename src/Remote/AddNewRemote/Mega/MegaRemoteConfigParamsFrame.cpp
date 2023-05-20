@@ -11,16 +11,16 @@ MegaRemoteConfigParamsFrame::MegaRemoteConfigParamsFrame(QWidget *parent) : Remo
 
 void MegaRemoteConfigParamsFrame::createUi()
 {
-    m_userLineEdit = new QLineEdit(this);
-    m_userLineEdit->setPlaceholderText("Email");
-    m_userLineEdit->setPlaceholderText("toto@exemple.com");
+    _user = new QLineEdit(this);
+    _user->setPlaceholderText("Email");
+    _user->setPlaceholderText("toto@exemple.com");
 
-    m_passwordLineEdit = new QLineEdit(this);
-    m_passwordLineEdit->setPlaceholderText("*********");
-    m_passwordLineEdit->setEchoMode(QLineEdit::Password);
+    _password = new QLineEdit(this);
+    _password->setPlaceholderText("*********");
+    _password->setEchoMode(QLineEdit::Password);
 
-    m_formLayout->addRow(tr("Email"), m_userLineEdit);
-    m_formLayout->addRow(tr("Mot de passe"), m_passwordLineEdit);
+    _form_layout->addRow(tr("Email"), _user);
+    _form_layout->addRow(tr("Mot de passe"), _password);
 
     RemoteConfigParamsFrame::createUi();
 }
@@ -32,11 +32,11 @@ void MegaRemoteConfigParamsFrame::addRemote()
     RemoteConfigParamsFrame::addRemote();
     if (not checkFields())
         return;
-    m_rclone->config(RemoteType::Mega, m_remoteName->text().toStdString(), {
-            "user=" + m_userLineEdit->text().toStdString(),
-            "pass=" + m_passwordLineEdit->text().toStdString()
+    _rclone->config(RemoteType::Mega, _remote_name->text().toStdString(), {
+            "user=" + _user->text().toStdString(),
+            "pass=" + _password->text().toStdString()
     });
-    m_rclone->waitForStarted();
-    m_login->hide();
-    m_cancel->show();
+    _rclone->waitForStarted();
+    _login->hide();
+    _cancel->show();
 }

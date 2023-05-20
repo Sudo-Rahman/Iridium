@@ -18,7 +18,9 @@ namespace Iridium
         static uint8_t max_process;
 
         static void clear_and_swap_copy_files(const std::vector<RcloneFilePtr> &files)
-        {copy_files.swap(const_cast<std::vector<RcloneFilePtr> &>(files));}
+        {
+            copy_files.swap(const_cast<std::vector<RcloneFilePtr> &>(files));
+        }
 
 
     };

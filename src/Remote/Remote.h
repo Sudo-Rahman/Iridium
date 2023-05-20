@@ -59,19 +59,18 @@ const std::map<std::string, RemoteType> stringToRemoteType = {
 struct RemoteInfo
 {
 private:
-    std::string m_name;
+    std::string _name;
 public:
-    RemoteType m_type;
-    std::string m_icon;
-    std::string m_path;
+    RemoteType type;
+    std::string icon;
+    std::string path;
 
-    auto setName(std::string name)
-    {m_name = std::move(name);}
+    auto setName(std::string name) { _name = std::move(name); }
 
     RemoteInfo(std::string path, RemoteType type, std::string name = "")
-            : m_name(std::move(name)), m_type(type), m_path(std::move(path))
+            : _name(std::move(name)), type(type), path(std::move(path))
     {
-        m_icon = [&]() -> std::string
+        icon = [&]() -> std::string
         {
             try
             {
@@ -81,45 +80,45 @@ public:
                 return HARDDRIVEICON;
             }
         }();
-        m_name = [this]() -> auto
+        _name = [this]() -> auto
         {
-            if (!m_name.empty())
-                return m_name;
+            if (!_name.empty())
+                return _name;
             if (isLocal())
-                return m_path;
+                return RemoteInfo::path;
             else
             {
-                if (m_path.find(':') != std::string::npos)
-                    return m_path.substr(0, m_path.find(':'));
+                if (RemoteInfo::path.find(':') != std::string::npos)
+                    return RemoteInfo::path.substr(0, RemoteInfo::path.find(':'));
                 else
-                    return m_path;
+                    return RemoteInfo::path;
             }
         }();
 
-        m_path = [this]() -> auto
+        RemoteInfo::path = [this]() -> auto
         {
             if (isLocal())
-                return m_path;
+                return RemoteInfo::path;
             else
             {
-                if (m_path.find(':') == std::string::npos)
-                    return m_path + ":";
+                if (RemoteInfo::path.find(':') == std::string::npos)
+                    return RemoteInfo::path + ":";
                 else
-                    return m_path;
+                    return RemoteInfo::path;
             }
         }();
     }
 
     RemoteInfo() = default;
 
-    [[nodiscard]] bool isLocal() const { return m_type == RemoteType::LocalHardDrive; }
+    [[nodiscard]] bool isLocal() const { return type == RemoteType::LocalHardDrive; }
 
-    [[nodiscard]] std::string name() const { return m_name; }
+    [[nodiscard]] std::string name() const { return _name; }
 
     // overload operator == to compare two RemoteInfo
     bool operator==(const RemoteInfo &other) const
     {
-        return m_name == other.m_name && m_type == other.m_type && m_path == other.m_path;
+        return _name == other._name && type == other.type && path == other.path;
     }
 
     bool operator==(const RemoteInfo *other) const { return *this == *other; }
@@ -132,22 +131,13 @@ public:
     friend std::ostream &operator<<(std::ostream &os, const RemoteInfo &info)
     {
         os << "RemoteInfo{"
-           << "name=" << info.m_name << ", "
-           << "type=" << info.m_type << ", "
-           << "path=" << info.m_path << "}";
+           << "name=" << info._name << ", "
+           << "type=" << info.type << ", "
+           << "path=" << info.path << "}";
         return os;
     }
 };
 
 typedef std::shared_ptr<RemoteInfo> RemoteInfoPtr;
 
-struct FileInfo
-{
-    std::string name;
-    std::string path;
-    uint64_t size;
-    uint64_t date;
-    RemoteInfo remote;
-    bool isDir;
-};
 #endif //IRIDIUM_REMOTE_H

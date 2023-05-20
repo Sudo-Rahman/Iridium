@@ -23,9 +23,9 @@ class TaskTreeView : public QTreeView
 {
 Q_OBJECT
 
-    std::unordered_map<size_t, Tasks> m_tasks{};
+    std::unordered_map<size_t, Tasks> _tasks{};
 
-    QStandardItemModel *m_model{};
+    QStandardItemModel *_model{};
 
 public:
     explicit TaskTreeView(QWidget *parent = nullptr);

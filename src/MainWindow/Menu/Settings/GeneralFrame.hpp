@@ -13,7 +13,7 @@ class GeneralFrame : public QFrame
 {
 Q_OBJECT
 
-    QComboBox *m_language{};
+    QComboBox *_language{};
 
 public:
     explicit GeneralFrame(QWidget *parent = nullptr);

@@ -11,50 +11,50 @@
 ItemMenu::ItemMenu(QWidget *parent) : QMenu(parent)
 {
 
-    m_info = addAction(tr("Information"), this, [this]
+    _info = addAction(tr("Information"), this, [this]
     {
-        m_action = Info;
+        _action = Info;
         emit info();
     });
-    m_copy = addAction(tr("Copier"), this, [this]
+    _copy = addAction(tr("Copier"), this, [this]
     {
-        m_action = Copy;
+        _action = Copy;
         emit copyed();
     });
-    m_paste = addAction(tr("Coller"), this, [this]
+    _paste = addAction(tr("Coller"), this, [this]
     {
-        m_action = Paste;
+        _action = Paste;
         emit pasted();
     });
-    m_delete = addAction(tr("Supprimer"), this, [this]
+    _delete = addAction(tr("Supprimer"), this, [this]
     {
-        m_action = Delete;
+        _action = Delete;
         emit deleted();
     });
-    m_new_folder = addAction(tr("Nouveau dossier"), this, [this]
+    _new_folder = addAction(tr("Nouveau dossier"), this, [this]
     {
-        m_action = NewFolder;
+        _action = NewFolder;
         emit newFolder();
     });
 
     // add icons
-    m_info->setIcon(style()->standardIcon(QStyle::SP_FileDialogInfoView));
-    m_copy->setIcon(style()->standardIcon(QStyle::SP_DialogOpenButton));
-    m_paste->setIcon(style()->standardIcon(QStyle::SP_DialogOpenButton));
-    m_delete->setIcon(style()->standardIcon(QStyle::SP_DialogCancelButton));
-    m_new_folder->setIcon(style()->standardIcon(QStyle::SP_FileDialogNewFolder));
+    _info->setIcon(style()->standardIcon(QStyle::SP_FileDialogInfoView));
+    _copy->setIcon(style()->standardIcon(QStyle::SP_DialogOpenButton));
+    _paste->setIcon(style()->standardIcon(QStyle::SP_DialogOpenButton));
+    _delete->setIcon(style()->standardIcon(QStyle::SP_DialogCancelButton));
+    _new_folder->setIcon(style()->standardIcon(QStyle::SP_FileDialogNewFolder));
 
     // show shortcuts
-    m_info->setShortcut(Qt::Key_Space);
-    m_info->setShortcutVisibleInContextMenu(true);
-    m_copy->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_C));
-    m_copy->setShortcutVisibleInContextMenu(true);
-    m_paste->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_V));
-    m_paste->setShortcutVisibleInContextMenu(true);
-    m_delete->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Delete));
-    m_delete->setShortcutVisibleInContextMenu(true);
-    m_new_folder->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_N));
-    m_new_folder->setShortcutVisibleInContextMenu(true);
+    _info->setShortcut(Qt::Key_Space);
+    _info->setShortcutVisibleInContextMenu(true);
+    _copy->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_C));
+    _copy->setShortcutVisibleInContextMenu(true);
+    _paste->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_V));
+    _paste->setShortcutVisibleInContextMenu(true);
+    _delete->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Delete));
+    _delete->setShortcutVisibleInContextMenu(true);
+    _new_folder->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_N));
+    _new_folder->setShortcutVisibleInContextMenu(true);
 
 }
 
@@ -66,19 +66,19 @@ void ItemMenu::setActionEnabled(const QList<QPair<Action, bool>> &lst)
         switch (pair.first)
         {
             case Copy:
-                m_copy->setEnabled(pair.second);
+                _copy->setEnabled(pair.second);
                 break;
             case Paste:
-                m_paste->setEnabled(pair.second);
+                _paste->setEnabled(pair.second);
                 break;
             case Info:
-                m_info->setEnabled(pair.second);
+                _info->setEnabled(pair.second);
                 break;
             case Delete:
-                m_delete->setEnabled(pair.second);
+                _delete->setEnabled(pair.second);
                 break;
             case NewFolder:
-                m_new_folder->setEnabled(pair.second);
+                _new_folder->setEnabled(pair.second);
                 break;
             case None:
             default:

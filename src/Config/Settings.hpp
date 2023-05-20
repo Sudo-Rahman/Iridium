@@ -50,10 +50,10 @@ public:
     };
 
 private:
-    static boost::property_tree::ptree m_settings;
-    static const std::map<Node, std::string> m_nodes;
+    static boost::property_tree::ptree _settings;
+    static const std::map<Node, std::string> _nodes;
 
-    static boost::property_tree::ptree m_default;
+    static boost::property_tree::ptree _default;
 
     static void loadSettings();
 
@@ -103,7 +103,7 @@ public:
     inline
     static Type getValue(const Node &node)
     {
-        return m_settings.get_child(m_nodes.at(node)).BOOST_NESTED_TEMPLATE get_value<Type>();
+        return _settings.get_child(_nodes.at(node)).BOOST_NESTED_TEMPLATE get_value<Type>();
     }
 
     static void setRcloneFlag(const Rclone::Flag &, const std::string &);

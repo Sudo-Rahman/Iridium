@@ -11,7 +11,7 @@ class MegaRemoteConfigParamsFrame : public RemoteConfigParamsFrame
 {
 Q_OBJECT
 
-    QLineEdit *m_userLineEdit{}, *m_passwordLineEdit{};
+    QLineEdit *_user{}, *_password{};
 
 public:
     explicit MegaRemoteConfigParamsFrame(QWidget *parent = nullptr);

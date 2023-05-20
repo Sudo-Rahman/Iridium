@@ -26,7 +26,7 @@
 #include <QGraphicsDropShadowEffect>
 
 RemoteWidgetParam::RemoteWidgetParam(RemoteType type, QWidget *parent) :
-        QGroupBox(parent), type(type)
+        QGroupBox(parent), _type(type)
 {
     setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
     setContentsMargins(10, 10, 10, 10);
@@ -43,7 +43,7 @@ RemoteWidgetParam::RemoteWidgetParam(RemoteType type, QWidget *parent) :
 
     auto *labelRemoteName = new QLabel(this);
     layout->addWidget(labelRemoteName);
-    switch (RemoteWidgetParam::type)
+    switch (RemoteWidgetParam::_type)
     {
         case Drive:
             labelRemoteName->setText("Google Drive");
@@ -82,10 +82,10 @@ RemoteWidgetParam::RemoteWidgetParam(RemoteType type, QWidget *parent) :
             break;
     }
     if (type == RemoteType::LocalHardDrive)
-        m_icon = Settings::hardDriveIcon();
+        _icon = Settings::hardDriveIcon();
     else
-        m_icon = QIcon(QString::fromStdString(remoteIco.find(RemoteWidgetParam::type)->second));
-    labelIcon->setPixmap(m_icon.pixmap(32, 32, QIcon::Normal, QIcon::On));
+        _icon = QIcon(QString::fromStdString(remoteIco.find(RemoteWidgetParam::_type)->second));
+    labelIcon->setPixmap(_icon.pixmap(32, 32, QIcon::Normal, QIcon::On));
 
     update();
 }
@@ -96,7 +96,7 @@ void RemoteWidgetParam::paintEvent(QPaintEvent *event)
     painter.setRenderHint(QPainter::Antialiasing);
 
     painter.setPen(QGroupBox::palette().color(QPalette::Light));
-    m_click ? painter.setBrush(QApplication::palette().color(QPalette::Window)) : painter.setBrush(
+    _click ? painter.setBrush(QApplication::palette().color(QPalette::Window)) : painter.setBrush(
             QApplication::palette().color(QPalette::Mid).lighter(130));
 
     // draw rounded rect
@@ -108,50 +108,50 @@ void RemoteWidgetParam::paintEvent(QPaintEvent *event)
 
 void RemoteWidgetParam::initParamsFrame()
 {
-    switch (type)
+    switch (_type)
     {
         case Drive:
-            paramsFrame = new GoogleDriveRemoteConfigParamsFrame();
+            _paramsFrame = new GoogleDriveRemoteConfigParamsFrame();
             break;
         case Sftp:
-            paramsFrame = new SftpRemoteConfigParamsFrame();
+            _paramsFrame = new SftpRemoteConfigParamsFrame();
             break;
         case LocalHardDrive:
-            paramsFrame = new LocalRemoteConfigParamsFrame();
+            _paramsFrame = new LocalRemoteConfigParamsFrame();
             break;
         case OneDrive:
-            paramsFrame = new OneDriveRemoteConfigParamsFrame();
+            _paramsFrame = new OneDriveRemoteConfigParamsFrame();
             break;
         case Dropbox:
-            paramsFrame = new DropboxRemoteConfigParamsFrame();
+            _paramsFrame = new DropboxRemoteConfigParamsFrame();
             break;
         case Ftp:
-            paramsFrame = new FtpRemoteConfigParamsFrame();
+            _paramsFrame = new FtpRemoteConfigParamsFrame();
             break;
         case Mega:
-            paramsFrame = new MegaRemoteConfigParamsFrame();
+            _paramsFrame = new MegaRemoteConfigParamsFrame();
             break;
         case OpenDrive:
-            paramsFrame = new OpenDriveRemoteConfigParamsFrame();
+            _paramsFrame = new OpenDriveRemoteConfigParamsFrame();
             break;
         case Pcloud:
-            paramsFrame = new PcloudRemoteConfigParamsFrame();
+            _paramsFrame = new PcloudRemoteConfigParamsFrame();
             break;
         case Box:
-            paramsFrame = new BoxRemoteConfigParamsFrame();
+            _paramsFrame = new BoxRemoteConfigParamsFrame();
             break;
         case Smb:
-            paramsFrame = new SmbRemoteConfigParamsFrame();
+            _paramsFrame = new SmbRemoteConfigParamsFrame();
             break;
         default:
             break;
     }
-    connect(paramsFrame, &RemoteConfigParamsFrame::remoteAdded, this, &RemoteWidgetParam::newRemoteAdded);
+    connect(_paramsFrame, &RemoteConfigParamsFrame::remoteAdded, this, &RemoteWidgetParam::newRemoteAdded);
 }
 
 RemoteConfigParamsFrame *RemoteWidgetParam::getParamsFrame() const
 {
-    return paramsFrame;
+    return _paramsFrame;
 }
 
 bool RemoteWidgetParam::event(QEvent *event)
@@ -160,25 +160,25 @@ bool RemoteWidgetParam::event(QEvent *event)
     {
         // mouse hover repaint
         case QEvent::Enter:
-            m_hover = true;
+            _hover = true;
             addBlur();
             break;
         case QEvent::Leave:
-            m_hover = false;
+            _hover = false;
             addBlur();
             break;
         case QEvent::MouseButtonPress:
             // change cursor
-            m_click = true;
+            _click = true;
             repaint();
             setCursor(Qt::PointingHandCursor);
             break;
         case QEvent::MouseButtonRelease:
             // change cursor
-            m_click = false;
+            _click = false;
             repaint();
             setCursor(Qt::ArrowCursor);
-            emit clicked(paramsFrame);
+            emit clicked(_paramsFrame);
             break;
         default:
             break;
@@ -189,7 +189,7 @@ bool RemoteWidgetParam::event(QEvent *event)
 void RemoteWidgetParam::addBlur()
 {
     // if not hover remove effect
-    if (!m_hover)
+    if (not _hover)
     {
         this->setGraphicsEffect(nullptr);
         return;

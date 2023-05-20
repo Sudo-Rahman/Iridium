@@ -18,15 +18,15 @@ class SettingsButton : public QGroupBox
 {
 Q_OBJECT
 
-    QHBoxLayout *m_layout{};
-    QLabel *m_label{};
-    QFrame *m_frame{};
+    QHBoxLayout *_layout{};
+    QLabel *_label{};
+    QFrame *_frame{};
 
 public:
 
-    [[nodiscard]] QString getName() const { return m_label->text(); }
+    [[nodiscard]] QString getName() const { return _label->text(); }
 
-    [[nodiscard]] QFrame *getFrame() const { return m_frame; }
+    [[nodiscard]] QFrame *getFrame() const { return _frame; }
 
     enum class Type
     {

@@ -106,19 +106,19 @@ RemoteWidget::RemoteWidget(const RemoteInfoPtr &remoteInfo, bool deletable, QWid
 
 void RemoteWidget::init()
 {
-    m_layout = new QHBoxLayout(this);
-    m_layout->setContentsMargins(10, 5, 5, 5);
-    m_layout->setSpacing(0);
+    _layout = new QHBoxLayout(this);
+    _layout->setContentsMargins(10, 5, 5, 5);
+    _layout->setSpacing(0);
 
     auto *labelIcon = new QLabel;
-    m_layout->addWidget(labelIcon);
+    _layout->addWidget(labelIcon);
 // create pixmap
     QIcon icon;
     if (m_remote_info->isLocal())
     {
         icon = Settings::hardDriveIcon();
     } else
-        icon = QIcon(m_remote_info->m_icon.c_str());
+        icon = QIcon(m_remote_info->icon.c_str());
     labelIcon->setPixmap(icon.pixmap(32, 32, QIcon::Normal, QIcon::On));
 
 
@@ -134,7 +134,7 @@ void RemoteWidget::init()
     QFont font = labelRemoteName->font();
     font.setPointSize(15);
     labelRemoteName->setFont(font);
-    m_layout->addWidget(labelRemoteName);
+    _layout->addWidget(labelRemoteName);
 
     auto rightLayout = new QVBoxLayout;
     rightLayout->setSpacing(10);
@@ -152,7 +152,7 @@ void RemoteWidget::init()
     rightLayout->addWidget(m_delete, 0, Qt::AlignTop | Qt::AlignRight);
     rightLayout->addWidget(m_selected, 0, Qt::AlignBottom | Qt::AlignCenter);
 
-    m_layout->addLayout(rightLayout);
+    _layout->addLayout(rightLayout);
 
     connect(m_delete, &RoundedButton::clicked, this, [this]
     {

@@ -26,11 +26,11 @@ public:
     };
 private:
 
-    double_t m_value{}, m_max_value{}, m_min_value{}, m_timer_counter{};
-    Type m_type{};
-    bool m_is_indeterminate{false}, m_show_progress{false};
-    QTimer *m_timer{};
-    State m_state{Progress};
+    double_t _value{}, _max_value{}, _min_value{}, _timer_counter{};
+    Type _type{};
+    bool _is_indeterminate{false}, _show_progress{false};
+    QTimer *_timer{};
+    State _state{Progress};
 
 public:
     explicit ProgressBar(const Type &type, QWidget *parent = nullptr);
@@ -63,7 +63,7 @@ protected:
     // resiez if circular width = height
     [[nodiscard]] QSize sizeHint() const override
     {
-        if (m_type == Circular)
+        if (_type == Circular)
             return {(QWidget::height() + QWidget::width()) / 2, (QWidget::height() + QWidget::width()) / 2};
         return {QWidget::width(), QWidget::height()};
     };

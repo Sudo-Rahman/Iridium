@@ -11,11 +11,9 @@ class FtpRemoteConfigParamsFrame : public RemoteConfigParamsFrame
 {
 Q_OBJECT
 
-    QSpinBox *m_portSpinBox{};
-    QLineEdit *m_userLineEdit{};
-    QLineEdit *m_passwordLineEdit{};
-    QLineEdit *m_hostLineEdit{};
-    QComboBox *m_tls{};
+    QSpinBox *_port{};
+    QLineEdit *_user{}, *_password{}, *_host{};
+    QComboBox *_tls{};
 
 public:
     explicit FtpRemoteConfigParamsFrame(QWidget *parent = nullptr);

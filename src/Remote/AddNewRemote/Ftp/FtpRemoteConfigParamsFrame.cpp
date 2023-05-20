@@ -11,46 +11,46 @@ FtpRemoteConfigParamsFrame::FtpRemoteConfigParamsFrame(QWidget *parent) : Remote
 
 void FtpRemoteConfigParamsFrame::createUi()
 {
-    m_portSpinBox = new QSpinBox(this);
-    m_portSpinBox->setMinimum(1);
-    m_portSpinBox->setMaximum(65535);
-    m_portSpinBox->setValue(21);
-    m_portSpinBox->setSingleStep(1);
-    m_portSpinBox->setToolTip("Port number");
+    _port = new QSpinBox(this);
+    _port->setMinimum(1);
+    _port->setMaximum(65535);
+    _port->setValue(21);
+    _port->setSingleStep(1);
+    _port->setToolTip("Port number");
 
-    m_userLineEdit = new QLineEdit(this);
-    m_userLineEdit->setPlaceholderText("Utilisateur");
-    m_userLineEdit->setToolTip("Utilisateur");
+    _user = new QLineEdit(this);
+    _user->setPlaceholderText("Utilisateur");
+    _user->setToolTip("Utilisateur");
 
-    m_passwordLineEdit = new QLineEdit(this);
-    m_passwordLineEdit->setClearButtonEnabled(true);
-    m_passwordLineEdit->setEchoMode(QLineEdit::Password);
-    m_passwordLineEdit->setPlaceholderText("Password");
-    m_passwordLineEdit->setToolTip("********");
+    _password = new QLineEdit(this);
+    _password->setClearButtonEnabled(true);
+    _password->setEchoMode(QLineEdit::Password);
+    _password->setPlaceholderText("Password");
+    _password->setToolTip("********");
 
-    m_hostLineEdit = new QLineEdit(this);
-    m_hostLineEdit->setPlaceholderText("Host");
-    m_hostLineEdit->setToolTip("ftp.example.com");
+    _host = new QLineEdit(this);
+    _host->setPlaceholderText("Host");
+    _host->setToolTip("ftp.example.com");
 
-    m_tls = new QComboBox(this);
-    m_tls->setToolTip("False");
-    m_tls->addItem("False");
-    m_tls->addItem("True");
-    m_tls->setToolTip("True");
+    _tls = new QComboBox(this);
+    _tls->setToolTip("False");
+    _tls->addItem("False");
+    _tls->addItem("True");
+    _tls->setToolTip("True");
 
-    m_formLayout->addRow(tr("Hote : "), m_hostLineEdit);
-    m_formLayout->addRow(tr("Port : "), m_portSpinBox);
-    m_formLayout->addRow(tr("Utilisateur : "), m_userLineEdit);
-    m_formLayout->addRow(tr("Mot de passe : "), m_passwordLineEdit);
-    m_formLayout->addRow(tr("TLS : "), m_tls);
+    _form_layout->addRow(tr("Hote : "), _host);
+    _form_layout->addRow(tr("Port : "), _port);
+    _form_layout->addRow(tr("Utilisateur : "), _user);
+    _form_layout->addRow(tr("Mot de passe : "), _password);
+    _form_layout->addRow(tr("TLS : "), _tls);
 
 
-    connect(m_tls, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [this](int index)
+    connect(_tls, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [this](int index)
     {
         if (index == 0)
-            m_portSpinBox->setValue(21);
+            _port->setValue(21);
         else
-            m_portSpinBox->setValue(990);
+            _port->setValue(990);
     });
 
     RemoteConfigParamsFrame::createUi();
@@ -63,20 +63,20 @@ void FtpRemoteConfigParamsFrame::addRemote()
     RemoteConfigParamsFrame::addRemote();
     if (not checkFields())
         return;
-    m_rclone->config(RemoteType::Ftp, m_remoteName->text().toStdString(), {
-            "host=" + m_hostLineEdit->text().toStdString(),
-            "port=" + std::to_string(m_portSpinBox->value()),
-            "user=" + m_userLineEdit->text().toStdString(),
-            "pass=" + m_passwordLineEdit->text().toStdString(),
-            "tls=" + m_tls->currentText().toLower().toStdString()});
-    m_rclone->waitForStarted();
-    m_login->hide();
-    m_cancel->show();
+    _rclone->config(RemoteType::Ftp, _remote_name->text().toStdString(), {
+            "host=" + _host->text().toStdString(),
+            "port=" + std::to_string(_port->value()),
+            "user=" + _user->text().toStdString(),
+            "pass=" + _password->text().toStdString(),
+            "tls=" + _tls->currentText().toLower().toStdString()});
+    _rclone->waitForStarted();
+    _login->hide();
+    _cancel->show();
 }
 
 void FtpRemoteConfigParamsFrame::reset()
 {
     RemoteConfigParamsFrame::reset();
-    m_portSpinBox->setValue(21);
-    m_tls->setCurrentIndex(0);
+    _port->setValue(21);
+    _tls->setCurrentIndex(0);
 }

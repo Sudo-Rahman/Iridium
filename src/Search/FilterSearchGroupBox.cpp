@@ -40,9 +40,9 @@ FilterSearchGroupBox::FilterSearchGroupBox(QWidget *parent) : QGroupBox(parent)
     setChecked(false);
 
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-    m_layout = new QVBoxLayout(this);
-    m_layout->setSpacing(0);
-    m_layout->setContentsMargins(0, 0, 0, 0);
+    _layout = new QVBoxLayout(this);
+    _layout->setSpacing(0);
+    _layout->setContentsMargins(0, 0, 0, 0);
 
     m_listView = new QListView(this);
     auto model = new QStandardItemModel(this);
@@ -58,16 +58,16 @@ FilterSearchGroupBox::FilterSearchGroupBox(QWidget *parent) : QGroupBox(parent)
     m_add_exclude = new QPushButton(tr("Exclure"), this);
     m_remove = new QPushButton(tr("Retirer"), this);
 
-    m_up = new QPushButton(QIcon(":/ressources/arrow-up.png").pixmap(20,20), "", this);
-    m_edit = new QPushButton(QIcon(":/ressources/edit.png").pixmap(20,20), "", this);
-    m_down = new QPushButton(QIcon(":/ressources/arrow-down.png").pixmap(20,20), "", this);
+    m_up = new QPushButton(QIcon(":/ressources/arrow-up.png").pixmap(20, 20), "", this);
+    m_edit = new QPushButton(QIcon(":/ressources/edit.png").pixmap(20, 20), "", this);
+    m_down = new QPushButton(QIcon(":/ressources/arrow-down.png").pixmap(20, 20), "", this);
 
 
     m_up->setFixedWidth(30);
     m_edit->setFixedWidth(30);
     m_down->setFixedWidth(30);
 
-    for (auto btn: {m_add_include, m_add_exclude, m_remove,m_up,m_down})
+    for (auto btn: {m_add_include, m_add_exclude, m_remove, m_up, m_down})
         btn->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
     auto up_down_listView_layout = new QHBoxLayout();
@@ -85,12 +85,11 @@ FilterSearchGroupBox::FilterSearchGroupBox(QWidget *parent) : QGroupBox(parent)
     up_down_btn_layout->addWidget(m_down);
 
 
-
     up_down_listView_layout->addLayout(up_down_btn_layout);
     up_down_listView_layout->addWidget(m_listView);
 
-    m_layout->addLayout(include_btn_layout);
-    m_layout->addLayout(up_down_listView_layout);
+    _layout->addLayout(include_btn_layout);
+    _layout->addLayout(up_down_listView_layout);
 
     connectSignals();
 }
@@ -123,20 +122,20 @@ void FilterSearchGroupBox::connectSignals()
         });
     };
 
-    connect(m_add_include, &QPushButton::clicked, this, [this,func]
+    connect(m_add_include, &QPushButton::clicked, this, [this, func]
     {
         auto item = new FilterItem(Rclone::FilterType::Include, "");
         auto model = dynamic_cast<QStandardItemModel *>(m_listView->model());
         model->insertRow(0, item);
-        func(item,model);
+        func(item, model);
     });
 
-    connect(m_add_exclude, &QPushButton::clicked, this, [this,func]
+    connect(m_add_exclude, &QPushButton::clicked, this, [this, func]
     {
         auto item = new FilterItem(Rclone::FilterType::Exclude, "");
         auto model = dynamic_cast<QStandardItemModel *>(m_listView->model());
         model->insertRow(0, item);
-        func(item,model);
+        func(item, model);
     });
 
     connect(m_remove, &QPushButton::clicked, this, [this]
@@ -148,7 +147,7 @@ void FilterSearchGroupBox::connectSignals()
 
     connect(m_up, &QPushButton::clicked, this, [this]
     {
-        if(m_listView->model()->rowCount() < 2)
+        if (m_listView->model()->rowCount() < 2)
             return;
         auto model = dynamic_cast<QStandardItemModel *>(m_listView->model());
         auto index = m_listView->currentIndex();
@@ -164,7 +163,7 @@ void FilterSearchGroupBox::connectSignals()
 
     connect(m_down, &QPushButton::clicked, this, [this]
     {
-        if(m_listView->model()->rowCount() < 2)
+        if (m_listView->model()->rowCount() < 2)
             return;
         auto model = dynamic_cast<QStandardItemModel *>(m_listView->model());
         auto index = m_listView->currentIndex();
@@ -178,12 +177,12 @@ void FilterSearchGroupBox::connectSignals()
         }
     });
 
-    connect(m_edit, &QPushButton::clicked, this, [func,this]
+    connect(m_edit, &QPushButton::clicked, this, [func, this]
     {
         auto model = dynamic_cast<QStandardItemModel *>(m_listView->model());
         auto item = dynamic_cast<FilterItem *>(model->item(m_listView->currentIndex().row()));
         if (item)
-            func(item,model);
+            func(item, model);
     });
 }
 

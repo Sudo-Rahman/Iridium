@@ -20,7 +20,7 @@ void LocalRemoteConfigParamsFrame::createUi()
     auto *path = new QLineEdit(this);
     path->setPlaceholderText("/user/home");
 
-    m_formLayout->addRow(btn, path);
+    _form_layout->addRow(btn, path);
 
     connect(btn, &QPushButton::clicked, this, [this, path]()
     {
@@ -30,14 +30,14 @@ void LocalRemoteConfigParamsFrame::createUi()
                                                         QFileDialog::DontResolveSymlinks);
         if (!result.isEmpty())
         {
-            m_path = result;
+            _path = result;
             path->setText(result);
         }
     });
 
     connect(path, &QLineEdit::textChanged, this, [this, path](const QString &text)
     {
-        m_path = text;
+        _path = text;
         if (QFileInfo::exists(text))
         {
             path->setStyleSheet("border: 1px solid gray; border-radius: 5px;");
@@ -51,24 +51,24 @@ void LocalRemoteConfigParamsFrame::createUi()
 
     RemoteConfigParamsFrame::createUi();
 
-    m_login->setText(tr("Ajouter"));
+    _login->setText(tr("Ajouter"));
 
 }
 
 void LocalRemoteConfigParamsFrame::addRemote()
 {
-    if (QFileInfo::exists(m_path))
+    if (QFileInfo::exists(_path))
     {
         Settings::addLocalRemote(
-                {m_path.toStdString(), RemoteType::LocalHardDrive, m_remoteName->text().toStdString()});
+                {_path.toStdString(), RemoteType::LocalHardDrive, _remote_name->text().toStdString()});
         emit remoteAdded();
         QMessageBox::information(this, tr("Ajout d’un nouveau remote local"),
-                                 tr("Le remote %1 a été ajouté avec succès !").QString::arg(m_remoteName->text()));
+                                 tr("Le remote %1 a été ajouté avec succès !").QString::arg(_remote_name->text()));
         clearAllFields();
 
     } else
     {
-        m_messLabel->setText(tr("Le chemin n’existe pas !"));
-        m_messLabel->show();
+        _mess_label->setText(tr("Le chemin n’existe pas !"));
+        _mess_label->show();
     }
 }

@@ -18,10 +18,10 @@ namespace pt = boost::property_tree;
 
 QIcon Settings::DIR_ICON;
 QIcon Settings::HARDDRIVE_ICON;
-string Rclone::m_path_rclone;
-property_tree::ptree Settings::m_settings, Settings::m_default;
+string Rclone::_path_rclone;
+property_tree::ptree Settings::_settings, Settings::_default;
 signals2::signal<void()> Settings::list_remote_changed;
-const map<Settings::Node, string> Settings::m_nodes = {
+const map<Settings::Node, string> Settings::_nodes = {
         {Settings::Node::All,          ""},
         {Settings::Node::General,      "general"},
         {Settings::Node::Rclone,       "rclone"},
@@ -87,7 +87,7 @@ void Settings::changeDirIcon(const Settings::ThemeColor &color)
 std::vector<RemoteInfoPtr> Settings::getLocalRemotes()
 {
     std::vector<RemoteInfoPtr> remotes;
-    try { auto remote_ptree = m_settings.get_child(m_nodes.at(Remotes)); }
+    try { auto remote_ptree = _settings.get_child(_nodes.at(Remotes)); }
     catch (boost::wrapexcept<boost::property_tree::ptree_bad_path> &e)
     {
         cout << e.what() << endl;
@@ -95,7 +95,7 @@ std::vector<RemoteInfoPtr> Settings::getLocalRemotes()
     }
 
 
-    for (const auto &remote: m_settings.get_child(m_nodes.at(Remotes)))
+    for (const auto &remote: _settings.get_child(_nodes.at(Remotes)))
     {
         try
         {
@@ -130,12 +130,12 @@ void Settings::refreshRemotesList()
 void Settings::addLocalRemote(const RemoteInfo &remoteInfo)
 {
     pt::ptree remote, ptree_path;
-    ptree_path.put("", remoteInfo.m_path);
+    ptree_path.put("", remoteInfo.path);
     remote.add_child("path", ptree_path);
 
-    pt::ptree array = m_settings.get_child(m_nodes.at(Remotes));
+    pt::ptree array = _settings.get_child(_nodes.at(Remotes));
     array.push_back(std::make_pair(remoteInfo.name(), remote));
-    m_settings.put_child(m_nodes.at(Remotes), array);
+    _settings.put_child(_nodes.at(Remotes), array);
 
     saveSettings();
 }
@@ -146,7 +146,7 @@ void Settings::addLocalRemote(const RemoteInfo &remoteInfo)
  */
 void Settings::deleteRemote(const RemoteInfoPtr &remoteInfo)
 {
-    pt::ptree array = m_settings.get_child(m_nodes.at(Remotes));
+    pt::ptree array = _settings.get_child(_nodes.at(Remotes));
     for (auto it = array.begin(); it != array.end(); ++it)
     {
         if (it->first == remoteInfo->name())
@@ -155,7 +155,7 @@ void Settings::deleteRemote(const RemoteInfoPtr &remoteInfo)
             break;
         }
     }
-    m_settings.put_child(m_nodes.at(Remotes), array);
+    _settings.put_child(_nodes.at(Remotes), array);
     saveSettings();
 }
 
@@ -200,7 +200,7 @@ void Settings::loadSettings()
         ifstream ifs(path.string());
         string data((std::istreambuf_iterator<char>(ifs)),
                     std::istreambuf_iterator<char>());
-        pt::read_json(getPathSettings().string(), m_settings);
+        pt::read_json(getPathSettings().string(), _settings);
         initValues();
     } else
     {
@@ -216,7 +216,7 @@ void Settings::loadSettings()
 void Settings::saveSettings()
 {
     // overwrite settings file
-    pt::write_json(getPathSettings().string(), m_settings);
+    pt::write_json(getPathSettings().string(), _settings);
 }
 
 /**
@@ -243,22 +243,22 @@ boost::filesystem::path Settings::getPathSettings()
 
 void Settings::initSettings()
 {
-    m_settings.put(m_nodes.at(Language), QLocale::system().name().toStdString());
-    m_settings.put(m_nodes.at(DirIconColor), 0);
-    m_settings.put(m_nodes.at(LoadType), 0);
-    m_settings.put(m_nodes.at(MaxDepth), 2);
-    m_settings.put(m_nodes.at(MaxProcess), std::thread::hardware_concurrency());
-    m_settings.put(m_nodes.at(Remotes), "");
-    m_settings.put(m_nodes.at(Flags), "");
+    _settings.put(_nodes.at(Language), QLocale::system().name().toStdString());
+    _settings.put(_nodes.at(DirIconColor), 0);
+    _settings.put(_nodes.at(LoadType), 0);
+    _settings.put(_nodes.at(MaxDepth), 2);
+    _settings.put(_nodes.at(MaxProcess), std::thread::hardware_concurrency());
+    _settings.put(_nodes.at(Remotes), "");
+    _settings.put(_nodes.at(Flags), "");
 
     pt::ptree remote, ptree_path;
     RemoteInfo remoteInfo = {"/", RemoteType::LocalHardDrive, "Local"};
-    ptree_path.put("", remoteInfo.m_path);
+    ptree_path.put("", remoteInfo.path);
     remote.add_child("path", ptree_path);
 
-    pt::ptree array = m_settings.get_child(m_nodes.at(Remotes));
+    pt::ptree array = _settings.get_child(_nodes.at(Remotes));
     array.push_back(std::make_pair(remoteInfo.name(), remote));
-    m_settings.put_child(m_nodes.at(Remotes), array);
+    _settings.put_child(_nodes.at(Remotes), array);
 
     // init flags
     pt::ptree flags;
@@ -271,9 +271,9 @@ void Settings::initSettings()
         flag.put("value", Rclone::getFlag(static_cast<Rclone::Flag>(i)).value);
         flags.push_back(std::make_pair(std::to_string(i), flag));
     }
-    m_settings.put_child(m_nodes.at(Flags), flags);
+    _settings.put_child(_nodes.at(Flags), flags);
 
-    m_default = m_settings;
+    _default = _settings;
 
 //    std::stringstream ss;
 //    property_tree::json_parser::write_json(ss, m_settings);
@@ -285,12 +285,12 @@ void Settings::resetSettings(const Node &node)
 {
     if (node == All)
     {
-        m_settings.clear();
-        m_settings = m_default;
+        _settings.clear();
+        _settings = _default;
     } else
     {
-        m_settings.erase(m_nodes.at(node));
-        m_settings.put_child(m_nodes.at(node), m_default.get_child(m_nodes.at(node)));
+        _settings.erase(_nodes.at(node));
+        _settings.put_child(_nodes.at(node), _default.get_child(_nodes.at(node)));
     }
     saveSettings();
     initValues();
@@ -303,7 +303,7 @@ void Settings::initValues()
 {
     try
     {
-        auto flags = m_settings.get_child(m_nodes.at(Flags));
+        auto flags = _settings.get_child(_nodes.at(Flags));
         for (const auto &flag: flags)
         {
             Rclone::setFlag(static_cast<Rclone::Flag>(std::stoi(flag.first)),
@@ -330,7 +330,7 @@ void Settings::setValue(const Node &node, const auto &val)
 {
     try
     {
-        m_settings.put(m_nodes.at(node), val);
+        _settings.put(_nodes.at(node), val);
         saveSettings();
     } catch (boost::exception &e)
     {
@@ -344,12 +344,12 @@ void Settings::setRcloneFlag(const Rclone::Flag &flag, const std::string &value)
     flags.put("name", Rclone::getFlag(flag).name);
     flags.put("value", value);
 
-    pt::ptree array = m_settings.get_child(m_nodes.at(Flags));
+    pt::ptree array = _settings.get_child(_nodes.at(Flags));
 
     while (array.find(to_string(flag)) != array.not_found())
         array.erase(to_string(flag));
     array.push_back(std::make_pair(to_string(flag), flags));
-    m_settings.put_child(m_nodes.at(Flags), array);
+    _settings.put_child(_nodes.at(Flags), array);
 
     Rclone::setFlag(flag, value);
     saveSettings();
@@ -357,7 +357,7 @@ void Settings::setRcloneFlag(const Rclone::Flag &flag, const std::string &value)
 
 std::string Settings::getRcloneFlag(const Rclone::Flag &flag)
 {
-    pt::ptree array = m_settings.get_child(m_nodes.at(Flags));
+    pt::ptree array = _settings.get_child(_nodes.at(Flags));
     for (auto &it: array)
     {
         if (it.first == to_string(flag))
@@ -369,6 +369,6 @@ std::string Settings::getRcloneFlag(const Rclone::Flag &flag)
 
 void Settings::setLanguage(const QLocale::Language &lang)
 {
-    m_settings.put(m_nodes.at(Language), QLocale(lang).name().toStdString());
+    _settings.put(_nodes.at(Language), QLocale(lang).name().toStdString());
     saveSettings();
 }

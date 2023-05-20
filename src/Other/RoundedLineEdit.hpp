@@ -12,8 +12,8 @@ class RoundedLineEdit : public QLineEdit
 {
 Q_OBJECT
 
-    QTimer *m_timer;
-    bool m_add_cusrsor{};
+    QTimer *_timer;
+    bool _add_cusrsor{};
 
 public:
     explicit RoundedLineEdit(QWidget *parent = nullptr);

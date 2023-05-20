@@ -13,14 +13,9 @@ class SettingsDialog : public QDialog
 {
 Q_OBJECT
 
-    QScrollArea *m_left_scrollArea;
-    QWidget *m_left_scrollAreaWidget;
-    QVBoxLayout *m_left_scrollAreaLayout;
-
-    QScrollArea *m_right_scrollArea;
-    QWidget *m_right_scrollAreaWidget;
-    QVBoxLayout *m_right_scrollAreaLayout;
-
+    QScrollArea *_left_scrollArea{}, *_right_scrollArea{};
+    QWidget *_left_scrollAreaWidget{}, *_right_scrollAreaWidget{};
+    QVBoxLayout *_left_scrollAreaLayout{}, *_right_scrollAreaLayout{};
 
 public:
     explicit SettingsDialog(QWidget *parent = nullptr);

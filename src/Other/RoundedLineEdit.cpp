@@ -13,20 +13,20 @@ RoundedLineEdit::RoundedLineEdit(QWidget *parent) : QLineEdit(parent)
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     setMinimumHeight(40);
     setAttribute(Qt::WA_MacShowFocusRect, false);
-    m_timer = new QTimer(this);
-    m_timer->setInterval(600);
-    connect(m_timer, &QTimer::timeout, this, [this]()
+    _timer = new QTimer(this);
+    _timer->setInterval(600);
+    connect(_timer, &QTimer::timeout, this, [this]()
     {
-        m_add_cusrsor = !m_add_cusrsor;
+        _add_cusrsor = !_add_cusrsor;
         update();
     });
 
     // wait timer if text written
     connect(this, &QLineEdit::textChanged, this, [this](const QString &text)
     {
-        m_add_cusrsor = true;
-        m_timer->stop();
-        m_timer->start();
+        _add_cusrsor = true;
+        _timer->stop();
+        _timer->start();
         update();
     });
 }
@@ -49,7 +49,7 @@ void RoundedLineEdit::paintEvent(QPaintEvent *event)
     }
 
     // draw cursor if focused
-    if (QLineEdit::hasFocus() and m_add_cusrsor)
+    if (QLineEdit::hasFocus() and _add_cusrsor)
     {
         painter.setPen(QLineEdit::palette().color(QPalette::Text));
         QFontMetrics fm(QLineEdit::font());
@@ -100,11 +100,11 @@ bool RoundedLineEdit::event(QEvent *event)
     {
         case QEvent::FocusIn:
             addBlur();
-            m_timer->start();
+            _timer->start();
             break;
         case QEvent::FocusOut:
             setGraphicsEffect(nullptr);
-            m_timer->stop();
+            _timer->stop();
             break;
         default:
             break;

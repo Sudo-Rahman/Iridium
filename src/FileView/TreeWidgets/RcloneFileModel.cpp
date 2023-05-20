@@ -13,9 +13,9 @@
  * @param remoteInfo
  * @param View
  */
-RcloneFileModel::RcloneFileModel(const RemoteInfoPtr &remoteInfo, QTreeView *View) : m_view(View)
+RcloneFileModel::RcloneFileModel(const RemoteInfoPtr &remoteInfo, QTreeView *View) : _view(View)
 {
-    m_remote_info = remoteInfo;
+    _remote_info = remoteInfo;
 
     setColumnCount(4);
     setRowCount(0);
@@ -40,7 +40,7 @@ QList<QStandardItem *> RcloneFileModel::getItemList(TreeFileItem *item)
 
 const QModelIndex &RcloneFileModel::getRootIndex() const
 {
-    return m_root_index;
+    return _root_index;
 }
 
 /**
@@ -55,7 +55,7 @@ void RcloneFileModel::addProgressBar(const QModelIndex &index)
     layout->setContentsMargins(0, 0, 0, 0);
     ProgressBar *progressBar;
 
-    if (m_expand_or_double_click)
+    if (_expand_or_double_click)
     {
         progressBar = new ProgressBar(ProgressBar::Circular, container);
         progressBar->setFixedSize(40, 40);
@@ -68,7 +68,7 @@ void RcloneFileModel::addProgressBar(const QModelIndex &index)
     progressBar->setRange(0, 0);
     layout->setAlignment(Qt::AlignLeft);
     layout->addWidget(progressBar);
-    m_view->setIndexWidget(index, container);
+    _view->setIndexWidget(index, container);
 }
 
 RcloneFileModel::RcloneFileModel()

@@ -14,18 +14,18 @@
 
 class TaskRow : public QList<QStandardItem *>
 {
-    ProgressBar *m_progressBar{};
+    ProgressBar *_progressBar{};
 
-    QTimer m_elapsed_time{};
-    uint64_t m_elapsed_time_count{};
+    QTimer _elapsed_time{};
+    uint64_t _elapsed_time_count{};
 
-    QString m_src{}, m_dest{};
+    QString _src{}, _dest{};
 
-    uint64_t m_size{};
+    uint64_t _size{};
 
-    boost::json::object m_data{};
+    boost::json::object _data{};
 
-    std::vector<double> m_avg{};
+    std::vector<double> _avg{};
 
 public:
 
@@ -69,7 +69,7 @@ public:
                      const Rclone::TaskType &taskType = Rclone::Unknown, const State &state = Normal,
                      const Type &type = Child);
 
-    [[nodiscard]] ProgressBar *progressBar() { return m_progressBar; }
+    [[nodiscard]] ProgressBar *progressBar() { return _progressBar; }
 
     [[nodiscard]] QModelIndex progressBarIndex() const { return this->at(4)->index(); };
 

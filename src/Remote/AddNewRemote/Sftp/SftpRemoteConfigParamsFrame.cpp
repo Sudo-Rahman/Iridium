@@ -14,35 +14,35 @@ void SftpRemoteConfigParamsFrame::addRemote()
     RemoteConfigParamsFrame::addRemote();
     if (not checkFields())
         return;
-    m_rclone->config(RemoteType::Sftp, m_remoteName->text().toStdString(),
-                     {"host=" + m_host->text().toStdString(), "port=" + m_port->text().toStdString(),
-                      "user=" + m_user->text().toStdString(), "pass=" + m_password->text().toStdString()});
-    m_rclone->waitForStarted();
-    m_rclone->waitForFinished();
+    _rclone->config(RemoteType::Sftp, _remote_name->text().toStdString(),
+                    {"host=" + _host->text().toStdString(), "port=" + _port->text().toStdString(),
+                     "user=" + _user->text().toStdString(), "pass=" + _password->text().toStdString()});
+    _rclone->waitForStarted();
+    _rclone->waitForFinished();
 }
 
 void SftpRemoteConfigParamsFrame::createUi()
 {
 
-    m_host = new QLineEdit(this);
-    m_host->setPlaceholderText(tr("exemple.com"));
-    m_formLayout->addRow(tr("Hôte : "), m_host);
+    _host = new QLineEdit(this);
+    _host->setPlaceholderText(tr("exemple.com"));
+    _form_layout->addRow(tr("Hôte : "), _host);
 
 
-    m_port = new QSpinBox(this);
-    m_port->setRange(1, 65535);
-    m_port->setValue(22);
-    m_formLayout->addRow(tr("Port : "), m_port);
+    _port = new QSpinBox(this);
+    _port->setRange(1, 65535);
+    _port->setValue(22);
+    _form_layout->addRow(tr("Port : "), _port);
 
-    m_user = new QLineEdit(this);
-    m_user->setPlaceholderText(tr("root"));
-    m_formLayout->addRow(tr("Utilisateur : "), m_user);
+    _user = new QLineEdit(this);
+    _user->setPlaceholderText(tr("root"));
+    _form_layout->addRow(tr("Utilisateur : "), _user);
 
-    m_password = new QLineEdit(this);
-    m_password->setPlaceholderText(tr("********"));
-    m_password->setClearButtonEnabled(true);
-    m_password->setEchoMode(QLineEdit::Password);
-    m_formLayout->addRow(tr("Mot de passe : "), m_password);
+    _password = new QLineEdit(this);
+    _password->setPlaceholderText(tr("********"));
+    _password->setClearButtonEnabled(true);
+    _password->setEchoMode(QLineEdit::Password);
+    _form_layout->addRow(tr("Mot de passe : "), _password);
 
     RemoteConfigParamsFrame::createUi();
 }
@@ -50,5 +50,5 @@ void SftpRemoteConfigParamsFrame::createUi()
 void SftpRemoteConfigParamsFrame::reset()
 {
     RemoteConfigParamsFrame::reset();
-    m_port->setValue(22);
+    _port->setValue(22);
 }

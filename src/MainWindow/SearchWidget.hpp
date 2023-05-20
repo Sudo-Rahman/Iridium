@@ -21,14 +21,14 @@ class SearchWidget : public QWidget
 {
 Q_OBJECT
 
-    ProgressBar *m_progressBar{};
-    std::vector<RemoteInfoPtr> m_remotes{};
-    QComboBox *m_remotes_comboBox{};
-    QLineEdit *m_search{};
-    QPushButton *m_start{}, *m_stop;
-    QVBoxLayout *m_layout{};
-    SearchTableView *m_search_view{};
-    FilterSearchGroupBox *m_filter_search{};
+    ProgressBar *_progressBar{};
+    std::vector<RemoteInfoPtr> _remotes{};
+    QComboBox *_remotes_comboBox{};
+    QLineEdit *_search{};
+    QPushButton *_start{}, *_stop;
+    QVBoxLayout *_layout{};
+    SearchTableView *_search_view{};
+    FilterSearchGroupBox *_filter_search{};
 
 public:
     explicit SearchWidget(QWidget *parent = nullptr);
