@@ -190,12 +190,12 @@ private:
     {
         _readyRead.disconnect_all_slots();
         _finished.disconnect_all_slots();
-        if (_ioc)
-            _ioc->stop();
         if (_pipe_out)
             _pipe_out->close();
         if (_pipe_err)
             _pipe_err->close();
+        if (_ioc)
+            _ioc->stop();
         disconnect();
     }
 

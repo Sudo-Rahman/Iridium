@@ -16,6 +16,7 @@
 #ifdef _WIN32
 
 #include <boost/process/windows.hpp>
+#include <boost/process/async_pipe.hpp>
 #include <codecvt>
 
 #endif
@@ -289,7 +290,7 @@ void Rclone::execute()
 
 #ifdef _WIN32
     std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-    std::wstring exe = converter.from_bytes(m_path_rclone);
+    std::wstring exe = converter.from_bytes(_path_rclone);
     vector<std::wstring> argsEncoding;
     argsEncoding.reserve(_args.size());
     for (auto &arg: _args)
@@ -397,9 +398,9 @@ Rclone::~Rclone()
     cout << "destructeur rclone" << endl;
     Rclone::kill();
     delete _child;
-    delete _ioc;
     delete _pipe_err;
     delete _pipe_out;
+    delete _ioc;
 }
 
 /**
