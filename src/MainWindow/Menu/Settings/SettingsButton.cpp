@@ -9,6 +9,9 @@ SettingsButton::SettingsButton(const Type &type, QWidget *parent) : QGroupBox(pa
     _layout = new QHBoxLayout(this);
     _label = new QLabel(this);
 
+    setAutoFillBackground(true);
+
+
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
     switch (type)

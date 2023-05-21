@@ -14,10 +14,10 @@
 #include <Rclone.hpp>
 
 RemoteWidget::RemoteWidget(const RemoteInfo &remoteInfo, bool deletable, QWidget *parent) : QGroupBox(parent),
-                                                                                            m_remote_info(std::move(
+                                                                                            _remote_info(std::move(
                                                                                                     std::make_shared<RemoteInfo>(
                                                                                                             remoteInfo))),
-                                                                                            m_deletable(deletable)
+                                                                                            _deletable(deletable)
 {
     init();
 }
@@ -28,8 +28,12 @@ void RemoteWidget::paintEvent(QPaintEvent *event)
     painter.setRenderHint(QPainter::Antialiasing);
 
     painter.setPen(QApplication::palette().color(QPalette::Window));
-    m_click ? painter.setBrush(QApplication::palette().color(QPalette::Window)) : painter.setBrush(
+    _click ? painter.setBrush(QApplication::palette().color(QPalette::Window)) : painter.setBrush(
             QApplication::palette().color(QPalette::Mid).lighter(130));
+
+    if (_selection not_eq None)
+        // darker color
+        painter.setBrush(painter.brush().color().darker(140));
 
     // draw rounded rect
     QRect rect = this->rect().marginsRemoved(QMargins(5, 5, 5, 5));
@@ -45,22 +49,22 @@ bool RemoteWidget::event(QEvent *event)
     {
         // mouse hover repaint
         case QEvent::Enter:
-            m_hover = true;
+            _hover = true;
             addBlur();
             break;
         case QEvent::Leave:
-            m_hover = false;
+            _hover = false;
             addBlur();
             break;
         case QEvent::MouseButtonPress:
             // change cursor
-            m_click = true;
+            _click = true;
             repaint();
             setCursor(Qt::PointingHandCursor);
             break;
         case QEvent::MouseButtonRelease:
             // change cursor
-            m_click = false;
+            _click = false;
             repaint();
             setCursor(Qt::ArrowCursor);
             emit clicked(this);
@@ -74,7 +78,7 @@ bool RemoteWidget::event(QEvent *event)
 void RemoteWidget::addBlur()
 {
     // if not hover remove effect
-    if (!m_hover)
+    if (!_hover)
     {
         this->setGraphicsEffect(nullptr);
         return;
@@ -87,20 +91,10 @@ void RemoteWidget::addBlur()
     this->setGraphicsEffect(effect);
 }
 
-const RemoteInfoPtr &RemoteWidget::remoteInfo() const
-{
-    return m_remote_info;
-}
-
-void RemoteWidget::setSelectedText(const QString &text)
-{
-    m_selected->setText(text);
-}
-
 RemoteWidget::RemoteWidget(const RemoteInfoPtr &remoteInfo, bool deletable, QWidget *parent)
 {
-    m_remote_info = remoteInfo;
-    this->m_deletable = deletable;
+    _remote_info = remoteInfo;
+    this->_deletable = deletable;
     init();
 }
 
@@ -114,20 +108,20 @@ void RemoteWidget::init()
     _layout->addWidget(labelIcon);
 // create pixmap
     QIcon icon;
-    if (m_remote_info->isLocal())
+    if (_remote_info->isLocal())
     {
         icon = Settings::hardDriveIcon();
     } else
-        icon = QIcon(m_remote_info->icon.c_str());
+        icon = QIcon(_remote_info->icon.c_str());
     labelIcon->setPixmap(icon.pixmap(32, 32, QIcon::Normal, QIcon::On));
 
 
     // if length of name is more than 10 chars then cut it
-    QString name = QString::fromStdString(m_remote_info->name());
+    QString name = QString::fromStdString(_remote_info->name());
     if (name.length() > 10)
         name = name.left(10) + "...";
     auto *labelRemoteName = new QLabel(name);
-    labelRemoteName->setToolTip(QString::fromStdString(m_remote_info->name()));
+    labelRemoteName->setToolTip(QString::fromStdString(_remote_info->name()));
     labelRemoteName->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
     labelRemoteName->setAlignment(Qt::AlignCenter);
     // set auto size font
@@ -139,24 +133,27 @@ void RemoteWidget::init()
     auto rightLayout = new QVBoxLayout;
     rightLayout->setSpacing(10);
     rightLayout->setContentsMargins(0, 0, 0, 0);
-    m_selected = new QLabel(this);
+    _selected_label = new QLabel(this);
+    font = _selected_label->font();
+    font.setPointSize(15);
+    _selected_label->setFont(font);
 
 
-    auto *m_delete = new RoundedButton("✕", this);
-    m_delete->setFixedSize(25, 25);
-    // get max font size for m_delete
-    auto size = m_delete->fontMetrics().boundingRect(m_delete->text()).size();
-    m_delete->setFont(QFont("Arial", size.height() - 5));
-    m_delete->setToolTip(tr("Supprimer"));
+    auto *_delete = new RoundedButton("✕", this);
+    _delete->setFixedSize(25, 25);
+    // get max font size for _delete
+    auto size = _delete->fontMetrics().boundingRect(_delete->text()).size();
+    _delete->setFont(QFont("Arial", size.height() - 5));
+    _delete->setToolTip(tr("Supprimer"));
 
-    rightLayout->addWidget(m_delete, 0, Qt::AlignTop | Qt::AlignRight);
-    rightLayout->addWidget(m_selected, 0, Qt::AlignBottom | Qt::AlignCenter);
+    rightLayout->addWidget(_delete, 0, Qt::AlignTop | Qt::AlignRight);
+    rightLayout->addWidget(_selected_label, 0, Qt::AlignBottom | Qt::AlignCenter);
 
     _layout->addLayout(rightLayout);
 
-    connect(m_delete, &RoundedButton::clicked, this, [this]
+    connect(_delete, &RoundedButton::clicked, this, [this]
     {
-        if (not m_deletable)
+        if (not _deletable)
         {
             QMessageBox::warning(this, tr("Suppression"), tr("Vous ne pouvez pas supprimer ce remote."));
             return;
@@ -169,12 +166,12 @@ void RemoteWidget::init()
 
         if (msgbox.clickedButton() == yes)
         {
-            if (m_remote_info->isLocal())
-                Settings::deleteRemote(m_remote_info);
+            if (_remote_info->isLocal())
+                Settings::deleteRemote(_remote_info);
             else
             {
                 auto rclone = RcloneManager::get();
-                rclone->deleteRemote(m_remote_info->name());
+                rclone->deleteRemote(_remote_info->name());
                 rclone->waitForFinished();
                 if (rclone->exitCode() != 0)
                 {
@@ -189,4 +186,31 @@ void RemoteWidget::init()
             emit deleted(this);
         }
     });
+}
+
+/**
+ * @brief RemoteWidget::setSelection, set selection of remote and update label
+ * @param selection
+ */
+void RemoteWidget::setSelection(Selection selection)
+{
+    _selection = selection;
+    switch (selection)
+    {
+        case Selection::None:
+            _selected_label->setText("");
+            break;
+        case Selection::First:
+            _selected_label->setText("➀");
+            break;
+        case Selection::Second:
+            _selected_label->setText("➁");
+            break;
+        case Selection::FirstSecond:
+            _selected_label->setText("➀➁");
+            break;
+        default:
+            break;
+    }
+    update();
 }

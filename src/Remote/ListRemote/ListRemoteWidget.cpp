@@ -33,21 +33,21 @@ ListRemoteWidget::ListRemoteWidget(QWidget *parent) : QScrollArea(parent)
 
     _layout->setContentsMargins(5, 10, 5, 10);
 
-    m_expand = new QPushButton(this);
-    m_expand->setCheckable(true);
-    m_expand->setChecked(true);
-    m_expand->setIcon(Settings::hardDriveIcon());
-    m_expand->setFixedWidth(35);
+    _expand = new QPushButton(this);
+    _expand->setCheckable(true);
+    _expand->setChecked(true);
+    _expand->setIcon(Settings::hardDriveIcon());
+    _expand->setFixedWidth(35);
     // rounded button
-    _layout->addWidget(m_expand);
+    _layout->addWidget(_expand);
 
-    connect(m_expand, &QPushButton::clicked, this, [this]() { expand(); });
+    connect(_expand, &QPushButton::clicked, this, [this]() { expand(); });
 
     auto *toplayout = new QHBoxLayout;
 
-    m_add = new RoundedButton("＋");
-    m_add->setFixedSize(35, 35);
-    connect(m_add, &QPushButton::clicked, this, [this]()
+    _add = new RoundedButton("＋");
+    _add->setFixedSize(35, 35);
+    connect(_add, &QPushButton::clicked, this, [this]()
     {
         auto *addRemote = new AddNewRemoteDialog(this);
         connect(addRemote, &AddNewRemoteDialog::newRemoteAdded, this, [this]()
@@ -58,18 +58,18 @@ ListRemoteWidget::ListRemoteWidget(QWidget *parent) : QScrollArea(parent)
         addRemote->setModal(true);
         addRemote->show();
     });
-    toplayout->addWidget(m_add);
+    toplayout->addWidget(_add);
 
-    m_recherche = new RoundedLineEdit(this);
-    m_recherche->setPlaceholderText(tr("Rechercher"));
-    connect(m_recherche, &QLineEdit::textChanged, this, &ListRemoteWidget::searchRemote);
-    toplayout->addWidget(m_recherche);
+    _recherche = new RoundedLineEdit(this);
+    _recherche->setPlaceholderText(tr("Rechercher"));
+    connect(_recherche, &QLineEdit::textChanged, this, &ListRemoteWidget::searchRemote);
+    toplayout->addWidget(_recherche);
 
     _layout->addLayout(toplayout);
 
 
-    m_remoteLayout = new QVBoxLayout;
-    _layout->addLayout(m_remoteLayout);
+    _remote_layout = new QVBoxLayout;
+    _layout->addLayout(_remote_layout);
 
     _remoteselected = std::make_shared<remotes_selected>();
 
@@ -79,7 +79,7 @@ ListRemoteWidget::ListRemoteWidget(QWidget *parent) : QScrollArea(parent)
     // no border
     setFrameShape(QFrame::NoFrame);
 
-    m_width = QScrollArea::sizeHint().width();
+    _width = QScrollArea::sizeHint().width();
 
     Settings::list_remote_changed.connect([this] { getAllRemote(); });
 
@@ -91,10 +91,10 @@ ListRemoteWidget::ListRemoteWidget(QWidget *parent) : QScrollArea(parent)
 void ListRemoteWidget::getAllRemote()
 {
     // clear layout
-    for (auto *remote: m_listRemote)
+    for (auto *remote: _remotes)
         _layout->removeWidget(remote);
-    qDeleteAll(m_listRemote);
-    m_listRemote.clear();
+    qDeleteAll(_remotes);
+    _remotes.clear();
     _remoteselected->clear();
 
 //     cration des remoteWidget
@@ -102,58 +102,56 @@ void ListRemoteWidget::getAllRemote()
     if (remotes.empty())
         return;
     auto it = remotes.begin();
-    m_listRemote << new RemoteWidget(*it, false, this);
+    _remotes << new RemoteWidget(*it, false, this);
     it++;
     for (; it not_eq remotes.end(); ++it)
-        m_listRemote << new RemoteWidget(*it, true, this);
+        _remotes << new RemoteWidget(*it, true, this);
 
-    for (auto *remote: m_listRemote)
+    for (auto *remote: _remotes)
     {
         connect(remote, &RemoteWidget::clicked, this, [this](RemoteWidget *remoteWidget)
         {
-            if (_remoteselected->first not_eq nullptr)
-                _remoteselected->first->setSelectedText("");
-            if (_remoteselected->second not_eq nullptr)
-                _remoteselected->second->setSelectedText("");
-            if (m_selected)
+            for(auto *remote: _remotes)
+                remote->setSelection(RemoteWidget::None);
+            if (_selected)
                 _remoteselected->first = remoteWidget;
             else
                 _remoteselected->second = remoteWidget;
             if (_remoteselected->first == _remoteselected->second)
-                _remoteselected->first->setSelectedText("➀➁");
+                _remoteselected->first->setSelection(RemoteWidget::FirstSecond);
             else
             {
                 if (_remoteselected->first not_eq nullptr)
-                    _remoteselected->first->setSelectedText("➀");
+                    _remoteselected->first->setSelection(RemoteWidget::First);
                 if (_remoteselected->second not_eq nullptr)
-                    _remoteselected->second->setSelectedText("➁");
+                    _remoteselected->second->setSelection(RemoteWidget::Second);
             }
-            m_selected = !m_selected;
+            _selected = !_selected;
             emit remoteClicked(_remoteselected);
         });
 
         connect(remote, &RemoteWidget::deleted, this, [this](auto *remoteWidget)
         {
-            m_listRemote.clear();
-            for (int i = m_remoteLayout->count() - 1; i >= 0; --i)
+            _remotes.clear();
+            for (int i = _remote_layout->count() - 1; i >= 0; --i)
             {
-                auto *item = m_remoteLayout->itemAt(i);
-                m_remoteLayout->removeItem(item);
+                auto *item = _remote_layout->itemAt(i);
+                _remote_layout->removeItem(item);
                 item->widget()->deleteLater();
             }
             Settings::refreshRemotesList();
         });
 
-        m_remoteLayout->addWidget(remote);
-        if (!m_listRemote.isEmpty())
+        _remote_layout->addWidget(remote);
+        if (!_remotes.isEmpty())
         {
-            _remoteselected->first = m_listRemote.first();
-            _remoteselected->first->setSelectedText("➀");
+            _remoteselected->first = _remotes.first();
+            _remoteselected->first->setSelection(RemoteWidget::First);
         }
-        if (m_listRemote.size() > 1)
+        if (_remotes.size() > 1)
         {
-            _remoteselected->second = m_listRemote[1];
-            _remoteselected->second->setSelectedText("➁");
+            _remoteselected->second = _remotes[1];
+            _remoteselected->second->setSelection(RemoteWidget::Second);
         }
     }
     emit remoteClicked(_remoteselected);
@@ -165,7 +163,7 @@ void ListRemoteWidget::getAllRemote()
  */
 void ListRemoteWidget::searchRemote(const QString &name)
 {
-    for (auto *remote: m_listRemote)
+    for (auto *remote: _remotes)
     {
         if (QString::fromStdString(remote->remoteInfo()->name()).contains(name, Qt::CaseInsensitive))
             showAnimation(remote);
@@ -182,28 +180,28 @@ void ListRemoteWidget::expand()
     auto animation = new QPropertyAnimation(this, "maximumWidth");
     animation->setDuration(500);
     animation->setStartValue(width());
-    animation->setEndValue(m_isExpand ? 45 : m_width);
+    animation->setEndValue(_is_expand ? 45 : _width);
     animation->setEasingCurve(QEasingCurve::InOutQuad);
     animation->start(QAbstractAnimation::DeleteWhenStopped);
-    m_isExpand = !m_isExpand;
-    if (not m_isExpand)
-        m_add->hide();
-    if (m_isExpand)
+    _is_expand = !_is_expand;
+    if (not _is_expand)
+        _add->hide();
+    if (_is_expand)
     {
-        for (auto wid: m_listRemote)
+        for (auto wid: _remotes)
             showAnimation(wid);
-        showAnimation(m_recherche);
+        showAnimation(_recherche);
 
     } else
     {
-        for (auto wid: m_listRemote)
+        for (auto wid: _remotes)
             hideAnimation(wid);
-        hideAnimation(m_recherche);
+        hideAnimation(_recherche);
     }
     connect(animation, &QPropertyAnimation::finished, this, [this]()
     {
-        if (m_isExpand)
-            m_add->show();
+        if (_is_expand)
+            _add->show();
     });
 }
 
@@ -216,7 +214,7 @@ void ListRemoteWidget::showAnimation(QWidget *widget) const
     auto animation = new QPropertyAnimation(widget, "maximumWidth");
     animation->setDuration(300);
     animation->setStartValue(0);
-    animation->setEndValue(m_width);
+    animation->setEndValue(_width);
     animation->setEasingCurve(QEasingCurve::InOutQuad);
     animation->start(QAbstractAnimation::DeleteWhenStopped);
     connect(animation, &QPropertyAnimation::finished, widget, [widget]() { widget->show(); });

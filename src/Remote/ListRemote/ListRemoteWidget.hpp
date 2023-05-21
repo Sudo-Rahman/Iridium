@@ -35,24 +35,24 @@ class ListRemoteWidget : public QScrollArea
 Q_OBJECT
 
 private:
-    QVBoxLayout *_layout{}, *m_remoteLayout{};
+    QVBoxLayout *_layout{}, *_remote_layout{};
 
-    RoundedLineEdit *m_recherche{};
-    RoundedButton *m_add{};
+    RoundedLineEdit *_recherche{};
+    RoundedButton *_add{};
 
     RclonePtr _rclone{};
 
-    QList<RemoteWidget *> m_listRemote{};
+    QList<RemoteWidget *> _remotes{};
 
     std::shared_ptr<remotes_selected> _remoteselected{};
 
-    QPushButton *m_expand{};
+    QPushButton *_expand{};
 
-    bool m_selected{};
+    bool _selected{};
 
 
-    int m_width{};
-    bool m_isExpand = true;
+    int _width{};
+    bool _is_expand = true;
 
 public:
     explicit ListRemoteWidget(QWidget *parent = nullptr);

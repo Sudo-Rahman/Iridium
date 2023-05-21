@@ -44,9 +44,9 @@ public:
     };
 
 private:
-    State m_state{};
+    State _state{};
 
-    Type m_type{};
+    Type _type{};
 
     void init();
 
@@ -75,7 +75,7 @@ public:
 
     void updateData(const boost::json::object &);
 
-    [[nodiscard]] const State &state() const { return m_state; }
+    [[nodiscard]] const State &state() const { return _state; }
 
     void setMessageToolTip(const std::string &message)
     {

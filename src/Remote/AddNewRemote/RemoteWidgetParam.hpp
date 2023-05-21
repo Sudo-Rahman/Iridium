@@ -17,7 +17,7 @@ Q_OBJECT
 private:
     RemoteType _type;
     QIcon _icon{};
-    bool _hover{}, _click{};
+    bool _hover{}, _click{}, _selected{};
     RemoteConfigParamsFrame *_paramsFrame{};
 
     void initParamsFrame();
@@ -28,6 +28,19 @@ public:
     explicit RemoteWidgetParam(RemoteType type, QWidget *parent = nullptr);
 
     [[nodiscard]] RemoteConfigParamsFrame *getParamsFrame() const;
+
+    void select()
+    {
+        _selected = true;
+        repaint();
+    }
+
+    void unselect()
+    {
+        _selected = false;
+        repaint();
+    }
+
 
 protected:
 

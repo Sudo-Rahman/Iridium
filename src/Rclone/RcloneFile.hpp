@@ -87,7 +87,7 @@ public:
     {
         os << "path: " << file._path.toStdString() << std::endl;
         os << "size: " << file._size << std::endl;
-        os << "m_is_dir: " << file._is_dir << std::endl;
+        os << "is_dir: " << file._is_dir << std::endl;
         os << "modTime: " << file._mod_time.toString().toStdString() << std::endl;
         os << "remoteInfo: " << file._remote_info->name() << std::endl;
         return os;

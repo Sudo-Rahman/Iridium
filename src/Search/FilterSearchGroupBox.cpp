@@ -11,10 +11,10 @@
 class FilterItem : public QStandardItem
 {
 private:
-    Rclone::FilterType m_type;
+    Rclone::FilterType _type;
 
 public:
-    explicit FilterItem(const Rclone::FilterType &type, const QString &text) : QStandardItem(text), m_type(type)
+    explicit FilterItem(const Rclone::FilterType &type, const QString &text) : QStandardItem(text), _type(type)
     {
         setFlags(flags() & ~Qt::ItemIsDropEnabled);
         switch (type)
@@ -28,7 +28,7 @@ public:
         }
     }
 
-    [[nodiscard]] Rclone::FilterType getType() const { return m_type; }
+    [[nodiscard]] Rclone::FilterType getType() const { return _type; }
 
 };
 
@@ -54,8 +54,8 @@ FilterSearchGroupBox::FilterSearchGroupBox(QWidget *parent) : QGroupBox(parent)
 
     m_listView->setMaximumHeight(100);
 
-    m_add_include = new QPushButton(tr("Inclure"), this);
-    m_add_exclude = new QPushButton(tr("Exclure"), this);
+    _add_include = new QPushButton(tr("Inclure"), this);
+    _add_exclude = new QPushButton(tr("Exclure"), this);
     m_remove = new QPushButton(tr("Retirer"), this);
 
     m_up = new QPushButton(QIcon(":/ressources/arrow-up.png").pixmap(20, 20), "", this);
@@ -67,7 +67,7 @@ FilterSearchGroupBox::FilterSearchGroupBox(QWidget *parent) : QGroupBox(parent)
     m_edit->setFixedWidth(30);
     m_down->setFixedWidth(30);
 
-    for (auto btn: {m_add_include, m_add_exclude, m_remove, m_up, m_down})
+    for (auto btn: {_add_include, _add_exclude, m_remove, m_up, m_down})
         btn->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
     auto up_down_listView_layout = new QHBoxLayout();
@@ -76,8 +76,8 @@ FilterSearchGroupBox::FilterSearchGroupBox(QWidget *parent) : QGroupBox(parent)
     include_btn_layout->setContentsMargins(0, 0, 0, 0);
     up_down_btn_layout->setContentsMargins(0, 0, 0, 0);
 
-    include_btn_layout->addWidget(m_add_include);
-    include_btn_layout->addWidget(m_add_exclude);
+    include_btn_layout->addWidget(_add_include);
+    include_btn_layout->addWidget(_add_exclude);
     include_btn_layout->addWidget(m_remove);
 
     up_down_btn_layout->addWidget(m_up);
@@ -122,7 +122,7 @@ void FilterSearchGroupBox::connectSignals()
         });
     };
 
-    connect(m_add_include, &QPushButton::clicked, this, [this, func]
+    connect(_add_include, &QPushButton::clicked, this, [this, func]
     {
         auto item = new FilterItem(Rclone::FilterType::Include, "");
         auto model = dynamic_cast<QStandardItemModel *>(m_listView->model());
@@ -130,7 +130,7 @@ void FilterSearchGroupBox::connectSignals()
         func(item, model);
     });
 
-    connect(m_add_exclude, &QPushButton::clicked, this, [this, func]
+    connect(_add_exclude, &QPushButton::clicked, this, [this, func]
     {
         auto item = new FilterItem(Rclone::FilterType::Exclude, "");
         auto model = dynamic_cast<QStandardItemModel *>(m_listView->model());

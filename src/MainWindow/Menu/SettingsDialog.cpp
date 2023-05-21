@@ -17,7 +17,7 @@ SettingsDialog::SettingsDialog(QWidget *parent)
     _left_scrollArea = new QScrollArea(this);
     _left_scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     _left_scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    _left_scrollArea->setStyleSheet("QScrollArea{border:none;}");
+    _left_scrollArea->setFrameShape(QFrame::NoFrame);
     _left_scrollArea->setFixedWidth(150);
 
     _left_scrollAreaWidget = new QWidget(_left_scrollArea);
@@ -37,7 +37,7 @@ SettingsDialog::SettingsDialog(QWidget *parent)
     _right_scrollArea->setMinimumWidth(500);
     _right_scrollArea->setWidgetResizable(true);
     // not resize with parent
-    _right_scrollArea->setStyleSheet("QScrollArea{border:none;}");
+    _right_scrollArea->setFrameShape(QFrame::NoFrame);
 
 
     auto *layout = new QHBoxLayout(this);
@@ -51,13 +51,16 @@ SettingsDialog::SettingsDialog(QWidget *parent)
 
     _right_scrollArea->setWidget(_left_scrollAreaWidget->findChildren<SettingsButton *>().first()->getFrame());
 
-
+    _left_scrollAreaWidget->findChildren<SettingsButton *>().first()->select();
     for (const auto &menu: _left_scrollAreaWidget->findChildren<SettingsButton *>())
     {
         connect(menu, &SettingsButton::clicked, [menu, this]()
         {
             _right_scrollArea->takeWidget();
             _right_scrollArea->setWidget(menu->getFrame());
+            for(auto *wid: _left_scrollAreaWidget->findChildren<SettingsButton *>())
+                wid->unselect();
+            menu->select();
         });
     }
 }

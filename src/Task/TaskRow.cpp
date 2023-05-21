@@ -19,7 +19,7 @@ TaskRow::TaskRow(const QString &src, const QString &dest, const boost::json::obj
         : QList<QStandardItem *>()
 {
 
-    m_type = type;
+    _type = type;
 
     switch (state)
     {
@@ -39,7 +39,7 @@ TaskRow::TaskRow(const QString &src, const QString &dest, const boost::json::obj
 
     init();
 
-    if (m_type == Child)
+    if (_type == Child)
         setState(state);
 
     switch (taskType)
@@ -86,12 +86,12 @@ TaskRow::TaskRow(const QString &src, const QString &dest, const boost::json::obj
  */
 void TaskRow::updateData(const boost::json::object &data)
 {
-    if (m_state == TaskRow::Finished)
+    if (_state == TaskRow::Finished)
         return;
 
     _data = data;
 
-    if (Type::Parent == m_type)
+    if (Type::Parent == _type)
         updateDataParent();
     else
         updateDataChild();
@@ -190,7 +190,7 @@ void TaskRow::terminate()
     _progressBar->setToolTip("100%");
     this->at(5)->setText(QObject::tr("Terminé"));
     this->at(6)->setText(QObject::tr("00:00:00"));
-    m_state = TaskRow::Finished;
+    _state = TaskRow::Finished;
 }
 
 /**
@@ -250,7 +250,7 @@ void TaskRow::finished()
  */
 void TaskRow::error()
 {
-    m_state = TaskRow::Error;
+    _state = TaskRow::Error;
     _elapsed_time.stop();
     _progressBar->setValue(0);
     _progressBar->setToolTip("0%");
@@ -331,7 +331,7 @@ void TaskRow::init()
 
 void TaskRow::setState(const TaskRow::State &state)
 {
-    m_state = state;
+    _state = state;
     switch (state)
     {
         case TaskRow::Normal:
@@ -344,7 +344,7 @@ void TaskRow::setState(const TaskRow::State &state)
             error();
             break;
         case TaskRow::Cancelled:
-            if (m_state not_eq TaskRow::Finished and m_state not_eq TaskRow::Error)
+            if (_state not_eq TaskRow::Finished and _state not_eq TaskRow::Error)
                 at(5)->setText(QObject::tr("Annulé"));
             break;
     }

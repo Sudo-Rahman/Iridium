@@ -90,12 +90,12 @@ void RcloneFileModel::addItem(const RcloneFilePtr &file, TreeFileItem *parent)
 //            {
 //                auto msgBox = QMessageBox(QMessageBox::Critical, tr("Erreur"),
 //                                          tr("Impossible de se connecter au remote %1 !").arg(
-//                                                  m_remote_info->name().c_str()), QMessageBox::Ok);
+//                                                  _remote_info->name().c_str()), QMessageBox::Ok);
 //                msgBox.setDetailedText(rclone->readAllError().back().c_str());
 //                msgBox.exec();
 //            }
 //            m_check_is_valid = true;
 //        });
-//        rclone->about(m_remote_info.operator*());
+//        rclone->about(_remote_info.operator*());
 //    }
 }

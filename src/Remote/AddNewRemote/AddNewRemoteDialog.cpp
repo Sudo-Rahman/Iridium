@@ -15,12 +15,12 @@ AddNewRemoteDialog::AddNewRemoteDialog(QWidget *parent) : QDialog(parent)
     setMinimumSize(600, 500);
 
     auto *scrollArea = new QScrollArea(this);
-    scrollArea->setStyleSheet("QScrollArea{border:none;}");
     scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     scrollArea->setWidgetResizable(true);
     scrollArea->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
     scrollArea->setAlignment(Qt::AlignLeft);
+    scrollArea->setFrameShape(QFrame::NoFrame);
 
     auto *scrollWidget = new QWidget(scrollArea);
     auto *scrollWidgetLayout = new QVBoxLayout(scrollWidget);
@@ -31,12 +31,19 @@ AddNewRemoteDialog::AddNewRemoteDialog(QWidget *parent) : QDialog(parent)
     {
         auto type = static_cast<RemoteType>(t);
         auto *widget = new RemoteWidgetParam(type);
-        connect(widget, &RemoteWidgetParam::clicked, this, &AddNewRemoteDialog::changeParamsFrame);
+        connect(widget, &RemoteWidgetParam::clicked, this, [this, widget]()
+        {
+            for(auto *wid: findChildren<RemoteWidgetParam *>())
+                wid->unselect();
+            widget->select();
+            changeParamsFrame(widget->getParamsFrame());
+        });
         scrollWidgetLayout->addWidget(widget);
     }
 
     _layout->addWidget(scrollArea);
     _paramsFrame = findChildren<RemoteWidgetParam *>().first()->getParamsFrame();
+    findChildren<RemoteWidgetParam *>().first()->select();
     _layout->addWidget(_paramsFrame);
 
     for (auto *widget: scrollWidget->findChildren<RemoteWidgetParam *>())

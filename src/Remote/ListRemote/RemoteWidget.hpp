@@ -16,16 +16,23 @@ class RemoteWidget : public QGroupBox
 {
 Q_OBJECT
 
+public:
+
+    enum Selection{
+        First,Second, FirstSecond, None
+    };
+
 protected:
     QHBoxLayout *_layout{};
 
-    RemoteInfoPtr m_remote_info{};
-    QLabel *m_selected{};
+    RemoteInfoPtr _remote_info{};
+    QLabel *_selected_label{};
 
-    bool m_hover{};
-    bool m_click{};
+    bool _hover{},_click{};
 
-    bool m_deletable = true;
+    bool _deletable = true;
+
+    Selection _selection = None;
 
 protected:
     void paintEvent(QPaintEvent *event) override;
@@ -38,18 +45,17 @@ private:
     void addBlur();
 
 public:
+
     explicit RemoteWidget(const RemoteInfo &remoteInfo, bool deletable = true, QWidget *parent = nullptr);
 
     explicit RemoteWidget(const RemoteInfoPtr &remoteInfo, bool deletable = true, QWidget *parent = nullptr);
 
-    [[nodiscard]] const RemoteInfoPtr &remoteInfo() const;
-
-    void setSelectedText(const QString &text);
+    [[nodiscard]] const RemoteInfoPtr &remoteInfo() const{return _remote_info;}
 
     bool operator==(const RemoteWidget &other) const
-    {
-        return m_remote_info == other.m_remote_info;
-    }
+    {return _remote_info == other._remote_info;}
+
+    void setSelection(Selection selection);
 
 signals:
 

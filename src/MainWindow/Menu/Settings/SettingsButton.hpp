@@ -21,12 +21,7 @@ Q_OBJECT
     QHBoxLayout *_layout{};
     QLabel *_label{};
     QFrame *_frame{};
-
 public:
-
-    [[nodiscard]] QString getName() const { return _label->text(); }
-
-    [[nodiscard]] QFrame *getFrame() const { return _frame; }
 
     enum class Type
     {
@@ -37,9 +32,32 @@ public:
 
     explicit SettingsButton(const Type &type, QWidget *parent = nullptr);
 
+    [[nodiscard]] QString getName() const { return _label->text(); }
+
+    [[nodiscard]] QFrame *getFrame() const { return _frame; }
+
+    void select()
+    {
+        QPalette palette(QGroupBox().palette());
+        palette.setColor(QPalette::WindowText, QColor(40, 145, 255));
+        setPalette(palette);
+        auto font = _label->font();
+        font.setBold(true);
+        _label->setFont(font);
+    }
+
+    void unselect()
+    {
+        QPalette palette(QGroupBox().palette());
+        setPalette(palette);
+        update();
+        auto font = _label->font();
+        font.setBold(false);
+        _label->setFont(font);
+    }
+
 protected:
     void mousePressEvent(QMouseEvent *event) override;
-
 
 signals:
 
