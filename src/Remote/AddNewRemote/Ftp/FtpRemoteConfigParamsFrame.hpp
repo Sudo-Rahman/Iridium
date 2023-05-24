@@ -12,7 +12,7 @@ class FtpRemoteConfigParamsFrame : public RemoteConfigParamsFrame
 Q_OBJECT
 
     QSpinBox *_port{};
-    QLineEdit *_user{}, *_password{}, *_host{};
+    RoundedLineEdit *_user{}, *_password{}, *_host{};
     QComboBox *_tls{};
 
 public:

@@ -4,21 +4,21 @@
 
 #include "Settings.hpp"
 #include <Rclone.hpp>
-#include <RcloneFileModelDistant.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/dll.hpp>
 #include <fstream>
 #include <QTranslator>
 #include <memory>
+#include <Global.hpp>
 
 using namespace std;
+using namespace Iridium;
 using namespace boost;
 namespace bf = boost::filesystem;
 namespace pt = boost::property_tree;
 
 QIcon Settings::DIR_ICON;
 QIcon Settings::HARDDRIVE_ICON;
-string Rclone::_path_rclone;
 property_tree::ptree Settings::_settings, Settings::_default;
 signals2::signal<void()> Settings::list_remote_changed;
 const map<Settings::Node, string> Settings::_nodes = {
@@ -32,7 +32,9 @@ const map<Settings::Node, string> Settings::_nodes = {
         {Settings::Node::Remotes,      "remotes"},
         {Settings::Node::MaxDepth,     "rclone.max_depth"},
         {Settings::Node::Flags,        "rclone.flags"},
-        {Settings::Node::Language,     "general.language"}
+        {Settings::Node::Language,     "general.language"},
+        {Settings::Node::Width,        "general.size.width"},
+        {Settings::Node::Height,       "general.size.height"},
 };
 
 /**
@@ -118,7 +120,7 @@ void Settings::refreshRemotesList()
     for (const auto &pair: rclone->getData())
         remotes.emplace_back(
                 std::make_shared<RemoteInfo>(pair.first, stringToRemoteType.find(pair.second)->second));
-    Iridium::Variable::remotes = remotes;
+    Iridium::Global::remotes = remotes;
     list_remote_changed();
 }
 
@@ -167,12 +169,13 @@ void Settings::init()
     auto rclonePath = dll::program_location().parent_path().append("rclone");
     if (QSysInfo::productType() == "windows")
         rclonePath += ".exe";
-    Rclone::setPathRclone(rclonePath.string());
+    Global::path_rclone = rclonePath.string();
 
     Settings::HARDDRIVE_ICON = QIcon::fromTheme("drive-harddisk-solidstate");
     initSettings();
     loadSettings();
     Settings::changeDirIcon(static_cast<ThemeColor>(getValue<uint8_t>(DirIconColor)));
+
 
     boost::filesystem::path translation_dir;
     if (QSysInfo::productType() == "macos")
@@ -250,6 +253,8 @@ void Settings::initSettings()
     _settings.put(_nodes.at(MaxProcess), std::thread::hardware_concurrency());
     _settings.put(_nodes.at(Remotes), "");
     _settings.put(_nodes.at(Flags), "");
+    _settings.put(_nodes.at(Width), 1200);
+    _settings.put(_nodes.at(Height), 600);
 
     pt::ptree remote, ptree_path;
     RemoteInfo remoteInfo = {"/", RemoteType::LocalHardDrive, "Local"};
@@ -301,6 +306,15 @@ void Settings::resetSettings(const Node &node)
  */
 void Settings::initValues()
 {
+    //check if all nodes are present
+    for (const auto &node: _nodes)
+    {
+        if (!_settings.get_child_optional(node.second))
+        {
+            resetSettings(node.first);
+            break;
+        }
+    }
     try
     {
         auto flags = _settings.get_child(_nodes.at(Flags));
@@ -309,10 +323,9 @@ void Settings::initValues()
             Rclone::setFlag(static_cast<Rclone::Flag>(std::stoi(flag.first)),
                             flag.second.get<string>("value"));
         }
-        RcloneFileModelDistant::setLoadType(
-                static_cast<RcloneFileModelDistant::Load>(getValue<uint8_t>(LoadType)));
-        RcloneFileModelDistant::setMaxDepth(getValue<uint8_t>(MaxDepth));
-        RcloneManager::setMaxProcess(getValue<uint8_t>(MaxProcess));
+        Global::load_type = static_cast<Iridium::Load>(getValue<uint8_t>(LoadType));
+        Global::max_depth = getValue<uint8_t>(MaxDepth);
+        Global::max_process = getValue<uint8_t>(MaxProcess);
         Settings::changeDirIcon(static_cast<Settings::ThemeColor>(getValue<uint8_t>(DirIconColor)));
 
     } catch (boost::exception &e)

@@ -32,7 +32,7 @@ void RemoteWidget::paintEvent(QPaintEvent *event)
             QApplication::palette().color(QPalette::Mid).lighter(130));
 
     if (_selection not_eq None)
-        // darker color
+        // pallet not active
         painter.setBrush(painter.brush().color().darker(140));
 
     // draw rounded rect

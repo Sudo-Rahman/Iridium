@@ -33,7 +33,7 @@ AddNewRemoteDialog::AddNewRemoteDialog(QWidget *parent) : QDialog(parent)
         auto *widget = new RemoteWidgetParam(type);
         connect(widget, &RemoteWidgetParam::clicked, this, [this, widget]()
         {
-            for(auto *wid: findChildren<RemoteWidgetParam *>())
+            for (auto *wid: findChildren<RemoteWidgetParam *>())
                 wid->unselect();
             widget->select();
             changeParamsFrame(widget->getParamsFrame());

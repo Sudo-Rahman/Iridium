@@ -5,6 +5,7 @@
 #include "TreeFileItem.hpp"
 #include <Settings.hpp>
 #include <QMimeDatabase>
+#include <QPainter>
 
 
 const std::shared_ptr<RcloneFile> &TreeFileItem::getFile() const
@@ -65,7 +66,7 @@ TreeFileItem *TreeFileItem::getParent() const
 
 void TreeFileItem::initIcon()
 {
-    setIcon(_file->getIcon().pixmap(32, 32));
+    setIcon(_file->getIcon());
     setToolTip(_file->getName());
 }
 

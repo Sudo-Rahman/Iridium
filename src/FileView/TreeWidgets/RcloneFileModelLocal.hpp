@@ -21,6 +21,8 @@ public:
 public:
     void addItem(const RcloneFilePtr &file, TreeFileItem *parent) override;
 
+    void stop() override {};
+
 protected:
 
     void init() override;

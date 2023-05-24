@@ -15,6 +15,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
     setWindowTitle("Iridium");
     setContentsMargins(0, 0, 0, 0);
+    resize(Settings::getValue<int>(Settings::Width), Settings::getValue<int>(Settings::Height));
     setMinimumSize(1200, 600);
     QIcon::setThemeName("fluent");
 
@@ -39,7 +40,8 @@ void MainWindow::connectSignals()
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
+    Settings::setValue(Settings::Width, width(), Settings::Height, height());
     Settings::saveSettings();
     QMainWindow::closeEvent(event);
-    RcloneManager::stopThread();
+    RcloneManager::stopAll();
 }

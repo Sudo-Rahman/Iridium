@@ -38,26 +38,26 @@ public:
 
     void select()
     {
-        QPalette palette(QGroupBox().palette());
-        palette.setColor(QPalette::WindowText, QColor(40, 145, 255));
-        setPalette(palette);
+        // get accentuation color and set it to the label
+        QPalette palette = _label->palette();
+        palette.setColor(QPalette::WindowText, palette.highlight().color());
+        _label->setPalette(palette);
         auto font = _label->font();
         font.setBold(true);
+        font.setPointSize(font.pointSize() + 1);
         _label->setFont(font);
     }
 
     void unselect()
     {
-        QPalette palette(QGroupBox().palette());
-        setPalette(palette);
-        update();
-        auto font = _label->font();
-        font.setBold(false);
-        _label->setFont(font);
+        _label->setPalette(QLabel().palette());
+        _label->setFont(QFont());
     }
 
 protected:
     void mousePressEvent(QMouseEvent *event) override;
+
+    bool event(QEvent *event) override;
 
 signals:
 

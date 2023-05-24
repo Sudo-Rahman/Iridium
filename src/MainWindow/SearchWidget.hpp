@@ -6,7 +6,7 @@
 #define IRIDIUM_SEARCHWIDGET_HPP
 
 #include <QWidget>
-#include <QLineEdit>
+#include <RoundedLineEdit.hpp>
 #include <QPushButton>
 #include <QLayout>
 #include <QComboBox>
@@ -24,7 +24,7 @@ Q_OBJECT
     ProgressBar *_progressBar{};
     std::vector<RemoteInfoPtr> _remotes{};
     QComboBox *_remotes_comboBox{};
-    QLineEdit *_search{};
+    RoundedLineEdit *_search{};
     QPushButton *_start{}, *_stop;
     QVBoxLayout *_layout{};
     SearchTableView *_search_view{};

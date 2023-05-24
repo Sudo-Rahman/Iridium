@@ -12,6 +12,7 @@ ProgressBar::ProgressBar(const ProgressBar::Type &type, QWidget *parent) : QWidg
     _max_value = 100;
     _min_value = 0;
     _value = 0;
+    _current = _progress;
     _timer = new QTimer(this);
     _timer->setInterval(5);
     connect(_timer, &QTimer::timeout, this, [this]()
@@ -69,7 +70,10 @@ void ProgressBar::setType(ProgressBar::Type type)
 void ProgressBar::setIsIndeterminate(bool isIndeterminate)
 {
     if (isIndeterminate)
+    {
         _timer->start();
+        _current = _highlight;
+    }
     else
     {
         _timer->stop();
@@ -93,7 +97,7 @@ void ProgressBar::drawCircular(QPainter &painter)
     pen.setCapStyle(Qt::RoundCap);
 
     if (_state == Error)
-        pen.setColor(QColor(255, 118, 118));
+        pen.setColor(_error);
     else
         pen.setColor(QWidget::palette().color(QPalette::Mid));
 
@@ -103,11 +107,7 @@ void ProgressBar::drawCircular(QPainter &painter)
     painter.setBrush(Qt::NoBrush);
     painter.drawEllipse(marginRect);
 
-
-    if (_state == Progress)
-        pen.setColor(QColor(69, 164, 235));
-    else if (_state == Success)
-        pen.setColor(QColor(128, 211, 132));
+    pen.setColor(_current);
 
     if (_is_indeterminate)
     {
@@ -161,7 +161,7 @@ void ProgressBar::drawLinear(QPainter &painter)
     pen.setWidth(QWidget::height() / 2);
     pen.setCapStyle(Qt::RoundCap);
     if (_state == Error)
-        pen.setColor(QColor(255, 118, 118));
+        pen.setColor(_error);
     else
         pen.setColor(QWidget::palette().color(QPalette::Mid));
 
@@ -176,10 +176,7 @@ void ProgressBar::drawLinear(QPainter &painter)
     painter.drawLine(start, end);
     pen.setWidth(QWidget::height() / 2);
 
-    if (_state == Progress)
-        pen.setColor(QColor(69, 164, 235));
-    else if (_state == Success)
-        pen.setColor(QColor(128, 211, 132));
+    pen.setColor(_current);
 
     if (_is_indeterminate)
     {
@@ -246,6 +243,7 @@ void ProgressBar::error()
     setIsIndeterminate(false);
     setShowProgress(true);
     _state = Error;
+    _current = _error;
     update();
 }
 
@@ -254,5 +252,6 @@ void ProgressBar::success()
     setIsIndeterminate(false);
     setShowProgress(true);
     _state = Success;
+    _current = _success;
     update();
 }

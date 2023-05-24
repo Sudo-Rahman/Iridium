@@ -9,8 +9,6 @@ SettingsButton::SettingsButton(const Type &type, QWidget *parent) : QGroupBox(pa
     _layout = new QHBoxLayout(this);
     _label = new QLabel(this);
 
-    setAutoFillBackground(true);
-
 
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
@@ -40,4 +38,13 @@ void SettingsButton::mousePressEvent(QMouseEvent *event)
     {
         emit clicked();
     }
+}
+
+bool SettingsButton::event(QEvent *event)
+{
+    if (event->type() == QEvent::PaletteChange)
+    {
+        update();
+    }
+    return QGroupBox::event(event);
 }

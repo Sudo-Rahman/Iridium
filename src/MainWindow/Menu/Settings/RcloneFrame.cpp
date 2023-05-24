@@ -35,22 +35,22 @@ RcloneFrame::RcloneFrame(QWidget *parent) : QFrame(parent)
     _max_depth->setValue(Settings::getValue<uint8_t>(Settings::MaxDepth));
     group2Layout->addRow(tr("Type de chargement : "), _load_type);
     group2Layout->addRow(tr("Profondeur : "), _max_depth);
-    if (RcloneFileModelDistant::loadType() == RcloneFileModelDistant::Dynamic)
+    if (Iridium::Global::load_type == Iridium::Load::Dynamic)
         _max_depth->setEnabled(false);
 
     auto group3 = new QGroupBox(this);
     auto group3Layout = new QFormLayout(group3);
     _max_rclone_execution = new QSpinBox(this);
-    _max_rclone_execution->setRange(1, 100);
+    _max_rclone_execution->setRange(1, 30);
     _max_rclone_execution->setValue(Settings::getValue<uint8_t>(Settings::MaxProcess));
     group3Layout->addRow(tr("Nombre maximum d'éxecution simultané : "), _max_rclone_execution);
-    if (RcloneFileModelDistant::loadType() == RcloneFileModelDistant::Dynamic)
+    if (Iridium::Global::load_type == Iridium::Load::Dynamic)
         _max_rclone_execution->setEnabled(false);
 
 
     connect(_load_type, &QComboBox::currentIndexChanged, [this](int index)
     {
-        if (index == RcloneFileModelDistant::Dynamic)
+        if (index == Iridium::Load::Dynamic)
         {
             _max_depth->setEnabled(false);
             _max_rclone_execution->setEnabled(false);
@@ -108,7 +108,7 @@ void RcloneFrame::connectSignals()
     });
     connect(_load_type, &QComboBox::currentIndexChanged, [=](int index)
     {
-        RcloneFileModelDistant::setLoadType(static_cast<RcloneFileModelDistant::Load>(index));
+        RcloneFileModelDistant::setLoadType(static_cast<Iridium::Load>(index));
         Settings::setValue(Settings::LoadType, index);
     });
     connect(_max_depth, &QSpinBox::valueChanged, [=](int value)

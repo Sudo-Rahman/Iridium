@@ -12,19 +12,25 @@ class RoundedLineEdit : public QLineEdit
 {
 Q_OBJECT
 
-    QTimer *_timer;
-    bool _add_cusrsor{};
+    QString _styleSheet{},_boder_radius{};
 
 public:
     explicit RoundedLineEdit(QWidget *parent = nullptr);
 
+    void reset();
+
+    void redBorder();
+
+    void normalBorder();
+
 protected:
-    void paintEvent(QPaintEvent *event) override;
 
     bool event(QEvent *) override;
 
 private:
     void addBlur();
+
+    void setStyleSheet(const QString &styleSheet);
 
 };
 

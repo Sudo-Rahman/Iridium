@@ -14,8 +14,8 @@
 #include <thread>
 #include <QMessageBox>
 #include <Rclone.hpp>
-#include <Variable.hpp>
-
+#include <Global.hpp>
+#include <RoundedLineEdit.hpp>
 
 class TreeFileView : public QTreeView
 {
@@ -31,6 +31,8 @@ Q_OBJECT
     QList<TreeFileItem *> _dragItems{};
 
     bool _dragable{}, _ctrl_presed{};
+
+    RoundedLineEdit *_search_line_edit{};
 
 public:
     explicit TreeFileView(const RemoteInfoPtr &remoteInfo, QWidget *parent = nullptr);
@@ -99,6 +101,8 @@ private:
 
     void showContextMenu();
 
+    void showSearchLine();
+
 signals:
 
     void pathChanged(const QString &);
@@ -108,8 +112,6 @@ signals:
     void
     taskAdded(const QString &src, const QString &dst, const RclonePtr &rclone, const std::function<void()> &callable,
               const Rclone::TaskType &type = Rclone::Unknown);
-
-    void ctrlFPressed();
 
     void resized();
 

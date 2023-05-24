@@ -58,7 +58,7 @@ SettingsDialog::SettingsDialog(QWidget *parent)
         {
             _right_scrollArea->takeWidget();
             _right_scrollArea->setWidget(menu->getFrame());
-            for(auto *wid: _left_scrollAreaWidget->findChildren<SettingsButton *>())
+            for (auto *wid: _left_scrollAreaWidget->findChildren<SettingsButton *>())
                 wid->unselect();
             menu->select();
         });

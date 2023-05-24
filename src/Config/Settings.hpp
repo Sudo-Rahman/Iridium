@@ -14,7 +14,7 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/signals2.hpp>
-#include <Variable.hpp>
+#include <Global.hpp>
 
 
 class Settings
@@ -46,7 +46,9 @@ public:
         Remotes,
         MaxDepth,
         Flags,
-        Language
+        Language,
+        Width,
+        Height,
     };
 
 private:
@@ -93,6 +95,13 @@ public:
 
     static void setValue(const Node &node, const auto &value);
 
+    template<class ... Args>
+    static void setValue(const Node &node, const auto &value, Args &&... args)
+    {
+        setValue(node, value);
+        setValue(std::forward<Args>(args)...);
+    }
+
     /**
      * @brief get the value of a node
      * @tparam Type
@@ -111,7 +120,6 @@ public:
     static std::string getRcloneFlag(const Rclone::Flag &);
 
     static void setLanguage(const QLocale::Language &);
-
 
 };
 

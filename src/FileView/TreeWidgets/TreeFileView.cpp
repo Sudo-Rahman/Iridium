@@ -22,7 +22,6 @@
 #include <QProxyStyle>
 #include <Settings.hpp>
 
-
 using namespace std::chrono;
 
 /**
@@ -82,6 +81,24 @@ void TreeFileView::initUI()
     header()->setSectionsClickable(true);
     header()->setStretchLastSection(false);
     setContextMenuPolicy(Qt::CustomContextMenu);
+
+    _search_line_edit = new RoundedLineEdit(viewport());
+    _search_line_edit->setClearButtonEnabled(false);
+    _search_line_edit->hide();
+    _search_line_edit->setPlaceholderText("Search");
+    auto hide = _search_line_edit->addAction(style()->standardIcon(QStyle::SP_LineEditClearButton),
+                                             QLineEdit::LeadingPosition);
+    _search_line_edit->setPlaceholderText("...");
+    _search_line_edit->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+
+    connect(hide, &QAction::triggered, _search_line_edit, [this]()
+    {
+        _search_line_edit->clear();
+        _search_line_edit->hide();
+    });
+
+    viewport()->stackUnder(_search_line_edit);
+    _search_line_edit->raise();
 
     // set row height
     setItemDelegate(new MyItemDelegate(this));
@@ -160,6 +177,26 @@ void TreeFileView::connectSignals()
     });
 
     connect(this, &QTreeView::customContextMenuRequested, this, &TreeFileView::showContextMenu);
+
+
+    connect(_search_line_edit, &QLineEdit::textChanged, this, [this](const QString &text) { search(text); });
+
+    connect(this, &TreeFileView::pathChanged, this, [this]()
+    {
+        _search_line_edit->clear();
+        _search_line_edit->hide();
+    });
+
+    // when treeview is resized move search line edit
+    connect(this, &TreeFileView::resized, this, [this]()
+    {
+        _search_line_edit->setFixedWidth(viewport()->width() * .4);
+        if (viewport()->size().width() < _search_line_edit->size().width() * 1.1)
+            _search_line_edit->hide();
+        auto x_y = QPoint((viewport()->width() * .97) - _search_line_edit->width(),
+                          (viewport()->height() * .99) - _search_line_edit->height());
+        _search_line_edit->move(x_y);
+    });
 }
 
 /**
@@ -286,7 +323,7 @@ void TreeFileView::showContextMenu()
         menu.setActionEnabled({{ItemMenu::Action::Paste, false},
                                {ItemMenu::NewFolder,     false}});
 
-    if (Iridium::Variable::copy_files.empty())
+    if (Iridium::Global::copy_files.empty())
         menu.setActionEnabled({{ItemMenu::Paste, false}});
 
     ItemMenu::Action action = menu.exec(QCursor::pos());
@@ -302,7 +339,7 @@ void TreeFileView::showContextMenu()
             }
             break;
         case ItemMenu::Action::Copy:
-            Iridium::Variable::clear_and_swap_copy_files(
+            Iridium::Global::clear_and_swap_copy_files(
                     [lisItem]
                     {
                         std::vector<RcloneFilePtr> files;
@@ -312,7 +349,7 @@ void TreeFileView::showContextMenu()
                     }());
             break;
         case ItemMenu::Action::Paste:
-            copyto(Iridium::Variable::copy_files);
+            copyto(Iridium::Global::copy_files);
             break;
         case ItemMenu::Action::Delete:
         {
@@ -464,7 +501,7 @@ void TreeFileView::keyPressEvent(QKeyEvent *event)
     // if ctrl + f
     if (QKeySequence(event->modifiers() | event->key()).matches(Qt::CTRL + Qt::Key_F))
     {
-        emit ctrlFPressed();
+        showSearchLine();
         return;
     }
 
@@ -480,7 +517,7 @@ void TreeFileView::keyPressEvent(QKeyEvent *event)
     if (lisItem.isEmpty() and getPath().isEmpty())
         return;
     if (QKeySequence(event->modifiers() | event->key()).matches(QKeySequence::Copy) and !lisItem.empty())
-        Iridium::Variable::clear_and_swap_copy_files(
+        Iridium::Global::clear_and_swap_copy_files(
                 [lisItem]
                 {
                     std::vector<RcloneFilePtr> files;
@@ -489,7 +526,7 @@ void TreeFileView::keyPressEvent(QKeyEvent *event)
                     return files;
                 }());
     if (QKeySequence(event->modifiers() | event->key()).matches(QKeySequence::Paste) and getSelectedItems().size() == 1)
-        copyto(Iridium::Variable::copy_files);
+        copyto(Iridium::Global::copy_files);
     if (QKeySequence(event->modifiers() | event->key()).matches(Qt::CTRL + Qt::Key_Backspace) and !lisItem.empty())
         if (QTreeView::currentIndex().parent().isValid())
             deleteFile(lisItem);
@@ -615,6 +652,8 @@ void TreeFileView::reload(TreeFileItem *treeItem)
             _model->addItem(item->getFile(), item);
             continue;
         }
+
+        _model->stop();
 
         // remove all children
         QList<TreeFileItem *> lst;
@@ -939,9 +978,34 @@ void TreeFileView::search(const QString &text)
 
 bool TreeFileView::event(QEvent *event)
 {
-    if (event->type() == QEvent::FocusOut)
+    switch (event->type())
     {
-//        selectionModel()->clearSelection();
+        case QEvent::FocusOut :
+            break;
+        case QEvent::PaletteChange :
+
+            break;
+        default:
+            break;
+
     }
     return QTreeView::event(event);
+}
+
+/**
+ * @brief show search line edit for search item
+ */
+void TreeFileView::showSearchLine()
+{
+    _search_line_edit->clear();
+    _search_line_edit->setFixedWidth(viewport()->width() * .4);
+    if (_search_line_edit->isHidden())
+    {
+        // move search line edit to bottom right
+        auto x_y = QPoint((viewport()->width() * .97) - _search_line_edit->width(),
+                          (viewport()->height() * .99) - _search_line_edit->height());
+        _search_line_edit->move(x_y);
+        _search_line_edit->show();
+    }
+    _search_line_edit->setFocus();
 }

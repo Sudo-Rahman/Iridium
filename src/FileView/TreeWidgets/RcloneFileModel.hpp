@@ -45,6 +45,7 @@ public:
         _expand_or_double_click = expandOrDoubleClick;
     }
 
+    virtual void stop() = 0;
 };
 
 

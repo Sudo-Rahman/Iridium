@@ -11,7 +11,7 @@ class SmbRemoteConfigParamsFrame : public RemoteConfigParamsFrame
 {
 Q_OBJECT
 
-    QLineEdit *_host{}, *_user{}, *_password{}, *_domain{};
+    RoundedLineEdit *_host{}, *_user{}, *_password{}, *_domain{};
     QSpinBox *_port{};
 
 public:

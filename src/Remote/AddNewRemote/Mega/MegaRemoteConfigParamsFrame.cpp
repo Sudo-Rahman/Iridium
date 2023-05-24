@@ -11,11 +11,11 @@ MegaRemoteConfigParamsFrame::MegaRemoteConfigParamsFrame(QWidget *parent) : Remo
 
 void MegaRemoteConfigParamsFrame::createUi()
 {
-    _user = new QLineEdit(this);
+    _user = new RoundedLineEdit(this);
     _user->setPlaceholderText("Email");
     _user->setPlaceholderText("toto@exemple.com");
 
-    _password = new QLineEdit(this);
+    _password = new RoundedLineEdit(this);
     _password->setPlaceholderText("*********");
     _password->setEchoMode(QLineEdit::Password);
 

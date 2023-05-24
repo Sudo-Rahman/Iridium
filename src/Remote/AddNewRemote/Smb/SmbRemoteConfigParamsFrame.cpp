@@ -12,20 +12,20 @@ SmbRemoteConfigParamsFrame::SmbRemoteConfigParamsFrame(QWidget *parent) : Remote
 
 void SmbRemoteConfigParamsFrame::createUi()
 {
-    _host = new QLineEdit(this);
+    _host = new RoundedLineEdit(this);
     _host->setPlaceholderText(tr("example.com"));
     _form_layout->addRow(tr("Hôte :"), _host);
 
-    _user = new QLineEdit(this);
+    _user = new RoundedLineEdit(this);
     _user->setPlaceholderText("toto");
     _form_layout->addRow(tr("Utilisateur :"), _user);
 
-    _password = new QLineEdit(this);
+    _password = new RoundedLineEdit(this);
     _password->setPlaceholderText("*********");
     _password->setEchoMode(QLineEdit::Password);
     _form_layout->addRow(tr("Mot de passe :"), _password);
 
-    _domain = new QLineEdit(this);
+    _domain = new RoundedLineEdit(this);
     _domain->setPlaceholderText("domain");
     _domain->setText("WORKGROUP");
     auto action = _domain->addAction(QIcon::fromTheme("reload"),

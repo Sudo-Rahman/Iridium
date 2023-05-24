@@ -8,6 +8,7 @@
 #include <AddNewRemoteDialog.hpp>
 #include <Settings.hpp>
 #include <QPalette>
+#include <QGraphicsOpacityEffect>
 
 /**
  * @brief constructeur
@@ -98,7 +99,7 @@ void ListRemoteWidget::getAllRemote()
     _remoteselected->clear();
 
 //     cration des remoteWidget
-    auto remotes = Iridium::Variable::remotes;
+    auto remotes = Iridium::Global::remotes;
     if (remotes.empty())
         return;
     auto it = remotes.begin();
@@ -111,7 +112,7 @@ void ListRemoteWidget::getAllRemote()
     {
         connect(remote, &RemoteWidget::clicked, this, [this](RemoteWidget *remoteWidget)
         {
-            for(auto *remote: _remotes)
+            for (auto *remote: _remotes)
                 remote->setSelection(RemoteWidget::None);
             if (_selected)
                 _remoteselected->first = remoteWidget;
@@ -184,8 +185,7 @@ void ListRemoteWidget::expand()
     animation->setEasingCurve(QEasingCurve::InOutQuad);
     animation->start(QAbstractAnimation::DeleteWhenStopped);
     _is_expand = !_is_expand;
-    if (not _is_expand)
-        _add->hide();
+
     if (_is_expand)
     {
         for (auto wid: _remotes)
@@ -198,11 +198,14 @@ void ListRemoteWidget::expand()
             hideAnimation(wid);
         hideAnimation(_recherche);
     }
-    connect(animation, &QPropertyAnimation::finished, this, [this]()
-    {
-        if (_is_expand)
-            _add->show();
-    });
+
+    auto * show_effect = new QGraphicsOpacityEffect(_add);
+    animation = new QPropertyAnimation(show_effect, "opacity");
+    _add->setGraphicsEffect(show_effect);
+    animation->setEndValue(_is_expand ? 1 : 0);
+    animation->setDuration(300);
+    animation->setEasingCurve(QEasingCurve::InOutQuad);
+    animation->start(QAbstractAnimation::DeleteWhenStopped);
 }
 
 /**

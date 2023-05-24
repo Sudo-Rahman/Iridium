@@ -18,8 +18,9 @@ Q_OBJECT
 
 public:
 
-    enum Selection{
-        First,Second, FirstSecond, None
+    enum Selection
+    {
+        First, Second, FirstSecond, None
     };
 
 protected:
@@ -28,7 +29,7 @@ protected:
     RemoteInfoPtr _remote_info{};
     QLabel *_selected_label{};
 
-    bool _hover{},_click{};
+    bool _hover{}, _click{};
 
     bool _deletable = true;
 
@@ -50,10 +51,9 @@ public:
 
     explicit RemoteWidget(const RemoteInfoPtr &remoteInfo, bool deletable = true, QWidget *parent = nullptr);
 
-    [[nodiscard]] const RemoteInfoPtr &remoteInfo() const{return _remote_info;}
+    [[nodiscard]] const RemoteInfoPtr &remoteInfo() const { return _remote_info; }
 
-    bool operator==(const RemoteWidget &other) const
-    {return _remote_info == other._remote_info;}
+    bool operator==(const RemoteWidget &other) const { return _remote_info == other._remote_info; }
 
     void setSelection(Selection selection);
 

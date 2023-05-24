@@ -13,6 +13,7 @@
 #include <QDialog>
 
 #include <RoundedButton.hpp>
+#include <RoundedLineEdit.hpp>
 
 
 class TreeFileViewContainer : public QWidget

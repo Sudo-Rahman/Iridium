@@ -46,17 +46,18 @@ SearchWidget::SearchWidget(QWidget *parent) : QWidget(parent)
     view->setMinimumWidth(150);
     _remotes_comboBox->setMaxVisibleItems(3);
 
-    _remotes = Iridium::Variable::remotes;
+    _remotes = Iridium::Global::remotes;
     fillRemotesComboBox();
 
     Settings::list_remote_changed.connect(
             [this]()
             {
-                _remotes = Iridium::Variable::remotes;
+                _remotes = Iridium::Global::remotes;
                 fillRemotesComboBox();
             });
 
-    _search = new QLineEdit(this);
+    _search = new RoundedLineEdit(this);
+    _search->setPlaceholderText(tr(".png"));
     _start = new QPushButton(tr("Rechercher"), this);
     _start->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
     auto *validator = new QRegularExpressionValidator(QRegularExpression(R"([^\/:*?"<>|]*)"));

@@ -24,7 +24,7 @@ void SftpRemoteConfigParamsFrame::addRemote()
 void SftpRemoteConfigParamsFrame::createUi()
 {
 
-    _host = new QLineEdit(this);
+    _host = new RoundedLineEdit(this);
     _host->setPlaceholderText(tr("exemple.com"));
     _form_layout->addRow(tr("Hôte : "), _host);
 
@@ -34,11 +34,11 @@ void SftpRemoteConfigParamsFrame::createUi()
     _port->setValue(22);
     _form_layout->addRow(tr("Port : "), _port);
 
-    _user = new QLineEdit(this);
+    _user = new RoundedLineEdit(this);
     _user->setPlaceholderText(tr("root"));
     _form_layout->addRow(tr("Utilisateur : "), _user);
 
-    _password = new QLineEdit(this);
+    _password = new RoundedLineEdit(this);
     _password->setPlaceholderText(tr("********"));
     _password->setClearButtonEnabled(true);
     _password->setEchoMode(QLineEdit::Password);

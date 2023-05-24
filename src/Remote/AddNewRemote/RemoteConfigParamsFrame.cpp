@@ -4,6 +4,7 @@
 
 #include <QPainter>
 #include <QMessageBox>
+#include <QIterator>
 
 #include "RemoteConfigParamsFrame.hpp"
 
@@ -20,7 +21,7 @@ RemoteConfigParamsFrame::RemoteConfigParamsFrame(QWidget *parent) : QFrame(paren
     _form_layout->setContentsMargins(0, 0, 0, 0);
     _layout->addLayout(_form_layout);
 
-    _remote_name = new QLineEdit(this);
+    _remote_name = new RoundedLineEdit(this);
     _form_layout->addRow(tr("Nom : "), _remote_name);
 }
 
@@ -66,14 +67,12 @@ void RemoteConfigParamsFrame::createUi()
     _layout->addWidget(_mess_label, Qt::AlignTop);
     _layout->setAlignment(_mess_label, Qt::AlignTop);
 
-    _remote_name->setStyleSheet("border: 1px solid gray; border-radius: 5px;");
-
-    for (auto &field: findChildren<QLineEdit *>())
+    for (auto &field: findChildren<RoundedLineEdit *>())
     {
         connect(field, &QLineEdit::textChanged, this, [this, field]()
         {
-            field->setStyleSheet("border: 1px solid gray; border-radius: 5px;");
             _mess_label->hide();
+            field->normalBorder();
         });
     }
 
@@ -86,7 +85,7 @@ void RemoteConfigParamsFrame::addRemote()
 {
     if (_remote_name->text().isEmpty())
     {
-        _remote_name->setStyleSheet("border: 1px solid red; border-radius: 5px;");
+        _remote_name->redBorder();
         _mess_label->show();
         _mess_label->setText(tr("Les champs en rouge sont obligatoires !"));
         return;
@@ -134,11 +133,11 @@ bool RemoteConfigParamsFrame::checkFields()
         QMessageBox::critical(this, tr("Erreur"), tr("Le nom du disque est déjà utilisé !"));
         return false;
     }
-    for (auto &field: findChildren<QLineEdit *>())
+    for (auto &field: findChildren<RoundedLineEdit *>())
     {
         if (field->text().isEmpty())
         {
-            field->setStyleSheet("border: 1px solid red; border-radius: 5px;");
+            field->redBorder();
             _mess_label->show();
             _mess_label->setText(tr("Les champs en rouge sont obligatoires !"));
             ok = false;
@@ -152,11 +151,8 @@ bool RemoteConfigParamsFrame::checkFields()
  */
 void RemoteConfigParamsFrame::clearAllFields()
 {
-    for (auto &field: findChildren<QLineEdit *>())
-    {
-        field->clear();
-        field->setStyleSheet("border: 1px solid gray; border-radius: 5px;");
-    }
+    for (auto lineEdit: findChildren<RoundedLineEdit *>()) { lineEdit->reset(); }
+
 }
 
 /**

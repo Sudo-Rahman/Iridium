@@ -11,8 +11,8 @@ OpenDriveRemoteConfigParamsFrame::OpenDriveRemoteConfigParamsFrame(QWidget *pare
 
 void OpenDriveRemoteConfigParamsFrame::createUi()
 {
-    _user = new QLineEdit(this);
-    _password = new QLineEdit(this);
+    _user = new RoundedLineEdit(this);
+    _password = new RoundedLineEdit(this);
 
     _user->setPlaceholderText("Toto");
     _password->setPlaceholderText("********");

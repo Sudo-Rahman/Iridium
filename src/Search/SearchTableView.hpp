@@ -19,7 +19,7 @@ class SearchTableView : public QTableView
 {
 Q_OBJECT
 
-    struct addRow
+    struct Row
     {
         boost::json::object file;
         RemoteInfoPtr remoteInfo;
@@ -29,7 +29,7 @@ Q_OBJECT
     std::vector<RclonePtr> _rclones{};
     std::vector<boost::thread> _threads{};
     std::unique_ptr<boost::thread> _adder{};
-    std::vector<addRow> _rows{};
+    std::vector<Row> _rows{};
     std::mutex _mutex{};
     std::condition_variable _cv{};
     std::atomic_uint8_t _searching = 0;
@@ -50,7 +50,7 @@ public :
     }
 
 private:
-    void addFile(const boost::json::object &file, const RemoteInfoPtr &remoteInfo);
+    void addFile();
 
     void showCustomContextMenu();
 

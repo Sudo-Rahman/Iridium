@@ -6,9 +6,6 @@
 #include "RcloneFileModelDistant.hpp"
 #include "TreeFileItemDistant.hpp"
 
-uint8_t RcloneFileModelDistant::_max_depth = 2;
-RcloneFileModelDistant::Load RcloneFileModelDistant::_load = Dynamic;
-
 RcloneFileModelDistant::RcloneFileModelDistant(const RemoteInfoPtr &remoteInfo, QTreeView *View)
         : RcloneFileModel(remoteInfo, View)
 {
@@ -33,7 +30,7 @@ void RcloneFileModelDistant::init()
 void RcloneFileModelDistant::addItem(const RcloneFilePtr &file, TreeFileItem *parent)
 {
     RcloneFileModel::addItem(file, parent);
-    if (_load == Dynamic)
+    if (loadType() == Iridium::Load::Dynamic)
         addItemDynamic(file->getPath(), parent);
     else
         addItemStatic(file->getPath(), parent);
@@ -63,9 +60,9 @@ void RcloneFileModelDistant::addItemDynamic(const QString &path, TreeFileItem *p
 
 void RcloneFileModelDistant::addItemStatic(const QString &path, TreeFileItem *parent, uint8_t depth)
 {
-    if (depth == 0)
+    if (depth == 0 or loadType() == Iridium::Load::Dynamic)
         return;
-    if (depth == _max_depth)
+    if (depth == maxDepth())
     {
         for (auto &rclone: _locked_rclone) { rclone->cancel(); }
         _locked_rclone.clear();
@@ -94,7 +91,6 @@ void RcloneFileModelDistant::addItemStatic(const QString &path, TreeFileItem *pa
 
         connect(rclone.get(), &Rclone::finished, this, [rclone, this]
         {
-//            remove rclone from m_locked_rclone
             _locked_rclone.erase(std::remove(_locked_rclone.begin(), _locked_rclone.end(), rclone),
                                  _locked_rclone.end());
             rclone->disconnect();

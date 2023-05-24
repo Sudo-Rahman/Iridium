@@ -7,7 +7,7 @@
 #include <Rclone.hpp>
 #include <SearchTableItem.hpp>
 #include <QMenu>
-#include <Variable.hpp>
+#include <Global.hpp>
 #include <QDirIterator>
 #include <QProxyStyle>
 #include <memory>
@@ -89,7 +89,7 @@ void SearchTableView::showCustomContextMenu()
             connect(parent, &QAction::triggered, this, [this, items]()
             {
                 auto item = dynamic_cast<SearchTableItem *>(_model->itemFromIndex(items[0]));
-                Iridium::Variable::clear_and_swap_copy_files(
+                Iridium::Global::clear_and_swap_copy_files(
                         {std::make_shared<RcloneFile>(item->getFile()->getParentDir())});
             });
         }
@@ -108,29 +108,41 @@ void SearchTableView::showCustomContextMenu()
             auto item_cast = dynamic_cast<SearchTableItem *>(_model->itemFromIndex(item));
             files.push_back(item_cast->getFile());
         }
-        Iridium::Variable::clear_and_swap_copy_files(files);
+        Iridium::Global::clear_and_swap_copy_files(files);
         return;
     }
 }
 
-void SearchTableView::addFile(const boost::json::object &file, const RemoteInfoPtr &remoteInfo)
+void SearchTableView::addFile()
 {
-    RcloneFilePtr rcloneFile = std::make_shared<RcloneFile>(
-            (remoteInfo->path + std::string(file.at("Path").as_string())).c_str(),
-            file.at("Size").as_int64(),
-            file.at("IsDir").as_bool(),
-            QDateTime::fromString(file.at("ModTime").as_string().c_str(), Qt::ISODate),
-            remoteInfo
-    );
-    QList<QStandardItem *> row = {
-            new SearchTableItem(0, rcloneFile),
-            new SearchTableItem(1, rcloneFile),
-            new SearchTableItem(2, rcloneFile),
-            new SearchTableItem(3, rcloneFile),
-            new SearchTableItem(4, rcloneFile),
-            new SearchTableItem(5, rcloneFile)
-    };
-    _model->appendRow(row);
+    auto file = std::move(_rows.front().file);
+    auto remoteInfo = _rows.front().remoteInfo;
+    _rows.erase(_rows.begin());
+    try
+    {
+        RcloneFilePtr rcloneFile = std::make_shared<RcloneFile>(
+                (remoteInfo->path + std::string(file.at("Path").as_string())).c_str(),
+                file.at("Size").as_int64(),
+                file.at("IsDir").as_bool(),
+                QDateTime::fromString(file.at("ModTime").as_string().c_str(), Qt::ISODate),
+                remoteInfo
+        );
+        QList<QStandardItem *> row = {
+                new SearchTableItem(0, rcloneFile),
+                new SearchTableItem(1, rcloneFile),
+                new SearchTableItem(2, rcloneFile),
+                new SearchTableItem(3, rcloneFile),
+                new SearchTableItem(4, rcloneFile),
+                new SearchTableItem(5, rcloneFile)
+        };
+        _model->appendRow(row);
+    } catch (const boost::exception &e)
+    {
+        std::cerr << "add file : " << file << std::endl;
+        std::cerr << boost::diagnostic_information(e) << std::endl;
+    }catch (...){
+        std::cerr << "add file : " << file << std::endl;
+    }
 }
 
 
@@ -179,6 +191,11 @@ void SearchTableView::searchLocal(const QString &text, const RemoteInfoPtr &remo
     _threads.push_back(std::move(th));
 }
 
+/**
+ * @brief SearchTableView::searchDistant search distant files
+ * @param filters
+ * @param remoteInfo
+ */
 void SearchTableView::searchDistant(const std::vector<Rclone::Filter> &filters, const RemoteInfoPtr &remoteInfo)
 {
     if (filters.empty())
@@ -187,22 +204,35 @@ void SearchTableView::searchDistant(const std::vector<Rclone::Filter> &filters, 
     _rclones.push_back(rclone);
     emit searchStarted();
     connect(rclone.get(), &Rclone::searchRefresh,
-            [this, remoteInfo](const boost::json::object &file)
+            [this, remoteInfo](boost::json::object file)
             {
-                _rows.push_back({file, remoteInfo});
+                _rows.push_back({std::move(file), remoteInfo});
             });
-    connect(rclone.get(), &Rclone::finished, this, &SearchTableView::terminateSearch);
+    connect(rclone.get(), &Rclone::finished, this, [this]()
+    {
+        terminateSearch();
+        erase_if(_rclones,[this](const RclonePtr &rclone)
+        {
+            return rclone->state() == Rclone::State::Finsished;
+        });
+    });
     rclone->search(filters, *remoteInfo);
     _searching++;
     _cv.notify_one();
 }
 
+/**
+ * @brief SearchTableView::terminateSearch when a search is finished call this function
+ */
 void SearchTableView::terminateSearch()
 {
     if ((_searching--) == 1)
         emit searchFinished();
 }
 
+/**
+ * @brief SearchTableView::stopAllSearch stop all search, local and distant
+ */
 void SearchTableView::stopAllSearch()
 {
     _rows.clear();
@@ -251,9 +281,7 @@ void SearchTableView::initThread()
                         });
                         if (_rows.empty())
                             continue;
-                        auto row = _rows.front();
-                        _rows.erase(_rows.begin());
-                        addFile(row.file, row.remoteInfo);
+                        addFile();
                         boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
                     } catch (boost::thread_interrupted &e) { break; }
                 }

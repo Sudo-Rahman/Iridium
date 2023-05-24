@@ -34,16 +34,6 @@ std::map<Rclone::Flag, Rclone::flags_str> Rclone::_map_flags{
         {Rclone::Flag::LogType,   {"",            "--use-json-log"}},
 };
 
-
-/**
- * @brief Rclone::setPathRclone
- * @param pathRclone
- */
-void Rclone::setPathRclone(const string &pathRclone)
-{
-    Rclone::_path_rclone = pathRclone;
-}
-
 /**
  * @brief Liste sous forme de json les fichiers dans le dossier path
  * @param path
@@ -290,18 +280,17 @@ void Rclone::execute()
 
 #ifdef _WIN32
     std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-    std::wstring exe = converter.from_bytes(_path_rclone);
+    std::wstring exe = converter.from_bytes(pathRclone());
     vector<std::wstring> argsEncoding;
     argsEncoding.reserve(_args.size());
     for (auto &arg: _args)
         argsEncoding.emplace_back(converter.from_bytes(arg));
 #else
-    auto exe = _path_rclone;
+    auto exe = pathRclone();
     const auto &argsEncoding = _args;
 #endif
 
     _ioc = new ba::io_context();
-    boost::asio::executor_work_guard<boost::asio::io_context::executor_type> work(_ioc->get_executor());
     _pipe_err = new bp::async_pipe(*_ioc);
     _pipe_out = new bp::async_pipe(*_ioc);
 
@@ -321,22 +310,24 @@ void Rclone::execute()
     // notify that the process has started
     _cv.notify_one();
 
-    auto buffer = make_shared<ba::streambuf>();
+    _buff = new ba::streambuf;
     _read_loop =
-            [this, buffer](bp::async_pipe &pipe, vector<string> &vec)
+            [this](bp::async_pipe &pipe, vector<string> &vec)
             {
                 ba::async_read_until(
                         pipe,
-                        *buffer,
+                        *_buff,
                         '\n',
                         [&](boost::system::error_code error_code, std::size_t bytes)
                         {
                             if (not error_code)
                             {
                                 string line;
-                                if (std::getline(std::istream(&(*buffer)), line))
+                                if (std::getline(std::istream(&(*_buff)), line))
                                 {
                                     _readyRead(line);
+                                    if (vec.size() > 1000)
+                                        vec.clear();
                                     vec.emplace_back(line);
 //                                    cout << line << endl;
                                 }
@@ -401,6 +392,7 @@ Rclone::~Rclone()
     delete _pipe_err;
     delete _pipe_out;
     delete _ioc;
+    delete _buff;
 }
 
 /**
@@ -531,7 +523,6 @@ bj::object Rclone::parseJson(const string &str)
 }
 
 std::atomic_int_fast8_t RcloneManager::_rclone_locked;
-uint8_t RcloneManager::_max_process = thread::hardware_concurrency();
 mutex RcloneManager::_launch_mutex;
 condition_variable RcloneManager::_launch_cv;
 std::vector<RclonePtr> RcloneManager::_launch_queue;
@@ -551,7 +542,7 @@ boost::thread RcloneManager::_launch_thread = boost::thread(
                     {
                         boost::this_thread::interruption_point();
                         return not RcloneManager::_launch_queue.empty() and
-                               RcloneManager::_rclone_locked < RcloneManager::_max_process;
+                               RcloneManager::_rclone_locked < maxProcess();
                     });
                     if (not RcloneManager::_launch_queue.empty())
                     {

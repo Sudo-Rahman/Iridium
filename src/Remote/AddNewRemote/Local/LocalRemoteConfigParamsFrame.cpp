@@ -17,7 +17,7 @@ void LocalRemoteConfigParamsFrame::createUi()
 
     auto *btn = new QPushButton(tr("Chemin du dossier"), this);
 
-    auto *path = new QLineEdit(this);
+    auto *path = new RoundedLineEdit(this);
     path->setPlaceholderText("/user/home");
 
     _form_layout->addRow(btn, path);
@@ -40,11 +40,11 @@ void LocalRemoteConfigParamsFrame::createUi()
         _path = text;
         if (QFileInfo::exists(text))
         {
-            path->setStyleSheet("border: 1px solid gray; border-radius: 5px;");
+            path->normalBorder();
             path->setToolTip("");
         } else
         {
-            path->setStyleSheet("border: 1px solid red; border-radius: 5px;");
+            path->redBorder();
             path->setToolTip(tr("Le chemin n’existe pas !"));
         }
     });

@@ -12,7 +12,7 @@ class SftpRemoteConfigParamsFrame : public RemoteConfigParamsFrame
 {
 Q_OBJECT
 
-    QLineEdit *_host{}, *_user{}, *_password{};
+    RoundedLineEdit *_host{}, *_user{}, *_password{};
     QSpinBox *_port{};
 
 public:

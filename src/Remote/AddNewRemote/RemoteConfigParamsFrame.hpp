@@ -10,7 +10,6 @@
 #include <QLayout>
 #include <QFormLayout>
 #include <QLabel>
-#include <QLineEdit>
 #include <QSpinBox>
 #include <QComboBox>
 
@@ -26,7 +25,7 @@ protected:
     QLabel *_mess_label{};
     QVBoxLayout *_layout{};
     QFormLayout *_form_layout{};
-    QLineEdit *_remote_name{};
+    RoundedLineEdit *_remote_name{};
     RclonePtr _rclone{};
     std::map<std::string, std::string> _lst_remote{};
 

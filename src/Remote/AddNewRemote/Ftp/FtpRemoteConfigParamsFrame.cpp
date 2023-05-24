@@ -18,17 +18,17 @@ void FtpRemoteConfigParamsFrame::createUi()
     _port->setSingleStep(1);
     _port->setToolTip("Port number");
 
-    _user = new QLineEdit(this);
+    _user = new RoundedLineEdit(this);
     _user->setPlaceholderText("Utilisateur");
     _user->setToolTip("Utilisateur");
 
-    _password = new QLineEdit(this);
+    _password = new RoundedLineEdit(this);
     _password->setClearButtonEnabled(true);
     _password->setEchoMode(QLineEdit::Password);
     _password->setPlaceholderText("Password");
     _password->setToolTip("********");
 
-    _host = new QLineEdit(this);
+    _host = new RoundedLineEdit(this);
     _host->setPlaceholderText("Host");
     _host->setToolTip("ftp.example.com");
 

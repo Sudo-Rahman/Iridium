@@ -24,6 +24,7 @@
 #include <memory>
 #include "RcloneFile.hpp"
 #include <Remote.h>
+#include <Global.hpp>
 
 class RcloneManager;
 
@@ -101,7 +102,6 @@ private:
 
     boost::process::child *_child{};
 
-    static std::string _path_rclone;
     std::unique_ptr<boost::thread> _thread{};
     std::vector<std::string> _args{}, _out{}, _err{};
     std::map<std::string, std::string> _map_data{};
@@ -113,6 +113,7 @@ private:
 
     boost::process::async_pipe *_pipe_out, *_pipe_err;
     boost::asio::io_context *_ioc;
+    boost::asio::streambuf *_buff;
 
     static std::map<Flag, flags_str> _map_flags;
 
@@ -126,7 +127,9 @@ public:
 
     [[nodiscard]] bool isCanceled() const { return _cancel; }
 
-    static void setPathRclone(const std::string &pathRclone);
+    static void setPathRclone(const std::string &pathRclone) { Iridium::Global::path_rclone = pathRclone; }
+
+    static std::string pathRclone() { return Iridium::Global::path_rclone; }
 
     void config(RemoteType type, const std::string &name, const std::vector<std::string> &args = {});
 
@@ -225,7 +228,6 @@ class RcloneManager
 
 private:
     static std::atomic_int_fast8_t _rclone_locked;
-    static uint8_t _max_process;
     static std::mutex _launch_mutex;
     static std::condition_variable _launch_cv;
     static boost::thread _launch_thread;
@@ -234,9 +236,9 @@ private:
 public:
     static RclonePtr get(bool lockable = false);
 
-    static uint16_t maxProcess() { return _max_process; }
+    static uint16_t maxProcess() { return Iridium::Global::max_process; }
 
-    static void setMaxProcess(uint16_t nbMaxProcess) { _max_process = nbMaxProcess; }
+    static void setMaxProcess(uint16_t nbMaxProcess) { Iridium::Global::max_process = nbMaxProcess; }
 
     static void addLockable(const RclonePtr &);
 
@@ -244,6 +246,13 @@ public:
     {
         _launch_thread.interrupt();
         _launch_cv.notify_one();
+    }
+
+    static void stopAll()
+    {
+        for (const auto &rclone: _rclones)
+            rclone->kill();
+        RcloneManager::stopThread();
     }
 
     static void release(const Rclone *rclone)
