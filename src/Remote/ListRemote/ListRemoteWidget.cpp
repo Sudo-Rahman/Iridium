@@ -188,6 +188,7 @@ void ListRemoteWidget::expand()
 
     if (_is_expand)
     {
+        _add->show();
         for (auto wid: _remotes)
             showAnimation(wid);
         showAnimation(_recherche);
@@ -199,12 +200,17 @@ void ListRemoteWidget::expand()
         hideAnimation(_recherche);
     }
 
-    auto * show_effect = new QGraphicsOpacityEffect(_add);
+    auto show_effect = new QGraphicsOpacityEffect(_add);
     animation = new QPropertyAnimation(show_effect, "opacity");
+    connect(animation, &QPropertyAnimation::destroyed, this, [this]{
+        if (!_is_expand)
+            _add->hide();
+    });
     _add->setGraphicsEffect(show_effect);
+    animation->setStartValue(_is_expand ? 0 : 1);
     animation->setEndValue(_is_expand ? 1 : 0);
-    animation->setDuration(300);
-    animation->setEasingCurve(QEasingCurve::InOutQuad);
+    animation->setDuration(500);
+    animation->setEasingCurve(QEasingCurve::BezierSpline);
     animation->start(QAbstractAnimation::DeleteWhenStopped);
 }
 

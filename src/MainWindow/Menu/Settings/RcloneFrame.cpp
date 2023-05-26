@@ -69,10 +69,8 @@ RcloneFrame::RcloneFrame(QWidget *parent) : QFrame(parent)
     _stats_refresh->setValue((int) (std::stod(Settings::getRcloneFlag(Rclone::Flag::Stats)) * 1000));
     group4Layout->addRow(tr("Durée de rafraichissement des statistiques (ms) : "), _stats_refresh);
 
-    auto *group5 = new QGroupBox(this);
-    auto *group5Layout = new QFormLayout(group5);
     auto reset = new QPushButton(tr("Réinitialiser"), this);
-    group5Layout->addWidget(reset);
+    reset->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     connect(reset, &QPushButton::clicked, [this]()
     {
         Settings::resetSettings(Settings::Rclone);
@@ -88,7 +86,7 @@ RcloneFrame::RcloneFrame(QWidget *parent) : QFrame(parent)
     layout->addWidget(group2);
     layout->addWidget(group3);
     layout->addWidget(group4);
-    layout->addWidget(group5);
+    layout->addWidget(reset, 0, Qt::AlignHCenter);
 
     for (auto *group: findChildren<QGroupBox *>())
         group->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
