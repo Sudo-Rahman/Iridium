@@ -27,7 +27,7 @@ AddNewRemoteDialog::AddNewRemoteDialog(QWidget *parent) : QDialog(parent)
     scrollWidgetLayout->setAlignment(Qt::AlignTop);
     scrollArea->setWidget(scrollWidget);
 
-    for (int t = Drive; t != END; t++)
+    for (int t = 0; t != END; t++)
     {
         auto type = static_cast<RemoteType>(t);
         auto *widget = new RemoteWidgetParam(type);
@@ -44,12 +44,13 @@ AddNewRemoteDialog::AddNewRemoteDialog(QWidget *parent) : QDialog(parent)
     _layout->addWidget(scrollArea);
     _paramsFrame = findChildren<RemoteWidgetParam *>().first()->getParamsFrame();
     findChildren<RemoteWidgetParam *>().first()->select();
+    findChildren<RemoteWidgetParam *>().first()->getParamsFrame()->findChildren<RoundedLineEdit *>().first()->setFocus();
     _layout->addWidget(_paramsFrame);
 
     for (auto *widget: scrollWidget->findChildren<RemoteWidgetParam *>())
     {
         widget->setMinimumWidth(200);
-        connect(widget, &RemoteWidgetParam::newRemoteAdded, this, [this, widget]() { emit newRemoteAdded(); });
+        connect(widget, &RemoteWidgetParam::newRemoteAdded, this, [this]() { emit newRemoteAdded(); });
     }
 
 }

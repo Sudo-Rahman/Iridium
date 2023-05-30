@@ -8,6 +8,7 @@
 #include <AddNewRemoteDialog.hpp>
 #include <Settings.hpp>
 #include <QPalette>
+#include <QThread>
 #include <QGraphicsOpacityEffect>
 
 /**
@@ -74,16 +75,12 @@ ListRemoteWidget::ListRemoteWidget(QWidget *parent) : QScrollArea(parent)
 
     _remoteselected = std::make_shared<remotes_selected>();
 
-    Settings::refreshRemotesList();
-    getAllRemote();
+    Settings::list_remote_changed.connect([this] { getAllRemote(); });
 
     // no border
     setFrameShape(QFrame::NoFrame);
 
     _width = QScrollArea::sizeHint().width();
-
-    Settings::list_remote_changed.connect([this] { getAllRemote(); });
-
 }
 
 /**
@@ -202,7 +199,8 @@ void ListRemoteWidget::expand()
 
     auto show_effect = new QGraphicsOpacityEffect(_add);
     animation = new QPropertyAnimation(show_effect, "opacity");
-    connect(animation, &QPropertyAnimation::destroyed, this, [this]{
+    connect(animation, &QPropertyAnimation::destroyed, this, [this]
+    {
         if (!_is_expand)
             _add->hide();
     });

@@ -12,7 +12,7 @@ configure_file (src/Config/Version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/src/Config/V
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++2b -D NDEBUG -Wno-deprecated-declarations -O3")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++2b -DCURL_STATICLIB -D NDEBUG -Wno-deprecated-declarations -O3")
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -76,9 +76,6 @@ endif ()
 qt_add_translation(QM_FILES ${TRANSLATION})
 
 
-set(RCLONE "${CMAKE_CURRENT_SOURCE_DIR}/rclone")
-
-
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     file(COPY ${RCLONE} DESTINATION Iridium.app/Contents/MacOS)
     set(MACOSX_BUNDLE_ICON_FILE Iridium.icns)
@@ -87,7 +84,6 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
             MACOSX_PACKAGE_LOCATION "Resources")
     qt6_add_executable(${PROJECT_NAME} MACOSX_BUNDLE application.qrc ${myApp_ICON} ${SRC} ${QM_FILES})
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-    file(COPY ${RCLONE}.exe DESTINATION Iridium/../)
     enable_language("RC")
     set(WIN32_ICO ${CMAKE_CURRENT_SOURCE_DIR}/MyApp.rc)
     qt6_add_executable(${PROJECT_NAME} WIN32 application.qrc ${WIN32_ICO} ${SRC} ${QM_FILES})
@@ -105,6 +101,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
         Boost::thread
         Boost::json
         Boost::chrono
+        curl
         )
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     target_link_libraries(Iridium PRIVATE ws2_32

@@ -17,8 +17,6 @@ void OneDriveRemoteConfigParamsFrame::addRemote()
         return;
     _rclone->config(RemoteType::OneDrive, _remote_name->text().toStdString());
     _rclone->waitForStarted();
-    _login->hide();
-    _cancel->show();
 }
 
 

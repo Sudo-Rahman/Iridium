@@ -92,6 +92,11 @@ void RemoteConfigParamsFrame::addRemote()
     }
 
     _rclone = RcloneManager::get();
+    connect(_rclone.get(), &Rclone::started, this, [this]()
+    {
+        _login->hide();
+        _cancel->show();
+    });
     connect(_rclone.get(), &Rclone::finished, this, [this](int exit)
     {
         if (exit == 0)

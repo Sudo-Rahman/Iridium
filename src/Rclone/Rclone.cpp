@@ -10,6 +10,7 @@
 #include <boost/algorithm/string/join.hpp>
 #include <boost/chrono.hpp>
 #include <regex>
+#include <boost/filesystem.hpp>
 #include <boost/asio.hpp>
 
 
@@ -24,6 +25,7 @@
 namespace bp = boost::process;
 namespace bj = boost::json;
 namespace ba = boost::asio;
+namespace bfs = boost::filesystem;
 using namespace std;
 
 std::map<Rclone::Flag, Rclone::flags_str> Rclone::_map_flags{
@@ -33,6 +35,7 @@ std::map<Rclone::Flag, Rclone::flags_str> Rclone::_map_flags{
         {Rclone::Flag::Verbose,   {"",            "-v"}},
         {Rclone::Flag::LogType,   {"",            "--use-json-log"}},
 };
+boost::signals2::signal<void()> Rclone::rclone_not_exist;
 
 /**
  * @brief Liste sous forme de json les fichiers dans le dossier path
@@ -274,8 +277,15 @@ void Rclone::execute()
     {
         throw std::runtime_error("Rclone is not reusable");
     }
-    if (_cancel)
+    auto rclone_exist = bfs::exists(pathRclone());
+    if (_cancel or not rclone_exist)
+    {
+        if (not rclone_exist)
+            Rclone::rclone_not_exist();
+        _cancel = true;
+        _cv.notify_all();
         return;
+    }
 //    cout << "execute " << boost::algorithm::join(_args, " ") << endl;
 
 #ifdef _WIN32
@@ -294,17 +304,27 @@ void Rclone::execute()
     _pipe_err = new bp::async_pipe(*_ioc);
     _pipe_out = new bp::async_pipe(*_ioc);
 
-    _child = new bp::child(exe, bp::args(argsEncoding),
-                           bp::std_out > *_pipe_out,
-                           bp::std_err > *_pipe_err,
-                           bp::on_exit([this](int exit, const std::error_code &ec)
-                                       {
-                                           _exit = exit;
-                                       }), *_ioc
+    try
+    {
+
+        _child = new bp::child(exe, bp::args(argsEncoding),
+                               bp::std_out > *_pipe_out,
+                               bp::std_err > *_pipe_err,
+                               bp::on_exit([this](int exit, const std::error_code &ec)
+                                           {
+                                               _exit = exit;
+                                           }), *_ioc
 #ifdef _WIN32
-            , bp::windows::hide
+                , bp::windows::hide
 #endif
-    );
+        );
+    } catch (boost::process::process_error &e)
+    {
+        cout << e.what() << endl;
+        _cancel = true;
+        _cv.notify_all();
+        return;
+    }
     emit started();
     _state = Running;
     // notify that the process has started
@@ -377,7 +397,7 @@ void Rclone::waitForFinished()
     if (_state == Running)
     {
         unique_lock<mutex> lock(_mutex);
-        _cv.wait(lock, [this] { return _state == Finsished; });
+        _cv.wait(lock, [this] { return _state == Finsished or _cancel; });
     }
 }
 
@@ -421,11 +441,8 @@ void Rclone::kill()
  */
 void Rclone::waitForStarted()
 {
-    while (_state != Running)
-    {
-        std::unique_lock<std::mutex> lock(_mutex);
-        _cv.wait(lock);
-    }
+    std::unique_lock<std::mutex> lock(_mutex);
+    _cv.wait(lock, [this] { return _state == Running or _cancel; });
 }
 
 /**
@@ -471,7 +488,7 @@ string Rclone::version()
     if (not _lockable)
         execute();
     waitForFinished();
-    return _out[0];
+    return !_out.empty() ? _out.front() : "Unknown";
 }
 
 

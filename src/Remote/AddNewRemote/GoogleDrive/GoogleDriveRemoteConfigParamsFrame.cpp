@@ -19,6 +19,4 @@ void GoogleDriveRemoteConfigParamsFrame::addRemote()
         return;
     _rclone->config(RemoteType::Drive, _remote_name->text().toStdString());
     _rclone->waitForStarted();
-    _login->hide();
-    _cancel->show();
 }

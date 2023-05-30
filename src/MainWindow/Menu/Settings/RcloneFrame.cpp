@@ -8,6 +8,7 @@
 #include <QPushButton>
 #include <QLabel>
 #include <Settings.hpp>
+#include <QFileDialog>
 #include "RcloneFrame.hpp"
 
 RcloneFrame::RcloneFrame(QWidget *parent) : QFrame(parent)
@@ -17,12 +18,38 @@ RcloneFrame::RcloneFrame(QWidget *parent) : QFrame(parent)
     layout->setSpacing(10);
     layout->setAlignment(Qt::AlignTop);
 
-    auto group1 = new QGroupBox(this);
-    auto group1Layout = new QFormLayout(group1);
+    auto group = new QGroupBox(this);
+    auto gridLayout = new QGridLayout(group);
+    _rclone_path = new QLineEdit(this);
+    _rclone_path->setText(Settings::getValue<std::string>(Settings::Node::RclonePath).c_str());
+    _rclone_path->setReadOnly(true);
+    _rclone_path->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    auto *button = new QPushButton(tr("Changer"), this);
+    button->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    connect(button, &QPushButton::clicked, this, [this]()
+    {
+        auto path = QFileDialog::getOpenFileName(this, tr("Chemin vers rclone"), QDir::homePath());
+        if (!path.isEmpty()) _rclone_path->setText(path);
+    });
+    connect(_rclone_path, &QLineEdit::textChanged, this, [](const QString &path)
+    {
+        Settings::setValue(Settings::Node::RclonePath, path.toStdString());
+        Iridium::Global::path_rclone = path.toStdString();
+        Settings::refreshRemotesList();
+    });
+    gridLayout->addWidget(new QLabel(tr("Chemin vers rclone : "), this), 0, 0, 1, 2, Qt::AlignCenter);
+    gridLayout->addWidget(_rclone_path, 1, 0, 1, 1);
+    gridLayout->addWidget(button, 1, 1, 1, 1);
+    layout->addWidget(group);
+
+    group = new QGroupBox(this);
+    auto groupLayout = new QFormLayout(group);
     _parallel_transfers = new QSpinBox(this);
     _parallel_transfers->setRange(1, 100);
     _parallel_transfers->setValue(QString(Rclone::getFlag(Rclone::Transfers).value.c_str()).toInt());
-    group1Layout->addRow(tr("Transfert simultané : "), _parallel_transfers);
+    groupLayout->addRow(tr("Transfert simultané : "), _parallel_transfers);
+
+    layout->addWidget(group);
 
     auto group2 = new QGroupBox(this);
     auto group2Layout = new QFormLayout(group2);
@@ -79,10 +106,10 @@ RcloneFrame::RcloneFrame(QWidget *parent) : QFrame(parent)
         _max_depth->setValue(Settings::getValue<uint8_t>(Settings::MaxDepth));
         _max_rclone_execution->setValue(Settings::getValue<uint8_t>(Settings::MaxProcess));
         _stats_refresh->setValue((int) (std::stod(Settings::getRcloneFlag(Rclone::Flag::Stats)) * 1000));
+        _rclone_path->setText(Settings::getValue<std::string>(Settings::Node::RclonePath).c_str());
     });
 
 
-    layout->addWidget(group1);
     layout->addWidget(group2);
     layout->addWidget(group3);
     layout->addWidget(group4);

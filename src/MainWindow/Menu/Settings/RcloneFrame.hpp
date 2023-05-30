@@ -8,6 +8,7 @@
 #include <QFrame>
 #include <QSpinBox>
 #include <QComboBox>
+#include <QLineEdit>
 
 class RcloneFrame : public QFrame
 {
@@ -15,6 +16,7 @@ Q_OBJECT
 
     QSpinBox *_max_rclone_execution{}, *_parallel_transfers{}, *_max_depth{}, *_stats_refresh{};
     QComboBox *_load_type{};
+    QLineEdit *_rclone_path{};
 
 
 public:

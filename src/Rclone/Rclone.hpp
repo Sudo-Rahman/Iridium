@@ -116,7 +116,6 @@ private:
     boost::asio::streambuf *_buff;
 
     static std::map<Flag, flags_str> _map_flags;
-
     bool _lockable, _cancel = false;
 
 
@@ -179,6 +178,9 @@ public:
     void about(const RemoteInfo &info);
 
     void search(const std::vector<Filter> &filters, const RemoteInfo &info);
+
+    static boost::signals2::signal<void()> rclone_not_exist;
+
 
 private:
     boost::signals2::signal<void(const std::string &)> _readyRead{};

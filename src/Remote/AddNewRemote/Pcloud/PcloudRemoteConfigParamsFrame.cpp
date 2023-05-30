@@ -15,6 +15,5 @@ void PcloudRemoteConfigParamsFrame::addRemote()
     if (not checkFields())
         return;
     _rclone->config(RemoteType::Pcloud, _remote_name->text().toStdString());
-    _rclone->waitForStarted();
     _rclone->waitForFinished();
 }

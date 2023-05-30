@@ -36,6 +36,4 @@ void OpenDriveRemoteConfigParamsFrame::addRemote()
             "password=" + _password->text().toStdString()
     });
     _rclone->waitForStarted();
-    _login->hide();
-    _cancel->show();
 }

@@ -39,6 +39,7 @@ public:
         All,
         General,
         Rclone,
+        RclonePath,
         Theme,
         MaxProcess,
         LoadType,
@@ -49,6 +50,24 @@ public:
         Language,
         Width,
         Height,
+    };
+
+    enum Os{
+        Windows,
+        Linux,
+        MacOs,
+        UnknownSystem,
+    };
+
+    enum Arch{
+        X86,
+        x86_64,
+        Arm64,
+        UnknownArch,
+    };
+    struct System{
+        Os os;
+        Arch arch;
     };
 
 private:
@@ -68,6 +87,8 @@ private:
     static QIcon HARDDRIVE_ICON;
 
     static std::vector<RemoteInfoPtr> getLocalRemotes();
+
+    static RclonePtr _rclone;
 
 public:
 
@@ -93,7 +114,24 @@ public:
 
     static void initValues();
 
-    static void setValue(const Node &node, const auto &value);
+
+    /**
+     * @brief set the value of a node and save the settings
+     * @tparam Type
+     * @param node
+     * @param value
+     */
+    template<class Type>
+    static void setValue(const Node &node, const Type &value){
+        try
+        {
+            _settings.put(_nodes.at(node), value);
+            saveSettings();
+        } catch (boost::exception &e)
+        {
+            std::cout << "eror set Value" << diagnostic_information_what(e, true) << std::endl;
+        }
+    }
 
     template<class ... Args>
     static void setValue(const Node &node, const auto &value, Args &&... args)
@@ -120,6 +158,8 @@ public:
     static std::string getRcloneFlag(const Rclone::Flag &);
 
     static void setLanguage(const QLocale::Language &);
+
+    static System getSystem();
 
 };
 

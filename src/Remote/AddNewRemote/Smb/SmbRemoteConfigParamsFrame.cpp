@@ -55,8 +55,6 @@ void SmbRemoteConfigParamsFrame::addRemote()
                      "domain=" + _domain->text().toStdString(),
                      "port=" + std::to_string(_port->value())});
     _rclone->waitForStarted();
-    _login->hide();
-    _cancel->show();
 }
 
 void SmbRemoteConfigParamsFrame::reset()

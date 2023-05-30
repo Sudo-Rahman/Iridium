@@ -14,8 +14,8 @@ LocalRemoteConfigParamsFrame::LocalRemoteConfigParamsFrame(QWidget *parent) : Re
 
 void LocalRemoteConfigParamsFrame::createUi()
 {
-
     auto *btn = new QPushButton(tr("Chemin du dossier"), this);
+    btn->setDefault(false);
 
     auto *path = new RoundedLineEdit(this);
     path->setPlaceholderText("/user/home");
@@ -52,7 +52,8 @@ void LocalRemoteConfigParamsFrame::createUi()
     RemoteConfigParamsFrame::createUi();
 
     _login->setText(tr("Ajouter"));
-
+    _login->setAutoDefault(true);
+    _login->setDefault(true);
 }
 
 void LocalRemoteConfigParamsFrame::addRemote()

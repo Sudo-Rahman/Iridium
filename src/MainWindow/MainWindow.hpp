@@ -9,7 +9,7 @@
 #include <QCoreApplication>
 #include <QLayout>
 #include <QTabWidget>
-
+#include <QStatusBar>
 
 class MainWindow : public QMainWindow
 {
@@ -17,6 +17,9 @@ Q_OBJECT
 
     QHBoxLayout *_layout{};
     QTabWidget *_tabWidget{};
+    QStatusBar *_statusBar{};
+
+    bool _check_rclone = false;
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
@@ -25,6 +28,7 @@ public:
 private:
     void connectSignals();
 
+    void downloadRclone();
 protected:
     void closeEvent(QCloseEvent *event) override;
 };

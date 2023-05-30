@@ -70,8 +70,6 @@ void FtpRemoteConfigParamsFrame::addRemote()
             "pass=" + _password->text().toStdString(),
             "tls=" + _tls->currentText().toLower().toStdString()});
     _rclone->waitForStarted();
-    _login->hide();
-    _cancel->show();
 }
 
 void FtpRemoteConfigParamsFrame::reset()

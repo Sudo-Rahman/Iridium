@@ -24,7 +24,7 @@ const std::string HARDDRIVEICON = ":/ressources/drive-harddisk-solidstate.svg";
 
 enum RemoteType
 {
-    Drive, Sftp, LocalHardDrive, OneDrive, Dropbox, Ftp, Mega,
+    LocalHardDrive,Drive, Sftp, OneDrive, Dropbox, Ftp, Mega,
     OpenDrive, Pcloud, Box, Smb, END
 };
 

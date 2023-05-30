@@ -17,7 +17,5 @@ void DropboxRemoteConfigParamsFrame::addRemote()
         return;
     _rclone->config(RemoteType::Dropbox, _remote_name->text().toStdString());
     _rclone->waitForStarted();
-    _login->hide();
-    _cancel->show();
 }
 

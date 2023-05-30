@@ -6,6 +6,7 @@
 #include <Rclone.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/dll.hpp>
+#include <boost/system.hpp>
 #include <fstream>
 #include <QTranslator>
 #include <memory>
@@ -25,6 +26,7 @@ const map<Settings::Node, string> Settings::_nodes = {
         {Settings::Node::All,          ""},
         {Settings::Node::General,      "general"},
         {Settings::Node::Rclone,       "rclone"},
+        {Settings::Node::RclonePath,   "rclone.path"},
         {Settings::Node::Theme,        "theme"},
         {Settings::Node::MaxProcess,   "rclone.max_process"},
         {Settings::Node::LoadType,     "rclone.load_type"},
@@ -36,6 +38,7 @@ const map<Settings::Node, string> Settings::_nodes = {
         {Settings::Node::Width,        "general.size.width"},
         {Settings::Node::Height,       "general.size.height"},
 };
+RclonePtr Settings::_rclone;
 
 /**
  * @brief change the color of the directory icon
@@ -166,6 +169,7 @@ void Settings::deleteRemote(const RemoteInfoPtr &remoteInfo)
  */
 void Settings::init()
 {
+    // init rclone path
     auto rclonePath = dll::program_location().parent_path().append("rclone");
     if (QSysInfo::productType() == "windows")
         rclonePath += ".exe";
@@ -178,7 +182,7 @@ void Settings::init()
 
 
     boost::filesystem::path translation_dir;
-    if (QSysInfo::productType() == "macos")
+    if (getSystem().os == Os::MacOs)
     {
         translation_dir = dll::program_location().parent_path().parent_path().append("Translations");
     } else
@@ -229,7 +233,7 @@ void Settings::saveSettings()
 boost::filesystem::path Settings::getPathSettings()
 {
     bf::path path;
-    if (QSysInfo::productType() == "macos")
+    if (getSystem().os == Os::MacOs)
     {
         path = dll::program_location().parent_path().parent_path().append("Resources");
         path /= "settings.iridium";
@@ -250,6 +254,7 @@ void Settings::initSettings()
     _settings.put(_nodes.at(DirIconColor), 0);
     _settings.put(_nodes.at(LoadType), 0);
     _settings.put(_nodes.at(MaxDepth), 2);
+    _settings.put(_nodes.at(RclonePath), Global::path_rclone);
     _settings.put(_nodes.at(MaxProcess), std::thread::hardware_concurrency());
     _settings.put(_nodes.at(Remotes), "");
     _settings.put(_nodes.at(Flags), "");
@@ -326,28 +331,12 @@ void Settings::initValues()
         Global::load_type = static_cast<Iridium::Load>(getValue<uint8_t>(LoadType));
         Global::max_depth = getValue<uint8_t>(MaxDepth);
         Global::max_process = getValue<uint8_t>(MaxProcess);
+        Global::path_rclone = getValue<string>(RclonePath);
         Settings::changeDirIcon(static_cast<Settings::ThemeColor>(getValue<uint8_t>(DirIconColor)));
 
     } catch (boost::exception &e)
     {
         cout << diagnostic_information_what(e, true) << endl;
-    }
-}
-
-/**
- * @brief set value to node path in m_settings ptree
- * @param node
- * @param val
- */
-void Settings::setValue(const Node &node, const auto &val)
-{
-    try
-    {
-        _settings.put(_nodes.at(node), val);
-        saveSettings();
-    } catch (boost::exception &e)
-    {
-        cout << "eror set Value" << diagnostic_information_what(e, true) << endl;
     }
 }
 
@@ -384,4 +373,25 @@ void Settings::setLanguage(const QLocale::Language &lang)
 {
     _settings.put(_nodes.at(Language), QLocale(lang).name().toStdString());
     saveSettings();
+}
+
+Settings::System Settings::getSystem()
+{
+    System system;
+#ifdef _WIN32
+    system.os = Os::Windows;
+#elif __APPLE__
+    system.os = Os::MacOs;
+#elif __linux__
+    system.os = Os::Linux;
+#endif
+
+#ifdef __x86_64__
+    system.arch = Arch::x86_64;
+#elif __i386__
+    system.arch = Arch::x86;
+#elif __aarch64__
+    system.arch = Arch::Arm64;
+#endif
+    return system;
 }

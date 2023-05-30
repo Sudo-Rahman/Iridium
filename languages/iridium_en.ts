@@ -197,7 +197,7 @@
 <context>
     <name>ListRemoteWidget</name>
     <message>
-        <location filename="../src/Remote/ListRemote/ListRemoteWidget.cpp" line="64"/>
+        <location filename="../src/Remote/ListRemote/ListRemoteWidget.cpp" line="66"/>
         <source>Rechercher</source>
         <translation>Search</translation>
     </message>
@@ -239,14 +239,24 @@
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../src/MainWindow/MainWindow.cpp" line="28"/>
+        <location filename="../src/MainWindow/MainWindow.cpp" line="32"/>
         <source>Explorateur</source>
         <translation>Explorer</translation>
     </message>
     <message>
-        <location filename="../src/MainWindow/MainWindow.cpp" line="29"/>
+        <location filename="../src/MainWindow/MainWindow.cpp" line="33"/>
         <source>Recherche</source>
         <translation>Research</translation>
+    </message>
+    <message>
+        <location filename="../src/MainWindow/MainWindow.cpp" line="54"/>
+        <source>Télécharger Rclone !!!</source>
+        <translation>Download Rclone!!!</translation>
+    </message>
+    <message>
+        <location filename="../src/MainWindow/MainWindow.cpp" line="85"/>
+        <source>Téléchargement en cours...</source>
+        <translation>Downloading...</translation>
     </message>
 </context>
 <context>
@@ -454,53 +464,70 @@
         <translation>Type</translation>
     </message>
     <message>
+        <location filename="../src/FileView/TreeWidgets/RcloneFileModel.cpp" line="91"/>
         <source>Erreur</source>
-        <translation type="vanished">Error</translation>
+        <translation>Error</translation>
     </message>
     <message>
+        <location filename="../src/FileView/TreeWidgets/RcloneFileModel.cpp" line="92"/>
         <source>Impossible de se connecter au remote %1&#x202f;!</source>
-        <translation type="vanished">Unable to connect to remote %1!</translation>
+        <translation>Unable to connect to remote %1!</translation>
     </message>
 </context>
 <context>
     <name>RcloneFrame</name>
     <message>
-        <location filename="../src/MainWindow/Menu/Settings/RcloneFrame.cpp" line="25"/>
+        <location filename="../src/MainWindow/Menu/Settings/RcloneFrame.cpp" line="27"/>
+        <source>Changer</source>
+        <translation>Change</translation>
+    </message>
+    <message>
+        <location filename="../src/MainWindow/Menu/Settings/RcloneFrame.cpp" line="31"/>
+        <source>Chemin vers rclone</source>
+        <translation>Path to rclone</translation>
+    </message>
+    <message>
+        <location filename="../src/MainWindow/Menu/Settings/RcloneFrame.cpp" line="40"/>
+        <source>Chemin vers rclone&#xa0;: </source>
+        <translation>Path to rclone : </translation>
+    </message>
+    <message>
+        <location filename="../src/MainWindow/Menu/Settings/RcloneFrame.cpp" line="50"/>
         <source>Transfert simultané : </source>
         <translation>Simultaneous transfer : </translation>
     </message>
     <message>
-        <location filename="../src/MainWindow/Menu/Settings/RcloneFrame.cpp" line="30"/>
+        <location filename="../src/MainWindow/Menu/Settings/RcloneFrame.cpp" line="57"/>
         <source>Dynamic</source>
         <translation>Dynamic</translation>
     </message>
     <message>
-        <location filename="../src/MainWindow/Menu/Settings/RcloneFrame.cpp" line="31"/>
+        <location filename="../src/MainWindow/Menu/Settings/RcloneFrame.cpp" line="58"/>
         <source>Static</source>
         <translation>Static</translation>
     </message>
     <message>
-        <location filename="../src/MainWindow/Menu/Settings/RcloneFrame.cpp" line="36"/>
+        <location filename="../src/MainWindow/Menu/Settings/RcloneFrame.cpp" line="63"/>
         <source>Type de chargement : </source>
         <translation>Type of loading : </translation>
     </message>
     <message>
-        <location filename="../src/MainWindow/Menu/Settings/RcloneFrame.cpp" line="37"/>
+        <location filename="../src/MainWindow/Menu/Settings/RcloneFrame.cpp" line="64"/>
         <source>Profondeur : </source>
         <translation>Depth : </translation>
     </message>
     <message>
-        <location filename="../src/MainWindow/Menu/Settings/RcloneFrame.cpp" line="46"/>
+        <location filename="../src/MainWindow/Menu/Settings/RcloneFrame.cpp" line="73"/>
         <source>Nombre maximum d&apos;éxecution simultané&#xa0;: </source>
         <translation>Maximum number of simultaneous executions : </translation>
     </message>
     <message>
-        <location filename="../src/MainWindow/Menu/Settings/RcloneFrame.cpp" line="70"/>
+        <location filename="../src/MainWindow/Menu/Settings/RcloneFrame.cpp" line="97"/>
         <source>Durée de rafraichissement des statistiques (ms) : </source>
         <translation>Statistics refresh time (ms) : </translation>
     </message>
     <message>
-        <location filename="../src/MainWindow/Menu/Settings/RcloneFrame.cpp" line="74"/>
+        <location filename="../src/MainWindow/Menu/Settings/RcloneFrame.cpp" line="99"/>
         <source>Réinitialiser</source>
         <translation>Reset</translation>
     </message>
@@ -508,50 +535,50 @@
 <context>
     <name>RemoteConfigParamsFrame</name>
     <message>
-        <location filename="../src/Remote/AddNewRemote/RemoteConfigParamsFrame.cpp" line="24"/>
+        <location filename="../src/Remote/AddNewRemote/RemoteConfigParamsFrame.cpp" line="25"/>
         <source>Nom : </source>
         <translation>Name : </translation>
     </message>
     <message>
-        <location filename="../src/Remote/AddNewRemote/RemoteConfigParamsFrame.cpp" line="101"/>
+        <location filename="../src/Remote/AddNewRemote/RemoteConfigParamsFrame.cpp" line="105"/>
         <source>Succès</source>
         <translation>Success</translation>
     </message>
     <message>
-        <location filename="../src/Remote/AddNewRemote/RemoteConfigParamsFrame.cpp" line="102"/>
+        <location filename="../src/Remote/AddNewRemote/RemoteConfigParamsFrame.cpp" line="106"/>
         <source>Le disque %1 a été ajouté avec succès</source>
         <translation>Disk %1 added successfully</translation>
     </message>
     <message>
-        <location filename="../src/Remote/AddNewRemote/RemoteConfigParamsFrame.cpp" line="107"/>
-        <location filename="../src/Remote/AddNewRemote/RemoteConfigParamsFrame.cpp" line="134"/>
+        <location filename="../src/Remote/AddNewRemote/RemoteConfigParamsFrame.cpp" line="111"/>
+        <location filename="../src/Remote/AddNewRemote/RemoteConfigParamsFrame.cpp" line="138"/>
         <source>Erreur</source>
         <translation>Error</translation>
     </message>
     <message>
-        <location filename="../src/Remote/AddNewRemote/RemoteConfigParamsFrame.cpp" line="108"/>
+        <location filename="../src/Remote/AddNewRemote/RemoteConfigParamsFrame.cpp" line="112"/>
         <source>Une erreur est survenue lors de la configuration du serveur distant&#x202f;!</source>
         <translation>An error occurred while configuring the remote server!</translation>
     </message>
     <message>
-        <location filename="../src/Remote/AddNewRemote/RemoteConfigParamsFrame.cpp" line="34"/>
+        <location filename="../src/Remote/AddNewRemote/RemoteConfigParamsFrame.cpp" line="35"/>
         <source>Se connecter</source>
         <translation>Log in</translation>
     </message>
     <message>
-        <location filename="../src/Remote/AddNewRemote/RemoteConfigParamsFrame.cpp" line="41"/>
+        <location filename="../src/Remote/AddNewRemote/RemoteConfigParamsFrame.cpp" line="42"/>
         <source>Annuler</source>
         <translation>Cancel</translation>
     </message>
     <message>
-        <location filename="../src/Remote/AddNewRemote/RemoteConfigParamsFrame.cpp" line="60"/>
-        <location filename="../src/Remote/AddNewRemote/RemoteConfigParamsFrame.cpp" line="91"/>
-        <location filename="../src/Remote/AddNewRemote/RemoteConfigParamsFrame.cpp" line="143"/>
+        <location filename="../src/Remote/AddNewRemote/RemoteConfigParamsFrame.cpp" line="61"/>
+        <location filename="../src/Remote/AddNewRemote/RemoteConfigParamsFrame.cpp" line="90"/>
+        <location filename="../src/Remote/AddNewRemote/RemoteConfigParamsFrame.cpp" line="147"/>
         <source>Les champs en rouge sont obligatoires&#x202f;!</source>
         <translation>Fields in red are mandatory&#x202f;!</translation>
     </message>
     <message>
-        <location filename="../src/Remote/AddNewRemote/RemoteConfigParamsFrame.cpp" line="134"/>
+        <location filename="../src/Remote/AddNewRemote/RemoteConfigParamsFrame.cpp" line="138"/>
         <source>Le nom du disque est déjà utilisé&#x202f;!</source>
         <translation>The disk name is already in use!</translation>
     </message>
@@ -559,39 +586,39 @@
 <context>
     <name>RemoteWidget</name>
     <message>
-        <location filename="../src/Remote/ListRemote/RemoteWidget.cpp" line="150"/>
+        <location filename="../src/Remote/ListRemote/RemoteWidget.cpp" line="147"/>
         <source>Supprimer</source>
         <translation>Delete</translation>
     </message>
     <message>
+        <location filename="../src/Remote/ListRemote/RemoteWidget.cpp" line="158"/>
         <location filename="../src/Remote/ListRemote/RemoteWidget.cpp" line="161"/>
-        <location filename="../src/Remote/ListRemote/RemoteWidget.cpp" line="164"/>
-        <location filename="../src/Remote/ListRemote/RemoteWidget.cpp" line="181"/>
+        <location filename="../src/Remote/ListRemote/RemoteWidget.cpp" line="178"/>
         <source>Suppression</source>
         <translation>Deletion</translation>
     </message>
     <message>
-        <location filename="../src/Remote/ListRemote/RemoteWidget.cpp" line="161"/>
+        <location filename="../src/Remote/ListRemote/RemoteWidget.cpp" line="158"/>
         <source>Vous ne pouvez pas supprimer ce remote.</source>
         <translation>You cannot delete this remote.</translation>
     </message>
     <message>
-        <location filename="../src/Remote/ListRemote/RemoteWidget.cpp" line="165"/>
+        <location filename="../src/Remote/ListRemote/RemoteWidget.cpp" line="162"/>
         <source>Êtes-vous sûr de vouloir supprimer ce remote ?</source>
         <translation>Are you sure you want to delete this remote ?</translation>
     </message>
     <message>
-        <location filename="../src/Remote/ListRemote/RemoteWidget.cpp" line="166"/>
+        <location filename="../src/Remote/ListRemote/RemoteWidget.cpp" line="163"/>
         <source>Oui</source>
         <translation>Yes</translation>
     </message>
     <message>
-        <location filename="../src/Remote/ListRemote/RemoteWidget.cpp" line="167"/>
+        <location filename="../src/Remote/ListRemote/RemoteWidget.cpp" line="164"/>
         <source>Non</source>
         <translation>No</translation>
     </message>
     <message>
-        <location filename="../src/Remote/ListRemote/RemoteWidget.cpp" line="182"/>
+        <location filename="../src/Remote/ListRemote/RemoteWidget.cpp" line="179"/>
         <source>Une erreur est survenue lors de la suppression du remote</source>
         <translation>An error occurred while deleting the remote</translation>
     </message>
@@ -647,22 +674,22 @@
 <context>
     <name>SearchWidget</name>
     <message>
-        <location filename="../src/MainWindow/SearchWidget.cpp" line="60"/>
+        <location filename="../src/MainWindow/SearchWidget.cpp" line="58"/>
         <source>Rechercher</source>
         <translation>Search</translation>
     </message>
     <message>
-        <location filename="../src/MainWindow/SearchWidget.cpp" line="67"/>
+        <location filename="../src/MainWindow/SearchWidget.cpp" line="65"/>
         <source>Arrêter</source>
         <translation>Stop</translation>
     </message>
     <message>
-        <location filename="../src/MainWindow/SearchWidget.cpp" line="84"/>
+        <location filename="../src/MainWindow/SearchWidget.cpp" line="82"/>
         <source>Chercher dans&#xa0;: </source>
         <translation>Search in:</translation>
     </message>
     <message>
-        <location filename="../src/MainWindow/SearchWidget.cpp" line="85"/>
+        <location filename="../src/MainWindow/SearchWidget.cpp" line="83"/>
         <source>Nom du Fichier&#xa0;: </source>
         <translation>File name :</translation>
     </message>
@@ -670,17 +697,17 @@
 <context>
     <name>SettingsButton</name>
     <message>
-        <location filename="../src/MainWindow/Menu/Settings/SettingsButton.cpp" line="17"/>
+        <location filename="../src/MainWindow/Menu/Settings/SettingsButton.cpp" line="18"/>
         <source>General</source>
         <translation>General</translation>
     </message>
     <message>
-        <location filename="../src/MainWindow/Menu/Settings/SettingsButton.cpp" line="21"/>
+        <location filename="../src/MainWindow/Menu/Settings/SettingsButton.cpp" line="22"/>
         <source>Rclone</source>
         <translation>Rclone</translation>
     </message>
     <message>
-        <location filename="../src/MainWindow/Menu/Settings/SettingsButton.cpp" line="25"/>
+        <location filename="../src/MainWindow/Menu/Settings/SettingsButton.cpp" line="26"/>
         <source>Apparence</source>
         <translation>Appearance</translation>
     </message>
@@ -696,37 +723,37 @@
 <context>
     <name>SftpRemoteConfigParamsFrame</name>
     <message>
-        <location filename="../src/Remote/AddNewRemote/Sftp/SftpRemoteConfigParamsFrame.cpp" line="28"/>
+        <location filename="../src/Remote/AddNewRemote/Sftp/SftpRemoteConfigParamsFrame.cpp" line="27"/>
         <source>exemple.com</source>
         <translation>exemple.com</translation>
     </message>
     <message>
-        <location filename="../src/Remote/AddNewRemote/Sftp/SftpRemoteConfigParamsFrame.cpp" line="29"/>
+        <location filename="../src/Remote/AddNewRemote/Sftp/SftpRemoteConfigParamsFrame.cpp" line="28"/>
         <source>Hôte : </source>
         <translation>Host : </translation>
     </message>
     <message>
-        <location filename="../src/Remote/AddNewRemote/Sftp/SftpRemoteConfigParamsFrame.cpp" line="35"/>
+        <location filename="../src/Remote/AddNewRemote/Sftp/SftpRemoteConfigParamsFrame.cpp" line="34"/>
         <source>Port : </source>
         <translation>Port : </translation>
     </message>
     <message>
-        <location filename="../src/Remote/AddNewRemote/Sftp/SftpRemoteConfigParamsFrame.cpp" line="38"/>
+        <location filename="../src/Remote/AddNewRemote/Sftp/SftpRemoteConfigParamsFrame.cpp" line="37"/>
         <source>root</source>
         <translation>root</translation>
     </message>
     <message>
-        <location filename="../src/Remote/AddNewRemote/Sftp/SftpRemoteConfigParamsFrame.cpp" line="39"/>
+        <location filename="../src/Remote/AddNewRemote/Sftp/SftpRemoteConfigParamsFrame.cpp" line="38"/>
         <source>Utilisateur : </source>
         <translation>User : </translation>
     </message>
     <message>
-        <location filename="../src/Remote/AddNewRemote/Sftp/SftpRemoteConfigParamsFrame.cpp" line="42"/>
+        <location filename="../src/Remote/AddNewRemote/Sftp/SftpRemoteConfigParamsFrame.cpp" line="41"/>
         <source>********</source>
         <translation>********</translation>
     </message>
     <message>
-        <location filename="../src/Remote/AddNewRemote/Sftp/SftpRemoteConfigParamsFrame.cpp" line="45"/>
+        <location filename="../src/Remote/AddNewRemote/Sftp/SftpRemoteConfigParamsFrame.cpp" line="44"/>
         <source>Mot de passe : </source>
         <translation>Password : </translation>
     </message>
@@ -840,93 +867,93 @@
 <context>
     <name>TreeFileView</name>
     <message>
-        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="340"/>
+        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="377"/>
         <source>Nom</source>
         <translation>Name</translation>
     </message>
     <message>
-        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="340"/>
+        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="377"/>
         <source>Taille</source>
         <translation>Size</translation>
     </message>
     <message>
-        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="340"/>
+        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="377"/>
         <source>Date de modification</source>
         <translation>Modification date</translation>
     </message>
     <message>
-        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="340"/>
+        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="377"/>
         <source>Type</source>
         <translation>Type</translation>
     </message>
     <message>
-        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="548"/>
+        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="585"/>
         <source>Suppression</source>
         <translation>Deletion</translation>
     </message>
     <message>
-        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="549"/>
+        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="586"/>
         <source>Suppression de </source>
         <translation>Removal of </translation>
     </message>
     <message>
-        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="550"/>
+        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="587"/>
         <source> fichiers</source>
         <translation> Files</translation>
     </message>
     <message>
-        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="550"/>
+        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="587"/>
         <source> fichier</source>
         <translation> file</translation>
     </message>
     <message>
-        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="552"/>
+        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="589"/>
         <source>Supprimer</source>
         <translation>Delete</translation>
     </message>
     <message>
-        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="553"/>
+        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="590"/>
         <source>Annuler</source>
         <translation>Cancel</translation>
     </message>
     <message>
-        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="558"/>
+        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="595"/>
         <source>Cette action est irréversible.</source>
         <translation>This action is irreversible.</translation>
     </message>
     <message>
-        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="663"/>
+        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="700"/>
         <source>Création de dossier</source>
         <translation>Folder creation</translation>
     </message>
     <message>
-        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="672"/>
+        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="709"/>
         <source>Nom du dossier</source>
         <translation>Folder name</translation>
     </message>
     <message>
-        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="706"/>
-        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="722"/>
+        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="743"/>
+        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="759"/>
         <source>Création</source>
         <translation>Creation</translation>
     </message>
     <message>
-        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="706"/>
+        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="743"/>
         <source>Le dossier existe déjà</source>
         <translation>Folder already exists</translation>
     </message>
     <message>
-        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="722"/>
+        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="759"/>
         <source>Le dossier n’a pas pu être créé</source>
         <translation>Folder could not be created</translation>
     </message>
     <message>
-        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="774"/>
+        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="811"/>
         <source>Renommage</source>
         <translation>Renaming</translation>
     </message>
     <message>
-        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="774"/>
+        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="811"/>
         <source>Le fichier existe déjà</source>
         <translation>The file already exists</translation>
     </message>

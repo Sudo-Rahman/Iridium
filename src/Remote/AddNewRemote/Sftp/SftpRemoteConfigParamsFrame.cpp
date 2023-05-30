@@ -17,7 +17,6 @@ void SftpRemoteConfigParamsFrame::addRemote()
     _rclone->config(RemoteType::Sftp, _remote_name->text().toStdString(),
                     {"host=" + _host->text().toStdString(), "port=" + _port->text().toStdString(),
                      "user=" + _user->text().toStdString(), "pass=" + _password->text().toStdString()});
-    _rclone->waitForStarted();
     _rclone->waitForFinished();
 }
 
