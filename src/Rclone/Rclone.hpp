@@ -32,20 +32,19 @@ class Rclone : public QObject
 {
 Q_OBJECT
 
+    explicit Rclone(bool lockable) { _lockable = lockable; }
+
     friend class RcloneManager;
 
 private:
 
     Rclone() = default;
 
-    explicit Rclone(bool lockable) { _lockable = lockable; }
-
 public:
     Rclone(const Rclone &) = delete;
 
     Rclone &operator=(const Rclone &) = delete;
 
-public:
     ~Rclone() override;
 
     enum State
@@ -107,16 +106,17 @@ private:
     std::map<std::string, std::string> _map_data{};
     uint8_t _exit{};
     Rclone::State _state{Rclone::NotLaunched};
-    std::function<void(boost::process::async_pipe &pipe, std::vector<std::string> &vec)> _read_loop;
+    std::function<void(boost::process::async_pipe &pipe, std::vector<std::string> &vec)> _read_loop{};
     std::mutex _mutex{};
-    std::condition_variable _cv;
+    std::condition_variable _cv{};
 
-    boost::process::async_pipe *_pipe_out, *_pipe_err;
-    boost::asio::io_context *_ioc;
-    boost::asio::streambuf *_buff;
+    boost::process::async_pipe *_pipe_out{}, *_pipe_err{};
+    boost::asio::io_context *_ioc{};
+    boost::asio::streambuf *_buff{};
 
     static std::map<Flag, flags_str> _map_flags;
     bool _lockable, _cancel = false;
+    bool _resetable = false;
 
 
 public:
@@ -179,8 +179,21 @@ public:
 
     void search(const std::vector<Filter> &filters, const RemoteInfo &info);
 
+    void clear(){
+        _out.clear();
+        _err.clear();
+        _map_data.clear();
+    }
+
     static boost::signals2::signal<void()> rclone_not_exist;
 
+    static std::shared_ptr<Rclone> create_shared(){
+        return std::shared_ptr<Rclone>(new Rclone());
+    }
+
+    static std::unique_ptr<Rclone> create_unique(){
+        return std::unique_ptr<Rclone>(new Rclone());
+    }
 
 private:
     boost::signals2::signal<void(const std::string &)> _readyRead{};
@@ -191,18 +204,7 @@ private:
 
     static boost::json::object parseJson(const std::string &str);
 
-    void closeAll()
-    {
-        _readyRead.disconnect_all_slots();
-        _finished.disconnect_all_slots();
-        if (_pipe_out)
-            _pipe_out->close();
-        if (_pipe_err)
-            _pipe_err->close();
-        if (_ioc)
-            _ioc->stop();
-        disconnect();
-    }
+    void reset();
 
 
 signals:
@@ -222,6 +224,8 @@ signals:
 };
 
 typedef std::shared_ptr<Rclone> RclonePtr;
+typedef std::unique_ptr<Rclone> RcloneUniquePtr;
+
 
 class RcloneManager
 {

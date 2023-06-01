@@ -66,7 +66,7 @@ void MenuBar::connectSignals()
         formLayout.addRow(new QLabel(tr("Boost Version : ")), &boostVersion);
 
         auto rcloneVersion = QLabel(
-                "<a href=\"https://rclone.org/\">" + QString::fromStdString(RcloneManager::get()->version()) + "</a>");
+                "<a href=\"https://rclone.org/\">" + QString::fromStdString(Rclone::create_unique()->version()) + "</a>");
         rcloneVersion.setOpenExternalLinks(true);
         formLayout.addRow(new QLabel(tr("Rclone Version : ")), &rcloneVersion);
 
@@ -91,8 +91,6 @@ void MenuBar::connectSignals()
         otherRessources.setWordWrap(true);
         otherRessources.setOpenExternalLinks(true);
         formLayout.addRow(new QLabel(tr("Autres ressources : ")), &otherRessources);
-
-
         dialog.exec();
     });
 

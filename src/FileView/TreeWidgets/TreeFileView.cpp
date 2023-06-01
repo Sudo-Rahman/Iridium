@@ -598,7 +598,7 @@ void TreeFileView::deleteFile(const QList<TreeFileItem *> &items)
         return;
     for (auto item: items)
     {
-        auto rclone = RcloneManager::get();
+        auto rclone = Rclone::create_shared();
         connect(rclone.get(), &Rclone::finished, this, [this, files, item, rclone](const int exit)
         {
             if (exit == 0)
@@ -745,7 +745,7 @@ void TreeFileView::mkdir()
         msgb.exec();
         return;
     }
-    auto rclone = RcloneManager::get();
+    auto rclone = Rclone::create_shared();
     auto *newItem = new TreeFileItem(0, rcloneFile, items.first());
     connect(rclone.get(), &Rclone::finished, this, [this, rclone, name, newItem, items](const int exit)
     {
@@ -850,9 +850,9 @@ void TreeFileView::mousePressEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton)
     {
-        if (not _ctrl_presed)
-            selectionModel()->select(indexAt(event->pos()),
-                                     QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
+//        if (not _ctrl_presed and QTreeView::selectionModel()->isSelected(indexAt(event->pos())))
+//            selectionModel()->select(indexAt(event->pos()),
+//                                     QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
         if (QDateTime::currentMSecsSinceEpoch() - _clickTime < 700 and
             QDateTime::currentMSecsSinceEpoch() - _clickTime > 350)
         {
@@ -913,6 +913,10 @@ void TreeFileView::dropEvent(QDropEvent *event)
  */
 void TreeFileView::dragMoveEvent(QDragMoveEvent *event)
 {
+
+    // get TreeMimeData
+//    auto mimeData = qobject_cast<const TreeMimeData *>(event->mimeData());
+
     auto tree = dynamic_cast<TreeFileView *>(event->source());
     auto index = indexAt(event->pos()).siblingAtColumn(0);
     auto not_possible = [event, tree]

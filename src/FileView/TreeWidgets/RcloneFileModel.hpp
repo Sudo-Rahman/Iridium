@@ -9,11 +9,36 @@
 #include "TreeFileItem.hpp"
 #include <QTreeView>
 #include <Rclone.hpp>
+#include <QMimeData>
 
+class TreeMimeData : public QMimeData
+{
+Q_OBJECT
+
+    QList<TreeFileItem *> _items{};
+public:
+    explicit TreeMimeData(const QList<TreeFileItem *> &items) : _items(items) {}
+
+    [[nodiscard]] QList<TreeFileItem *> items() const { return _items; }
+
+    [[nodiscard]] bool hasFormat(const QString &mimeType) const override
+    {
+        return mimeType == "application/x-qabstractitemmodeldatalist";
+    }
+};
 
 class RcloneFileModel : public QStandardItemModel
 {
 Q_OBJECT
+
+public:
+    QMimeData *mimeData(const QModelIndexList &indexes) const override;
+
+    QStringList mimeTypes() const override;
+
+    bool
+    dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent) override;
+
 
 protected:
     RemoteInfoPtr _remote_info{};

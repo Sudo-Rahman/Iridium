@@ -38,7 +38,7 @@ const map<Settings::Node, string> Settings::_nodes = {
         {Settings::Node::Width,        "general.size.width"},
         {Settings::Node::Height,       "general.size.height"},
 };
-RclonePtr Settings::_rclone;
+RcloneUniquePtr Settings::_rclone = Rclone::create_unique();
 
 /**
  * @brief change the color of the directory icon
@@ -114,7 +114,7 @@ std::vector<RemoteInfoPtr> Settings::getLocalRemotes()
 
 void Settings::refreshRemotesList()
 {
-    auto rclone = RcloneManager::get();
+    auto rclone = Rclone::create_unique();
     rclone->listRemotes();
     rclone->waitForFinished();
     std::vector<RemoteInfoPtr> remotes;

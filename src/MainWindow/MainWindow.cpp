@@ -49,6 +49,7 @@ void MainWindow::connectSignals()
     Rclone::rclone_not_exist.connect(
             [this]
             {
+                qDebug() << "rclone not exist";
                 if (_check_rclone)
                     return;
                 auto btn = new QPushButton(tr("Télécharger Rclone !!!"));
@@ -144,7 +145,6 @@ void MainWindow::downloadRclone()
         file = fopen("rclone.zip", "wb");
         if (file)
         {
-
             curl_easy_setopt(curl, CURLOPT_WRITEDATA, file);
 
             curl_easy_perform(curl);
@@ -156,7 +156,8 @@ void MainWindow::downloadRclone()
         curl_global_cleanup();
 
         // Unzip
-        std::string command = "mkdir rcloneUnziped && tar -xf rclone.zip -C rcloneUnziped --strip-components 1";
+        bfs::create_directory("rcloneUnziped");
+        std::string command = "tar -xf rclone.zip -C rcloneUnziped --strip-components 1";
         system(command.c_str());
 
         // Move rclone exe to current directory

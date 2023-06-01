@@ -205,7 +205,7 @@
 <context>
     <name>LocalRemoteConfigParamsFrame</name>
     <message>
-        <location filename="../src/Remote/AddNewRemote/Local/LocalRemoteConfigParamsFrame.cpp" line="18"/>
+        <location filename="../src/Remote/AddNewRemote/Local/LocalRemoteConfigParamsFrame.cpp" line="17"/>
         <source>Chemin du dossier</source>
         <translation>Folder path</translation>
     </message>
@@ -216,7 +216,7 @@
     </message>
     <message>
         <location filename="../src/Remote/AddNewRemote/Local/LocalRemoteConfigParamsFrame.cpp" line="48"/>
-        <location filename="../src/Remote/AddNewRemote/Local/LocalRemoteConfigParamsFrame.cpp" line="71"/>
+        <location filename="../src/Remote/AddNewRemote/Local/LocalRemoteConfigParamsFrame.cpp" line="72"/>
         <source>Le chemin n’existe pas&#x202f;!</source>
         <translation>The path does not exist!</translation>
     </message>
@@ -226,12 +226,12 @@
         <translation>Add</translation>
     </message>
     <message>
-        <location filename="../src/Remote/AddNewRemote/Local/LocalRemoteConfigParamsFrame.cpp" line="65"/>
+        <location filename="../src/Remote/AddNewRemote/Local/LocalRemoteConfigParamsFrame.cpp" line="66"/>
         <source>Ajout d’un nouveau remote local</source>
         <translation>Adding a new local remote</translation>
     </message>
     <message>
-        <location filename="../src/Remote/AddNewRemote/Local/LocalRemoteConfigParamsFrame.cpp" line="66"/>
+        <location filename="../src/Remote/AddNewRemote/Local/LocalRemoteConfigParamsFrame.cpp" line="67"/>
         <source>Le remote %1 a été ajouté avec succès&#x202f;!</source>
         <translation>Remote %1 added successfully!</translation>
     </message>
@@ -249,12 +249,12 @@
         <translation>Research</translation>
     </message>
     <message>
-        <location filename="../src/MainWindow/MainWindow.cpp" line="54"/>
+        <location filename="../src/MainWindow/MainWindow.cpp" line="55"/>
         <source>Télécharger Rclone !!!</source>
         <translation>Download Rclone!!!</translation>
     </message>
     <message>
-        <location filename="../src/MainWindow/MainWindow.cpp" line="85"/>
+        <location filename="../src/MainWindow/MainWindow.cpp" line="86"/>
         <source>Téléchargement en cours...</source>
         <translation>Downloading...</translation>
     </message>
@@ -409,12 +409,22 @@
         <translation type="vanished">Delete</translation>
     </message>
     <message>
-        <location filename="../src/Task/TaskTreeView.cpp" line="57"/>
+        <location filename="../src/Task/TaskTreeView.cpp" line="60"/>
+        <source>Annuler les %1 tâches</source>
+        <translation>Cancel %1 tasks</translation>
+    </message>
+    <message>
+        <location filename="../src/Task/TaskTreeView.cpp" line="61"/>
         <source>Annuler la tâche</source>
         <translation>Cancel task</translation>
     </message>
     <message>
-        <location filename="../src/Task/TaskTreeView.cpp" line="60"/>
+        <location filename="../src/Task/TaskTreeView.cpp" line="65"/>
+        <source>Supprimer les %1 tâches</source>
+        <translation>Delete %1 tasks</translation>
+    </message>
+    <message>
+        <location filename="../src/Task/TaskTreeView.cpp" line="66"/>
         <source>Supprimer la tâche</source>
         <translation>Delete Task</translation>
     </message>
@@ -440,36 +450,36 @@
 <context>
     <name>RcloneFileModel</name>
     <message>
-        <location filename="../src/FileView/TreeWidgets/RcloneFileModel.cpp" line="23"/>
-        <location filename="../src/FileView/TreeWidgets/RcloneFileModel.cpp" line="79"/>
+        <location filename="../src/FileView/TreeWidgets/RcloneFileModel.cpp" line="22"/>
+        <location filename="../src/FileView/TreeWidgets/RcloneFileModel.cpp" line="78"/>
         <source>Nom</source>
         <translation>Name</translation>
     </message>
     <message>
-        <location filename="../src/FileView/TreeWidgets/RcloneFileModel.cpp" line="23"/>
-        <location filename="../src/FileView/TreeWidgets/RcloneFileModel.cpp" line="79"/>
+        <location filename="../src/FileView/TreeWidgets/RcloneFileModel.cpp" line="22"/>
+        <location filename="../src/FileView/TreeWidgets/RcloneFileModel.cpp" line="78"/>
         <source>Taille</source>
         <translation>Size</translation>
     </message>
     <message>
-        <location filename="../src/FileView/TreeWidgets/RcloneFileModel.cpp" line="23"/>
-        <location filename="../src/FileView/TreeWidgets/RcloneFileModel.cpp" line="79"/>
+        <location filename="../src/FileView/TreeWidgets/RcloneFileModel.cpp" line="22"/>
+        <location filename="../src/FileView/TreeWidgets/RcloneFileModel.cpp" line="78"/>
         <source>Date de modification</source>
         <translation>Modification date</translation>
     </message>
     <message>
-        <location filename="../src/FileView/TreeWidgets/RcloneFileModel.cpp" line="23"/>
-        <location filename="../src/FileView/TreeWidgets/RcloneFileModel.cpp" line="79"/>
+        <location filename="../src/FileView/TreeWidgets/RcloneFileModel.cpp" line="22"/>
+        <location filename="../src/FileView/TreeWidgets/RcloneFileModel.cpp" line="78"/>
         <source>Type</source>
         <translation>Type</translation>
     </message>
     <message>
-        <location filename="../src/FileView/TreeWidgets/RcloneFileModel.cpp" line="91"/>
+        <location filename="../src/FileView/TreeWidgets/RcloneFileModel.cpp" line="90"/>
         <source>Erreur</source>
         <translation>Error</translation>
     </message>
     <message>
-        <location filename="../src/FileView/TreeWidgets/RcloneFileModel.cpp" line="92"/>
+        <location filename="../src/FileView/TreeWidgets/RcloneFileModel.cpp" line="91"/>
         <source>Impossible de se connecter au remote %1&#x202f;!</source>
         <translation>Unable to connect to remote %1!</translation>
     </message>
@@ -535,44 +545,44 @@
 <context>
     <name>RemoteConfigParamsFrame</name>
     <message>
-        <location filename="../src/Remote/AddNewRemote/RemoteConfigParamsFrame.cpp" line="25"/>
+        <location filename="../src/Remote/AddNewRemote/RemoteConfigParamsFrame.cpp" line="26"/>
         <source>Nom : </source>
         <translation>Name : </translation>
     </message>
     <message>
-        <location filename="../src/Remote/AddNewRemote/RemoteConfigParamsFrame.cpp" line="105"/>
+        <location filename="../src/Remote/AddNewRemote/RemoteConfigParamsFrame.cpp" line="106"/>
         <source>Succès</source>
         <translation>Success</translation>
     </message>
     <message>
-        <location filename="../src/Remote/AddNewRemote/RemoteConfigParamsFrame.cpp" line="106"/>
+        <location filename="../src/Remote/AddNewRemote/RemoteConfigParamsFrame.cpp" line="107"/>
         <source>Le disque %1 a été ajouté avec succès</source>
         <translation>Disk %1 added successfully</translation>
     </message>
     <message>
-        <location filename="../src/Remote/AddNewRemote/RemoteConfigParamsFrame.cpp" line="111"/>
+        <location filename="../src/Remote/AddNewRemote/RemoteConfigParamsFrame.cpp" line="112"/>
         <location filename="../src/Remote/AddNewRemote/RemoteConfigParamsFrame.cpp" line="138"/>
         <source>Erreur</source>
         <translation>Error</translation>
     </message>
     <message>
-        <location filename="../src/Remote/AddNewRemote/RemoteConfigParamsFrame.cpp" line="112"/>
+        <location filename="../src/Remote/AddNewRemote/RemoteConfigParamsFrame.cpp" line="113"/>
         <source>Une erreur est survenue lors de la configuration du serveur distant&#x202f;!</source>
         <translation>An error occurred while configuring the remote server!</translation>
     </message>
     <message>
-        <location filename="../src/Remote/AddNewRemote/RemoteConfigParamsFrame.cpp" line="35"/>
+        <location filename="../src/Remote/AddNewRemote/RemoteConfigParamsFrame.cpp" line="36"/>
         <source>Se connecter</source>
         <translation>Log in</translation>
     </message>
     <message>
-        <location filename="../src/Remote/AddNewRemote/RemoteConfigParamsFrame.cpp" line="42"/>
+        <location filename="../src/Remote/AddNewRemote/RemoteConfigParamsFrame.cpp" line="43"/>
         <source>Annuler</source>
         <translation>Cancel</translation>
     </message>
     <message>
-        <location filename="../src/Remote/AddNewRemote/RemoteConfigParamsFrame.cpp" line="61"/>
-        <location filename="../src/Remote/AddNewRemote/RemoteConfigParamsFrame.cpp" line="90"/>
+        <location filename="../src/Remote/AddNewRemote/RemoteConfigParamsFrame.cpp" line="63"/>
+        <location filename="../src/Remote/AddNewRemote/RemoteConfigParamsFrame.cpp" line="92"/>
         <location filename="../src/Remote/AddNewRemote/RemoteConfigParamsFrame.cpp" line="147"/>
         <source>Les champs en rouge sont obligatoires&#x202f;!</source>
         <translation>Fields in red are mandatory&#x202f;!</translation>
@@ -844,22 +854,22 @@
         <translation>Average Speed</translation>
     </message>
     <message>
-        <location filename="../src/Task/TaskTreeView.cpp" line="74"/>
+        <location filename="../src/Task/TaskTreeView.cpp" line="79"/>
         <source>Annuler la tâche</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/Task/TaskTreeView.cpp" line="75"/>
+        <location filename="../src/Task/TaskTreeView.cpp" line="80"/>
         <source>Voulez-vous vraiment annuler la tâche ?</source>
         <translation>Are you sure you want to cancel the task?</translation>
     </message>
     <message>
-        <location filename="../src/Task/TaskTreeView.cpp" line="76"/>
+        <location filename="../src/Task/TaskTreeView.cpp" line="81"/>
         <source>Oui</source>
         <translation>Yes</translation>
     </message>
     <message>
-        <location filename="../src/Task/TaskTreeView.cpp" line="77"/>
+        <location filename="../src/Task/TaskTreeView.cpp" line="82"/>
         <source>Non</source>
         <translation>No</translation>
     </message>

@@ -26,7 +26,7 @@ protected:
     QVBoxLayout *_layout{};
     QFormLayout *_form_layout{};
     RoundedLineEdit *_remote_name{};
-    RclonePtr _rclone{};
+    RcloneUniquePtr _rclone{};
     std::map<std::string, std::string> _lst_remote{};
 
 public:

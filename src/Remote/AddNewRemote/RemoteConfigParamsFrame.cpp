@@ -12,6 +12,7 @@ using namespace std;
 
 RemoteConfigParamsFrame::RemoteConfigParamsFrame(QWidget *parent) : QFrame(parent)
 {
+    _rclone = Rclone::create_unique();
 
     _layout = new QVBoxLayout(this);
 
@@ -51,10 +52,11 @@ void RemoteConfigParamsFrame::createUi()
 
     connect(_cancel, &QPushButton::clicked, this, [this]()
     {
-        if (_rclone->state() == Rclone::Running)
-            _rclone->kill();
+        qDebug() << "kill rclone";
+        _rclone->kill();
         _cancel->hide();
         _login->show();
+        qDebug() << "rclone killed";
     });
 
     _mess_label = new QLabel(this);
@@ -91,7 +93,6 @@ void RemoteConfigParamsFrame::addRemote()
         return;
     }
 
-    _rclone = RcloneManager::get();
     connect(_rclone.get(), &Rclone::started, this, [this]()
     {
         _login->hide();
@@ -118,9 +119,8 @@ void RemoteConfigParamsFrame::addRemote()
         _login->show();
     });
 
-    auto rclone_liste_remote = RcloneManager::get();
+    auto rclone_liste_remote = Rclone::create_unique();
     rclone_liste_remote->listRemotes();
-    rclone_liste_remote->waitForStarted();
     rclone_liste_remote->waitForFinished();
     _lst_remote = rclone_liste_remote->getData();
 
@@ -133,7 +133,7 @@ void RemoteConfigParamsFrame::addRemote()
 bool RemoteConfigParamsFrame::checkFields()
 {
     bool ok = true;
-    if (_lst_remote.contains(_remote_name->text().toStdString()))
+    if (_lst_remote.contains(_remote_name->text().toStdString() + ":"))
     {
         QMessageBox::critical(this, tr("Erreur"), tr("Le nom du disque est déjà utilisé !"));
         return false;

@@ -54,10 +54,16 @@ TaskTreeView::TaskTreeView(QWidget *parent) : QTreeView(parent)
                 return;
         }
         QMenu menu;
-        auto cancel = menu.addAction(QObject::tr("Annuler la tâche"));
+        // get the selected rows size
+        auto size = QTreeView::selectedIndexes().size() / header()->count();
+        auto cancel = menu.addAction(
+                size > 1 ? QObject::tr("Annuler les %1 tâches").arg(size) :
+                QObject::tr("Annuler la tâche"));
         cancel->setIcon(style()->standardIcon(QStyle::SP_DialogCancelButton));
 
-        auto remove = menu.addAction(QObject::tr("Supprimer la tâche"));
+        auto remove = menu.addAction(
+                size > 1 ? QObject::tr("Supprimer les %1 tâches").arg(size) :
+                QObject::tr("Supprimer la tâche"));
         remove->setIcon(style()->standardIcon(QStyle::SP_TrashIcon));
         connect(remove, &QAction::triggered, this, [this]()
         {
@@ -70,7 +76,6 @@ TaskTreeView::TaskTreeView(QWidget *parent) : QTreeView(parent)
 
         if (action == cancel)
         {
-
             QMessageBox info = QMessageBox(QMessageBox::Information, tr("Annuler la tâche"),
                                            tr("Voulez-vous vraiment annuler la tâche ?"));
             info.addButton(tr("Oui"), QMessageBox::YesRole);

@@ -88,7 +88,7 @@ private:
 
     static std::vector<RemoteInfoPtr> getLocalRemotes();
 
-    static RclonePtr _rclone;
+    static RcloneUniquePtr _rclone;
 
 public:
 

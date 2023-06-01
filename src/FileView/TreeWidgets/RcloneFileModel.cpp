@@ -7,7 +7,6 @@
 #include <ProgressBar.hpp>
 #include <QMessageBox>
 
-
 /**
  * @brief RcloneFileModel::RcloneFileModel
  * @param remoteInfo
@@ -98,4 +97,33 @@ void RcloneFileModel::addItem(const RcloneFilePtr &file, TreeFileItem *parent)
         });
         rclone->about(*_remote_info);
     }
+}
+
+QMimeData *RcloneFileModel::mimeData(const QModelIndexList &indexes) const
+{
+    QList<TreeFileItem *> lst_item;
+    int row = 0;
+    for (const auto &index: indexes)
+    {
+        if (index.row() not_eq row)
+        {
+            row = index.row();
+            lst_item << dynamic_cast<TreeFileItem *>(itemFromIndex(index));
+        }
+    }
+    for (auto *item: lst_item)
+        qDebug() << item->getFile()->getName();
+
+    return new TreeMimeData(lst_item);
+}
+
+QStringList RcloneFileModel::mimeTypes() const
+{
+    return QStandardItemModel::mimeTypes();
+}
+
+bool RcloneFileModel::dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column,
+                                   const QModelIndex &parent)
+{
+    return QStandardItemModel::dropMimeData(data, action, row, column, parent);
 }
