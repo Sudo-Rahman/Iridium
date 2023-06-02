@@ -494,10 +494,6 @@ QList<TreeFileItem *> TreeFileView::getSelectedItems(bool can_be_empty)
  */
 void TreeFileView::keyPressEvent(QKeyEvent *event)
 {
-    // if ctrl
-    if (event->modifiers() == Qt::ControlModifier)
-        _ctrl_presed = true;
-
     // if ctrl + f
     if (QKeySequence(event->modifiers() | event->key()).matches(Qt::CTRL + Qt::Key_F))
     {
@@ -562,9 +558,6 @@ void TreeFileView::keyPressEvent(QKeyEvent *event)
 void TreeFileView::keyReleaseEvent(QKeyEvent *event)
 {
     QTreeView::keyReleaseEvent(event);
-    // if ctrl release
-    if (event->modifiers() == Qt::NoModifier)
-        _ctrl_presed = false;
 }
 
 /**
@@ -865,12 +858,6 @@ void TreeFileView::mousePressEvent(QMouseEvent *event)
         }
     }
     _clickIndex = indexAt(event->pos());
-
-    // get items to drag
-    _dragItems = getSelectedItems(true);
-    if (not _dragItems.contains(_model->itemFromIndex(_clickIndex)))
-        _dragItems << dynamic_cast<TreeFileItem *>(_model->itemFromIndex(_clickIndex));
-
     _clickTime = QDateTime::currentMSecsSinceEpoch();
     QTreeView::mousePressEvent(event);
 }
@@ -887,7 +874,7 @@ void TreeFileView::dropEvent(QDropEvent *event)
         return;
     }
     // get items to drop
-    auto lst = dynamic_cast<TreeFileView *>(event->source())->_dragItems;
+    auto lst = qobject_cast<const TreeMimeData *>(event->mimeData())->items();
     if (lst.isEmpty())
     {
         event->ignore();
@@ -915,7 +902,7 @@ void TreeFileView::dragMoveEvent(QDragMoveEvent *event)
 {
 
     // get TreeMimeData
-//    auto mimeData = qobject_cast<const TreeMimeData *>(event->mimeData());
+    auto mimeData = qobject_cast<const TreeMimeData *>(event->mimeData());
 
     auto tree = dynamic_cast<TreeFileView *>(event->source());
     auto index = indexAt(event->pos()).siblingAtColumn(0);
@@ -945,12 +932,11 @@ void TreeFileView::dragMoveEvent(QDragMoveEvent *event)
     if (item_to_drop->index() == dynamic_cast<TreeFileView *>(event->source())->rootIndex())
         return not_possible();
 
-    auto lst = dynamic_cast<TreeFileView *>(event->source())->_dragItems;
 
     // not drop in itself
-    if (not lst.isEmpty())
+    if (not mimeData->items().isEmpty())
     {
-        for (auto item: lst)
+        for (auto item: mimeData->items())
         {
             if (item->index() == index or
                 fileIsInFolder(item->getFile()->getName(), item_to_drop))

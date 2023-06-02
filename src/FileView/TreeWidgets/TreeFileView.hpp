@@ -28,9 +28,7 @@ Q_OBJECT
     uint64_t _clickTime{};
     QModelIndex _clickIndex{};
 
-    QList<TreeFileItem *> _dragItems{};
-
-    bool _dragable{}, _ctrl_presed{};
+    bool _dragable{};
 
     RoundedLineEdit *_search_line_edit{};
 

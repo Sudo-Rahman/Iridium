@@ -111,8 +111,8 @@ QMimeData *RcloneFileModel::mimeData(const QModelIndexList &indexes) const
             lst_item << dynamic_cast<TreeFileItem *>(itemFromIndex(index));
         }
     }
-    for (auto *item: lst_item)
-        qDebug() << item->getFile()->getName();
+//    for (auto *item: lst_item)
+//        qDebug() << item->getFile()->getName();
 
     return new TreeMimeData(lst_item);
 }
