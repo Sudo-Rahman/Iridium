@@ -6,10 +6,17 @@
 #include "RcloneFileModelDistant.hpp"
 #include "TreeFileItemDistant.hpp"
 
+boost::signals2::signal<void()> RcloneFileModelDistant::_load_change;
+
 RcloneFileModelDistant::RcloneFileModelDistant(const RemoteInfoPtr &remoteInfo, QTreeView *View)
         : RcloneFileModel(remoteInfo, View)
 {
     RcloneFileModelDistant::init();
+    _load_change.connect([this]() {
+        for (auto &rclone: _rclones)
+            rclone->cancel();
+        _rclones.clear();
+    });
 }
 
 void RcloneFileModelDistant::init()
@@ -38,8 +45,17 @@ void RcloneFileModelDistant::addItem(const RcloneFilePtr &file, TreeFileItem *pa
 
 void RcloneFileModelDistant::addItemDynamic(const QString &path, TreeFileItem *parent)
 {
+    // get rclone instance that is not running
+    auto rclone = [this]->RclonePtr{
+            for (auto &rclone: _rclones)
+            if (not rclone->isRunning())
+            return rclone;
+            auto rclone = Rclone::create_shared();
+            _rclones.push_back(rclone);
+            return rclone;
+    }();
+
     auto *tree_item = (parent->getParent() == nullptr ? parent : parent->getParent());
-    auto rclone = RcloneManager::get();
     if (tree_item->state() == TreeFileItem::NotLoaded)
     {
         addProgressBar(tree_item->child(0, 0)->index());
@@ -54,6 +70,7 @@ void RcloneFileModelDistant::addItemDynamic(const QString &path, TreeFileItem *p
             }
             tree_item->setState(TreeFileItem::Loaded);
         });
+        connect(rclone.get(), &Rclone::finished, this, [rclone] { rclone->clear(); });
         rclone->lsJson(path.toStdString());
     }
 }
@@ -64,8 +81,8 @@ void RcloneFileModelDistant::addItemStatic(const QString &path, TreeFileItem *pa
         return;
     if (depth == maxDepth())
     {
-        for (auto &rclone: _locked_rclone) { rclone->cancel(); }
-        _locked_rclone.clear();
+        for (auto &rclone: _rclones) { rclone->cancel(); }
+        _rclones.clear();
     }
 
     auto *tree_item = (parent->getParent() == nullptr ? parent : parent->getParent());
@@ -91,12 +108,12 @@ void RcloneFileModelDistant::addItemStatic(const QString &path, TreeFileItem *pa
 
         connect(rclone.get(), &Rclone::finished, this, [rclone, this]
         {
-            _locked_rclone.erase(std::remove(_locked_rclone.begin(), _locked_rclone.end(), rclone),
-                                 _locked_rclone.end());
+            _rclones.erase(std::remove(_rclones.begin(), _rclones.end(), rclone),
+                           _rclones.end());
             rclone->disconnect();
         });
         rclone->lsJson(path.toStdString());
-        _locked_rclone.push_back(rclone);
+        _rclones.push_back(rclone);
         RcloneManager::addLockable(rclone);
     } else
     {

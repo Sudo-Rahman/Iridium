@@ -52,11 +52,9 @@ void RemoteConfigParamsFrame::createUi()
 
     connect(_cancel, &QPushButton::clicked, this, [this]()
     {
-        qDebug() << "kill rclone";
         _rclone->kill();
         _cancel->hide();
         _login->show();
-        qDebug() << "rclone killed";
     });
 
     _mess_label = new QLabel(this);
@@ -157,7 +155,6 @@ bool RemoteConfigParamsFrame::checkFields()
 void RemoteConfigParamsFrame::clearAllFields()
 {
     for (auto lineEdit: findChildren<RoundedLineEdit *>()) { lineEdit->reset(); }
-
 }
 
 /**

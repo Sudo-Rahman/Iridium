@@ -14,15 +14,17 @@ LocalRemoteConfigParamsFrame::LocalRemoteConfigParamsFrame(QWidget *parent) : Re
 
 void LocalRemoteConfigParamsFrame::createUi()
 {
-    auto *btn = new QPushButton(tr("Chemin du dossier"), this);
-    btn->setDefault(false);
+    RemoteConfigParamsFrame::createUi();
+    _login->setText(tr("Ajouter"));
 
-    auto *path = new RoundedLineEdit(this);
-    path->setPlaceholderText("/user/home");
+    _path_button = new QPushButton(tr("Chemin du dossier"), this);
 
-    _form_layout->addRow(btn, path);
+    _path_lineEdit = new RoundedLineEdit(this);
+    _path_lineEdit->setPlaceholderText("/user/home");
 
-    connect(btn, &QPushButton::clicked, this, [this, path]()
+    _form_layout->addRow(_path_button, _path_lineEdit);
+
+    connect(_path_button, &QPushButton::clicked, this, [this]()
     {
         auto result = QFileDialog::getExistingDirectory(this, tr("Choisir un dossier"),
                                                         QDir::homePath(),
@@ -31,29 +33,23 @@ void LocalRemoteConfigParamsFrame::createUi()
         if (!result.isEmpty())
         {
             _path = result;
-            path->setText(result);
+            _path_lineEdit->setText(result);
         }
     });
 
-    connect(path, &QLineEdit::textChanged, this, [this, path](const QString &text)
+    connect(_path_lineEdit, &QLineEdit::textChanged, this, [this](const QString &text)
     {
         _path = text;
         if (QFileInfo::exists(text))
         {
-            path->normalBorder();
-            path->setToolTip("");
+            _path_lineEdit->normalBorder();
+            _path_lineEdit->setToolTip("");
         } else
         {
-            path->redBorder();
-            path->setToolTip(tr("Le chemin n’existe pas !"));
+            _path_lineEdit->redBorder();
+            _path_lineEdit->setToolTip(tr("Le chemin n’existe pas !"));
         }
     });
-
-    RemoteConfigParamsFrame::createUi();
-
-    _login->setText(tr("Ajouter"));
-    _login->setAutoDefault(true);
-    _login->setDefault(true);
 }
 
 void LocalRemoteConfigParamsFrame::addRemote()

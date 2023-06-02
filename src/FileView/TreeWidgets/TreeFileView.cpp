@@ -41,21 +41,6 @@ public:
     }
 };
 
-// https://stackoverflow.com/questions/74929660/qtableview-how-to-hide-dotted-line-border-when-no-items-are-selected
-class NoFocusOutlineStyle : public QProxyStyle
-{
-public:
-    void drawPrimitive(PrimitiveElement element,
-                       const QStyleOption *option,
-                       QPainter *painter,
-                       const QWidget *widget) const override
-    {
-        if (element == QStyle::PE_FrameFocusRect)
-            return;
-        QProxyStyle::drawPrimitive(element, option, painter, widget);
-    }
-};
-
 
 /**
  * @brief Initialise l'interface
@@ -100,7 +85,6 @@ void TreeFileView::initUI()
     viewport()->stackUnder(_search_line_edit);
     _search_line_edit->raise();
 
-    // set row height
     setItemDelegate(new MyItemDelegate(this));
 
     connectSignals();
@@ -118,7 +102,7 @@ void TreeFileView::initUI()
         p.setColor(QPalette::AlternateBase, QWidget::palette().color(QPalette::Midlight));
     setPalette(p);
 
-    setStyle(new NoFocusOutlineStyle());
+    setStyleSheet("QTreeView { outline:none; }");
 }
 
 TreeFileView::TreeFileView(QWidget *parent) : QTreeView(parent)
@@ -817,7 +801,7 @@ void TreeFileView::editItem(const QModelIndex &index)
  */
 void TreeFileView::rename(const TreeFileItem *item, const QString &newName)
 {
-    auto rclone = RcloneManager::get();
+    auto rclone = Rclone::create_shared();
     connect(rclone.get(), &Rclone::finished, this, [this, rclone, item, newName](const int exit)
     {
         if (not item->index().isValid())

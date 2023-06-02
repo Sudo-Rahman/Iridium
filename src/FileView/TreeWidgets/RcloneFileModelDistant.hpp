@@ -14,12 +14,18 @@ Q_OBJECT
 
 private:
 
-    std::vector<RclonePtr> _locked_rclone{};
+    std::vector<RclonePtr> _rclones{};
+
+    static boost::signals2::signal<void()> _load_change;
 
 public:
     explicit RcloneFileModelDistant(const RemoteInfoPtr &remoteInfo, QTreeView *parent);
 
-    static void setLoadType(Iridium::Load load) { Iridium::Global::load_type = load; }
+    static void setLoadType(Iridium::Load load)
+    {
+        Iridium::Global::load_type = load;
+        _load_change();
+    }
 
     static void setMaxDepth(uint8_t maxDepth) { Iridium::Global::max_depth = maxDepth; }
 
@@ -29,12 +35,12 @@ public:
 
     ~RcloneFileModelDistant() override
     {
-        for (auto &rclone: _locked_rclone)
+        for (auto &rclone: _rclones)
             rclone->kill();
-        _locked_rclone.clear();
+        _rclones.clear();
     }
 
-    void stop() override { for (auto &rclone: _locked_rclone) rclone->kill(); }
+    void stop() override { for (auto &rclone: _rclones) rclone->kill(); }
 
 
 protected:

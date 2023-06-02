@@ -21,18 +21,14 @@ Q_OBJECT
 
 private:
     QGridLayout *_layout{};
-
     std::shared_ptr<RcloneFile> _file{};
     TreeFileItem *_item{};
     QLabel *_icon{}, *_name{}, *_size{}, *_type{}, *_path{}, *_mod_time{}, *_objs{};
-
     ProgressBar *_loading1{}, *_loading2{};
-
     QTimer _timer{};
-
     int _row{};
-
     boost::shared_ptr<boost::thread> _thread{};
+    RcloneUniquePtr _rclone{};
 
 public:
     explicit ItemInfoDialog(TreeFileItem *item, QWidget *parent = nullptr);
@@ -50,7 +46,7 @@ protected:
 
 signals:
 
-    void m_threadFinished();
+    void threadFinished();
 
 };
 

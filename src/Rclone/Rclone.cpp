@@ -377,8 +377,7 @@ void Rclone::execute()
                 } catch (...)
                 {
                     cerr << "Exception in thread: " << endl;
-                    _finished(_exit);
-                    emit finished(_exit);
+                    _state = Stopped;
                     _cv.notify_one();
                     reset();
                     RcloneManager::finished(this);
@@ -406,8 +405,8 @@ void Rclone::waitForFinished()
 Rclone::~Rclone()
 {
     cout << "destructeur rclone" << endl;
-    reset();
     Rclone::kill();
+    reset();
 }
 
 /**

@@ -37,6 +37,7 @@ AddNewRemoteDialog::AddNewRemoteDialog(QWidget *parent) : QDialog(parent)
                 wid->unselect();
             widget->select();
             changeParamsFrame(widget->getParamsFrame());
+            widget->getParamsFrame()->focusLineEdit();
         });
         scrollWidgetLayout->addWidget(widget);
     }
@@ -44,7 +45,6 @@ AddNewRemoteDialog::AddNewRemoteDialog(QWidget *parent) : QDialog(parent)
     _layout->addWidget(scrollArea);
     _paramsFrame = findChildren<RemoteWidgetParam *>().first()->getParamsFrame();
     findChildren<RemoteWidgetParam *>().first()->select();
-    findChildren<RemoteWidgetParam *>().first()->getParamsFrame()->findChildren<RoundedLineEdit *>().first()->setFocus();
     _layout->addWidget(_paramsFrame);
 
     for (auto *widget: scrollWidget->findChildren<RemoteWidgetParam *>())
@@ -52,7 +52,7 @@ AddNewRemoteDialog::AddNewRemoteDialog(QWidget *parent) : QDialog(parent)
         widget->setMinimumWidth(200);
         connect(widget, &RemoteWidgetParam::newRemoteAdded, this, [this]() { emit newRemoteAdded(); });
     }
-
+    findChildren<RemoteWidgetParam *>().first()->getParamsFrame()->focusLineEdit();
 }
 
 void AddNewRemoteDialog::changeParamsFrame(RemoteConfigParamsFrame *frame)

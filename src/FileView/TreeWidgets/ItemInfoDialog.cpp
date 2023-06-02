@@ -12,6 +12,8 @@ using namespace Iridium;
 
 ItemInfoDialog::ItemInfoDialog(TreeFileItem *item, QWidget *parent) : QDialog(parent), _item(item)
 {
+    _rclone = Rclone::create_unique();
+
     // delete on close
     setAttribute(Qt::WA_DeleteOnClose);
     _file = item->getFile();
@@ -44,20 +46,19 @@ ItemInfoDialog::ItemInfoDialog(TreeFileItem *item, QWidget *parent) : QDialog(pa
     if (_item->index().model()->index(0, 0) == _item->index())
     {
         _name->setText(_file->getRemoteInfo()->name().c_str());
-        auto rclone = RcloneManager::get();
         _mod_time->hide();
         _loading1 = new ProgressBar(ProgressBar::Circular, this);
         _loading1->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
         _loading1->setFixedSize(100, 100);
         _loading1->setRange(0, 0);
         _layout->addWidget(_loading1, _row, 0, 1, 3, Qt::AlignCenter);
-        connect(rclone.get(), &Rclone::finished, this, [rclone, this](int exit)
+        connect(_rclone.get(), &Rclone::finished, this, [this](int exit)
         {
             if (exit == 0)
             {
                 _layout->removeWidget(_loading1);
                 delete _loading1;
-                auto json = boost::json::parse(rclone->getData().find("json")->second);
+                auto json = boost::json::parse(_rclone->getData().find("json")->second);
                 _layout->addWidget(new QLabel(tr("Total : ")), _row, 0, 1, 2);
                 uint64_t size = json.at("total").as_int64();
                 _layout->addWidget(new QLabel(
@@ -83,7 +84,7 @@ ItemInfoDialog::ItemInfoDialog(TreeFileItem *item, QWidget *parent) : QDialog(pa
                     lab->setWordWrap(true);
             }
         });
-        rclone->about(*_file->getRemoteInfo());
+        _rclone->about(*_file->getRemoteInfo());
         return;
     }
 
@@ -95,18 +96,21 @@ ItemInfoDialog::ItemInfoDialog(TreeFileItem *item, QWidget *parent) : QDialog(pa
 
     if (_file->isDir())
     {
-        _size->hide();
         _layout->addWidget(new QLabel(tr("Nombre d'objets: ")), _row, 0, 1, 1);
         _layout->addWidget(_objs, _row, 1, 1, 1);
-        _loading1 = new ProgressBar(ProgressBar::Circular, this);
-        _loading1->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-        _loading1->setRange(0, 0);
-        _layout->addWidget(_loading1, 5, 1, 1, 1, Qt::AlignLeft);
+        if (_file->getSize() == 0)
+        {
+            _size->hide();
+            _loading1 = new ProgressBar(ProgressBar::Circular, this);
+            _loading1->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+            _loading1->setRange(0, 0);
+            _layout->addWidget(_loading1, 5, 1, 1, 1, Qt::AlignLeft);
 
-        _loading2 = new ProgressBar(ProgressBar::Circular, this);
-        _loading2->setRange(0, 0);
-        _loading2->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-        _layout->addWidget(_loading2, 7, 1, 1, 1, Qt::AlignLeft);
+            _loading2 = new ProgressBar(ProgressBar::Circular, this);
+            _loading2->setRange(0, 0);
+            _loading2->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+            _layout->addWidget(_loading2, 7, 1, 1, 1, Qt::AlignLeft);
+        }
     }
 
 
@@ -136,7 +140,8 @@ void ItemInfoDialog::initLabel()
     if (_file->isDir())
     {
         _objs = new QLabel("", this);
-        _objs->hide();
+        if (_file->getSize() == 0)
+            _objs->hide();
         _objs->setWordWrap(true);
         _objs->setAlignment(Qt::AlignLeft);
     }
@@ -169,10 +174,10 @@ void ItemInfoDialog::initSize()
                             (*objs)++;
                         }
                     }
-                    emit m_threadFinished();
+                    emit threadFinished();
                 });
 
-        connect(this, &ItemInfoDialog::m_threadFinished, this, [this, objs, size]()
+        connect(this, &ItemInfoDialog::threadFinished, this, [this, objs, size]()
         {
             _layout->removeWidget(_loading1);
             _loading1->deleteLater();
@@ -194,9 +199,7 @@ void ItemInfoDialog::initSize()
     }
     if (!_file->getRemoteInfo()->isLocal() and _file->getSize() == 0)
     {
-
-        auto rclone = RcloneManager::get();
-        connect(rclone.get(), &Rclone::sizeFinished, this,
+        connect(_rclone.get(), &Rclone::sizeFinished, this,
                 [this](const uint32_t &objs, const uint64_t &size, const std::string &strSize)
                 {
                     _layout->removeWidget(_loading1);
@@ -215,7 +218,7 @@ void ItemInfoDialog::initSize()
                     _objs->setFont({});
                     _size->setFont({});
                 });
-        rclone->size(_file->getPath().toStdString());
+        _rclone->size(_file->getPath().toStdString());
     } else
     {
         _size->setText(QString::fromStdString(Utility::numberToString(_file->getSize())) + " octets" + " (" +
@@ -244,6 +247,8 @@ void ItemInfoDialog::initType()
 
 ItemInfoDialog::~ItemInfoDialog()
 {
+    if(_rclone->isRunning())
+        _rclone->kill();
     if (not _thread)
         return;
     if (_thread->joinable())

@@ -13,6 +13,9 @@ Q_OBJECT
 
 private:
     QString _path{};
+    QPushButton *_path_button{};
+    RoundedLineEdit *_path_lineEdit{};
+
 
 public:
     explicit LocalRemoteConfigParamsFrame(QWidget *parent = nullptr);

@@ -170,7 +170,7 @@ void RemoteWidget::init()
                 Settings::deleteRemote(_remote_info);
             else
             {
-                auto rclone = RcloneManager::get();
+                auto rclone = Rclone::create_unique();
                 rclone->deleteRemote(_remote_info->name());
                 rclone->waitForFinished();
                 if (rclone->exitCode() != 0)

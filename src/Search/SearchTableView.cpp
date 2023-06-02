@@ -12,21 +12,6 @@
 #include <QProxyStyle>
 #include <memory>
 
-// https://stackoverflow.com/questions/74929660/qtableview-how-to-hide-dotted-line-border-when-no-items-are-selected
-class NoFocusOutlineStyle : public QProxyStyle
-{
-public:
-    void drawPrimitive(PrimitiveElement element,
-                       const QStyleOption *option,
-                       QPainter *painter,
-                       const QWidget *widget) const override
-    {
-        if (element == QStyle::PE_FrameFocusRect)
-            return;
-        QProxyStyle::drawPrimitive(element, option, painter, widget);
-    }
-};
-
 SearchTableView::SearchTableView(QWidget *parent) : QTableView(parent)
 {
     _model = new QStandardItemModel(0, 6, this);
@@ -66,7 +51,7 @@ SearchTableView::SearchTableView(QWidget *parent) : QTableView(parent)
                                                                     horizontalHeader()->count() - 1));
     });
 
-    setStyle(new NoFocusOutlineStyle());
+    setStyleSheet("QTableView { outline:none; }");
     setFrameStyle(QFrame::NoFrame);
     setShowGrid(false);
 }
@@ -140,7 +125,8 @@ void SearchTableView::addFile()
     {
         std::cerr << "add file : " << file << std::endl;
         std::cerr << boost::diagnostic_information(e) << std::endl;
-    }catch (...){
+    } catch (...)
+    {
         std::cerr << "add file : " << file << std::endl;
     }
 }
@@ -200,8 +186,17 @@ void SearchTableView::searchDistant(const std::vector<Rclone::Filter> &filters, 
 {
     if (filters.empty())
         return;
-    auto rclone = RcloneManager::get();
-    _rclones.push_back(rclone);
+    auto rclone = [this]->RclonePtr
+    {
+        for (auto &rclone: _rclones)
+        {
+            if (rclone->state() not_eq Rclone::Running)
+                return rclone;
+        }
+        auto rclone = Rclone::create_shared();
+        _rclones.push_back(rclone);
+        return rclone;
+    }();
     emit searchStarted();
     connect(rclone.get(), &Rclone::searchRefresh,
             [this, remoteInfo](boost::json::object file)
@@ -211,7 +206,7 @@ void SearchTableView::searchDistant(const std::vector<Rclone::Filter> &filters, 
     connect(rclone.get(), &Rclone::finished, this, [this]()
     {
         terminateSearch();
-        erase_if(_rclones,[this](const RclonePtr &rclone)
+        erase_if(_rclones, [this](const RclonePtr &rclone)
         {
             return rclone->state() == Rclone::State::Finsished;
         });
@@ -244,7 +239,6 @@ void SearchTableView::stopAllSearch()
     }
     for (auto &rclone: _rclones)
         rclone->kill();
-    _rclones.clear();
     _threads.clear();
     emit searchFinished();
 }
