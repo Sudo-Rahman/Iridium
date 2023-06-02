@@ -122,7 +122,13 @@ private:
 public:
     void kill();
 
-    void cancel() { _cancel = true; }
+    void cancel()
+    {
+        _readyRead.disconnect_all_slots();
+        _finished.disconnect_all_slots();
+        disconnect();
+        _cancel = true;
+    }
 
     [[nodiscard]] bool isCanceled() const { return _cancel; }
 
@@ -179,7 +185,8 @@ public:
 
     void search(const std::vector<Filter> &filters, const RemoteInfo &info);
 
-    void clear(){
+    void clear()
+    {
         _out.clear();
         _err.clear();
         _map_data.clear();
@@ -187,11 +194,13 @@ public:
 
     static boost::signals2::signal<void()> rclone_not_exist;
 
-    static std::shared_ptr<Rclone> create_shared(){
+    static std::shared_ptr<Rclone> create_shared()
+    {
         return std::shared_ptr<Rclone>(new Rclone());
     }
 
-    static std::unique_ptr<Rclone> create_unique(){
+    static std::unique_ptr<Rclone> create_unique()
+    {
         return std::unique_ptr<Rclone>(new Rclone());
     }
 

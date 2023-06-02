@@ -12,11 +12,13 @@ RcloneFileModelDistant::RcloneFileModelDistant(const RemoteInfoPtr &remoteInfo, 
         : RcloneFileModel(remoteInfo, View)
 {
     RcloneFileModelDistant::init();
-    _load_change.connect([this]() {
-        for (auto &rclone: _rclones)
-            rclone->cancel();
-        _rclones.clear();
-    });
+    _load_change.connect(
+            [this]
+            {
+                for (auto &rclone: _rclones)
+                    rclone->cancel();
+                _rclones.clear();
+            });
 }
 
 void RcloneFileModelDistant::init()
@@ -105,13 +107,6 @@ void RcloneFileModelDistant::addItemStatic(const QString &path, TreeFileItem *pa
                 });
         connect(rclone.get(), &Rclone::started, this,
                 [tree_item] { tree_item->setState(TreeFileItem::Loading); });
-
-        connect(rclone.get(), &Rclone::finished, this, [rclone, this]
-        {
-            _rclones.erase(std::remove(_rclones.begin(), _rclones.end(), rclone),
-                           _rclones.end());
-            rclone->disconnect();
-        });
         rclone->lsJson(path.toStdString());
         _rclones.push_back(rclone);
         RcloneManager::addLockable(rclone);
