@@ -10,6 +10,9 @@
 #include "SearchWidget.hpp"
 #include <ExplorerWidget.hpp>
 #include <curl/curl.h>
+#include <zip.h>
+#include <fstream>
+#include <filesystem>
 #include <boost/filesystem.hpp>
 #include <ProgressBar.hpp>
 
@@ -76,6 +79,9 @@ void MainWindow::closeEvent(QCloseEvent *event)
  */
 void MainWindow::downloadRclone()
 {
+    using namespace std;
+    using namespace std::filesystem;
+
     _statusBar->removeWidget(_statusBar->findChild<QPushButton *>());
     auto dialog = new QDialog(this);
     dialog->setAttribute(Qt::WA_DeleteOnClose);
@@ -93,7 +99,7 @@ void MainWindow::downloadRclone()
     layout->addWidget(progressBar, 0, Qt::AlignCenter);
     dialog->open();
 
-    std::string os, arch;
+    string os, arch;
     switch (Settings::getSystem().os)
     {
         case Settings::Windows:
@@ -123,52 +129,82 @@ void MainWindow::downloadRclone()
             break;
     }
 
-    std::string url = "https://downloads.rclone.org/rclone-current-" + os + arch + ".zip";
+    string url = "https://downloads.rclone.org/rclone-current-" + os + arch + ".zip";
 
     std::thread(
-    [this, url, dialog]
-    {
-        CURL *curl = curl_easy_init();
+            [this, url, dialog]
+            {
+                CURL *curl = curl_easy_init();
 
-        curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-        curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
+                curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+                curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+                curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
 
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,
-                         +[](void *ptr, size_t size, size_t nmemb, void *stream) -> size_t
-                         {
-                             size_t written = fwrite(ptr, size, nmemb, (FILE *) stream);
-                             return written;
-                         });
+                curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,
+                                 +[](void *ptr, size_t size, size_t nmemb, void *stream) -> size_t
+                                 {
+                                     size_t written = fwrite(ptr, size, nmemb, (FILE *) stream);
+                                     return written;
+                                 });
 
-        FILE *file;
-        file = fopen("rclone.zip", "wb");
-        if (file)
-        {
-            curl_easy_setopt(curl, CURLOPT_WRITEDATA, file);
+                FILE *file;
+                file = fopen("rclone.zip", "wb");
+                if (file)
+                {
+                    curl_easy_setopt(curl, CURLOPT_WRITEDATA, file);
 
-            curl_easy_perform(curl);
+                    curl_easy_perform(curl);
 
-            fclose(file);
-        }
-        curl_easy_cleanup(curl);
+                    fclose(file);
+                }
+                curl_easy_cleanup(curl);
 
-        curl_global_cleanup();
+                curl_global_cleanup();
 
-        // Unzip
-        bfs::create_directory("rcloneUnziped");
-        std::string command = "tar -xf rclone.zip -C rcloneUnziped --strip-components 1";
-        system(command.c_str());
+                // Unzip
+                int err = 0;
+                zip *z = zip_open("rclone.zip", 0, &err);
+                struct zip_stat sb{};
+                auto file_name = string{"rclone"} +
+                                 string{Settings::getSystem().os == Settings::Os::Windows ? ".exe" : ""};
 
-        // Move rclone exe to current directory
-        std::string rcloneName =
-                Settings::getSystem().os not_eq Settings::Os::Windows ? "rclone" : "rclone.exe";
-        bfs::copy_file("rcloneUnziped/" + rcloneName, rcloneName, bfs::copy_option::overwrite_if_exists);
+                if (z == nullptr)
+                    return ;
 
-        bfs::remove("rclone.zip");
-        bfs::remove_all("rcloneUnziped");
-        // execute by main thread
-        dialog->close();
-        _check_rclone = false;
-    }).detach();
+                for (int i = 0; i < zip_get_num_entries(z, 0); i++)
+                {
+                    if (zip_stat_index(z, i, 0, &sb) == 0)
+                    {
+                        auto f = string{sb.name};
+                        f = f.substr(f.find_last_of('/') + 1, f.size() - 1);
+                        // check if file is rclone executable
+                        if (f == file_name)
+                        {
+                            auto zf = zip_fopen_index(z, i, 0);
+                            auto rclone_file = ofstream(file_name);
+                            permissions(file_name,perms::all);
+
+                            auto sum = 0;
+                            char buf[100];
+                            while (sum != sb.size) {
+                                auto len = zip_fread(zf, buf, 100);
+                                if (len < 0) {
+                                    cerr << "error unzip" << endl;
+                                    return;
+                                }
+                                rclone_file.write(buf,len);
+                                sum += len;
+                            }
+                            rclone_file.close();
+                            zip_fclose(zf);
+                            break;
+                        }
+                    }
+                }
+                zip_close(z);
+
+                bfs::remove("rclone.zip");
+                dialog->close();
+                _check_rclone = false;
+            }).detach();
 }

@@ -102,6 +102,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
         Boost::json
         Boost::chrono
         curl
+        zip
         )
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     target_link_libraries(Iridium PRIVATE ws2_32
