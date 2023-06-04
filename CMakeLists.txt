@@ -6,7 +6,7 @@ set(Iridium_VERSION_MINOR 8)
 set(Iridium_VERSION_PATCH 6)
 set(Iridium_VERSION "${Iridium_VERSION_MAJOR}.${Iridium_VERSION_MINOR}.${Iridium_VERSION_PATCH}")
 
-configure_file (src/Config/Version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/src/Config/Version.h @ONLY)
+configure_file(src/Config/Version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/src/Config/Version.h @ONLY)
 
 
 set(CMAKE_CXX_STANDARD 23)
@@ -34,6 +34,8 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS
         LinguistTools)
 
 message(STATUS "Qt version: ${Qt${QT_VERSION_MAJOR}_VERSION}")
+
+set(ZIP_PATH "/Users/sr-71/LibZip")
 
 file(GLOB_RECURSE SRC
         src/*.cpp
@@ -91,6 +93,9 @@ else ()
     qt6_add_executable(${PROJECT_NAME} application.qrc ${SRC} ${QM_FILES})
 endif ()
 
+target_include_directories(${PROJECT_NAME} PRIVATE
+        ${ZIP_PATH}/include
+        )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
         Qt::Core
@@ -102,7 +107,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
         Boost::json
         Boost::chrono
         curl
-        zip
+        ${ZIP_PATH}/lib/libzip.a
         )
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     target_link_libraries(Iridium PRIVATE ws2_32

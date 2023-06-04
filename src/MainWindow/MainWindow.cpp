@@ -13,11 +13,9 @@
 #include <zip.h>
 #include <fstream>
 #include <filesystem>
-#include <boost/filesystem.hpp>
+#include <boost/dll.hpp>
 #include <ProgressBar.hpp>
-
-namespace bfs = boost::filesystem;
-
+#include <EscDiasableDialog.hpp>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
@@ -75,7 +73,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 }
 
 /**
- * @brief download rclone with curl
+ * @brief download rclone with curl and unzip it with libzip
  */
 void MainWindow::downloadRclone()
 {
@@ -83,8 +81,7 @@ void MainWindow::downloadRclone()
     using namespace std::filesystem;
 
     _statusBar->removeWidget(_statusBar->findChild<QPushButton *>());
-    auto dialog = new QDialog(this);
-    dialog->setAttribute(Qt::WA_DeleteOnClose);
+    auto dialog = new EscDiasableDialog(this);
     dialog->setModal(true);
     connect(dialog, &QDialog::finished, &Settings::refreshRemotesList);
     auto layout = new QVBoxLayout(dialog);
@@ -147,8 +144,10 @@ void MainWindow::downloadRclone()
                                      return written;
                                  });
 
+                // get file iridium path
+                auto pwd = boost::dll::program_location().parent_path().string() + "/";
                 FILE *file;
-                file = fopen("rclone.zip", "wb");
+                file = fopen(string{pwd + "rclone.zip"}.c_str(), "wb");
                 if (file)
                 {
                     curl_easy_setopt(curl, CURLOPT_WRITEDATA, file);
@@ -163,13 +162,13 @@ void MainWindow::downloadRclone()
 
                 // Unzip
                 int err = 0;
-                zip *z = zip_open("rclone.zip", 0, &err);
+                auto *z = zip_open(string{pwd + "rclone.zip"}.c_str(), 0, &err);
                 struct zip_stat sb{};
-                auto file_name = string{"rclone"} +
+                auto file_name = string{string{"rclone"}.c_str()} +
                                  string{Settings::getSystem().os == Settings::Os::Windows ? ".exe" : ""};
 
                 if (z == nullptr)
-                    return ;
+                    return;
 
                 for (int i = 0; i < zip_get_num_entries(z, 0); i++)
                 {
@@ -181,18 +180,20 @@ void MainWindow::downloadRclone()
                         if (f == file_name)
                         {
                             auto zf = zip_fopen_index(z, i, 0);
-                            auto rclone_file = ofstream(file_name);
-                            permissions(file_name,perms::all);
+                            auto rclone_file = ofstream(pwd + file_name);
+                            permissions(pwd + file_name, perms::all);
 
                             auto sum = 0;
                             char buf[100];
-                            while (sum != sb.size) {
+                            while (sum != sb.size)
+                            {
                                 auto len = zip_fread(zf, buf, 100);
-                                if (len < 0) {
+                                if (len < 0)
+                                {
                                     cerr << "error unzip" << endl;
                                     return;
                                 }
-                                rclone_file.write(buf,len);
+                                rclone_file.write(buf, len);
                                 sum += len;
                             }
                             rclone_file.close();
@@ -203,7 +204,7 @@ void MainWindow::downloadRclone()
                 }
                 zip_close(z);
 
-                bfs::remove("rclone.zip");
+                ::remove(string{pwd + "rclone.zip"}.c_str());
                 dialog->close();
                 _check_rclone = false;
             }).detach();

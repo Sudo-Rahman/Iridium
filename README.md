@@ -11,6 +11,7 @@ Graphical application for managing remote storage services such as Google Drive,
 - [Boost](https://www.boost.org/)
 - [Rclone](https://rclone.org/)
 - [Libcurl](https://curl.se/libcurl/)
+- [LibZip](https://libzip.org/)
 
 ## Features
 
@@ -65,6 +66,7 @@ Graphical application for managing remote storage services such as Google Drive,
 - [CMake](https://cmake.org/)
 - [Boost](https://www.boost.org/)
 - [Libcurl](https://curl.se/libcurl/)
+- [LibZip](https://libzip.org/)
 
 ### Compilation
 
