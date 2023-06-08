@@ -15,11 +15,8 @@
 
 
 #ifdef _WIN32
-
 #include <boost/process/windows.hpp>
-#include <boost/process/async_pipe.hpp>
 #include <codecvt>
-
 #endif
 
 namespace bp = boost::process;
@@ -35,7 +32,7 @@ std::map<Rclone::Flag, Rclone::flags_str> Rclone::_map_flags{
         {Rclone::Flag::Verbose,   {"",            "-v"}},
         {Rclone::Flag::LogType,   {"",            "--use-json-log"}},
 };
-boost::signals2::signal<void()> Rclone::rclone_not_exist;
+boost::signals2::signal<void(bool)> Rclone::check_rclone;
 
 /**
  * @brief Liste sous forme de json les fichiers dans le dossier path
@@ -118,9 +115,9 @@ void Rclone::deleteFile(const RcloneFile &file)
  * @param type
  * @param params
  */
-void Rclone::config(RemoteType type, const string &name, const vector <string> &params)
+void Rclone::config(RemoteType type, const string &name, const vector<string> &params)
 {
-    vector <string> args = {"config", "create", name};
+    vector<string> args = {"config", "create", name};
     switch (type)
     {
         case Drive:
@@ -162,6 +159,7 @@ void Rclone::config(RemoteType type, const string &name, const vector <string> &
         execute();
 }
 
+
 /**
  * @brief Rclone::about, permet de récupérer des informations sur un remote
  * @param info
@@ -183,33 +181,26 @@ void Rclone::about(const RemoteInfo &info)
 }
 
 /**
- * @brief Rclone::lstRemote, permet de lister les remotes configurés
+ * @brief Rclone::lstRemote, return a list of remote
  */
-void Rclone::listRemotes()
+vector<RemoteInfoPtr> Rclone::listRemotes()
 {
-    _finished.connect(
-            [this](const int exit)
-            {
-                if (exit == 0)
-                {
-                    map <string, string> map;
-                    for (auto &string: _out)
-                    {
-                        auto name_regex = std::regex("([a-zA-Z0-9]+):");
-                        auto type_regex = std::regex("([a-zA-Z0-9]+)$");
-                        std::smatch match;
-                        std::regex_search(string, match, name_regex);
-                        auto name = match[0].str();
-                        std::regex_search(string, match, type_regex);
-                        auto type = match[0].str();
-                        map.insert({name, type});
-                    }
-                    _map_data = map;
-                }
-            });
     _args = {"listremotes", "--long"};
-    if (not _lockable)
-        execute();
+    execute();
+    waitForFinished();
+    vector<RemoteInfoPtr> remotes;
+    for (auto &string: _out)
+    {
+        auto name_regex = std::regex("([a-zA-Z0-9]+):");
+        auto type_regex = std::regex("([a-zA-Z0-9]+)$");
+        std::smatch match;
+        std::regex_search(string, match, name_regex);
+        auto name = match[0].str();
+        std::regex_search(string, match, type_regex);
+        auto type = match[0].str();
+        remotes.emplace_back(std::make_shared<RemoteInfo>(name, stringToRemoteType.find(type)->second));
+    }
+    return remotes;
 }
 
 /**
@@ -217,7 +208,7 @@ void Rclone::listRemotes()
  * @param filters
  * @param info
  */
-void Rclone::search(const vector <Filter> &filters, const RemoteInfo &info)
+void Rclone::search(const vector<Filter> &filters, const RemoteInfo &info)
 {
     _readyRead.connect(
             [this](const string &line)
@@ -274,12 +265,13 @@ void Rclone::deleteRemote(const string &remote)
 void Rclone::execute()
 {
     if (_state == Running)
+        // ptint adress
         throw std::runtime_error("Rclone is running");
     auto rclone_exist = bfs::exists(pathRclone());
     if (_cancel or not rclone_exist)
     {
         if (not rclone_exist)
-            Rclone::rclone_not_exist();
+            Rclone::check_rclone(false);
         _cancel = true;
         _cv.notify_all();
         return;
@@ -299,19 +291,16 @@ void Rclone::execute()
 #endif
 
     _ioc = new ba::io_context();
-    _pipe_err = new bp::async_pipe(*_ioc);
-    _pipe_out = new bp::async_pipe(*_ioc);
+    _pipe = new bp::async_pipe(*_ioc);
 
     try
     {
-
-        _child = new bp::child(exe, bp::args(argsEncoding),
-                               bp::std_out > *_pipe_out,
-                               bp::std_err > *_pipe_err,
-                               bp::on_exit([this](int exit, const std::error_code &ec)
-                                           {
-                                               _exit = exit;
-                                           }), *_ioc
+        _child = new bp::child(bp::shell,
+                               bp::exe = exe,
+                               bp::args = argsEncoding,
+                               (bp::std_out & bp::std_err) > *_pipe,
+                               bp::std_in.close(),
+                               *_ioc
 #ifdef _WIN32
                 , bp::windows::hide
 #endif
@@ -322,6 +311,7 @@ void Rclone::execute()
         cout << e.what() << endl;
         _cancel = true;
         _cv.notify_all();
+        _state = Finsished;
         return;
     }
     emit started();
@@ -329,60 +319,50 @@ void Rclone::execute()
     // notify that the process has started
     _cv.notify_one();
 
-    _buff = new ba::streambuf;
-    _read_loop =
-            [this](bp::async_pipe &pipe, vector <string> &vec)
-            {
-                ba::async_read_until(
-                        pipe,
-                        *_buff,
-                        '\n',
-                        [&](boost::system::error_code error_code, std::size_t bytes)
-                        {
-                            if (not error_code)
-                            {
-                                string line;
-                                if (std::getline(std::istream(&(*_buff)), line))
-                                {
-                                    _readyRead(line);
-                                    if (vec.size() > 1000)
-                                        vec.clear();
-                                    vec.emplace_back(line);
-//                                    cout << line << endl;
-                                }
-                                _read_loop(pipe, vec);
-                            }
-                        }
-                );
-            };
 
     _thread = make_unique<boost::thread>(
             [this]
             {
                 try
                 {
-                    ba::post(*_ioc, [this]
-                    {
-                        _read_loop(*_pipe_out, _out);
-                        _read_loop(*_pipe_err, _err);
-                    });
+                    ba::post(*_ioc, [this] { readLoop(*_pipe, _out); });
                     _ioc->run();
                     _child->wait();
-                    _state = Finsished;
+                    _exit = _child->exit_code();
                     _finished(_exit);
                     emit finished(_exit);
+                    _state = Finsished;
                     _cv.notify_one();
-                    reset();
                     RcloneManager::finished(this);
+                    Rclone::reset();
                 } catch (...)
                 {
-                    cerr << "Exception in thread: " << endl;
-                    _state = Stopped;
-                    _cv.notify_one();
-                    reset();
-                    RcloneManager::finished(this);
+                    throw std::runtime_error("Rclone::execute");
                 }
             });
+}
+
+void Rclone::readLoop(boost::process::async_pipe &pipe, std::vector<std::string> &vec)
+{
+    ba::async_read_until(
+            pipe,
+            _buffer,
+            '\n',
+            [&](boost::system::error_code error_code, std::size_t bytes)
+            {
+                if (not error_code)
+                {
+                    string line;
+                    if (std::getline(std::istream(&_buffer), line))
+                    {
+                        _readyRead(line);
+                        vec.emplace_back(line);
+//                                    cout << line << endl;
+                    }
+                    readLoop(pipe, vec);
+                }
+            }
+    );
 }
 
 /**
@@ -394,8 +374,8 @@ void Rclone::waitForFinished()
         waitForStarted();
     if (_state == Running)
     {
-        unique_lock <mutex> lock(_mutex);
-        _cv.wait(lock, [this] { return _state == Finsished or _cancel; });
+        unique_lock<mutex> lock(_mutex);
+        _cv.wait(lock, [this] { return _state == Finsished; });
     }
 }
 
@@ -404,9 +384,13 @@ void Rclone::waitForFinished()
  */
 Rclone::~Rclone()
 {
-    cout << "destructeur rclone" << endl;
-    Rclone::kill();
-    reset();
+    cout << "destructeur rclone : " << this << endl;
+//    Rclone::kill();
+    if (_state == Running)
+    {
+        cerr << "destructeur rclone : " << this << " is running" << endl;
+        std::terminate();
+    }
 }
 
 /**
@@ -414,18 +398,14 @@ Rclone::~Rclone()
  */
 void Rclone::kill()
 {
-    disconnect();
     if (_state == Running)
     {
-        cout << "process rclone kill" << endl;
-        _child->detach();
-#ifdef _WIN32
-        boost::winapi::TerminateProcess(_child->native_handle(), EXIT_FAILURE);
-#else
-        bp::detail::api::terminate(bp::child::child_handle{_child->native_handle()});
-#endif
-        _thread->interrupt();
-        _exit = 1;
+        cout << "process rclone kill : " << this << endl;
+        emit killed();
+        _ioc->stop();
+        _child->terminate();
+        _thread->join();
+        _exit = -1;
     }
     _state = Stopped;
     clear();
@@ -436,41 +416,32 @@ void Rclone::kill()
  */
 void Rclone::reset()
 {
-    lock_guard <mutex> lock(_mutex);
+    cout << "reset rclone : " << this << endl;
+    // if process finish and destructor, call reset twice
+    lock_guard<mutex> lock(_mutex);
     if (not _resetable)
         return;
-    _readyRead.disconnect_all_slots();
-    _finished.disconnect_all_slots();
-    if (_pipe_out)
-    {
-        _pipe_out->close();
-        delete _pipe_out;
-        _pipe_out = nullptr;
-    }
-    if (_pipe_err)
-    {
-        _pipe_err->close();
-        delete _pipe_err;
-        _pipe_err = nullptr;
-    }
-    if (_ioc)
-    {
-        _ioc->stop();
-        delete _ioc;
-        _ioc = nullptr;
-    }
-    if (_buff)
-    {
-        delete _buff;
-        _buff = nullptr;
-    }
+    _resetable = false;
     if (_child)
     {
         delete _child;
         _child = nullptr;
     }
-    disconnect();
-    _resetable = false;
+    if (_pipe)
+    {
+        delete _pipe;
+        _pipe = nullptr;
+    }
+    if (_ioc)
+    {
+        delete _ioc;
+        _ioc = nullptr;
+    }
+    _finished.disconnect_all_slots();
+    _readyRead.disconnect_all_slots();
+    this->disconnect();
+    _cancel = false;
+    _aquired = false;
 }
 
 /**
@@ -479,7 +450,7 @@ void Rclone::reset()
 void Rclone::waitForStarted()
 {
     std::unique_lock<std::mutex> lock(_mutex);
-    _cv.wait(lock, [this] { return _state == Running or _cancel; });
+    _cv.wait(lock, [this] { return _state == Running; });
 }
 
 /**
@@ -580,7 +551,6 @@ std::atomic_int_fast8_t RcloneManager::_rclone_locked;
 mutex RcloneManager::_launch_mutex;
 condition_variable RcloneManager::_launch_cv;
 std::vector<RclonePtr> RcloneManager::_launch_queue;
-std::vector<RclonePtr> RcloneManager::_rclones;
 
 boost::thread RcloneManager::_launch_thread = boost::thread(
         []
@@ -591,7 +561,7 @@ boost::thread RcloneManager::_launch_thread = boost::thread(
                 {
                     // On attend que le nombre de processus rclone soit inférieur au nombre max
                     boost::this_thread::interruption_point();
-                    unique_lock <mutex> lock(RcloneManager::_launch_mutex);
+                    unique_lock<mutex> lock(RcloneManager::_launch_mutex);
                     RcloneManager::_launch_cv.wait(lock, []
                     {
                         boost::this_thread::interruption_point();
@@ -601,7 +571,6 @@ boost::thread RcloneManager::_launch_thread = boost::thread(
                     if (not RcloneManager::_launch_queue.empty())
                     {
                         auto rclone = RcloneManager::_launch_queue.front();
-//                        release(rclone);
                         RcloneManager::_launch_queue.erase(RcloneManager::_launch_queue.begin());
                         if (not rclone->isCanceled())
                         {
@@ -612,17 +581,6 @@ boost::thread RcloneManager::_launch_thread = boost::thread(
                 } catch (boost::thread_interrupted &e) { break; }
             }
         });
-
-/**
- * @brief RcloneManager::get, retourne un pointeur vers un rclone
- * @return un pointeur vers un rclone
- */
-RclonePtr RcloneManager::get(bool lockable)
-{
-    auto rclone = RclonePtr(new Rclone(lockable));
-    _rclones.push_back(rclone);
-    return rclone;
-}
 
 /**
  * @brief RcloneManager::launch, ajout le processus rclone à la queue de lancement
@@ -644,5 +602,4 @@ void RcloneManager::finished(Rclone *rclone)
         --RcloneManager::_rclone_locked;
         RcloneManager::_launch_cv.notify_one();
     }
-//    else release(rclone);
 }

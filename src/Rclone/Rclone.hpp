@@ -32,8 +32,6 @@ class Rclone : public QObject
 {
 Q_OBJECT
 
-    explicit Rclone(bool lockable) { _lockable = lockable; }
-
     friend class RcloneManager;
 
 private:
@@ -102,21 +100,19 @@ private:
     boost::process::child *_child{};
 
     std::unique_ptr<boost::thread> _thread{};
-    std::vector<std::string> _args{}, _out{}, _err{};
+    std::vector<std::string> _args{}, _out{};
     std::map<std::string, std::string> _map_data{};
-    uint8_t _exit{};
+    int _exit{};
     Rclone::State _state{Rclone::NotLaunched};
-    std::function<void(boost::process::async_pipe &pipe, std::vector<std::string> &vec)> _read_loop{};
     std::mutex _mutex{};
     std::condition_variable _cv{};
 
-    boost::process::async_pipe *_pipe_out{}, *_pipe_err{};
     boost::asio::io_context *_ioc{};
-    boost::asio::streambuf *_buff{};
+    boost::process::async_pipe *_pipe{};
+    boost::asio::streambuf _buffer{};
 
     static std::map<Flag, flags_str> _map_flags;
-    bool _lockable, _cancel = false;
-    bool _resetable = false;
+    bool _lockable, _cancel, _resetable, _aquired = false;
 
 
 public:
@@ -129,6 +125,14 @@ public:
         disconnect();
         _cancel = true;
     }
+
+    void setLockable(bool lock = true) { _lockable = lock; }
+
+    [[nodiscard]] bool lockable() const { return _lockable; }
+
+    void aquire() { _aquired = true; }
+
+    [[nodiscard]] bool isAquired() const { return _aquired; }
 
     [[nodiscard]] bool isCanceled() const { return _cancel; }
 
@@ -150,7 +154,7 @@ public:
 
     void moveto(const RcloneFile &src, const RcloneFile &dest);
 
-    void listRemotes();
+    std::vector<RemoteInfoPtr> listRemotes();
 
     void size(const std::string &path);
 
@@ -166,16 +170,9 @@ public:
 
     [[nodiscard]] std::map<std::string, std::string> getData() const { return _map_data; }
 
-    [[nodiscard]] std::vector<std::string> readAllError() const { return _err; }
-
     [[nodiscard]] uint8_t exitCode() const { return _exit; }
 
-    [[nodiscard]] std::vector<std::string> readAll() const
-    {
-        auto vec = _out;
-        vec.insert(vec.end(), _err.begin(), _err.end());
-        return vec;
-    }
+    [[nodiscard]] std::vector<std::string> readAll() { return _out; }
 
     static Rclone::flags_str getFlag(const Flag &key) { return _map_flags[key]; }
 
@@ -188,11 +185,10 @@ public:
     void clear()
     {
         _out.clear();
-        _err.clear();
         _map_data.clear();
     }
 
-    static boost::signals2::signal<void()> rclone_not_exist;
+    static boost::signals2::signal<void(bool)> check_rclone;
 
     static std::shared_ptr<Rclone> create_shared()
     {
@@ -215,12 +211,16 @@ private:
 
     void reset();
 
+    void readLoop(boost::process::async_pipe &pipe, std::vector<std::string> &vec);
+
 
 signals:
 
     void started();
 
     void finished(int exit);
+
+    void killed();
 
     void lsJsonFinished(const boost::json::array);
 
@@ -246,10 +246,9 @@ private:
     static std::mutex _launch_mutex;
     static std::condition_variable _launch_cv;
     static boost::thread _launch_thread;
-    static std::vector<RclonePtr> _rclones, _launch_queue;
+    static std::vector<RclonePtr> _launch_queue;
 
 public:
-    static RclonePtr get(bool lockable = false);
 
     static uint16_t maxProcess() { return Iridium::Global::max_process; }
 
@@ -265,20 +264,10 @@ public:
 
     static void stopAll()
     {
-        for (const auto &rclone: _rclones)
+        for (const auto &rclone: _launch_queue)
             rclone->kill();
         RcloneManager::stopThread();
     }
-
-    static void release(const Rclone *rclone)
-    {
-        std::erase_if(_rclones, [&](const auto &ptr) { return ptr.get() == rclone; });
-        std::erase_if(_launch_queue, [&](const auto &ptr) { return ptr.get() == rclone; });
-    }
-
-    static void release(const RclonePtr &rclone) { release(rclone.get()); }
-
-    static void release(const std::vector<RclonePtr> &lst) { for (const auto &rclone: lst) release(rclone); }
 
 private:
 

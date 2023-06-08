@@ -114,16 +114,9 @@ std::vector<RemoteInfoPtr> Settings::getLocalRemotes()
 
 void Settings::refreshRemotesList()
 {
-    auto rclone = Rclone::create_unique();
-    rclone->listRemotes();
-    rclone->waitForFinished();
-    std::vector<RemoteInfoPtr> remotes;
-    auto locales = getLocalRemotes();
-    remotes.insert(remotes.end(), locales.begin(), locales.end());
-    for (const auto &pair: rclone->getData())
-        remotes.emplace_back(
-                std::make_shared<RemoteInfo>(pair.first, stringToRemoteType.find(pair.second)->second));
-    Iridium::Global::remotes = remotes;
+    auto remotes = Settings::getLocalRemotes();
+    Iridium::Global::remotes = Rclone::create_unique()->listRemotes();
+    Iridium::Global::remotes.insert(Iridium::Global::remotes.begin(), remotes.begin(), remotes.end());
     list_remote_changed();
 }
 

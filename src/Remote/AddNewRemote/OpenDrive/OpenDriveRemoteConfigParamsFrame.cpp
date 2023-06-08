@@ -11,6 +11,8 @@ OpenDriveRemoteConfigParamsFrame::OpenDriveRemoteConfigParamsFrame(QWidget *pare
 
 void OpenDriveRemoteConfigParamsFrame::createUi()
 {
+    RemoteConfigParamsFrame::createUi();
+
     _user = new RoundedLineEdit(this);
     _password = new RoundedLineEdit(this);
 
@@ -22,8 +24,6 @@ void OpenDriveRemoteConfigParamsFrame::createUi()
 
     _form_layout->addRow(tr("Utilisateur"), _user);
     _form_layout->addRow(tr("Mot de passe"), _password);
-
-    RemoteConfigParamsFrame::createUi();
 }
 
 void OpenDriveRemoteConfigParamsFrame::addRemote()

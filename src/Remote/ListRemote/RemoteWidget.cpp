@@ -139,7 +139,7 @@ void RemoteWidget::init()
     _selected_label->setFont(font);
 
 
-    auto *_delete = new RoundedButton("✕", this);
+    _delete = new RoundedButton("✕", this);
     _delete->setFixedSize(25, 25);
     // get max font size for _delete
     auto size = _delete->fontMetrics().boundingRect(_delete->text()).size();
@@ -178,7 +178,7 @@ void RemoteWidget::init()
                     auto msgb = QMessageBox(QMessageBox::Critical, tr("Suppression"),
                                             tr("Une erreur est survenue lors de la suppression du remote"),
                                             QMessageBox::Ok, this);
-                    msgb.setDetailedText(QString::fromStdString(rclone->readAllError().back()));
+                    msgb.setDetailedText(QString::fromStdString(rclone->readAll().back()));
                     msgb.exec();
                     return;
                 }

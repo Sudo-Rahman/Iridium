@@ -11,6 +11,8 @@ FtpRemoteConfigParamsFrame::FtpRemoteConfigParamsFrame(QWidget *parent) : Remote
 
 void FtpRemoteConfigParamsFrame::createUi()
 {
+    RemoteConfigParamsFrame::createUi();
+
     _port = new QSpinBox(this);
     _port->setMinimum(1);
     _port->setMaximum(65535);
@@ -52,8 +54,6 @@ void FtpRemoteConfigParamsFrame::createUi()
         else
             _port->setValue(990);
     });
-
-    RemoteConfigParamsFrame::createUi();
 
 }
 

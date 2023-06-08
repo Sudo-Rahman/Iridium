@@ -16,6 +16,7 @@
 #include "Pcloud/PcloudRemoteConfigParamsFrame.hpp"
 #include "Box/BoxRemoteConfigParamsFrame.hpp"
 #include "Smb/SmbRemoteConfigParamsFrame.hpp"
+#include "Cmd/CmdRemoteConfigParamsFrame.hpp"
 #include <Settings.hpp>
 
 #include <QLayout>
@@ -77,6 +78,9 @@ RemoteWidgetParam::RemoteWidgetParam(RemoteType type, QWidget *parent) :
             break;
         case Smb:
             labelRemoteName->setText("Smb");
+            break;
+        case Cmd:
+            labelRemoteName->setText(tr("Manuel"));
             break;
         default:
             break;
@@ -145,6 +149,9 @@ void RemoteWidgetParam::initParamsFrame()
             break;
         case Smb:
             _paramsFrame = new SmbRemoteConfigParamsFrame();
+            break;
+        case Cmd:
+            _paramsFrame = new CmdRemoteConfigParamsFrame();
             break;
         default:
             break;

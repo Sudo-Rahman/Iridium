@@ -14,9 +14,11 @@ Q_OBJECT
 
 private:
 
-    std::vector<RclonePtr> _rclones{};
+    std::vector<RclonePtr> _rclones_static{}, _rclones_dynamic{};
 
     static boost::signals2::signal<void()> _load_change;
+
+    bool _stop{false};
 
 public:
     explicit RcloneFileModelDistant(const RemoteInfoPtr &remoteInfo, QTreeView *parent);
@@ -35,12 +37,17 @@ public:
 
     ~RcloneFileModelDistant() override
     {
-        for (auto &rclone: _rclones)
-            rclone->kill();
-        _rclones.clear();
+        RcloneFileModelDistant::stop();
     }
 
-    void stop() override { for (auto &rclone: _rclones) rclone->kill(); }
+    void stop() override
+    {
+        _stop = true;
+        for (auto &rclone: _rclones_static)rclone->kill();
+        for (auto &rclone: _rclones_dynamic) rclone->kill();
+        _rclones_static.clear();
+        _rclones_dynamic.clear();
+    }
 
 
 protected:

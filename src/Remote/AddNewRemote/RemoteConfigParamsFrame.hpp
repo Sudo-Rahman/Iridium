@@ -27,14 +27,14 @@ protected:
     QFormLayout *_form_layout{};
     RoundedLineEdit *_remote_name{};
     RcloneUniquePtr _rclone{};
-    std::map<std::string, std::string> _lst_remote{};
+    std::vector<RemoteInfoPtr> _remotes{};
 
 public:
     explicit RemoteConfigParamsFrame(QWidget *parent = nullptr);
 
     virtual void reset();
 
-    void focusLineEdit(){_remote_name->setFocus();}
+    void focusLineEdit(){if(_remote_name)_remote_name->setFocus();}
 
 protected:
     virtual void addRemote();

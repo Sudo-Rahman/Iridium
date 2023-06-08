@@ -6,7 +6,7 @@
 
 MegaRemoteConfigParamsFrame::MegaRemoteConfigParamsFrame(QWidget *parent) : RemoteConfigParamsFrame(parent)
 {
-    MegaRemoteConfigParamsFrame::createUi();
+    RemoteConfigParamsFrame::createUi();
 }
 
 void MegaRemoteConfigParamsFrame::createUi()

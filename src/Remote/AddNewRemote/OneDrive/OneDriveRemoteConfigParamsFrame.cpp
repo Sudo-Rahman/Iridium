@@ -6,7 +6,7 @@
 
 OneDriveRemoteConfigParamsFrame::OneDriveRemoteConfigParamsFrame(QWidget *parent) : RemoteConfigParamsFrame(parent)
 {
-    OneDriveRemoteConfigParamsFrame::createUi();
+    RemoteConfigParamsFrame::createUi();
 }
 
 void OneDriveRemoteConfigParamsFrame::addRemote()

@@ -6,7 +6,7 @@
 
 BoxRemoteConfigParamsFrame::BoxRemoteConfigParamsFrame(QWidget *parent) : RemoteConfigParamsFrame(parent)
 {
-    BoxRemoteConfigParamsFrame::createUi();
+    RemoteConfigParamsFrame::createUi();
 }
 
 void BoxRemoteConfigParamsFrame::addRemote()

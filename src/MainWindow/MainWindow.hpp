@@ -28,7 +28,7 @@ public:
 private:
     void connectSignals();
 
-    void downloadRclone();
+//    void downloadRclone();
 protected:
     void closeEvent(QCloseEvent *event) override;
 };

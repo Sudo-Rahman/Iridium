@@ -31,6 +31,8 @@ class RcloneFileModel : public QStandardItemModel
 {
 Q_OBJECT
 
+    RcloneUniquePtr _rclone{};
+
 public:
     QMimeData *mimeData(const QModelIndexList &indexes) const override;
 

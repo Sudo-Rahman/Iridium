@@ -17,7 +17,6 @@ public:
 protected:
     void addRemote() override;
 
-
 };
 
 

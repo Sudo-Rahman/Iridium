@@ -35,7 +35,12 @@ RcloneFrame::RcloneFrame(QWidget *parent) : QFrame(parent)
     {
         Settings::setValue(Settings::Node::RclonePath, path.toStdString());
         Iridium::Global::path_rclone = path.toStdString();
-        Settings::refreshRemotesList();
+        auto rclone = Rclone::create_unique();
+        if (not rclone->version().empty())
+        {
+            Settings::refreshRemotesList();
+            Rclone::check_rclone(true);
+        }
     });
     gridLayout->addWidget(new QLabel(tr("Chemin vers rclone : "), this), 0, 0, 1, 2, Qt::AlignCenter);
     gridLayout->addWidget(_rclone_path, 1, 0, 1, 1);

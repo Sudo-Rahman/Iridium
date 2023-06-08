@@ -80,29 +80,29 @@ RcloneFileModel::RcloneFileModel()
 
 void RcloneFileModel::addItem(const RcloneFilePtr &file, TreeFileItem *parent)
 {
-    if (not _check_is_valid)
+    if (not _check_is_valid )
     {
-        auto rclone = RcloneManager::get();
-        connect(rclone.get(), &Rclone::finished, this, [this, rclone](int exit)
+        _rclone = Rclone::create_unique();
+        connect(_rclone.get(), &Rclone::finished, this, [this](int exit)
         {
             if (exit not_eq 0)
             {
                 auto msgBox = QMessageBox(QMessageBox::Critical, tr("Erreur"),
                                           tr("Impossible de se connecter au remote %1 !").arg(
                                                   _remote_info->name().c_str()), QMessageBox::Ok);
-                msgBox.setDetailedText(rclone->readAllError().back().c_str());
+                msgBox.setDetailedText(_rclone->readAll().back().c_str());
                 msgBox.exec();
             }
             _check_is_valid = true;
         });
-        rclone->about(*_remote_info);
+        _rclone->about(*_remote_info);
     }
 }
 
 QMimeData *RcloneFileModel::mimeData(const QModelIndexList &indexes) const
 {
     QList<TreeFileItem *> lst_item;
-    int row = 0;
+    int row = -1;
     for (const auto &index: indexes)
     {
         if (index.row() not_eq row)

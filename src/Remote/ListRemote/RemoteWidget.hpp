@@ -29,6 +29,8 @@ protected:
     RemoteInfoPtr _remote_info{};
     QLabel *_selected_label{};
 
+    RoundedButton *_delete{};
+
     bool _hover{}, _click{};
 
     bool _deletable = true;

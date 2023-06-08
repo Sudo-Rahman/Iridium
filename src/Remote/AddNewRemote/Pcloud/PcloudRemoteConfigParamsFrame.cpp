@@ -6,7 +6,7 @@
 
 PcloudRemoteConfigParamsFrame::PcloudRemoteConfigParamsFrame(QWidget *parent) : RemoteConfigParamsFrame(parent)
 {
-    PcloudRemoteConfigParamsFrame::createUi();
+    RemoteConfigParamsFrame::createUi();
 }
 
 void PcloudRemoteConfigParamsFrame::addRemote()

@@ -8,7 +8,7 @@
 GoogleDriveRemoteConfigParamsFrame::GoogleDriveRemoteConfigParamsFrame(QWidget *parent)
         : RemoteConfigParamsFrame(parent)
 {
-    GoogleDriveRemoteConfigParamsFrame::createUi();
+    RemoteConfigParamsFrame::createUi();
 }
 
 void GoogleDriveRemoteConfigParamsFrame::addRemote()

@@ -69,7 +69,16 @@ TaskTreeView::TaskTreeView(QWidget *parent) : QTreeView(parent)
         {
             auto indexes = QTreeView::selectedIndexes();
             for (long long i = indexes.size() / 10; i > 0; i--)
-                _model->removeRows(indexes[i].row(), 1, indexes[i].parent());
+            {
+                auto id = indexes[i].siblingAtColumn(0);
+                auto it = _tasks.find(id.data(Qt::UserRole + 1).toULongLong());
+                if (it not_eq _tasks.end())
+                {
+                    it->second.rclone->kill();
+                    _model->removeRows(indexes[i].row(), 1, indexes[i].parent());
+                    erase_if(_tasks, [it](const auto &t) { return t.first == it->first; });
+                }
+            }
         });
 
         auto action = menu.exec(QCursor::pos());
@@ -81,9 +90,7 @@ TaskTreeView::TaskTreeView(QWidget *parent) : QTreeView(parent)
             info.addButton(tr("Oui"), QMessageBox::YesRole);
             info.addButton(tr("Non"), QMessageBox::NoRole);
             if (info.exec() == QMessageBox::NRoles)
-            {
                 return;
-            }
 
             auto indexes = QTreeView::selectedIndexes();
             for (int i = 0; i < indexes.size(); i = i + 10)
@@ -252,15 +259,17 @@ void TaskTreeView::addTask(const QString &src, const QString &dst, const RcloneP
                             src.toStdString() + dst.toStdString());
                 } catch (const boost::wrapexcept<std::invalid_argument> &e) { return; }
                 auto it = _tasks.find(id);
+                if (it == _tasks.end())
+                    return;
                 if (exit == 0)
                     (*it).second.parent->setState(TaskRow::Finished);
                 else
                 {
                     (*it).second.parent->setState(TaskRow::Error);
-                    (*it).second.parent->setMessageToolTip(rclone->readAllError().back());
+                    (*it).second.parent->setMessageToolTip(rclone->readAll().back());
                     (*it).second.parent->progressBar()->error();
                 }
-                emit taskFinished(*_tasks.find(id));
+                emit taskFinished(*it);
             });
     callable();
 }

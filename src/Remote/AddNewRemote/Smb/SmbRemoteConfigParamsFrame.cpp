@@ -12,6 +12,8 @@ SmbRemoteConfigParamsFrame::SmbRemoteConfigParamsFrame(QWidget *parent) : Remote
 
 void SmbRemoteConfigParamsFrame::createUi()
 {
+    RemoteConfigParamsFrame::createUi();
+
     _host = new RoundedLineEdit(this);
     _host->setPlaceholderText(tr("example.com"));
     _form_layout->addRow(tr("Hôte :"), _host);
@@ -38,8 +40,6 @@ void SmbRemoteConfigParamsFrame::createUi()
     _port->setRange(1, 65535);
     _port->setValue(445);
     _form_layout->addRow(tr("Port :"), _port);
-
-    RemoteConfigParamsFrame::createUi();
 }
 
 void SmbRemoteConfigParamsFrame::addRemote()

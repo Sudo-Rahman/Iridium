@@ -6,7 +6,7 @@
 
 DropboxRemoteConfigParamsFrame::DropboxRemoteConfigParamsFrame(QWidget *parent) : RemoteConfigParamsFrame(parent)
 {
-    DropboxRemoteConfigParamsFrame::createUi();
+    RemoteConfigParamsFrame::createUi();
 }
 
 void DropboxRemoteConfigParamsFrame::addRemote()

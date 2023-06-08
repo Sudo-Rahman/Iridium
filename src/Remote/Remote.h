@@ -19,13 +19,14 @@ const std::string OPENDRIVE = ":/ressources/open-drive.png";
 const std::string PCLOUD = ":/ressources/pcloud.png";
 const std::string BOX = ":/ressources/box.png";
 const std::string SMB = ":/ressources/smb.png";
+const std::string CMD = ":/ressources/cmd.png";
 
 const std::string HARDDRIVEICON = ":/ressources/drive-harddisk-solidstate.svg";
 
 enum RemoteType
 {
     LocalHardDrive,Drive, Sftp, OneDrive, Dropbox, Ftp, Mega,
-    OpenDrive, Pcloud, Box, Smb, END
+    OpenDrive, Pcloud, Box, Smb,Cmd, END
 };
 
 const std::map<RemoteType, std::string> remoteIco = {
@@ -39,7 +40,8 @@ const std::map<RemoteType, std::string> remoteIco = {
         {RemoteType::OpenDrive,      OPENDRIVE},
         {RemoteType::Pcloud,         PCLOUD},
         {RemoteType::Box,            BOX},
-        {RemoteType::Smb,            SMB}
+        {RemoteType::Smb,            SMB},
+        {RemoteType::Cmd,            CMD}
 
 };
 const std::map<std::string, RemoteType> stringToRemoteType = {

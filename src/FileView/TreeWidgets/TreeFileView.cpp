@@ -410,7 +410,7 @@ void TreeFileView::copyto(const std::vector<RcloneFilePtr> &files, TreeFileItem 
                 file->isDir() ? QDateTime::currentDateTime() : file->getModTime(),
                 _remote_info
         );
-        auto rclone = RcloneManager::get();
+        auto rclone = Rclone::create_shared();
         connect(rclone.get(), &Rclone::finished, this, [this, newFile, treePaste](int exit)
         {
             if (exit == 0)
@@ -658,7 +658,7 @@ void TreeFileView::reload(TreeFileItem *treeItem)
 bool TreeFileView::fileIsInFolder(const QString &name, TreeFileItem *folder)
 {
     if (folder == nullptr)
-        exit(1);
+        return false;
     // for each all children
     for (int i = 0; i < folder->rowCount(); i++)
     {
@@ -735,7 +735,7 @@ void TreeFileView::mkdir()
         {
             auto msgb = QMessageBox(QMessageBox::Critical, tr("Création"), tr("Le dossier n’a pas pu être créé"),
                                     QMessageBox::Ok, this);
-            msgb.setDetailedText(QString::fromStdString(rclone->readAllError().back()));
+            msgb.setDetailedText(rclone->readAll().back().c_str());
             msgb.exec();
         }
     });

@@ -15,7 +15,13 @@ RemoteConfigParamsFrame::RemoteConfigParamsFrame(QWidget *parent) : QFrame(paren
     _rclone = Rclone::create_unique();
 
     _layout = new QVBoxLayout(this);
+}
 
+/**
+ * @brief creation of the ui
+ */
+void RemoteConfigParamsFrame::createUi()
+{
     _form_layout = new QFormLayout;
     _form_layout->setFieldGrowthPolicy(QFormLayout::ExpandingFieldsGrow);
     _form_layout->setFormAlignment(Qt::AlignTop);
@@ -24,13 +30,8 @@ RemoteConfigParamsFrame::RemoteConfigParamsFrame(QWidget *parent) : QFrame(paren
 
     _remote_name = new RoundedLineEdit(this);
     _form_layout->addRow(tr("Nom : "), _remote_name);
-}
 
-/**
- * @brief creation of the ui
- */
-void RemoteConfigParamsFrame::createUi()
-{
+
     auto *tmpwidlay = new QHBoxLayout;
 
     _login = new QPushButton(tr("Se connecter"), this);
@@ -109,7 +110,6 @@ void RemoteConfigParamsFrame::addRemote()
             auto msgBox = QMessageBox();
             msgBox.setWindowTitle(tr("Erreur"));
             msgBox.setText(tr("Une erreur est survenue lors de la configuration du serveur distant !"));
-            msgBox.setDetailedText(_rclone->readAllError().back().c_str());
             msgBox.setStandardButtons(QMessageBox::Ok);
             msgBox.exec();
         }
@@ -118,10 +118,7 @@ void RemoteConfigParamsFrame::addRemote()
     });
 
     auto rclone_liste_remote = Rclone::create_unique();
-    rclone_liste_remote->listRemotes();
-    rclone_liste_remote->waitForFinished();
-    _lst_remote = rclone_liste_remote->getData();
-
+    _remotes = rclone_liste_remote->listRemotes();
 }
 
 /**
@@ -131,10 +128,13 @@ void RemoteConfigParamsFrame::addRemote()
 bool RemoteConfigParamsFrame::checkFields()
 {
     bool ok = true;
-    if (_lst_remote.contains(_remote_name->text().toStdString() + ":"))
+    for (auto &remote: _remotes)
     {
-        QMessageBox::critical(this, tr("Erreur"), tr("Le nom du disque est déjà utilisé !"));
-        return false;
+        if (_remote_name->text().toStdString() == remote->name())
+        {
+            QMessageBox::critical(this, tr("Erreur"), tr("Le nom du disque est déjà utilisé !"));
+            return false;
+        }
     }
     for (auto &field: findChildren<RoundedLineEdit *>())
     {
@@ -163,5 +163,6 @@ void RemoteConfigParamsFrame::clearAllFields()
 void RemoteConfigParamsFrame::reset()
 {
     clearAllFields();
-    _mess_label->hide();
+    if (_mess_label)
+        _mess_label->hide();
 }
