@@ -47,8 +47,6 @@ void Rclone::lsJson(const string &path)
                 {
                     try
                     {
-                        if (_out.front() not_eq "[")
-                            _out.front() = "[";
                         auto joinStr = boost::algorithm::join(_out, "");
                         auto array = boost::json::parse(joinStr).as_array();
                         emit lsJsonFinished(std::move(array));
@@ -210,7 +208,7 @@ vector<RemoteInfoPtr> Rclone::listRemotes()
  */
 void Rclone::search(const vector<Filter> &filters, const RemoteInfo &info)
 {
-    _readyRead.connect(
+    auto c = _readyRead.connect(
             [this](const string &line)
             {
                 try
@@ -242,6 +240,17 @@ void Rclone::search(const vector<Filter> &filters, const RemoteInfo &info)
     for (auto &filter: filters)
         _args.emplace_back(filter.str());
     _args.emplace_back("--ignore-case");
+    if (not _lockable)
+        execute();
+}
+
+/**
+ * @brief Rclone::tree, execute la commande tree de rclone
+ * @param file
+ */
+void Rclone::tree(const RcloneFile &file)
+{
+    _args = {"tree", file.getPath().toStdString()};
     if (not _lockable)
         execute();
 }
@@ -335,9 +344,9 @@ void Rclone::execute()
                     _cv.notify_one();
                     RcloneManager::finished(this);
                     Rclone::reset();
-                } catch (...)
+                } catch (boost::exception &e)
                 {
-                    throw std::runtime_error("Rclone::execute");
+                    throw std::runtime_error(boost::diagnostic_information(e));
                 }
             });
 }
@@ -384,6 +393,8 @@ void Rclone::waitForFinished()
  */
 Rclone::~Rclone()
 {
+    // if mutex is not available, wait for it
+    lock_guard<mutex> lock(_mutex);
     cout << "destructeur rclone : " << this << endl;
 //    Rclone::kill();
     if (_state == Running)
@@ -551,6 +562,7 @@ std::atomic_int_fast8_t RcloneManager::_rclone_locked;
 mutex RcloneManager::_launch_mutex;
 condition_variable RcloneManager::_launch_cv;
 std::vector<RclonePtr> RcloneManager::_launch_queue;
+bool RcloneManager::lock_launch;
 
 boost::thread RcloneManager::_launch_thread = boost::thread(
         []
@@ -566,7 +578,7 @@ boost::thread RcloneManager::_launch_thread = boost::thread(
                     {
                         boost::this_thread::interruption_point();
                         return not RcloneManager::_launch_queue.empty() and
-                               RcloneManager::_rclone_locked < maxProcess();
+                               RcloneManager::_rclone_locked < maxProcess() and not RcloneManager::lock_launch;
                     });
                     if (not RcloneManager::_launch_queue.empty())
                     {

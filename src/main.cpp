@@ -2,7 +2,6 @@
 #include <MainWindow.hpp>
 #include <Settings.hpp>
 #include <Config.h>
-#include <QPalette>
 
 int main(int argc, char *argv[])
 {

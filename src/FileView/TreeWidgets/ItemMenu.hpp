@@ -14,7 +14,7 @@ class ItemMenu : public QMenu
 Q_OBJECT
 
 private:
-    QAction *_info{}, *_copy{}, *_paste{}, *_delete{}, *_new_folder{};
+    QAction *_info{}, *_copy{}, *_paste{}, *_delete{}, *_new_folder{}, *_tree;
 
 public:
 
@@ -25,14 +25,22 @@ public:
         Paste,
         Info,
         Delete,
-        NewFolder
+        NewFolder,
+        Tree
     };
 
     [[nodiscard]] Action action() const { return _action; }
 
     explicit ItemMenu(QWidget *parent = nullptr);
 
-    void setActionEnabled(const QList<QPair<Action, bool>> &lst);
+    void setActionEnabled(const Action &action, bool enabled);
+
+    template<class ...Args>
+    void setActionEnabled(const Action &action, bool enabled, Args &&... args)
+    {
+        setActionEnabled(action, enabled);
+        setActionEnabled(std::forward<Args>(args)...);
+    }
 
     // override exec and return action clicked
     Action exec(const QPoint &pos)
@@ -55,6 +63,8 @@ signals:
     void deleted();
 
     void newFolder();
+
+    void tree();
 
 };
 

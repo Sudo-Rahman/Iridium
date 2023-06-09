@@ -15,19 +15,7 @@ RcloneFileModelDistant::RcloneFileModelDistant(const RemoteInfoPtr &remoteInfo, 
     _load_change.connect(
             [this]
             {
-                if (loadType() == Iridium::Load::Dynamic)
-                {
-                    auto it = _rclones_static.begin();
-                    while (it != _rclones_static.end())
-                    {
-                        if (not(*it)->isRunning() and not(*it)->isCanceled())
-                        {
-                            (*it)->cancel();
-                            _rclones_static.erase(it);
-                        } else
-                            ++it;
-                    }
-                }
+                stop();
             });
 }
 
@@ -70,7 +58,6 @@ void RcloneFileModelDistant::addItemDynamic(const QString &path, TreeFileItem *p
     auto *tree_item = (parent->getParent() == nullptr ? parent : parent->getParent());
     if (tree_item->state() == TreeFileItem::NotLoaded)
     {
-        addProgressBar(tree_item->child(0, 0)->index());
         connect(rclone.get(), &Rclone::lsJsonFinished, this, [tree_item, path, this](const boost::json::array &array)
         {
             for (const auto &file: array)
@@ -80,7 +67,11 @@ void RcloneFileModelDistant::addItemDynamic(const QString &path, TreeFileItem *p
             }
             tree_item->setState(TreeFileItem::Loaded);
         });
-        connect(rclone.get(), &Rclone::started, this, [tree_item] { tree_item->setState(TreeFileItem::Loading); });
+        connect(rclone.get(), &Rclone::started, this, [this, tree_item]
+        {
+            addProgressBar(tree_item->child(0, 0)->index());
+            tree_item->setState(TreeFileItem::Loading);
+        });
         connect(rclone.get(), &Rclone::finished, rclone.get(), &Rclone::clear);
         connect(rclone.get(), &Rclone::killed, this, [tree_item] { tree_item->setState(TreeFileItem::NotLoaded); });
         connect(rclone.get(), &Rclone::finished, this,
@@ -94,13 +85,7 @@ void RcloneFileModelDistant::addItemStatic(const QString &path, TreeFileItem *pa
     if (depth == 0 or loadType() == Iridium::Load::Dynamic)
         return;
     if (depth == maxDepth())
-    {
-        for (auto &rclone: _rclones_static)
-            if (not rclone->isRunning() and not rclone->isCanceled())
-                rclone->cancel();
-        erase_if(_rclones_static,
-                 [](const RclonePtr &rclone) { return rclone->state() == Rclone::Finsished or rclone->isCanceled(); });
-    }
+        stop();
 
     auto *tree_item = (parent->getParent() == nullptr ? parent : parent->getParent());
     if (tree_item == nullptr)return;
@@ -125,12 +110,14 @@ void RcloneFileModelDistant::addItemStatic(const QString &path, TreeFileItem *pa
                     }
                     tree_item->setState(TreeFileItem::Loaded);
                 });
-        connect(rclone.get(), &Rclone::started, this,
-                [tree_item] { tree_item->setState(TreeFileItem::Loading); });
-        connect(rclone.get(), &Rclone::killed, this,
-                [rclone, tree_item] { tree_item->setState(TreeFileItem::NotLoaded); });
+        connect(rclone.get(), &Rclone::started, this, [tree_item, this]
+        {
+            addProgressBar(tree_item->child(0, 0)->index());
+            tree_item->setState(TreeFileItem::Loading);
+        });
+        connect(rclone.get(), &Rclone::killed, this, [tree_item] { tree_item->setState(TreeFileItem::NotLoaded); });
         connect(rclone.get(), &Rclone::finished, this,
-                [rclone, tree_item](int exit) { if (exit == 0)tree_item->removeRow(0); });
+                [tree_item](int exit) { if (exit == 0)tree_item->removeRow(0); });
         rclone->lsJson(path.toStdString());
         RcloneManager::addLockable(rclone);
     } else

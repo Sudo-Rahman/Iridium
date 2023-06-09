@@ -182,6 +182,8 @@ public:
 
     void search(const std::vector<Filter> &filters, const RemoteInfo &info);
 
+    void tree(const RcloneFile &file);
+
     void clear()
     {
         _out.clear();
@@ -247,6 +249,7 @@ private:
     static std::condition_variable _launch_cv;
     static boost::thread _launch_thread;
     static std::vector<RclonePtr> _launch_queue;
+    static bool lock_launch;
 
 public:
 
@@ -262,6 +265,10 @@ public:
         _launch_cv.notify_one();
     }
 
+    static void lockLaunch() { lock_launch = true; }
+    static void unlockLaunch() { lock_launch = false; }
+    static bool isLaunchLocked() { return lock_launch; }
+
     static void stopAll()
     {
         for (const auto &rclone: _launch_queue)
@@ -269,6 +276,16 @@ public:
         RcloneManager::stopThread();
     }
 
+    static void erase(const RclonePtr &rclone)
+    {
+        _launch_queue.erase(std::remove(_launch_queue.begin(), _launch_queue.end(), rclone), _launch_queue.end());
+    }
+
+    static void erase(const std::vector<RclonePtr> &rclones)
+    {
+        for (const auto &rclone: rclones)
+            erase(rclone);
+    }
 private:
 
     static void finished(Rclone *);

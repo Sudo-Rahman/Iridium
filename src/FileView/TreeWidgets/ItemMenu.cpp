@@ -37,12 +37,19 @@ ItemMenu::ItemMenu(QWidget *parent) : QMenu(parent)
         emit newFolder();
     });
 
+    _tree = addAction(tr("Tree"), this, [this]
+    {
+        _action = Tree;
+        emit tree();
+    });
+
     // add icons
     _info->setIcon(style()->standardIcon(QStyle::SP_FileDialogInfoView));
     _copy->setIcon(style()->standardIcon(QStyle::SP_DialogOpenButton));
     _paste->setIcon(style()->standardIcon(QStyle::SP_DialogOpenButton));
     _delete->setIcon(style()->standardIcon(QStyle::SP_DialogCancelButton));
     _new_folder->setIcon(style()->standardIcon(QStyle::SP_FileDialogNewFolder));
+    _tree->setIcon(QIcon(":/ressources/tree.png"));
 
     // show shortcuts
     _info->setShortcut(Qt::Key_Space);
@@ -59,31 +66,30 @@ ItemMenu::ItemMenu(QWidget *parent) : QMenu(parent)
 }
 
 
-void ItemMenu::setActionEnabled(const QList<QPair<Action, bool>> &lst)
+void ItemMenu::setActionEnabled(const ItemMenu::Action &action, bool enabled)
 {
-    for (const auto &pair: lst)
+    switch (action)
     {
-        switch (pair.first)
-        {
-            case Copy:
-                _copy->setEnabled(pair.second);
-                break;
-            case Paste:
-                _paste->setEnabled(pair.second);
-                break;
-            case Info:
-                _info->setEnabled(pair.second);
-                break;
-            case Delete:
-                _delete->setEnabled(pair.second);
-                break;
-            case NewFolder:
-                _new_folder->setEnabled(pair.second);
-                break;
-            case None:
-            default:
-                break;
-        }
+        case Copy:
+            _copy->setEnabled(enabled);
+            break;
+        case Paste:
+            _paste->setEnabled(enabled);
+            break;
+        case Info:
+            _info->setEnabled(enabled);
+            break;
+        case Delete:
+            _delete->setEnabled(enabled);
+            break;
+        case NewFolder:
+            _new_folder->setEnabled(enabled);
+            break;
+        case Tree:
+            _tree->setEnabled(enabled);
+            break;
+        case None:
+        default:
+            break;
     }
-
 }

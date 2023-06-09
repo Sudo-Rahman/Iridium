@@ -19,7 +19,7 @@
 #include <QDrag>
 #include <QMimeData>
 #include <QSysInfo>
-#include <QProxyStyle>
+#include <QTextEdit>
 #include <Settings.hpp>
 
 using namespace std::chrono;
@@ -293,22 +293,24 @@ void TreeFileView::showContextMenu()
             return;
         else
         {
-            menu.setActionEnabled({{ItemMenu::Action::Copy,   false},
-                                   {ItemMenu::Action::Delete, false}});
+            menu.setActionEnabled(ItemMenu::Action::Copy, false,
+                                  ItemMenu::Action::Delete, false);
         }
     }
 
     if (QTreeView::selectedIndexes().isEmpty())
-        menu.setActionEnabled({{ItemMenu::Action::Copy,   false},
-                               {ItemMenu::Action::Delete, false}});
+        menu.setActionEnabled(ItemMenu::Action::Copy, false,
+                              ItemMenu::Action::Delete, false,
+                              ItemMenu::Action::Tree, false);
 
 
     if (lisItem.size() > 1 or not lisItem.first()->getFile()->isDir())
-        menu.setActionEnabled({{ItemMenu::Action::Paste, false},
-                               {ItemMenu::NewFolder,     false}});
+        menu.setActionEnabled(ItemMenu::Action::Paste, false,
+                              ItemMenu::NewFolder, false,
+                              ItemMenu::Tree, false);
 
     if (Iridium::Global::copy_files.empty())
-        menu.setActionEnabled({{ItemMenu::Paste, false}});
+        menu.setActionEnabled(ItemMenu::Paste, false);
 
     ItemMenu::Action action = menu.exec(QCursor::pos());
 
@@ -342,6 +344,30 @@ void TreeFileView::showContextMenu()
         }
         case ItemMenu::Action::NewFolder:
             mkdir();
+            break;
+        case ItemMenu::Action::Tree:
+        {
+            QDialog diag(this);
+            diag.setMinimumSize(400, 400);
+            diag.setWindowTitle(tr("Arborescence"));
+            diag.setLayout(new QVBoxLayout);
+            auto *tree = new QTextEdit(&diag);
+            tree->setReadOnly(true);
+            tree->setWordWrapMode(QTextOption::NoWrap);
+            tree->setStyleSheet(
+                    "QTextEdit{background-color: #282c34; color: #abb2bf; border-radius: 25px; padding: 15px 10px;}");
+            auto rclone = Rclone::create_unique();
+            auto file = dynamic_cast<TreeFileItem *>(_model->itemFromIndex(currentIndex()))->getFile();
+            connect(rclone.get(), &Rclone::finished, this, [&rclone, tree](int exit)
+            {
+                if (exit == 0)
+                    tree->setText(boost::algorithm::join(rclone->readAll(), "\n").c_str());
+            });
+            connect(&diag, &QDialog::finished, rclone.get(), &Rclone::kill);
+            rclone->tree(*file);
+            diag.layout()->addWidget(tree);
+            diag.exec();
+        }
             break;
         default:
             break;

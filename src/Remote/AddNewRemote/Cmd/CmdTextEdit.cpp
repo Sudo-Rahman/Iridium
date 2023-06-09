@@ -15,12 +15,12 @@ CmdTextEdit::CmdTextEdit(QWidget *parent) : QTextEdit(parent)
     connect(this, &CmdTextEdit::cmdOutputReady, this, &CmdTextEdit::append);
 
     // mac os style scroll bar
-    setStyleSheet("QTextEdit{background-color: #282c34; color: #ffffff; border-radius: 25px; padding: 15px 10px;}"
-                  "QScrollBar:vertical {border: none; background: transparent; width: 10px;}"
-                  "QScrollBar::handle:vertical {background: #abb2bf; min-height: 20px; border-radius: 5px;}"
-                  "QScrollBar::add-line:vertical {height: 0px; subcontrol-position: bottom; subcontrol-origin: margin;}"
-                  "QScrollBar::sub-line:vertical { height: 0px; subcontrol-position: top; subcontrol-origin: margin;}"
-                  "QScrollBar::up-arrow:vertical, QScrollBar::down-arrow:vertical {border: none; background: none;}");
+    setStyleSheet("QTextEdit{background-color: #282c34; color: #abb2bf; border-radius: 25px; padding: 15px 10px;}");
+//                  "QScrollBar:vertical {border: none; background: transparent; width: 10px;}"
+//                  "QScrollBar::handle:vertical {background: #abb2bf; min-height: 20px; border-radius: 5px;}"
+//                  "QScrollBar::add-line:vertical {height: 0px; subcontrol-position: bottom; subcontrol-origin: margin;}"
+//                  "QScrollBar::sub-line:vertical { height: 0px; subcontrol-position: top; subcontrol-origin: margin;}"
+//                  "QScrollBar::up-arrow:vertical, QScrollBar::down-arrow:vertical {border: none; background: none;}");
 }
 
 void CmdTextEdit::cursorPosition()

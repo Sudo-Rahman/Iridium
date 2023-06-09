@@ -42,11 +42,15 @@ public:
 
     void stop() override
     {
+        RcloneManager::lockLaunch();
         _stop = true;
+        RcloneManager::erase(_rclones_static);
         for (auto &rclone: _rclones_static)rclone->kill();
         for (auto &rclone: _rclones_dynamic) rclone->kill();
         _rclones_static.clear();
         _rclones_dynamic.clear();
+        _stop = false;
+        RcloneManager::unlockLaunch();
     }
 
 
