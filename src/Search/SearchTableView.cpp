@@ -51,9 +51,11 @@ SearchTableView::SearchTableView(QWidget *parent) : QTableView(parent)
                                                                     horizontalHeader()->count() - 1));
     });
 
-    setStyleSheet("QTableView { outline:none; }");
     setFrameStyle(QFrame::NoFrame);
     setShowGrid(false);
+    setStyleSheet("QTableView { outline:none; }\n"
+                  "QTableView::item:selected:focus { background: palette(highlight); }\n"
+                  "QTableView::item:!selected:focus { background:transparent; }");
 }
 
 void SearchTableView::showCustomContextMenu()

@@ -10,7 +10,6 @@
 #include <QEvent>
 #include <QItemDelegate>
 #include <QPainter>
-#include <chrono>
 #include <QLineEdit>
 #include <QLayout>
 #include <QPushButton>
@@ -20,9 +19,9 @@
 #include <QMimeData>
 #include <QSysInfo>
 #include <QTextEdit>
+#include <boost/algorithm/string/join.hpp>
 #include <Settings.hpp>
 
-using namespace std::chrono;
 
 /**
  * @brief Classe permettant de définir la taille des items

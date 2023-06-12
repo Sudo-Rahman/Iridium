@@ -326,7 +326,8 @@ void Settings::initValues()
         Global::load_type = static_cast<Iridium::Load>(getValue<uint8_t>(LoadType));
         Global::max_depth = getValue<uint8_t>(MaxDepth);
         Global::max_process = getValue<uint8_t>(MaxProcess);
-        Global::path_rclone = getValue<string>(RclonePath);
+        if (getValue<string>(RclonePath).contains("rclone"))
+            Global::path_rclone = getValue<string>(RclonePath);
         Settings::changeDirIcon(static_cast<Settings::ThemeColor>(getValue<uint8_t>(DirIconColor)));
 
     } catch (boost::exception &e)
