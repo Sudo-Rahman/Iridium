@@ -10,8 +10,9 @@ Graphical application for managing remote storage services such as Google Drive,
 - [CMake](https://cmake.org/)
 - [Boost](https://www.boost.org/)
 - [Rclone](https://rclone.org/)
-- [Libcurl](https://curl.se/libcurl/)
-- [LibZip](https://libzip.org/)
+
+[//]: # (- [Libcurl]&#40;https://curl.se/libcurl/&#41;)
+[//]: # (- [LibZip]&#40;https://libzip.org/&#41;)
 
 ## Features
 
@@ -27,7 +28,7 @@ Graphical application for managing remote storage services such as Google Drive,
     - [x] SMB
     - [x] PCloud
     - [x] Box
-    - [ ] ...
+    - [x] ...
 - Manage remote :
   - [x] Copy
   - [x] Paste
@@ -39,6 +40,7 @@ Graphical application for managing remote storage services such as Google Drive,
   - [x] Drag and drop
   - [x] Search
   - [x] Sort by name, size, date, type
+  - [x] Tree view on folder
   - [ ] sync
   - [ ] ...
 
@@ -65,8 +67,9 @@ Graphical application for managing remote storage services such as Google Drive,
 - [Qt](https://www.qt.io/)
 - [CMake](https://cmake.org/)
 - [Boost](https://www.boost.org/)
-- [Libcurl](https://curl.se/libcurl/)
-- [LibZip](https://libzip.org/)
+
+[//]: # (- [Libcurl]&#40;https://curl.se/libcurl/&#41;)
+[//]: # (- [LibZip]&#40;https://libzip.org/&#41;)
 
 ### Compilation
 

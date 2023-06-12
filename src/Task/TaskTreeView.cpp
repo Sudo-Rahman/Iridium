@@ -126,14 +126,19 @@ void TaskTreeView::addTask(const QString &src, const QString &dst, const RcloneP
                            const std::function<void()> &callable, const Rclone::TaskType &type)
 {
     auto idParent = boost::hash<std::string>{}(src.toStdString() + dst.toStdString() + to_string(type));
+
+    // if the task already exist
     if (_tasks.find(idParent) not_eq _tasks.end())
     {
+        // kill the task and remove it from the view
         _tasks[idParent].rclone->kill();
         _tasks[idParent].parent->cancel();
         _model->removeRow(_tasks[idParent].parent->first()->row(),
                           _model->indexFromItem(_tasks[idParent].parent->first()->parent()));
         _tasks.erase(idParent);
     }
+
+    // create the task
     auto task = std::make_shared<TaskRow>(src, dst, boost::json::object(), type, TaskRow::Normal, TaskRow::Parent);
     _tasks.insert({idParent, Tasks{task, rclone, {}}});
     _model->appendRow(*task);
@@ -147,9 +152,11 @@ void TaskTreeView::addTask(const QString &src, const QString &dst, const RcloneP
                 boost::json::array transfer;
                 try
                 {
+                    // if the json contain errors
                     if (obj.at("level").as_string() == "error")
                     {
-//				cout << obj << endl;
+//				        cout << obj << endl;
+                        // chek if task is in the map
                         if (_tasks.find(idParent) == _tasks.end())
                             return;
                         auto object = obj.at("object").as_string();
@@ -160,6 +167,7 @@ void TaskTreeView::addTask(const QString &src, const QString &dst, const RcloneP
                                     src.toStdString() + object.c_str() + dst.toStdString() + object.c_str());
                         else
                             errId = boost::hash<std::string>{}(src.toStdString() + dst.toStdString() + to_string(type));
+                        // if the child is the parent
                         if (idParent == errId)
                         {
                             _tasks[idParent].parent->setState(TaskRow::Error);
@@ -266,15 +274,9 @@ void TaskTreeView::addTask(const QString &src, const QString &dst, const RcloneP
                 auto it = _tasks.find(id);
                 if (it == _tasks.end())
                     return;
-                if (exit == 0)
-                    (*it).second.parent->setState(TaskRow::Finished);
-                else
-                {
-                    (*it).second.parent->setState(TaskRow::Error);
-                    (*it).second.parent->setMessageToolTip(rclone->readAll().back());
-                    (*it).second.parent->progressBar()->error();
-                }
+                (*it).second.parent->setState(TaskRow::Finished);
                 emit taskFinished(*it);
             });
+    // call the rclone function
     callable();
 }

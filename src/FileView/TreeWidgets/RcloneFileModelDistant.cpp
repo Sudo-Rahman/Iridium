@@ -38,12 +38,12 @@ void RcloneFileModelDistant::addItem(const RcloneFilePtr &file, TreeFileItem *pa
 {
     RcloneFileModel::addItem(file, parent);
     if (loadType() == Iridium::Load::Dynamic)
-        addItemDynamic(file->getPath(), parent);
+        addItemDynamic(file, parent);
     else
-        addItemStatic(file->getPath(), parent);
+        addItemStatic(file, parent);
 }
 
-void RcloneFileModelDistant::addItemDynamic(const QString &path, TreeFileItem *parent)
+void RcloneFileModelDistant::addItemDynamic(const RcloneFilePtr &file, TreeFileItem *parent)
 {
     // get rclone instance that is not running
     auto rclone = [this]
@@ -58,11 +58,11 @@ void RcloneFileModelDistant::addItemDynamic(const QString &path, TreeFileItem *p
     auto *tree_item = (parent->getParent() == nullptr ? parent : parent->getParent());
     if (tree_item->state() == TreeFileItem::NotLoaded)
     {
-        connect(rclone.get(), &Rclone::lsJsonFinished, this, [tree_item, path, this](const boost::json::array &array)
+        connect(rclone.get(), &Rclone::lsJsonFinished, this, [tree_item, file, this](const boost::json::array &array)
         {
-            for (const auto &file: array)
+            for (const auto &f: array)
             {
-                auto *item = new TreeFileItemDistant(path, _remote_info, file.as_object());
+                auto *item = new TreeFileItemDistant(file->getPath(), _remote_info, f.as_object());
                 tree_item->appendRow(getItemList(item));
             }
             tree_item->setState(TreeFileItem::Loaded);
@@ -76,11 +76,11 @@ void RcloneFileModelDistant::addItemDynamic(const QString &path, TreeFileItem *p
         connect(rclone.get(), &Rclone::killed, this, [tree_item] { tree_item->setState(TreeFileItem::NotLoaded); });
         connect(rclone.get(), &Rclone::finished, this,
                 [rclone, tree_item](int exit) { if (exit == 0)tree_item->removeRow(0); });
-        rclone->lsJson(path.toStdString());
+        rclone->lsJson(*file);
     }
 }
 
-void RcloneFileModelDistant::addItemStatic(const QString &path, TreeFileItem *parent, uint8_t depth)
+void RcloneFileModelDistant::addItemStatic(const RcloneFilePtr &file, TreeFileItem *parent, uint8_t depth)
 {
     if (depth == 0 or loadType() == Iridium::Load::Dynamic)
         return;
@@ -99,14 +99,14 @@ void RcloneFileModelDistant::addItemStatic(const QString &path, TreeFileItem *pa
             return rclone;
         }();
         connect(rclone.get(), &Rclone::lsJsonFinished, this,
-                [depth, tree_item, rclone, path, this](const boost::json::array &array)
+                [depth, tree_item, rclone, file, this](const boost::json::array &array)
                 {
-                    for (const auto &file: array)
+                    for (const auto &f: array)
                     {
-                        auto *item = new TreeFileItemDistant(path, _remote_info, file.as_object());
+                        auto *item = new TreeFileItemDistant(file->getPath(), _remote_info, f.as_object());
                         tree_item->appendRow(getItemList(item));
-                        if (item->getFile()->isDir() and not rclone->isCanceled() and not _stop)
-                            addItemStatic(item->getFile()->getPath(), item, depth - 1);
+                        if (item->getFile()->isDir()  and not _stop)
+                            addItemStatic(item->getFile(), item, depth - 1);
                     }
                     tree_item->setState(TreeFileItem::Loaded);
                 });
@@ -118,7 +118,7 @@ void RcloneFileModelDistant::addItemStatic(const QString &path, TreeFileItem *pa
         connect(rclone.get(), &Rclone::killed, this, [tree_item] { tree_item->setState(TreeFileItem::NotLoaded); });
         connect(rclone.get(), &Rclone::finished, this,
                 [tree_item](int exit) { if (exit == 0)tree_item->removeRow(0); });
-        rclone->lsJson(path.toStdString());
+        rclone->lsJson(*file);
         RcloneManager::addLockable(rclone);
     } else
     {
@@ -128,7 +128,7 @@ void RcloneFileModelDistant::addItemStatic(const QString &path, TreeFileItem *pa
             if (item == nullptr)
                 continue;
             if (item->getFile()->isDir())
-                addItemStatic(item->getFile()->getPath(), item, depth - 1);
+                addItemStatic(item->getFile(), item, depth - 1);
         }
     }
 }

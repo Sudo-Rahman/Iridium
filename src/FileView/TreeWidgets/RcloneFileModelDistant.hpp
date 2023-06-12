@@ -60,10 +60,10 @@ protected:
     void addItem(const RcloneFilePtr &file, TreeFileItem *parent) override;
 
 private:
-    void addItemDynamic(const QString &path, TreeFileItem *parent);
+    void addItemDynamic(const RcloneFilePtr &file, TreeFileItem *parent);
 
 
-    void addItemStatic(const QString &path, TreeFileItem *parent, uint8_t depth = Iridium::Global::max_depth);
+    void addItemStatic(const RcloneFilePtr &file, TreeFileItem *parent, uint8_t depth = Iridium::Global::max_depth);
 
 };
 

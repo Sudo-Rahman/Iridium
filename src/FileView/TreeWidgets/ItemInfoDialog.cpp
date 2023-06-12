@@ -218,7 +218,7 @@ void ItemInfoDialog::initSize()
                     _objs->setFont({});
                     _size->setFont({});
                 });
-        _rclone->size(_file->getPath().toStdString());
+        _rclone->size(*_file);
     } else
     {
         _size->setText(QString::fromStdString(Utility::numberToString(_file->getSize())) + " octets" + " (" +

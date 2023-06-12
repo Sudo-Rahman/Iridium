@@ -35,10 +35,10 @@ std::map<Rclone::Flag, Rclone::flags_str> Rclone::_map_flags{
 boost::signals2::signal<void(bool)> Rclone::check_rclone;
 
 /**
- * @brief Liste sous forme de json les fichiers dans le dossier path
+ * @brief Rclone::lsJson, list a directory in json format
  * @param path
  */
-void Rclone::lsJson(const string &path)
+void Rclone::lsJson(const RcloneFile &path)
 {
     _finished.connect(
             [this](const int exit)
@@ -58,13 +58,13 @@ void Rclone::lsJson(const string &path)
                     }
                 }
             });
-    _args = {"lsjson", path, "--drive-skip-gdocs", "--fast-list"};
+    _args = {"lsjson", path.getPath().toStdString(), "--drive-skip-gdocs", "--fast-list"};
     if (not _lockable)
         execute();
 }
 
 /**
- * @brief Upload d'un fichier local src vers la destination dest.
+ * @brief Rclone::copyTo, copy a file to a destination
  * @param src
  * @param dest
  */
@@ -92,7 +92,7 @@ void Rclone::copyTo(const RcloneFile &src, const RcloneFile &dest)
 
 
 /**
- * @brief Rclone::deleteFile, supprime un fichier
+ * @brief Rclone::deleteFile, delete a file
  * @param file
  */
 void Rclone::deleteFile(const RcloneFile &file)
@@ -109,7 +109,7 @@ void Rclone::deleteFile(const RcloneFile &file)
 
 
 /**
- * @brief Rclone::config, permet de configurer un nouveau remote
+ * @brief Rclone::config, configure a remote
  * @param type
  * @param params
  */
@@ -159,7 +159,7 @@ void Rclone::config(RemoteType type, const string &name, const vector<string> &p
 
 
 /**
- * @brief Rclone::about, permet de récupérer des informations sur un remote
+ * @brief Rclone::about, rclone about command : get info about remote
  * @param info
  */
 void Rclone::about(const RemoteInfo &info)
@@ -202,7 +202,7 @@ vector<RemoteInfoPtr> Rclone::listRemotes()
 }
 
 /**
- * @brief Rclone::search, permet de rechercher des fichiers dans un remote
+ * @brief Rclone::search, search files in remote
  * @param filters
  * @param info
  */
@@ -245,7 +245,7 @@ void Rclone::search(const vector<Filter> &filters, const RemoteInfo &info)
 }
 
 /**
- * @brief Rclone::tree, execute la commande tree de rclone
+ * @brief Rclone::tree, rclone tree command
  * @param file
  */
 void Rclone::tree(const RcloneFile &file)
@@ -257,7 +257,7 @@ void Rclone::tree(const RcloneFile &file)
 
 
 /**
- * @brief Rclone::deleteRemote, permet de supprimer un remote
+ * @brief Rclone::deleteRemote, delete a remote
  * @param remote
  */
 void Rclone::deleteRemote(const string &remote)
@@ -268,20 +268,18 @@ void Rclone::deleteRemote(const string &remote)
 }
 
 /**
- * @brief Rclone::execute, execute la commande m_rclone avec les arguments args
+ * @brief Rclone::execute, launch child process with args
  * @param args
  */
 void Rclone::execute()
 {
     if (_state == Running)
-        // ptint adress
         throw std::runtime_error("Rclone is running");
     auto rclone_exist = bfs::exists(pathRclone());
-    if (_cancel or not rclone_exist)
+    if (not rclone_exist)
     {
-        if (not rclone_exist)
-            Rclone::check_rclone(false);
-        _cancel = true;
+        Rclone::check_rclone(false);
+        _state = Error;
         _cv.notify_all();
         return;
     }
@@ -318,9 +316,8 @@ void Rclone::execute()
     } catch (boost::process::process_error &e)
     {
         cout << e.what() << endl;
-        _cancel = true;
         _cv.notify_all();
-        _state = Finsished;
+        _state = Error;
         return;
     }
     emit started();
@@ -351,6 +348,11 @@ void Rclone::execute()
             });
 }
 
+/**
+ * @brief Rclone::readLoop, read the output of the process
+ * @param pipe
+ * @param vec
+ */
 void Rclone::readLoop(boost::process::async_pipe &pipe, std::vector<std::string> &vec)
 {
     ba::async_read_until(
@@ -375,7 +377,7 @@ void Rclone::readLoop(boost::process::async_pipe &pipe, std::vector<std::string>
 }
 
 /**
- * @brief Rclone::waitForFinished, attend que le processus rclone se termine
+ * @brief Rclone::waitForFinished, wait for the process to finish
  */
 void Rclone::waitForFinished()
 {
@@ -384,7 +386,7 @@ void Rclone::waitForFinished()
     if (_state == Running)
     {
         unique_lock<mutex> lock(_mutex);
-        _cv.wait(lock, [this] { return _state == Finsished; });
+        _cv.wait(lock, [this] { return _state == Finsished or _state == Error; });
     }
 }
 
@@ -405,7 +407,7 @@ Rclone::~Rclone()
 }
 
 /**
- * @brief Rclone::kill, tue le processus rclone
+ * @brief Rclone::kill, kill the process
  */
 void Rclone::kill()
 {
@@ -418,12 +420,12 @@ void Rclone::kill()
         _thread->join();
         _exit = -1;
     }
-    _state = Stopped;
+    _state = Kill;
     clear();
 }
 
 /**
- * @brief Rclone::reset, ferme les pipes, l'ioc, delete les pointeurs et deconnecte les signaux
+ * @brief Rclone::reset, delete all pointer and disconnect all signal
  */
 void Rclone::reset()
 {
@@ -451,24 +453,23 @@ void Rclone::reset()
     _finished.disconnect_all_slots();
     _readyRead.disconnect_all_slots();
     this->disconnect();
-    _cancel = false;
     _aquired = false;
 }
 
 /**
- * @brief Rclone::waitForStarted, attend que le processus m_rclone démarre
+ * @brief Rclone::waitForStarted, wait for the process to start
  */
 void Rclone::waitForStarted()
 {
     std::unique_lock<std::mutex> lock(_mutex);
-    _cv.wait(lock, [this] { return _state == Running; });
+    _cv.wait(lock, [this] { return _state == Running or _state == Error; });
 }
 
 /**
- * @brief Rclone::size, retourne la taille d'un fichier ou d'un dossier
+ * @brief Rclone::size, get size of a file or directory
  * @param path
  */
-void Rclone::size(const string &path)
+void Rclone::size(const RcloneFile &path)
 {
     _finished.connect(
             [this](const int exit)
@@ -492,13 +493,13 @@ void Rclone::size(const string &path)
                     }
                 }
             });
-    _args = {"size", path, "--json"};
+    _args = {"size", path.getPath().toStdString(), "--json"};
     if (not _lockable)
         execute();
 }
 
 /**
- * @brief retourne la version de rclone
+ * @brief Rclone::version,get rclone version
  * @return version
  */
 string Rclone::version()
@@ -512,7 +513,7 @@ string Rclone::version()
 
 
 /**
- * @brief mkdir, crée un dossier
+ * @brief Rclone::mkdir, Create a new directory.
  * @param dir
  */
 void Rclone::mkdir(const RcloneFile &dir)
@@ -526,7 +527,7 @@ void Rclone::mkdir(const RcloneFile &dir)
 }
 
 /**
- * @brief deplace un fichier src vers dest
+ * @brief Rclone::moveto, Move file or directory from source to dest.
  * @param src
  * @param dest
  */
@@ -540,7 +541,7 @@ void Rclone::moveto(const RcloneFile &src, const RcloneFile &dest)
 }
 
 /**
- * @brief Parse une chaine de caractère en json
+ * @brief Parse string to json
  */
 bj::object Rclone::parseJson(const string &str)
 {
@@ -571,7 +572,7 @@ boost::thread RcloneManager::_launch_thread = boost::thread(
             {
                 try
                 {
-                    // On attend que le nombre de processus rclone soit inférieur au nombre max
+                    // wait for rclone process to be less than max
                     boost::this_thread::interruption_point();
                     unique_lock<mutex> lock(RcloneManager::_launch_mutex);
                     RcloneManager::_launch_cv.wait(lock, []
@@ -584,18 +585,15 @@ boost::thread RcloneManager::_launch_thread = boost::thread(
                     {
                         auto rclone = RcloneManager::_launch_queue.front();
                         RcloneManager::_launch_queue.erase(RcloneManager::_launch_queue.begin());
-                        if (not rclone->isCanceled())
-                        {
-                            rclone->execute();
-                            ++RcloneManager::_rclone_locked;
-                        }
+                        rclone->execute();
+                        ++RcloneManager::_rclone_locked;
                     }
                 } catch (boost::thread_interrupted &e) { break; }
             }
         });
 
 /**
- * @brief RcloneManager::launch, ajout le processus rclone à la queue de lancement
+ * @brief RcloneManager::launch, add a rclone process to the launch queue
  * @param rcloneLocked
  */
 void RcloneManager::addLockable(const RclonePtr &rcloneLocked)
@@ -605,7 +603,7 @@ void RcloneManager::addLockable(const RclonePtr &rcloneLocked)
 }
 
 /**
- * @brief RcloneManager::finished, un processus rclone appel cette fonction lorsqu’il se termine, pour notifier le manager
+ * @brief RcloneManager::finished, rclone process call this function when finished
  */
 void RcloneManager::finished(Rclone *rclone)
 {

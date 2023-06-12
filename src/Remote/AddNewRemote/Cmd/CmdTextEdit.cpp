@@ -26,7 +26,6 @@ CmdTextEdit::CmdTextEdit(QWidget *parent) : QTextEdit(parent)
 void CmdTextEdit::cursorPosition()
 {
     // move the cursor to the end of the line if the user tries to move it on up lines
-
     if (textCursor().blockNumber() < document()->blockCount() - 1)
         moveCursor(QTextCursor::End);
 

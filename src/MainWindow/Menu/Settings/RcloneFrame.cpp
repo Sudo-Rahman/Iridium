@@ -28,7 +28,7 @@ RcloneFrame::RcloneFrame(QWidget *parent) : QFrame(parent)
     button->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     connect(button, &QPushButton::clicked, this, [this]()
     {
-        auto path = QFileDialog::getOpenFileName(this, tr("Chemin vers rclone"), QDir::homePath());
+        auto path = QFileDialog::getOpenFileName(this, tr("Chemin vers rclone"), QDir::homePath(), "rclone");
         if (!path.isEmpty()) _rclone_path->setText(path);
     });
     connect(_rclone_path, &QLineEdit::textChanged, this, [](const QString &path)

@@ -10,9 +10,6 @@
 #define __kernel_entry
 #endif
 
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QJsonArray>
 #include <boost/intrusive/list.hpp>
 #include <boost/signals2.hpp>
 #include <boost/process.hpp>
@@ -47,7 +44,7 @@ public:
 
     enum State
     {
-        NotLaunched, Running, Finsished, Stopped
+        NotLaunched, Running, Finsished, Kill, Error
     };
 
     enum TaskType
@@ -112,19 +109,11 @@ private:
     boost::asio::streambuf _buffer{};
 
     static std::map<Flag, flags_str> _map_flags;
-    bool _lockable, _cancel, _resetable, _aquired = false;
+    bool _lockable, _resetable, _aquired = false;
 
 
 public:
     void kill();
-
-    void cancel()
-    {
-        _readyRead.disconnect_all_slots();
-        _finished.disconnect_all_slots();
-        disconnect();
-        _cancel = true;
-    }
 
     void setLockable(bool lock = true) { _lockable = lock; }
 
@@ -134,15 +123,13 @@ public:
 
     [[nodiscard]] bool isAquired() const { return _aquired; }
 
-    [[nodiscard]] bool isCanceled() const { return _cancel; }
-
     static void setPathRclone(const std::string &pathRclone) { Iridium::Global::path_rclone = pathRclone; }
 
     static std::string pathRclone() { return Iridium::Global::path_rclone; }
 
     void config(RemoteType type, const std::string &name, const std::vector<std::string> &args = {});
 
-    void lsJson(const std::string &path);
+    void lsJson(const RcloneFile &);
 
     void copyTo(const RcloneFile &src, const RcloneFile &dest);
 
@@ -156,7 +143,7 @@ public:
 
     std::vector<RemoteInfoPtr> listRemotes();
 
-    void size(const std::string &path);
+    void size(const RcloneFile &);
 
     std::string version();
 
@@ -266,7 +253,9 @@ public:
     }
 
     static void lockLaunch() { lock_launch = true; }
+
     static void unlockLaunch() { lock_launch = false; }
+
     static bool isLaunchLocked() { return lock_launch; }
 
     static void stopAll()
@@ -286,6 +275,7 @@ public:
         for (const auto &rclone: rclones)
             erase(rclone);
     }
+
 private:
 
     static void finished(Rclone *);

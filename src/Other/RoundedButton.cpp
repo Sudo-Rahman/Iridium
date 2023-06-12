@@ -33,8 +33,16 @@ void RoundedButton::paintEvent(QPaintEvent *event)
 
     // draw rounded rect
     QRect rect = this->rect().marginsRemoved(QMargins(5, 5, 5, 5));
-    rect.setWidth(rect.width());
-    rect.setHeight(rect.height());
+    if (_hover)
+    {
+        rect.setWidth(rect.width() + 1);
+        rect.setHeight(rect.height() + 1);
+    } else
+    {
+
+        rect.setWidth(rect.width());
+        rect.setHeight(rect.height());
+    }
     painter.drawRoundedRect(rect, 10, 10);
 
     // draw text

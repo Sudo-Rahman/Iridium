@@ -163,7 +163,9 @@ void Settings::deleteRemote(const RemoteInfoPtr &remoteInfo)
 void Settings::init()
 {
     // init rclone path
-    auto rclonePath = dll::program_location().parent_path().append("rclone");
+    auto rclonePath = boost::process::search_path("rclone");
+    if (rclonePath.empty())
+        rclonePath = dll::program_location().parent_path().append("rclone");
     if (QSysInfo::productType() == "windows")
         rclonePath += ".exe";
     Global::path_rclone = rclonePath.string();
