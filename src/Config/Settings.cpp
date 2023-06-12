@@ -165,9 +165,11 @@ void Settings::init()
     // init rclone path
     auto rclonePath = boost::process::search_path("rclone");
     if (rclonePath.empty())
+    {
         rclonePath = dll::program_location().parent_path().append("rclone");
-    if (QSysInfo::productType() == "windows")
-        rclonePath += ".exe";
+        if (QSysInfo::productType() == "windows")
+            rclonePath += ".exe";
+    }
     Global::path_rclone = rclonePath.string();
 
     Settings::HARDDRIVE_ICON = QIcon::fromTheme("drive-harddisk-solidstate");
