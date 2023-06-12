@@ -62,7 +62,6 @@ private:
 
     void updateDataChild();
 
-
 public:
 
     explicit TaskRow(const QString &src, const QString &dest, const boost::json::object &,
@@ -84,6 +83,7 @@ public:
 
     void setState(const State &state);
 
+    void cancel();
 
     void terminate();
 };

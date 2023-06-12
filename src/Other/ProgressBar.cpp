@@ -31,6 +31,7 @@ ProgressBar::ProgressBar(const ProgressBar::Type &type, QWidget *parent) : QWidg
 void ProgressBar::setValue(double_t mValue)
 {
     _value = mValue;
+    _state = Progress;
     if (_max_value == _value)
         success();
     else

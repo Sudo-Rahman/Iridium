@@ -75,8 +75,8 @@ TaskTreeView::TaskTreeView(QWidget *parent) : QTreeView(parent)
                 if (it not_eq _tasks.end())
                 {
                     it->second.rclone->kill();
-                    _model->removeRows(indexes[i].row(), 1, indexes[i].parent());
-                    erase_if(_tasks, [it](const auto &t) { return t.first == it->first; });
+                    _model->removeRow(indexes[i].row(), indexes[i].parent());
+                    _tasks.erase(it);
                 }
             }
         });
@@ -100,21 +100,19 @@ TaskTreeView::TaskTreeView(QWidget *parent) : QTreeView(parent)
                 if (it not_eq _tasks.end())
                 {
                     it->second.rclone->kill();
-                    it->second.parent->setState(TaskRow::State::Cancelled);
+                    it->second.parent->cancel();
                     for (const auto &child: it->second.children)
-                        child.second->setState(TaskRow::State::Cancelled);
-                    erase_if(_tasks, [it](const auto &t) { return t.first == it->first; });
+                        child.second->cancel();
                 }
             }
             return;
         }
     });
 
-    connect(this, &TaskTreeView::taskFinished, this, [this](std::pair<size_t, Tasks> task)
+    connect(this, &TaskTreeView::taskFinished, this, [](const std::pair<size_t, Tasks> &task)
     {
         if (task.second.parent->state() not_eq TaskRow::State::Error)
             task.second.parent->terminate();
-        erase_if(_tasks, [task](const auto &t) { return t.first == task.first; });
     });
 }
 
@@ -127,9 +125,15 @@ TaskTreeView::TaskTreeView(QWidget *parent) : QTreeView(parent)
 void TaskTreeView::addTask(const QString &src, const QString &dst, const RclonePtr &rclone,
                            const std::function<void()> &callable, const Rclone::TaskType &type)
 {
-    auto idParent = boost::hash<std::string>{}(src.toStdString() + dst.toStdString());
-    if (_tasks.find(idParent) != _tasks.end())
-        return;
+    auto idParent = boost::hash<std::string>{}(src.toStdString() + dst.toStdString() + to_string(type));
+    if (_tasks.find(idParent) not_eq _tasks.end())
+    {
+        _tasks[idParent].rclone->kill();
+        _tasks[idParent].parent->cancel();
+        _model->removeRow(_tasks[idParent].parent->first()->row(),
+                          _model->indexFromItem(_tasks[idParent].parent->first()->parent()));
+        _tasks.erase(idParent);
+    }
     auto task = std::make_shared<TaskRow>(src, dst, boost::json::object(), type, TaskRow::Normal, TaskRow::Parent);
     _tasks.insert({idParent, Tasks{task, rclone, {}}});
     _model->appendRow(*task);
@@ -155,7 +159,7 @@ void TaskTreeView::addTask(const QString &src, const QString &dst, const RcloneP
                             errId = boost::hash<std::string>{}(
                                     src.toStdString() + object.c_str() + dst.toStdString() + object.c_str());
                         else
-                            errId = boost::hash<std::string>{}(src.toStdString() + dst.toStdString());
+                            errId = boost::hash<std::string>{}(src.toStdString() + dst.toStdString() + to_string(type));
                         if (idParent == errId)
                         {
                             _tasks[idParent].parent->setState(TaskRow::Error);
@@ -249,14 +253,15 @@ void TaskTreeView::addTask(const QString &src, const QString &dst, const RcloneP
             });
 
     connect(rclone.get(), &Rclone::finished, this,
-            [src, dst, rclone, this](int exit)
+            [src, dst, rclone, type, this](int exit)
             {
+                if (exit not_eq 0) return;
                 boost::json::object json;
                 size_t id;
                 try
                 {
                     id = boost::hash<std::string>{}(
-                            src.toStdString() + dst.toStdString());
+                            src.toStdString() + dst.toStdString() + to_string(type));
                 } catch (const boost::wrapexcept<std::invalid_argument> &e) { return; }
                 auto it = _tasks.find(id);
                 if (it == _tasks.end())

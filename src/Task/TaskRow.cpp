@@ -329,6 +329,18 @@ void TaskRow::init()
     averageSpeed->setText("0 B/s");
 }
 
+void TaskRow::cancel() {
+    if (_state not_eq TaskRow::Finished and _state not_eq TaskRow::Error)
+    {
+        _state = TaskRow::Cancelled;
+        _elapsed_time.stop();
+        _progressBar->error();
+        this->at(5)->setText(QObject::tr("Annulé"));
+        this->at(6)->setText("00:00:00");
+        this->at(7)->setText("00:00:00");
+    }
+}
+
 void TaskRow::setState(const TaskRow::State &state)
 {
     _state = state;
@@ -344,8 +356,7 @@ void TaskRow::setState(const TaskRow::State &state)
             error();
             break;
         case TaskRow::Cancelled:
-            if (_state not_eq TaskRow::Finished and _state not_eq TaskRow::Error)
-                at(5)->setText(QObject::tr("Annulé"));
+            cancel();
             break;
     }
 }
