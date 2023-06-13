@@ -11,6 +11,7 @@
 #include <QDirIterator>
 #include <QProxyStyle>
 #include <memory>
+#include <Settings.hpp>
 
 SearchTableView::SearchTableView(QWidget *parent) : QTableView(parent)
 {
@@ -53,9 +54,10 @@ SearchTableView::SearchTableView(QWidget *parent) : QTableView(parent)
 
     setFrameStyle(QFrame::NoFrame);
     setShowGrid(false);
-    setStyleSheet("QTableView { outline:none; }\n"
-                  "QTableView::item:selected:focus { background: palette(highlight); }\n"
-                  "QTableView::item:!selected:focus { background:transparent; }");
+    if (Settings::getSystem().os not_eq Settings::MacOs)
+        setStyleSheet("QTableView { outline:none; }\n"
+                      "QTableView::item:selected:focus { background: palette(highlight); }\n"
+                      "QTableView::item:!selected:focus { background:transparent; }");
 }
 
 void SearchTableView::showCustomContextMenu()
@@ -65,13 +67,13 @@ void SearchTableView::showCustomContextMenu()
         return;
     auto menu = QMenu(this);
     auto copie = menu.addAction(tr("Copier les fichiers"));
-    copie->setIcon(style()->standardIcon(QStyle::SP_DialogOpenButton));
+    copie->setIcon(QIcon(":/ressources/copy.png"));
     switch (items.size() / horizontalHeader()->count())
     {
         case 1:
         {
             auto parent = menu.addAction(tr("Copier le dossier parent"));
-            parent->setIcon(style()->standardIcon(QStyle::SP_DirIcon));
+            parent->setIcon(Settings::dirIcon());
             copie->setText(tr("Copier le fichier"));
             connect(parent, &QAction::triggered, this, [this, items]()
             {
@@ -198,7 +200,8 @@ void SearchTableView::searchDistant(const std::vector<Rclone::Filter> &filters, 
         auto rclone = Rclone::create_shared();
         _rclones.push_back(rclone);
         return rclone;
-    }();
+    }
+    ();
     emit searchStarted();
     connect(rclone.get(), &Rclone::searchRefresh,
             [this, remoteInfo](boost::json::object file)

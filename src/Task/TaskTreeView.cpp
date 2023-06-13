@@ -59,12 +59,12 @@ TaskTreeView::TaskTreeView(QWidget *parent) : QTreeView(parent)
         auto cancel = menu.addAction(
                 size > 1 ? QObject::tr("Annuler les %1 tâches").arg(size) :
                 QObject::tr("Annuler la tâche"));
-        cancel->setIcon(style()->standardIcon(QStyle::SP_DialogCancelButton));
+        cancel->setIcon(QIcon(":/ressources/cancel.png"));
 
         auto remove = menu.addAction(
                 size > 1 ? QObject::tr("Supprimer les %1 tâches").arg(size) :
                 QObject::tr("Supprimer la tâche"));
-        remove->setIcon(style()->standardIcon(QStyle::SP_TrashIcon));
+        remove->setIcon(QIcon(":/ressources/trash.png"));
         connect(remove, &QAction::triggered, this, [this]()
         {
             auto indexes = QTreeView::selectedIndexes();
@@ -263,7 +263,7 @@ void TaskTreeView::addTask(const QString &src, const QString &dst, const RcloneP
     connect(rclone.get(), &Rclone::finished, this,
             [src, dst, rclone, type, this](int exit)
             {
-                if (exit not_eq 0) return;
+                if (rclone->state() == Rclone::Kill) return;
                 boost::json::object json;
                 size_t id;
                 try
@@ -274,7 +274,14 @@ void TaskTreeView::addTask(const QString &src, const QString &dst, const RcloneP
                 auto it = _tasks.find(id);
                 if (it == _tasks.end())
                     return;
-                (*it).second.parent->setState(TaskRow::Finished);
+                if (exit == 0)
+                    (*it).second.parent->setState(TaskRow::Finished);
+                else
+                {
+                    (*it).second.parent->setState(TaskRow::Error);
+                    (*it).second.parent->setMessageToolTip(rclone->readAll().back());
+                    (*it).second.parent->progressBar()->error();
+                }
                 emit taskFinished(*it);
             });
     // call the rclone function

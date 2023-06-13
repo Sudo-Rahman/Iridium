@@ -21,6 +21,15 @@
         <file>ressources/arrow-up.png</file>
         <file>ressources/edit.png</file>
         <file>ressources/tree.png</file>
+        <file>ressources/copy.png</file>
+        <file>ressources/information.png</file>
+        <file>ressources/copy.png</file>
+        <file>ressources/paste.png</file>
+        <file>ressources/new-folder.png</file>
+        <file>ressources/file.png</file>
+        <file>ressources/delete.png</file>
+        <file>ressources/cancel.png</file>
+        <file>ressources/trash.png</file>
         <file>icons/fluent/index.theme</file>
         <file>icons/fluent/scalable/places</file>
         <file>icons/fluent/scalable/mimetypes</file>

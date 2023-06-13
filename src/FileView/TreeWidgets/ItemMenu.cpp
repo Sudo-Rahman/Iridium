@@ -44,11 +44,11 @@ ItemMenu::ItemMenu(QWidget *parent) : QMenu(parent)
     });
 
     // add icons
-    _info->setIcon(style()->standardIcon(QStyle::SP_FileDialogInfoView));
-    _copy->setIcon(style()->standardIcon(QStyle::SP_DialogOpenButton));
-    _paste->setIcon(style()->standardIcon(QStyle::SP_DialogOpenButton));
-    _delete->setIcon(style()->standardIcon(QStyle::SP_DialogCancelButton));
-    _new_folder->setIcon(style()->standardIcon(QStyle::SP_FileDialogNewFolder));
+    _info->setIcon(QIcon(":/ressources/information.png"));
+    _copy->setIcon(QIcon(":/ressources/copy.png"));
+    _paste->setIcon(QIcon(":/ressources/paste.png"));
+    _delete->setIcon(QIcon(":/ressources/delete.png"));
+    _new_folder->setIcon(QIcon(":/ressources/new-folder.png"));
     _tree->setIcon(QIcon(":/ressources/tree.png"));
 
     // show shortcuts
