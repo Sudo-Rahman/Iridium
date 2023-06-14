@@ -58,14 +58,10 @@ void RcloneFileModelDistant::addItemDynamic(const RcloneFilePtr &file, TreeFileI
     auto *tree_item = (parent->getParent() == nullptr ? parent : parent->getParent());
     if (tree_item->state() == TreeFileItem::NotLoaded)
     {
-        connect(rclone.get(), &Rclone::lsJsonFinished, this, [tree_item, file, this](const boost::json::array &array)
+        connect(rclone.get(), &Rclone::readDataJson, this, [tree_item, file, this](const boost::json::object &obj)
         {
-            for (const auto &f: array)
-            {
-                auto *item = new TreeFileItemDistant(file->getPath(), _remote_info, f.as_object());
-                tree_item->appendRow(getItemList(item));
-            }
-            tree_item->setState(TreeFileItem::Loaded);
+            auto *item = new TreeFileItemDistant(file->getPath(), _remote_info, obj);
+            tree_item->appendRow(getItemList(item));
         });
         connect(rclone.get(), &Rclone::started, this, [this, tree_item]
         {
@@ -75,7 +71,11 @@ void RcloneFileModelDistant::addItemDynamic(const RcloneFilePtr &file, TreeFileI
         connect(rclone.get(), &Rclone::finished, rclone.get(), &Rclone::clear);
         connect(rclone.get(), &Rclone::killed, this, [tree_item] { tree_item->setState(TreeFileItem::NotLoaded); });
         connect(rclone.get(), &Rclone::finished, this,
-                [rclone, tree_item](int exit) { if (exit == 0)tree_item->removeRow(0); });
+                [rclone, tree_item](int exit)
+                {
+                    if (exit == 0)tree_item->removeRow(0);
+                    tree_item->setState(TreeFileItem::Loaded);
+                });
         rclone->lsJson(*file);
     }
 }
@@ -98,17 +98,13 @@ void RcloneFileModelDistant::addItemStatic(const RcloneFilePtr &file, TreeFileIt
             rclone->setLockable(true);
             return rclone;
         }();
-        connect(rclone.get(), &Rclone::lsJsonFinished, this,
-                [depth, tree_item, rclone, file, this](const boost::json::array &array)
+        connect(rclone.get(), &Rclone::readDataJson, this,
+                [depth, tree_item, rclone, file, this](const boost::json::object &obj)
                 {
-                    for (const auto &f: array)
-                    {
-                        auto *item = new TreeFileItemDistant(file->getPath(), _remote_info, f.as_object());
-                        tree_item->appendRow(getItemList(item));
-                        if (item->getFile()->isDir()  and not _stop)
-                            addItemStatic(item->getFile(), item, depth - 1);
-                    }
-                    tree_item->setState(TreeFileItem::Loaded);
+                    auto *item = new TreeFileItemDistant(file->getPath(), _remote_info, obj);
+                    tree_item->appendRow(getItemList(item));
+                    if (item->getFile()->isDir() and not _stop)
+                        addItemStatic(item->getFile(), item, depth - 1);
                 });
         connect(rclone.get(), &Rclone::started, this, [tree_item, this]
         {
@@ -117,7 +113,11 @@ void RcloneFileModelDistant::addItemStatic(const RcloneFilePtr &file, TreeFileIt
         });
         connect(rclone.get(), &Rclone::killed, this, [tree_item] { tree_item->setState(TreeFileItem::NotLoaded); });
         connect(rclone.get(), &Rclone::finished, this,
-                [tree_item](int exit) { if (exit == 0)tree_item->removeRow(0); });
+                [tree_item](int exit)
+                {
+                    if (exit == 0)tree_item->removeRow(0);
+                    tree_item->setState(TreeFileItem::Loaded);
+                });
         rclone->lsJson(*file);
         RcloneManager::addLockable(rclone);
     } else

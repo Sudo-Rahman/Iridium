@@ -203,7 +203,7 @@ void SearchTableView::searchDistant(const std::vector<Rclone::Filter> &filters, 
     }
     ();
     emit searchStarted();
-    connect(rclone.get(), &Rclone::searchRefresh,
+    connect(rclone.get(), &Rclone::readDataJson,
             [this, remoteInfo](boost::json::object file)
             {
                 _rows.push_back({std::move(file), remoteInfo});
@@ -211,7 +211,7 @@ void SearchTableView::searchDistant(const std::vector<Rclone::Filter> &filters, 
     connect(rclone.get(), &Rclone::finished, this, [this]()
     {
         terminateSearch();
-        erase_if(_rclones, [this](const RclonePtr &rclone)
+        erase_if(_rclones, [](const RclonePtr &rclone)
         {
             return rclone->state() == Rclone::State::Finsished;
         });

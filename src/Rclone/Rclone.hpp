@@ -129,7 +129,7 @@ public:
 
     void config(RemoteType type, const std::string &name, const std::vector<std::string> &args = {});
 
-    void lsJson(const RcloneFile &);
+    void lsJson(const RcloneFile &, bool recursive = false);
 
     void copyTo(const RcloneFile &src, const RcloneFile &dest);
 
@@ -211,14 +211,11 @@ signals:
 
     void killed();
 
-    void lsJsonFinished(const boost::json::array);
+    void readDataJson(const boost::json::object);
 
-    void taskProgress(const boost::json::object);
+    void readData(const std::string);
 
     void sizeFinished(uint32_t objs, uint64_t size, std::string strSize);
-
-    void searchRefresh(boost::json::object obj);
-
 };
 
 typedef std::shared_ptr<Rclone> RclonePtr;

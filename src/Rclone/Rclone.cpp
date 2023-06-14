@@ -38,27 +38,30 @@ boost::signals2::signal<void(bool)> Rclone::check_rclone;
  * @brief Rclone::lsJson, list a directory in json format
  * @param path
  */
-void Rclone::lsJson(const RcloneFile &path)
+void Rclone::lsJson(const RcloneFile &path, bool recursive)
 {
-    _finished.connect(
-            [this](const int exit)
+    _readyRead.connect(
+            [this](const string &data)
             {
-                if (exit == 0)
+                try
                 {
-                    try
+                    regex reg(R"(\{.*\})");
+                    smatch match;
+                    if (regex_search(data, match, reg))
                     {
-                        auto joinStr = boost::algorithm::join(_out, "");
-                        auto array = boost::json::parse(joinStr).as_array();
-                        emit lsJsonFinished(std::move(array));
-                    } catch (boost::exception &e)
-                    {
-                        emit lsJsonFinished(std::move(bj::array()));
-                        cerr << boost::algorithm::join(_out, "") << endl;
-                        cerr << "Error: " << boost::diagnostic_information(e) << endl;
+                        auto obj = bj::parse(match[0].str());
+                        emit readDataJson(std::move(obj.as_object()));
                     }
+                } catch (boost::exception &e)
+                {
+//                        emit lsJsonFinished(std::move(bj::array()));
+                    cerr << boost::algorithm::join(_out, "") << endl;
+                    cerr << "Error: " << boost::diagnostic_information(e) << endl;
                 }
             });
     _args = {"lsjson", path.getPath().toStdString(), "--drive-skip-gdocs", "--fast-list"};
+    if (recursive)
+        _args.emplace_back("--recursive");
     if (not _lockable)
         execute();
 }
@@ -83,7 +86,7 @@ void Rclone::copyTo(const RcloneFile &src, const RcloneFile &dest)
                 {
                     _map_data.clear();
                     _map_data.emplace("json", boost::json::serialize(json));
-                    emit taskProgress(std::move(json));
+                    emit readDataJson(std::move(json));
                 }
             });
     if (not _lockable)
@@ -230,7 +233,7 @@ void Rclone::search(const vector<Filter> &filters, const RemoteInfo &info)
                     auto name = path.substr(path.find_last_of('/') + 1, path.size() - 1);
                     json.emplace("Name", name);
                     json.emplace("IsDir", false);
-                    emit searchRefresh(std::move(json));
+                    emit readDataJson(std::move(json));
                 } catch (...)
                 {
                     std::cerr << " probleme search " << line << std::endl;

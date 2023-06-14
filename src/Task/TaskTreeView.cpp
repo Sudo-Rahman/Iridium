@@ -146,7 +146,7 @@ void TaskTreeView::addTask(const QString &src, const QString &dst, const RcloneP
     setIndexWidget(task->progressBarIndex(), task->progressBar());
 
 
-    connect(rclone.get(), &Rclone::taskProgress, this,
+    connect(rclone.get(), &Rclone::readDataJson, this,
             [this, src, dst, rclone, type, idParent](const boost::json::object &obj)
             {
                 boost::json::array transfer;
