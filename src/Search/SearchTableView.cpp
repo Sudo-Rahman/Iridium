@@ -9,7 +9,6 @@
 #include <QMenu>
 #include <Global.hpp>
 #include <QDirIterator>
-#include <QProxyStyle>
 #include <memory>
 #include <Settings.hpp>
 

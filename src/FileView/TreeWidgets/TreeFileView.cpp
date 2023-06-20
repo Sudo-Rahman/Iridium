@@ -293,20 +293,23 @@ void TreeFileView::showContextMenu()
         else
         {
             menu.setActionEnabled(ItemMenu::Action::Copy, false,
-                                  ItemMenu::Action::Delete, false);
+                                  ItemMenu::Action::Delete, false,
+                                  ItemMenu::Action::Sync, false);
         }
     }
 
     if (QTreeView::selectedIndexes().isEmpty())
         menu.setActionEnabled(ItemMenu::Action::Copy, false,
                               ItemMenu::Action::Delete, false,
-                              ItemMenu::Action::Tree, false);
+                              ItemMenu::Action::Tree, false,
+                              ItemMenu::Action::Sync, false);
 
 
     if (lisItem.size() > 1 or not lisItem.first()->getFile()->isDir())
         menu.setActionEnabled(ItemMenu::Action::Paste, false,
                               ItemMenu::NewFolder, false,
-                              ItemMenu::Tree, false);
+                              ItemMenu::Tree, false,
+                              ItemMenu::Sync, false);
 
     if (Iridium::Global::copy_files.empty())
         menu.setActionEnabled(ItemMenu::Paste, false);
@@ -367,6 +370,10 @@ void TreeFileView::showContextMenu()
             diag.layout()->addWidget(tree);
             diag.exec();
         }
+            break;
+        case ItemMenu::Action::Sync:
+            Iridium::Global::sync_dirs.push_back(
+                    dynamic_cast<TreeFileItem *>(_model->itemFromIndex(currentIndex()))->getFile());
             break;
         default:
             break;

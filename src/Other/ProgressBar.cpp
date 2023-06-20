@@ -8,6 +8,10 @@
 
 ProgressBar::ProgressBar(const ProgressBar::Type &type, QWidget *parent) : QWidget(parent)
 {
+    if(type == Circular)
+        setMinimumSize(100, 100);
+    else
+        setMinimumHeight(10);
     _type = type;
     _max_value = 100;
     _min_value = 0;

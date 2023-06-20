@@ -51,6 +51,7 @@ include_directories(src
         src/Other
         src/Rclone
         src/Search
+        src/Sync
         src/Remote
         src/Remote/AddNewRemote
         src/Remote/ListRemote

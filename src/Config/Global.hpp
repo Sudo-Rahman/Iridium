@@ -17,6 +17,7 @@ namespace Iridium
     struct Global
     {
         static std::vector<RcloneFilePtr> copy_files;
+        static std::vector<RcloneFilePtr> sync_dirs;
         static std::vector<RemoteInfoPtr> remotes;
         static uint8_t max_process;
         static std::string path_rclone;

@@ -11,7 +11,7 @@
 #include <QFile>
 #include <QDir>
 #include <QIcon>
-#include <QJsonDocument>
+#include <boost/json.hpp>
 #include <Remote.h>
 
 class RcloneFile : public QObject
@@ -71,6 +71,8 @@ public:
     [[nodiscard]] QIcon getIcon();
 
     [[nodiscard]] RcloneFile getParentDir() const;
+
+    static RcloneFile fromJson(const boost::json::object &json, const RemoteInfoPtr &remoteInfo);
 
     // define copy operator and copy constructor
     RcloneFile(const RcloneFile &other)

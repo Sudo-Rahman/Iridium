@@ -9,7 +9,8 @@ using namespace std;
 using namespace Iridium;
 
 
-vector<RcloneFilePtr> Global::copy_files = {};
+vector<RcloneFilePtr> Global::copy_files{};
+vector<RcloneFilePtr> Global::sync_dirs{};
 vector<RemoteInfoPtr> Global::remotes{};
 uint8_t Global::max_process = thread::hardware_concurrency();
 string Global::path_rclone;

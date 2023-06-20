@@ -206,3 +206,19 @@ RcloneFile RcloneFile::getParentDir() const
     return rcloneFile;
 }
 
+RcloneFile RcloneFile::fromJson(const boost::json::object &json, const RemoteInfoPtr &remoteInfo)
+{
+    try
+    {
+        auto path = remoteInfo->path + json.at("Path").as_string().c_str();
+        auto size = json.at("Size").as_int64();
+        auto dir = json.at("IsDir").as_bool();
+        auto modTime = QDateTime::fromString(json.at("ModTime").as_string().c_str(), Qt::ISODateWithMs);
+        return {path.c_str(), (uint64_t)size, dir, modTime, remoteInfo};
+    } catch (boost::exception &e)
+    {
+        std::cout << "Error while parsing json: " << diagnostic_information_what(e, true) << std::endl;
+    }
+    return {"null",remoteInfo};
+}
+
