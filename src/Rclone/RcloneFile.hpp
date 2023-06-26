@@ -94,6 +94,14 @@ public:
         os << "remoteInfo: " << file._remote_info->name() << std::endl;
         return os;
     }
+
+    bool operator==(const RcloneFile &rhs) const
+    {
+        return _path == rhs._path &&
+               _is_dir == rhs._is_dir &&
+               _mod_time == rhs._mod_time &&
+               _remote_info == rhs._remote_info;
+    }
 };
 
 typedef std::shared_ptr<RcloneFile> RcloneFilePtr;

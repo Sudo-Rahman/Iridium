@@ -8,6 +8,7 @@
 #include "ItemMenu.hpp"
 #include "ItemInfoDialog.hpp"
 #include <QEvent>
+#include <QScrollEvent>
 #include <QItemDelegate>
 #include <QPainter>
 #include <QLineEdit>
@@ -66,7 +67,7 @@ void TreeFileView::initUI()
     header()->setStretchLastSection(false);
     setContextMenuPolicy(Qt::CustomContextMenu);
 
-    _search_line_edit = new RoundedLineEdit(viewport());
+    _search_line_edit = new RoundedLineEdit(this);
     _search_line_edit->setClearButtonEnabled(false);
     _search_line_edit->hide();
     _search_line_edit->setPlaceholderText("Search");
@@ -610,7 +611,7 @@ void TreeFileView::deleteFile(const QList<TreeFileItem *> &items)
         auto rclone = Rclone::create_shared();
         connect(rclone.get(), &Rclone::finished, this, [this, files, item, rclone](const int exit)
         {
-            if (exit == 0)
+            if (exit == 0 and item not_eq nullptr)
                 _model->removeRow(item->row(), _model->indexFromItem(item).parent());
         });
         emit taskAdded(item->getFile()->getPath(), "--", rclone, [rclone, item]()
@@ -989,11 +990,9 @@ bool TreeFileView::event(QEvent *event)
         case QEvent::FocusOut :
             break;
         case QEvent::PaletteChange :
-
             break;
         default:
             break;
-
     }
     return QTreeView::event(event);
 }
@@ -1004,12 +1003,12 @@ bool TreeFileView::event(QEvent *event)
 void TreeFileView::showSearchLine()
 {
     _search_line_edit->clear();
-    _search_line_edit->setFixedWidth(viewport()->width() * .4);
+    _search_line_edit->setFixedWidth(int(width() * .4));
     if (_search_line_edit->isHidden())
     {
         // move search line edit to bottom right
-        auto x_y = QPoint((viewport()->width() * .97) - _search_line_edit->width(),
-                          (viewport()->height() * .99) - _search_line_edit->height());
+        auto x_y = QPoint(int(width() * .95) - _search_line_edit->width(),
+                          int(height() * .95) - _search_line_edit->height());
         _search_line_edit->move(x_y);
         _search_line_edit->show();
     }

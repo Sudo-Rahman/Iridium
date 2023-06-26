@@ -74,7 +74,6 @@ protected slots:
 
 
 private:
-
     void initUI();
 
     QString getPath();

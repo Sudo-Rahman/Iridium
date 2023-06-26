@@ -23,7 +23,7 @@ class TaskTreeView : public QTreeView
 {
 Q_OBJECT
 
-    std::unordered_map<size_t, Tasks> _tasks{};
+    static std::unordered_map<size_t, Tasks> _tasks;
 
     QStandardItemModel *_model{};
 

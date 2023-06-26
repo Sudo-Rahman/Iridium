@@ -13,6 +13,8 @@
 using namespace std;
 using namespace boost;
 
+std::unordered_map<size_t, Tasks> TaskTreeView::_tasks;
+
 /**
  * @brief TaskTreeView::TaskTreeView
  * @param parent
