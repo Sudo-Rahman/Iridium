@@ -59,6 +59,8 @@ protected:
 
     void addItem(const RcloneFilePtr &file, TreeFileItem *parent) override;
 
+    void reload(TreeFileItem *item = nullptr) override;
+
 private:
     void addItemDynamic(const RcloneFilePtr &file, TreeFileItem *parent);
 

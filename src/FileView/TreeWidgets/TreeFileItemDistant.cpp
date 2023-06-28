@@ -21,7 +21,7 @@ TreeFileItemDistant::TreeFileItemDistant(const QString &path, const RemoteInfoPt
         initIcon();
         if (_file->isDir())
         {
-            appendRow({new QStandardItem, new QStandardItem, new QStandardItem, new QStandardItem});
+            appendRow(TreeFileItem::decorateList());
         } else
             setFlags(flags() & ~Qt::ItemIsDropEnabled);
     } catch (...)

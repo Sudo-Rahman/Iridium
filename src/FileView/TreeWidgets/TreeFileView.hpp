@@ -32,10 +32,17 @@ Q_OBJECT
 
     RoundedLineEdit *_search_line_edit{};
 
+    boost::thread _reload_thread{};
+
 public:
     explicit TreeFileView(const RemoteInfoPtr &remoteInfo, QWidget *parent = nullptr);
 
     explicit TreeFileView(QWidget *parent = nullptr);
+
+    ~TreeFileView() override{
+        _reload_thread.interrupt();
+        _reload_thread.join();
+    }
 
     void back();
 
@@ -99,6 +106,8 @@ private:
     void showContextMenu();
 
     void showSearchLine();
+
+    void autoReload();
 
 signals:
 

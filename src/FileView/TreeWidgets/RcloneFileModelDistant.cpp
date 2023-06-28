@@ -25,7 +25,7 @@ void RcloneFileModelDistant::init()
     drive->getFile()->setSize(0);
     drive->setIcon(QIcon(_remote_info->icon.c_str()));
     _root_index = drive->index();
-    drive->appendRow({new QStandardItem, new QStandardItem, new QStandardItem, new QStandardItem});
+    drive->appendRow(TreeFileItem::decorateList());
     appendRow({
                       drive,
                       new TreeFileItem(1, drive->getFile(), drive),
@@ -132,3 +132,9 @@ void RcloneFileModelDistant::addItemStatic(const RcloneFilePtr &file, TreeFileIt
         }
     }
 }
+
+void RcloneFileModelDistant::reload(TreeFileItem *parent)
+{
+
+}
+

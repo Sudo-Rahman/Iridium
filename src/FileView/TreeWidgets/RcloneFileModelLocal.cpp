@@ -29,14 +29,23 @@ void RcloneFileModelLocal::addItem(const RcloneFilePtr &file, TreeFileItem *pare
         _thread = std::make_unique<boost::thread>(
                 [this, tree_item, file]()
                 {
-                    tree_item->removeRow(0);
+                    if (dynamic_cast<TreeFileItemLocal *>(tree_item->child(0)) == nullptr) tree_item->removeRow(0);
+
                     auto list_file = QDir(file->getPath()).entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries);
+                    auto files = filesInFolder(tree_item);
                     for (const QFileInfo &info: list_file)
                     {
                         boost::this_thread::interruption_point();
                         auto *item = new TreeFileItemLocal(info.filePath(), _remote_info);
-                        tree_item->appendRow(getItemList(item));
+                        files.removeIf([item](const RcloneFilePtr &file) { return *(item->getFile()) == *file; });
+                        if (not fileInFolder(item->getFile(), tree_item))
+                            tree_item->appendRow(getItemList(item));
+                        else
+                            delete item;
                     }
+                    for (const auto &file: files) {
+                        tree_item->removeRow(getTreeFileItem(file, tree_item)->row()); }
+
                     tree_item->setState(TreeFileItem::Loaded);
                 });
     }
@@ -48,11 +57,21 @@ void RcloneFileModelLocal::init()
     drive->getFile()->setSize(0);
     drive->setIcon(Settings::hardDriveIcon());
     _root_index = drive->index();
-    drive->appendRow({new QStandardItem, new QStandardItem, new QStandardItem, new QStandardItem});
+    drive->appendRow(TreeFileItem::decorateList());
+
     appendRow({
                       drive,
                       new TreeFileItem(1, drive->getFile(), drive),
                       new TreeFileItem(2, drive->getFile(), drive),
                       new TreeFileItem(3, drive->getFile(), drive)
               });
+}
+
+void RcloneFileModelLocal::reload(TreeFileItem *item)
+{
+    if (item->state() == TreeFileItem::Loaded)
+    {
+        item->setState(TreeFileItem::NotLoaded);
+        addItem(item->getFile(), item);
+    }
 }

@@ -8,7 +8,6 @@
 #include "ItemMenu.hpp"
 #include "ItemInfoDialog.hpp"
 #include <QEvent>
-#include <QScrollEvent>
 #include <QItemDelegate>
 #include <QPainter>
 #include <QLineEdit>
@@ -103,6 +102,8 @@ void TreeFileView::initUI()
     setPalette(p);
 
     setStyleSheet("QTreeView { outline:none; }");
+
+    _reload_thread = boost::thread([this] { autoReload(); });
 }
 
 TreeFileView::TreeFileView(QWidget *parent) : QTreeView(parent)
@@ -1013,4 +1014,22 @@ void TreeFileView::showSearchLine()
         _search_line_edit->show();
     }
     _search_line_edit->setFocus();
+}
+
+/**
+ * @brief auto reload root folder every 15s
+ */
+void TreeFileView::autoReload()
+{
+    while (true)
+    {
+        boost::this_thread::sleep_for(boost::chrono::seconds(15));
+        // get index
+        auto index = rootIndex().siblingAtColumn(0);
+        if (index.isValid()){
+            auto item = dynamic_cast<TreeFileItem *>(_model->itemFromIndex(index));
+            if(item != nullptr)
+                _model->reload(item);
+        }
+    }
 }

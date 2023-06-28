@@ -37,6 +37,16 @@ public:
 
     [[nodiscard]] TreeFileItem *getParent() const;
 
+
+    static QList<QStandardItem *> decorateList(){
+        QList<QStandardItem *> decoratedItems;
+        for (int i = 0; i < 4; ++i) {
+            auto *item = new QStandardItem;
+            decoratedItems << item;
+        }
+        return decoratedItems;
+    }
+
     [[nodiscard]] const QList<TreeFileItem *> &getChildren() const { return _children; }
 
     void addChild(TreeFileItem *child) { _children << child; }

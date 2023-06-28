@@ -80,7 +80,7 @@ RcloneFileModel::RcloneFileModel()
 
 void RcloneFileModel::addItem(const RcloneFilePtr &file, TreeFileItem *parent)
 {
-    if (not _check_is_valid )
+    if (not _check_is_valid)
     {
         _rclone = Rclone::create_unique();
         connect(_rclone.get(), &Rclone::finished, this, [this](int exit)
@@ -126,4 +126,40 @@ bool RcloneFileModel::dropMimeData(const QMimeData *data, Qt::DropAction action,
                                    const QModelIndex &parent)
 {
     return QStandardItemModel::dropMimeData(data, action, row, column, parent);
+}
+
+bool RcloneFileModel::fileInFolder(const RcloneFilePtr &file, TreeFileItem *folder)
+{
+    for(auto &f : filesInFolder(folder))
+    {
+        if(*f == *file)
+            return true;
+    }
+    return false;
+}
+
+QList<RcloneFilePtr> RcloneFileModel::filesInFolder(TreeFileItem *folder)
+{
+    QList<RcloneFilePtr> files;
+    for (int i = 0; i < folder->rowCount(); i++)
+    {
+        auto *item = dynamic_cast<TreeFileItem *>(folder->child(i));
+        if (item == nullptr)
+            continue;
+        files << item->getFile();
+    }
+    return files;
+}
+
+TreeFileItem *RcloneFileModel::getTreeFileItem(const RcloneFilePtr &file, TreeFileItem *parent)
+{
+    for (int i = 0; i < parent->rowCount(); i++)
+    {
+        auto *item = dynamic_cast<TreeFileItem *>(parent->child(i));
+        if (item == nullptr)
+            continue;
+        if (*item->getFile() == *file)
+            return item;
+    }
+    return nullptr;
 }

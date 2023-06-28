@@ -26,6 +26,8 @@ public:
 protected:
 
     void init() override;
+
+    void reload(TreeFileItem *item = nullptr) override;
 };
 
 

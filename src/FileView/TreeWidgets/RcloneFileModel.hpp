@@ -63,6 +63,8 @@ protected:
 public:
     virtual void addItem(const RcloneFilePtr &file, TreeFileItem *parent);
 
+    virtual void reload(TreeFileItem *item = nullptr) = 0;
+
     [[nodiscard]] const QModelIndex &getRootIndex() const;
 
     static QList<QStandardItem *> getItemList(TreeFileItem *item);
@@ -71,6 +73,12 @@ public:
     {
         _expand_or_double_click = expandOrDoubleClick;
     }
+
+    bool fileInFolder(const RcloneFilePtr &, TreeFileItem *folder);
+
+    QList<RcloneFilePtr> filesInFolder( TreeFileItem *folder);
+
+    TreeFileItem *getTreeFileItem(const RcloneFilePtr &file, TreeFileItem *parent);
 
     virtual void stop() = 0;
 };

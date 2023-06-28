@@ -15,7 +15,7 @@ TreeFileItemLocal::TreeFileItemLocal(const QString &path, const RemoteInfoPtr &r
     QStandardItem::setData(_file->getName(), SORT_ROLE);
     initIcon();
     if (_file->isDir())
-        appendRow({new QStandardItem, new QStandardItem, new QStandardItem, new QStandardItem});
+        appendRow(TreeFileItem::decorateList());
     else
         setFlags(flags() & ~Qt::ItemIsDropEnabled);
 }
