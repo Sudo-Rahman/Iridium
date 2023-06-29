@@ -8,7 +8,7 @@
 #include <RcloneFrame.hpp>
 #include <SettingsButton.hpp>
 
-SettingsDialog::SettingsDialog(QWidget *parent)
+SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent)
 {
     setWindowTitle(tr("Paramètres"));
 

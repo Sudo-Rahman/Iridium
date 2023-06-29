@@ -23,6 +23,7 @@ namespace Iridium
         static std::string path_rclone;
         static Load load_type;
         static uint8_t max_depth;
+        static uint8_t reload_time;
 
         static void clear_and_swap_copy_files(const std::vector<RcloneFilePtr> &files)
         {

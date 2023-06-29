@@ -93,8 +93,6 @@ private:
 
     void removeItem(TreeFileItem *item);
 
-    static bool fileIsInFolder(const QString &name, TreeFileItem *folder);
-
     void mkdir();
 
     QDialog *mkdirDialog();

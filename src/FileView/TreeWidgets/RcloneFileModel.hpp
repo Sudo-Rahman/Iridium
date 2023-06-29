@@ -74,9 +74,11 @@ public:
         _expand_or_double_click = expandOrDoubleClick;
     }
 
-    bool fileInFolder(const RcloneFilePtr &, TreeFileItem *folder);
+    static bool fileInFolder(const RcloneFilePtr &, const TreeFileItem *folder);
 
-    QList<RcloneFilePtr> filesInFolder( TreeFileItem *folder);
+    static bool fileInFolder(const QString &, const TreeFileItem *folder);
+
+    static QList<RcloneFilePtr> filesInFolder(const TreeFileItem *folder);
 
     TreeFileItem *getTreeFileItem(const RcloneFilePtr &file, TreeFileItem *parent);
 

@@ -434,7 +434,7 @@ void TreeFileView::copyto(const std::vector<RcloneFilePtr> &files, TreeFileItem 
         return;
     for (const auto &file: files)
     {
-        if (fileIsInFolder(file->getName(), treePaste))
+        if (RcloneFileModel::fileInFolder(file, treePaste))
             continue;
 
         RcloneFilePtr newFile = std::make_shared<RcloneFile>(
@@ -451,7 +451,7 @@ void TreeFileView::copyto(const std::vector<RcloneFilePtr> &files, TreeFileItem 
             {
                 if (treePaste->state() == TreeFileItem::NotLoaded)
                     return;
-                if (fileIsInFolder(newFile->getName(), treePaste))
+                if (RcloneFileModel::fileInFolder(newFile, treePaste))
                 {
                     reload(treePaste);
                     return;
@@ -683,28 +683,6 @@ void TreeFileView::reload(TreeFileItem *treeItem)
     }
 }
 
-/**
- * @brief check if file is in folder
- * @param file
- * @param folder
- * @return true if file is in folder
- */
-bool TreeFileView::fileIsInFolder(const QString &name, TreeFileItem *folder)
-{
-    if (folder == nullptr)
-        return false;
-    // for each all children
-    for (int i = 0; i < folder->rowCount(); i++)
-    {
-        auto *item = dynamic_cast<TreeFileItem *>(folder->child(i, 0));
-        if (item == nullptr)
-            continue;
-        if (name == item->getFile()->getName())
-            return true;
-    }
-    return false;
-}
-
 QDialog *TreeFileView::mkdirDialog()
 {
     auto *dialog = new QDialog(this);
@@ -749,11 +727,12 @@ void TreeFileView::mkdir()
             _remote_info
     );
 //	qDebug() << "mkdir" << rcloneFile->getPath();
-    if (fileIsInFolder(rcloneFile->getName(), items.first()))
+    if (RcloneFileModel::fileInFolder(rcloneFile->getName(), items.first()))
     {
-        auto msgb = QMessageBox(QMessageBox::Critical, tr("Création"), tr("Le dossier existe déjà"),
-                                QMessageBox::Ok);
-        msgb.exec();
+        auto msgb = new QMessageBox(QMessageBox::Warning, tr("Création"), tr("Le dossier existe déjà"),
+                                    QMessageBox::Ok, this);
+        msgb->setModal(true);
+        msgb->show();
         return;
     }
     auto rclone = Rclone::create_shared();
@@ -815,7 +794,7 @@ void TreeFileView::editItem(const QModelIndex &index)
         this->closePersistentEditor(index);
         if (editor->text() == before or editor->text().isEmpty())
             return;
-        if (not this->fileIsInFolder(editor->text(), dynamic_cast<TreeFileItem *>(_model->itemFromIndex(rootIndex()))))
+        if (not RcloneFileModel::fileInFolder(editor->text(), dynamic_cast<TreeFileItem *>(_model->itemFromIndex(rootIndex()))))
             this->rename(dynamic_cast<TreeFileItem *>(_model->itemFromIndex(index)), editor->text());
         else
         {
@@ -861,9 +840,6 @@ void TreeFileView::mousePressEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton)
     {
-//        if (not _ctrl_presed and QTreeView::selectionModel()->isSelected(indexAt(event->pos())))
-//            selectionModel()->select(indexAt(event->pos()),
-//                                     QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
         if (QDateTime::currentMSecsSinceEpoch() - _clickTime < 700 and
             QDateTime::currentMSecsSinceEpoch() - _clickTime > 350)
         {
@@ -957,7 +933,7 @@ void TreeFileView::dragMoveEvent(QDragMoveEvent *event)
         for (auto item: mimeData->items())
         {
             if (item->index() == index or
-                fileIsInFolder(item->getFile()->getName(), item_to_drop))
+                RcloneFileModel::fileInFolder(item->getFile(), item_to_drop))
                 return not_possible();
         }
     }
@@ -1017,13 +993,13 @@ void TreeFileView::showSearchLine()
 }
 
 /**
- * @brief auto reload root folder every 15s
+ * @brief auto reload root folder every reload_time
  */
 void TreeFileView::autoReload()
 {
     while (true)
     {
-        boost::this_thread::sleep_for(boost::chrono::seconds(15));
+        boost::this_thread::sleep_for(boost::chrono::seconds(Iridium::Global::reload_time));
         // get index
         auto index = rootIndex().siblingAtColumn(0);
         if (index.isValid()){

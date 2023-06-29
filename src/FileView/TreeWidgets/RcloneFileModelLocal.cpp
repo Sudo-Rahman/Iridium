@@ -43,8 +43,8 @@ void RcloneFileModelLocal::addItem(const RcloneFilePtr &file, TreeFileItem *pare
                         else
                             delete item;
                     }
-                    for (const auto &file: files) {
-                        tree_item->removeRow(getTreeFileItem(file, tree_item)->row()); }
+                    for (const auto &file: files)
+                        tree_item->removeRow(getTreeFileItem(file, tree_item)->row());
 
                     tree_item->setState(TreeFileItem::Loaded);
                 });

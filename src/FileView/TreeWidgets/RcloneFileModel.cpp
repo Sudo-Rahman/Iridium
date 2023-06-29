@@ -128,28 +128,36 @@ bool RcloneFileModel::dropMimeData(const QMimeData *data, Qt::DropAction action,
     return QStandardItemModel::dropMimeData(data, action, row, column, parent);
 }
 
-bool RcloneFileModel::fileInFolder(const RcloneFilePtr &file, TreeFileItem *folder)
+bool RcloneFileModel::fileInFolder(const RcloneFilePtr &file, const TreeFileItem *folder)
 {
-    for(auto &f : filesInFolder(folder))
+    return std::ranges::any_of(filesInFolder(folder), [file](const RcloneFilePtr &f)
     {
-        if(*f == *file)
-            return true;
-    }
+        return *f == *file;
+    });
     return false;
 }
 
-QList<RcloneFilePtr> RcloneFileModel::filesInFolder(TreeFileItem *folder)
+bool RcloneFileModel::fileInFolder(const QString &text, const TreeFileItem *folder)
+{
+    return std::ranges::any_of(filesInFolder(folder), [text](const RcloneFilePtr &f)
+    {
+        return f->getName() == text;
+    });
+}
+
+
+QList<RcloneFilePtr> RcloneFileModel::filesInFolder(const TreeFileItem *folder)
 {
     QList<RcloneFilePtr> files;
     for (int i = 0; i < folder->rowCount(); i++)
     {
         auto *item = dynamic_cast<TreeFileItem *>(folder->child(i));
-        if (item == nullptr)
-            continue;
-        files << item->getFile();
+        if (item not_eq nullptr)
+            files << item->getFile();
     }
     return files;
 }
+
 
 TreeFileItem *RcloneFileModel::getTreeFileItem(const RcloneFilePtr &file, TreeFileItem *parent)
 {

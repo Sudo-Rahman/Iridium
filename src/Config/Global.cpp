@@ -16,3 +16,4 @@ uint8_t Global::max_process = thread::hardware_concurrency();
 string Global::path_rclone;
 Load Global::load_type = Load::Dynamic;
 uint8_t Global::max_depth = 2;
+uint8_t Global::reload_time = 10;

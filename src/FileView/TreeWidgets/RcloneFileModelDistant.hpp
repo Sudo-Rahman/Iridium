@@ -62,6 +62,10 @@ protected:
     void reload(TreeFileItem *item = nullptr) override;
 
 private:
+    void connectRclone(const RclonePtr &rclone,TreeFileItem *tree_item);
+
+    RclonePtr getRclone(bool dynamic = true);
+
     void addItemDynamic(const RcloneFilePtr &file, TreeFileItem *parent);
 
 

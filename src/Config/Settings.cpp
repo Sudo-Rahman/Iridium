@@ -37,6 +37,7 @@ const map<Settings::Node, string> Settings::_nodes = {
         {Settings::Node::Language,     "general.language"},
         {Settings::Node::Width,        "general.size.width"},
         {Settings::Node::Height,       "general.size.height"},
+        {Settings::Node::ReloadTime,   "general.reload_time"},
 };
 RcloneUniquePtr Settings::_rclone = Rclone::create_unique();
 
@@ -205,7 +206,7 @@ void Settings::loadSettings()
         string data((std::istreambuf_iterator<char>(ifs)),
                     std::istreambuf_iterator<char>());
         pt::read_json(getPathSettings().string(), _settings);
-        initValues();
+        loadValues();
     } else
     {
         bf::create_directories(path.parent_path());
@@ -257,6 +258,7 @@ void Settings::initSettings()
     _settings.put(_nodes.at(Flags), "");
     _settings.put(_nodes.at(Width), 1200);
     _settings.put(_nodes.at(Height), 600);
+    _settings.put(_nodes.at(ReloadTime), 10);
 
     pt::ptree remote, ptree_path;
     RemoteInfo remoteInfo = {"/", RemoteType::LocalHardDrive, "Local"};
@@ -300,13 +302,13 @@ void Settings::resetSettings(const Node &node)
         _settings.put_child(_nodes.at(node), _default.get_child(_nodes.at(node)));
     }
     saveSettings();
-    initValues();
+    loadValues();
 }
 
 /**
- * @brief load variables from m_settings ptree
+ * @brief load variables from _settings ptree
  */
-void Settings::initValues()
+void Settings::loadValues()
 {
     //check if all nodes are present
     for (const auto &node: _nodes)
@@ -331,6 +333,7 @@ void Settings::initValues()
         if (getValue<string>(RclonePath).contains("rclone"))
             Global::path_rclone = getValue<string>(RclonePath);
         Settings::changeDirIcon(static_cast<Settings::ThemeColor>(getValue<uint8_t>(DirIconColor)));
+        Global::reload_time = getValue<uint8_t>(ReloadTime);
 
     } catch (boost::exception &e)
     {

@@ -10,15 +10,15 @@
 #include <QLabel>
 #include <Settings.hpp>
 
-GeneralFrame::GeneralFrame(QWidget *parent)
+GeneralFrame::GeneralFrame(QWidget *parent) : QFrame(parent)
 {
     auto *layout = new QVBoxLayout(this);
     layout->setAlignment(Qt::AlignTop);
     layout->setSpacing(10);
 
-    auto box1 = new QGroupBox(this);
-    box1->setTitle(tr("Le changement de langue nécessite un redémarrage de l’application."));
-    auto *box1Layout = new QFormLayout(box1);
+    auto box = new QGroupBox(this);
+    box->setTitle(tr("Le changement de langue nécessite un redémarrage de l’application."));
+    auto *boxLayout = new QFormLayout(box);
     _language = new QComboBox(this);
     _language->addItems({"English", "Français"});
     _language->setItemData(0, QLocale::English, Qt::UserRole);
@@ -32,9 +32,18 @@ GeneralFrame::GeneralFrame(QWidget *parent)
             break;
         }
     }
-    box1Layout->addRow(tr("Langue : "), _language);
 
-    layout->addWidget(box1);
+    boxLayout->addRow(tr("Langue : "), _language);
+    layout->addWidget(box);
+
+    box = new QGroupBox(this);
+    boxLayout = new QFormLayout(box);
+    _reload_time = new QSpinBox(this);
+    _reload_time->setRange(1, 60);
+    _reload_time->setValue(Settings::getValue<int>(Settings::ReloadTime));
+
+    boxLayout->addRow(tr("Temps de rafraîchissement automatic du dossier courant : "), _reload_time);
+    layout->addWidget(box);
 
     for (const auto &box: findChildren<QGroupBox *>())
         box->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
@@ -49,5 +58,11 @@ void GeneralFrame::connectSignals()
     {
         auto lang = _language->itemData(index, Qt::UserRole).value<QLocale::Language>();
         Settings::setLanguage(lang);
+    });
+
+    connect(_reload_time, &QSpinBox::valueChanged, [](const int &value)
+    {
+        Settings::setValue(Settings::ReloadTime, value);
+        Iridium::Global::reload_time = value;
     });
 }

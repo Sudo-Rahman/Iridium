@@ -14,6 +14,7 @@ class GeneralFrame : public QFrame
 Q_OBJECT
 
     QComboBox *_language{};
+    QSpinBox *_reload_time{};
 
 public:
     explicit GeneralFrame(QWidget *parent = nullptr);

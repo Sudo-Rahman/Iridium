@@ -50,6 +50,7 @@ public:
         Language,
         Width,
         Height,
+        ReloadTime,
     };
 
     enum Os{
@@ -112,7 +113,7 @@ public:
 
     static void resetSettings(const Node &);
 
-    static void initValues();
+    static void loadValues();
 
 
     /**
