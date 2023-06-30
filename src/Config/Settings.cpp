@@ -378,7 +378,7 @@ void Settings::setLanguage(const QLocale::Language &lang)
 
 Settings::System Settings::getSystem()
 {
-    System system;
+    System system{};
 #ifdef _WIN32
     system.os = Os::Windows;
 #elif __APPLE__

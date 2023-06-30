@@ -22,7 +22,7 @@ void RcloneFileModelLocal::addItem(const RcloneFilePtr &file, TreeFileItem *pare
         _thread->interrupt();
         _thread->join();
     }
-    auto *tree_item = (parent->getParent() == nullptr ? parent : parent->getParent());
+    auto *tree_item = parent->siblingAtFirstColumn();
     if (tree_item->state() == TreeFileItem::NotLoaded)
     {
         tree_item->setState(TreeFileItem::Loading);
@@ -61,9 +61,9 @@ void RcloneFileModelLocal::init()
 
     appendRow({
                       drive,
-                      new TreeFileItem(1, drive->getFile(), drive),
-                      new TreeFileItem(2, drive->getFile(), drive),
-                      new TreeFileItem(3, drive->getFile(), drive)
+                      new TreeFileItem(1, drive->getFile()),
+                      new TreeFileItem(2, drive->getFile()),
+                      new TreeFileItem(3, drive->getFile())
               });
 }
 

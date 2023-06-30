@@ -5,7 +5,6 @@
 #include "TreeFileItemLocal.hpp"
 
 TreeFileItemLocal::TreeFileItemLocal(const QString &path, const RemoteInfoPtr &remoteInfo, TreeFileItem *parent)
-        : TreeFileItem(parent)
 {
     TreeFileItem::_file = std::make_shared<RcloneFile>(
             path,

@@ -22,20 +22,19 @@ public:
     };
 protected:
     RcloneFilePtr _file{};
-    TreeFileItem *_parent{};
     QList<TreeFileItem *> _children{};
     State _state{NotLoaded};
 
 public:
-    explicit TreeFileItem(TreeFileItem * = nullptr);
+    explicit TreeFileItem();
 
-    explicit TreeFileItem(const QString &path, const RemoteInfoPtr &remoteInfo, TreeFileItem * = nullptr);
+    explicit TreeFileItem(const QString &path, const RemoteInfoPtr &remoteInfo);
 
-    explicit TreeFileItem(const int &column, const std::shared_ptr<RcloneFile> &file, TreeFileItem * = nullptr);
+    explicit TreeFileItem(const int &column, const std::shared_ptr<RcloneFile> &file);
 
     [[nodiscard]] const std::shared_ptr<RcloneFile> &getFile() const;
 
-    [[nodiscard]] TreeFileItem *getParent() const;
+    [[nodiscard]] TreeFileItem *siblingAtFirstColumn() const;
 
 
     static QList<QStandardItem *> decorateList(){

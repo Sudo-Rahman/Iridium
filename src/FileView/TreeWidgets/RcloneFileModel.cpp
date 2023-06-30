@@ -31,9 +31,9 @@ QList<QStandardItem *> RcloneFileModel::getItemList(TreeFileItem *item)
 {
     return {
             item,
-            new TreeFileItem(1, item->getFile(), item),
-            new TreeFileItem(2, item->getFile(), item),
-            new TreeFileItem(3, item->getFile(), item)
+            new TreeFileItem(1, item->getFile()),
+            new TreeFileItem(2, item->getFile()),
+            new TreeFileItem(3, item->getFile())
     };
 }
 

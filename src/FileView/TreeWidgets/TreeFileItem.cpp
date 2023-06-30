@@ -13,11 +13,8 @@ const std::shared_ptr<RcloneFile> &TreeFileItem::getFile() const
     return _file;
 }
 
-TreeFileItem::TreeFileItem(const QString &path, const RemoteInfoPtr &remoteInfo, TreeFileItem *parent) : _parent(
-        parent), QStandardItem()
+TreeFileItem::TreeFileItem(const QString &path, const RemoteInfoPtr &remoteInfo)  : QStandardItem()
 {
-    if (parent not_eq nullptr)
-        parent->addChild(this);
     TreeFileItem::_file = std::make_shared<RcloneFile>(
             path,
             remoteInfo
@@ -27,11 +24,8 @@ TreeFileItem::TreeFileItem(const QString &path, const RemoteInfoPtr &remoteInfo,
     setFlags(flags() & ~Qt::ItemIsDropEnabled);
 }
 
-TreeFileItem::TreeFileItem(const int &column, const std::shared_ptr<RcloneFile> &file, TreeFileItem *parent) : _parent(
-        parent)
+TreeFileItem::TreeFileItem(const int &column, const std::shared_ptr<RcloneFile> &file)
 {
-    if (parent not_eq nullptr)
-        parent->addChild(this);
     TreeFileItem::_file = file;
     switch (column)
     {
@@ -59,9 +53,9 @@ TreeFileItem::TreeFileItem(const int &column, const std::shared_ptr<RcloneFile> 
         setFlags(flags() & ~Qt::ItemIsDropEnabled);
 }
 
-TreeFileItem *TreeFileItem::getParent() const
+TreeFileItem *TreeFileItem::siblingAtFirstColumn() const
 {
-    return _parent;
+    return dynamic_cast<TreeFileItem *>(model()->itemFromIndex(index().siblingAtColumn(0)));
 }
 
 void TreeFileItem::initIcon()
@@ -70,8 +64,5 @@ void TreeFileItem::initIcon()
     setToolTip(_file->getName());
 }
 
-TreeFileItem::TreeFileItem(TreeFileItem *parent) : _parent(parent)
-{
-    if (parent not_eq nullptr)
-        parent->addChild(this);
-}
+TreeFileItem::TreeFileItem()
+{}

@@ -271,11 +271,11 @@ void TreeFileView::doubleClick(const QModelIndex &index)
     _model->addItem(item->getFile(), item);
 
 //     get parent index
-    auto id = item->getParent() == nullptr ? index.parent() : _model->indexFromItem(item->getParent()).parent();
+    auto id = index.parent();
     _index_back.push_back(id);
     _index_front.clear();
     // if item getParent is null,it's first column item, else we get first column item.
-    QTreeView::setRootIndex(item->getParent() == nullptr ? index : _model->indexFromItem(item->getParent()));
+    QTreeView::setRootIndex(item->siblingAtFirstColumn()->index());
     emit pathChanged(getPath());
     selectionModel()->clearSelection();
 }
@@ -456,7 +456,7 @@ void TreeFileView::copyto(const std::vector<RcloneFilePtr> &files, TreeFileItem 
                     reload(treePaste);
                     return;
                 }
-                auto *treeItem = new TreeFileItem(0, newFile, nullptr);
+                auto *treeItem = new TreeFileItem(0, newFile);
                 auto list = RcloneFileModel::getItemList(treeItem);
                 if (newFile->isDir())
                     treeItem->appendRow({});
@@ -655,31 +655,7 @@ void TreeFileView::reload(TreeFileItem *treeItem)
     // all tree selected
     for (auto item: lstItem)
     {
-        if (not item->getFile()->isDir())
-            return;
-
-        if (dynamic_cast<TreeFileItem *>(item->child(0)) == nullptr)
-        {
-            _model->addItem(item->getFile(), item);
-            continue;
-        }
-
-        _model->stop();
-
-        // remove all children
-        QList<TreeFileItem *> lst;
-        for (int i = 0; i < item->rowCount(); i++)
-        {
-            auto child = dynamic_cast<TreeFileItem *>(item->child(i));
-            if (child not_eq nullptr)
-                lst << child;
-        }
-        for (auto child: lst)
-            removeItem(child);
-        // add new children
-        item->appendRow({new QStandardItem, new QStandardItem, new QStandardItem, new QStandardItem});
-        item->setState(TreeFileItem::NotLoaded);
-        _model->addItem(item->getFile(), item);
+        _model->reload(item);
     }
 }
 
@@ -736,7 +712,7 @@ void TreeFileView::mkdir()
         return;
     }
     auto rclone = Rclone::create_shared();
-    auto *newItem = new TreeFileItem(0, rcloneFile, items.first());
+    auto *newItem = new TreeFileItem(0, rcloneFile);
     connect(rclone.get(), &Rclone::finished, this, [this, rclone, name, newItem, items](const int exit)
     {
         if (exit == 0)
@@ -880,7 +856,7 @@ void TreeFileView::dropEvent(QDropEvent *event)
                         ? dynamic_cast<TreeFileItem *>(_model->itemFromIndex(rootIndex()))
                         : dynamic_cast<TreeFileItem *>(_model->itemFromIndex(indexAt(event->pos())));
 
-    item_to_drop = item_to_drop->getParent() == nullptr ? item_to_drop : item_to_drop->getParent();
+    item_to_drop = item_to_drop->siblingAtFirstColumn();
     std::vector<RcloneFilePtr> files;
     for (auto &item: lst)
         files.push_back(item->getFile());

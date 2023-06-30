@@ -6,7 +6,7 @@
 
 TreeFileItemDistant::TreeFileItemDistant(const QString &path, const RemoteInfoPtr &remoteInfo,
                                          const boost::json::object &data,
-                                         TreeFileItem *parent) : TreeFileItem(parent)
+                                         TreeFileItem *parent)
 {
     try
     {

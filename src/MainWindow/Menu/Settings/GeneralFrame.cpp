@@ -42,7 +42,7 @@ GeneralFrame::GeneralFrame(QWidget *parent) : QFrame(parent)
     _reload_time->setRange(1, 60);
     _reload_time->setValue(Settings::getValue<int>(Settings::ReloadTime));
 
-    boxLayout->addRow(tr("Temps de rafraîchissement automatic du dossier courant : "), _reload_time);
+    boxLayout->addRow(tr("Temps de rafraîchissement automatique du dossier courant : "), _reload_time);
     layout->addWidget(box);
 
     for (const auto &box: findChildren<QGroupBox *>())
