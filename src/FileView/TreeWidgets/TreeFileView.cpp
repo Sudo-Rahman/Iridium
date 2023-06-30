@@ -354,22 +354,26 @@ void TreeFileView::showContextMenu()
             QDialog diag(this);
             diag.setMinimumSize(400, 400);
             diag.setWindowTitle(tr("Arborescence"));
-            diag.setLayout(new QVBoxLayout);
-            auto *tree = new QTextEdit(&diag);
-            tree->setReadOnly(true);
-            tree->setWordWrapMode(QTextOption::NoWrap);
-            tree->setStyleSheet(
-                    "QTextEdit{background-color: #282c34; color: #abb2bf; border-radius: 25px; padding: 15px 10px;}");
+            auto layout = new QVBoxLayout(&diag);
+            auto progress = new ProgressBar(ProgressBar::Circular, &diag);
+            progress->setRange(0, 0);
+            layout->addWidget(progress, 0, Qt::AlignCenter);
             auto rclone = Rclone::create_unique();
             auto file = dynamic_cast<TreeFileItem *>(_model->itemFromIndex(currentIndex()))->getFile();
-            connect(rclone.get(), &Rclone::finished, this, [&rclone, tree](int exit)
+            connect(rclone.get(), &Rclone::finished, this, [&rclone, &diag, progress](int exit)
             {
+                delete progress;
+                auto *text = new QTextEdit(&diag);
+                text->setReadOnly(true);
+                text->setWordWrapMode(QTextOption::NoWrap);
+                text->setStyleSheet(
+                        "QTextEdit{background-color: #282c34; color: #abb2bf; border-radius: 25px; padding: 15px 10px;}");
+                diag.layout()->addWidget(text);
                 if (exit == 0)
-                    tree->setText(boost::algorithm::join(rclone->readAll(), "\n").c_str());
+                    text->setText(boost::algorithm::join(rclone->readAll(), "\n").c_str());
             });
             connect(&diag, &QDialog::finished, rclone.get(), &Rclone::kill);
             rclone->tree(*file);
-            diag.layout()->addWidget(tree);
             diag.exec();
         }
             break;
@@ -669,7 +673,7 @@ QDialog *TreeFileView::mkdirDialog()
     icon->setPixmap(Settings::dirIcon().pixmap(64));
     icon->setAlignment(Qt::AlignCenter);
     layout->addWidget(icon, 0, 0, 3, 1);
-    auto *name = new QLineEdit(dialog);
+    auto *name = new RoundedLineEdit(dialog);
     name->setObjectName("name");
     name->setPlaceholderText(tr("Nom du dossier"));
     layout->addWidget(name, 0, 1, 1, 2);
@@ -770,7 +774,8 @@ void TreeFileView::editItem(const QModelIndex &index)
         this->closePersistentEditor(index);
         if (editor->text() == before or editor->text().isEmpty())
             return;
-        if (not RcloneFileModel::fileInFolder(editor->text(), dynamic_cast<TreeFileItem *>(_model->itemFromIndex(rootIndex()))))
+        if (not RcloneFileModel::fileInFolder(editor->text(),
+                                              dynamic_cast<TreeFileItem *>(_model->itemFromIndex(rootIndex()))))
             this->rename(dynamic_cast<TreeFileItem *>(_model->itemFromIndex(index)), editor->text());
         else
         {
@@ -978,9 +983,10 @@ void TreeFileView::autoReload()
         boost::this_thread::sleep_for(boost::chrono::seconds(Iridium::Global::reload_time));
         // get index
         auto index = rootIndex().siblingAtColumn(0);
-        if (index.isValid()){
+        if (index.isValid())
+        {
             auto item = dynamic_cast<TreeFileItem *>(_model->itemFromIndex(index));
-            if(item != nullptr)
+            if (item != nullptr)
                 _model->reload(item);
         }
     }
