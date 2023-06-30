@@ -67,6 +67,8 @@ signals:
 
     void tree();
 
+    void sync();
+
 };
 
 
