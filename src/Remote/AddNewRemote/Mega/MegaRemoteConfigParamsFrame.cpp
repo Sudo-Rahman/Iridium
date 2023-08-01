@@ -6,11 +6,14 @@
 
 MegaRemoteConfigParamsFrame::MegaRemoteConfigParamsFrame(QWidget *parent) : RemoteConfigParamsFrame(parent)
 {
-    RemoteConfigParamsFrame::createUi();
+    MegaRemoteConfigParamsFrame::createUi();
 }
 
 void MegaRemoteConfigParamsFrame::createUi()
 {
+
+    RemoteConfigParamsFrame::createUi();
+
     _user = new RoundedLineEdit(this);
     _user->setPlaceholderText("Email");
     _user->setPlaceholderText("toto@exemple.com");
@@ -22,7 +25,6 @@ void MegaRemoteConfigParamsFrame::createUi()
     _form_layout->addRow(tr("Email"), _user);
     _form_layout->addRow(tr("Mot de passe"), _password);
 
-    RemoteConfigParamsFrame::createUi();
 }
 
 

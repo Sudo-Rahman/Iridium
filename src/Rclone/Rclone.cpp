@@ -199,7 +199,7 @@ vector<RemoteInfoPtr> Rclone::listRemotes()
         auto name = match[0].str();
         std::regex_search(string, match, type_regex);
         auto type = match[0].str();
-        remotes.emplace_back(std::make_shared<RemoteInfo>(name, stringToRemoteType.find(type)->second));
+        remotes.emplace_back(std::make_shared<RemoteInfo>(name, RemoteInfo::findType(type)));
     }
     return remotes;
 }

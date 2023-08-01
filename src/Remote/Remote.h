@@ -55,7 +55,7 @@ const std::map<std::string, RemoteType> stringToRemoteType = {
         {"opendrive", RemoteType::OpenDrive},
         {"pcloud",    RemoteType::Pcloud},
         {"box",       RemoteType::Box},
-        {"smb",       RemoteType::Smb}
+        {"smb",       RemoteType::Smb},
 };
 
 struct RemoteInfo
@@ -79,7 +79,10 @@ public:
                 return remoteIco.at(type);
             } catch (std::out_of_range &e)
             {
-                return HARDDRIVEICON;
+                if(type == RemoteType::LocalHardDrive)
+                    return HARDDRIVEICON;
+                else
+                    return CMD;
             }
         }();
         _name = [this]() -> auto
@@ -112,6 +115,14 @@ public:
     }
 
     RemoteInfo() = default;
+
+    [[nodiscard]] static const RemoteType findType(const std::string &type){
+        try {
+            return stringToRemoteType.at(type);
+        } catch (std::out_of_range &e) {
+            return RemoteType::Cmd;
+        }
+    }
 
     [[nodiscard]] bool isLocal() const { return type == RemoteType::LocalHardDrive; }
 
