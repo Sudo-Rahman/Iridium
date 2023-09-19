@@ -171,6 +171,8 @@ public:
 
     void tree(const RcloneFile &file);
 
+    void cat(const RcloneFile &file);
+
     void clear()
     {
         _out.clear();

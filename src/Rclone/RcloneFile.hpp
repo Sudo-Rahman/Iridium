@@ -13,6 +13,7 @@
 #include <QIcon>
 #include <boost/json.hpp>
 #include <Remote.h>
+#include <QMimeType>
 
 class RcloneFile : public QObject
 {
@@ -71,6 +72,8 @@ public:
     [[nodiscard]] QIcon getIcon();
 
     [[nodiscard]] RcloneFile getParentDir() const;
+
+    [[nodiscard]]  QList<QMimeType> mimeTypes() const;
 
     static RcloneFile fromJson(const boost::json::object &json, const RemoteInfoPtr &remoteInfo);
 

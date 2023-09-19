@@ -4,9 +4,9 @@
 
 #include "RcloneFile.hpp"
 
-#include <QMimeDatabase>
 #include <Settings.hpp>
 #include <Utility/Utility.hpp>
+#include <QMimeDatabase>
 
 void RcloneFile::init()
 {
@@ -220,5 +220,10 @@ RcloneFile RcloneFile::fromJson(const boost::json::object &json, const RemoteInf
         std::cout << "Error while parsing json: " << diagnostic_information_what(e, true) << std::endl;
     }
     return {"null",remoteInfo};
+}
+
+QList<QMimeType> RcloneFile::mimeTypes() const
+{
+    return QMimeDatabase().mimeTypesForFileName(getPath());
 }
 

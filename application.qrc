@@ -31,6 +31,10 @@
         <file>ressources/cancel.png</file>
         <file>ressources/trash.png</file>
         <file>ressources/sync-cloud.png</file>
+        <file>ressources/extend.png</file>
+        <file>ressources/shrink.png</file>
+        <file>ressources/preview.png</file>
+        <file>ressources/rotate-left.png</file>
         <file>icons/fluent/index.theme</file>
         <file>icons/fluent/scalable/places</file>
         <file>icons/fluent/scalable/mimetypes</file>

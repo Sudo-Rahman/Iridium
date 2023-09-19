@@ -562,6 +562,13 @@ bj::object Rclone::parseJson(const string &str)
     return json;
 }
 
+void Rclone::cat(const RcloneFile &file)
+{
+    _args = {"cat", file.getPath().toStdString()};
+    if (not _lockable)
+        execute();
+}
+
 std::atomic_int_fast8_t RcloneManager::_rclone_locked;
 mutex RcloneManager::_launch_mutex;
 condition_variable RcloneManager::_launch_cv;

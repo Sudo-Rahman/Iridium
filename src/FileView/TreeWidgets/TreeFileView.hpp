@@ -58,6 +58,8 @@ public:
 
     void search(const QString &text);
 
+    void preview(const TreeFileItem *);
+
 protected:
     void resizeEvent(QResizeEvent *event) override;
 
@@ -118,6 +120,8 @@ signals:
               const Rclone::TaskType &type = Rclone::Unknown);
 
     void resized();
+
+    void previewed(const QByteArray &data);
 
 };
 

@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 #include <boost/thread.hpp>
+#include "RcloneFile.hpp"
 
 typedef long double double64_t;
 
@@ -28,6 +29,10 @@ namespace Iridium
         [[nodiscard]] static std::string sizeToString(double64_t num);
 
         static void pushBack(std::vector<std::string> &dst, const std::vector<std::vector<std::string>> &src);
+
+        static bool isPreviewable(const RcloneFile &file);
+
+        static bool isPreviewable(const QList<RcloneFilePtr> &files);
 
     };
 

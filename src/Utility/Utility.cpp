@@ -115,3 +115,27 @@ void Utility::pushBack(vector<std::string> &dst, const std::vector<std::vector<s
             dst.push_back(j);
     }
 }
+
+bool Utility::isPreviewable(const RcloneFile &file)
+{
+    if (file.isDir())
+        return false;
+    if (file.getSize() > 1024 * 1024 * 1024 or file.getSize() == 0)
+        return false;
+    for (auto &i: file.mimeTypes())
+    {
+        if (i.name().contains("image"))
+            return true;
+    }
+    return false;
+}
+
+bool Utility::isPreviewable(const QList<RcloneFilePtr> &files)
+{
+    for (auto &i: files)
+    {
+        if (not isPreviewable(*i))
+            return false;
+    }
+    return true;
+}

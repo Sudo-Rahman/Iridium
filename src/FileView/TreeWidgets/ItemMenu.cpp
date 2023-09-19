@@ -36,7 +36,7 @@ ItemMenu::ItemMenu(QWidget *parent) : QMenu(parent)
         _action = NewFolder;
         emit newFolder();
     });
-    _tree = addAction(tr("Tree"), this, [this]
+    _tree = addAction(tr("Arbre"), this, [this]
     {
         _action = Tree;
         emit tree();
@@ -47,6 +47,11 @@ ItemMenu::ItemMenu(QWidget *parent) : QMenu(parent)
         _action = Sync;
         emit sync();
     });
+    _preview = addAction(tr("Aperçu"), this, [this]
+    {
+        _action = Preview;
+        emit preview();
+    });
 
     // add icons
     _info->setIcon(QIcon(":/ressources/information.png"));
@@ -56,6 +61,7 @@ ItemMenu::ItemMenu(QWidget *parent) : QMenu(parent)
     _new_folder->setIcon(QIcon(":/ressources/new-folder.png"));
     _tree->setIcon(QIcon(":/ressources/tree.png"));
     _sync->setIcon(QIcon(":/ressources/sync-cloud.png"));
+    _preview->setIcon(QIcon(":/ressources/preview.png"));
 
     // show shortcuts
     _info->setShortcut(Qt::Key_Space);
@@ -68,6 +74,7 @@ ItemMenu::ItemMenu(QWidget *parent) : QMenu(parent)
     _delete->setShortcutVisibleInContextMenu(true);
     _new_folder->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_N));
     _new_folder->setShortcutVisibleInContextMenu(true);
+    _tree->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_T));
 
 }
 
@@ -97,6 +104,8 @@ void ItemMenu::setActionEnabled(const ItemMenu::Action &action, bool enabled)
         case Sync:
             _sync->setEnabled(enabled);
             break;
+        case Preview:
+            _preview->setEnabled(enabled);
         case None:
         default:
             break;

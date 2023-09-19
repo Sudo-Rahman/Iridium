@@ -19,6 +19,8 @@
 #include <QMimeData>
 #include <QSysInfo>
 #include <QTextEdit>
+#include <QThread>
+#include <ImagePreviewDialog.hpp>
 #include <boost/algorithm/string/join.hpp>
 #include <Settings.hpp>
 
@@ -182,6 +184,12 @@ void TreeFileView::connectSignals()
                           (viewport()->height() * .99) - _search_line_edit->height());
         _search_line_edit->move(x_y);
     });
+
+    connect(this, &TreeFileView::previewed, this, [this](const QByteArray &data)
+    {
+        ImagePreviewDialog dialog(data, this);
+        dialog.exec();
+    });
 }
 
 /**
@@ -299,6 +307,8 @@ void TreeFileView::showContextMenu()
                                   ItemMenu::Action::Sync, false);
         }
     }
+    if (lisItem.size() == 1)
+        menu.setActionEnabled(ItemMenu::Action::Tree, Iridium::Utility::isPreviewable(*lisItem.first()->getFile()));
 
     if (QTreeView::selectedIndexes().isEmpty())
         menu.setActionEnabled(ItemMenu::Action::Copy, false,
@@ -380,6 +390,9 @@ void TreeFileView::showContextMenu()
         case ItemMenu::Action::Sync:
             Iridium::Global::sync_dirs.push_back(
                     dynamic_cast<TreeFileItem *>(_model->itemFromIndex(currentIndex()))->getFile());
+            break;
+        case ItemMenu::Action::Preview:
+            preview(lisItem.front());
             break;
         default:
             break;
@@ -990,4 +1003,19 @@ void TreeFileView::autoReload()
                 _model->reload(item);
         }
     }
+}
+
+void TreeFileView::preview(const TreeFileItem *item)
+{
+    if (item->getFile()->isDir())
+        return;
+    boost::thread(
+            [this, item]
+            {
+                auto rclone = Rclone::create_unique();
+                rclone->cat(*item->getFile());
+                rclone->waitForFinished();
+                auto data = QByteArray::fromStdString(boost::algorithm::join(rclone->readAll(), "\n"));
+                emit previewed(data);
+            }).detach();
 }

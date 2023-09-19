@@ -14,7 +14,7 @@ class ItemMenu : public QMenu
 Q_OBJECT
 
 private:
-    QAction *_info{}, *_copy{}, *_paste{}, *_delete{}, *_new_folder{}, *_tree{},*_sync{};
+    QAction *_info{}, *_copy{}, *_paste{}, *_delete{}, *_new_folder{}, *_tree{},*_sync{},*_preview{};
 
 public:
 
@@ -27,7 +27,8 @@ public:
         Delete,
         NewFolder,
         Tree,
-        Sync
+        Sync,
+        Preview
     };
 
     [[nodiscard]] Action action() const { return _action; }
@@ -68,6 +69,8 @@ signals:
     void tree();
 
     void sync();
+
+    void preview();
 
 };
 
