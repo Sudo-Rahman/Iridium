@@ -66,3 +66,11 @@ void TreeFileItem::initIcon()
 
 TreeFileItem::TreeFileItem()
 {}
+
+void TreeFileItem::appendRow(const QList<QStandardItem *> &row)
+{
+    QStandardItem::appendRow(row);
+    for (auto *item: row)
+        if(auto *tree_item = dynamic_cast<TreeFileItem *>(item); tree_item not_eq nullptr)
+            _children.push_back(tree_item);
+}

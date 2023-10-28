@@ -286,7 +286,7 @@ void Rclone::execute()
         _cv.notify_all();
         return;
     }
-//    cout << "execute " << boost::algorithm::join(_args, " ") << endl;
+    cout << "execute " << boost::algorithm::join(_args, " ") << endl;
 
 #ifdef _WIN32
     std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;

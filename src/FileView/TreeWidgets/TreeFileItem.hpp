@@ -36,6 +36,8 @@ public:
 
     [[nodiscard]] TreeFileItem *siblingAtFirstColumn() const;
 
+    void appendRow(const QList<QStandardItem *> &row);
+
 
     static QList<QStandardItem *> decorateList(){
         QList<QStandardItem *> decoratedItems;
@@ -47,8 +49,6 @@ public:
     }
 
     [[nodiscard]] const QList<TreeFileItem *> &getChildren() const { return _children; }
-
-    void addChild(TreeFileItem *child) { _children << child; }
 
     [[nodiscard]] State state() const { return _state; }
 

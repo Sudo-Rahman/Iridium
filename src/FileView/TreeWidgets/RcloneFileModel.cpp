@@ -6,6 +6,7 @@
 #include <QVBoxLayout>
 #include <ProgressBar.hpp>
 #include <QMessageBox>
+#include <cmath>
 
 /**
  * @brief RcloneFileModel::RcloneFileModel
@@ -134,7 +135,6 @@ bool RcloneFileModel::fileInFolder(const RcloneFilePtr &file, const TreeFileItem
     {
         return *f == *file;
     });
-    return false;
 }
 
 bool RcloneFileModel::fileInFolder(const QString &text, const TreeFileItem *folder)

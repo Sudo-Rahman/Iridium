@@ -12,7 +12,7 @@ configure_file(src/Config/Version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/src/Config/Ve
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++2b -DCURL_STATICLIB -D NDEBUG -Wno-deprecated-declarations -O3")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++2b -D NDEBUG -Wno-deprecated-declarations -O3")
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)

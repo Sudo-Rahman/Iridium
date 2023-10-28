@@ -8,7 +8,7 @@
 #include <QTextEdit>
 #include <QThread>
 #include <QKeyEvent>
-#include <Qtimer>
+#include <QTimer>
 #include <QProcess>
 
 
