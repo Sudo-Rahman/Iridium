@@ -3,6 +3,7 @@
 //
 
 #include <Rclone.hpp>
+#include <Config.h>
 
 #include <iostream>
 
@@ -286,7 +287,8 @@ void Rclone::execute()
         _cv.notify_all();
         return;
     }
-    cout << "execute " << boost::algorithm::join(_args, " ") << endl;
+    if (BUILD_TYPE == BuildType::Debug)
+        cout << "execute " << boost::algorithm::join(_args, " ") << endl;
 
 #ifdef _WIN32
     std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
@@ -400,7 +402,8 @@ Rclone::~Rclone()
 {
     // if mutex is not available, wait for it
     lock_guard<mutex> lock(_mutex);
-    cout << "destructeur rclone : " << this << endl;
+    if (BUILD_TYPE == BuildType::Debug)
+        cout << "destructeur rclone : " << this << endl;
 //    Rclone::kill();
     if (_state == Running)
     {
@@ -416,7 +419,8 @@ void Rclone::kill()
 {
     if (_state == Running)
     {
-        cout << "process rclone kill : " << this << endl;
+        if (BUILD_TYPE == BuildType::Debug)
+            cout << "process rclone kill : " << this << endl;
         emit killed();
         _ioc->stop();
         _child->terminate();
@@ -432,7 +436,8 @@ void Rclone::kill()
  */
 void Rclone::reset()
 {
-    cout << "reset rclone : " << this << endl;
+    if (BUILD_TYPE == BuildType::Debug)
+        cout << "reset rclone : " << this << endl;
     // if process finish and destructor, call reset twice
     lock_guard<mutex> lock(_mutex);
     if (not _resetable)

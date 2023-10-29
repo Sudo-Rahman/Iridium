@@ -30,6 +30,8 @@ Q_OBJECT
 
     bool _dragable{};
 
+    std::map<std::string, bool> _operations{};
+
     RoundedLineEdit *_search_line_edit{};
 
     boost::thread _reload_thread{};

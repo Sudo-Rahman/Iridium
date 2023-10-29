@@ -34,6 +34,20 @@ namespace Iridium
 
         static bool isPreviewable(const QList<RcloneFilePtr> &files);
 
+        template<class OBJ>
+        [[nodiscard]] static std::string addressObject (const OBJ &obj )
+        {
+            std::stringstream ss;
+            ss << &obj;
+            return ss.str();
+        }
+
+        template<class OBJ>
+        [[nodiscard]] static std::string addressObject (const OBJ *obj )
+        {
+            return addressObject(*obj);
+        }
+
     };
 
 }

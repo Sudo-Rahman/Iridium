@@ -106,6 +106,7 @@ void ItemMenu::setActionEnabled(const ItemMenu::Action &action, bool enabled)
             break;
         case Preview:
             _preview->setEnabled(enabled);
+            break;
         case None:
         default:
             break;

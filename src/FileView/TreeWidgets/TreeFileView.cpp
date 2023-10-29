@@ -308,7 +308,7 @@ void TreeFileView::showContextMenu()
         }
     }
     if (lisItem.size() == 1)
-        menu.setActionEnabled(ItemMenu::Action::Tree, Iridium::Utility::isPreviewable(*lisItem.first()->getFile()));
+        menu.setActionEnabled(ItemMenu::Action::Preview, Iridium::Utility::isPreviewable(*lisItem.first()->getFile()));
 
     if (QTreeView::selectedIndexes().isEmpty())
         menu.setActionEnabled(ItemMenu::Action::Copy, false,
@@ -321,6 +321,7 @@ void TreeFileView::showContextMenu()
         menu.setActionEnabled(ItemMenu::Action::Paste, false,
                               ItemMenu::NewFolder, false,
                               ItemMenu::Tree, false,
+                              ItemMenu::Action::Preview, false,
                               ItemMenu::Sync, false);
 
     if (Iridium::Global::copy_files.empty())
