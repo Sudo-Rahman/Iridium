@@ -133,9 +133,8 @@ void TaskRow::updateDataParent()
                         .arg(hours, 2, 10, QChar('0'))
                         .arg(minutes, 2, 10, QChar('0'))
                         .arg(seconds, 2, 10, QChar('0')));
-    }
-    catch (boost::wrapexcept<std::invalid_argument> &e) { return; }
-    catch (boost::wrapexcept<std::out_of_range> &e) { return; }
+    }    catch (boost::exception &e) {}
+
 }
 
 void TaskRow::updateDataChild()
@@ -145,9 +144,8 @@ void TaskRow::updateDataChild()
         _progressBar->setValue(
                 _data.at("percentage").as_int64());
 
-    }
-    catch (boost::wrapexcept<std::invalid_argument> &e) { return; }
-    catch (boost::wrapexcept<std::out_of_range> &e) { return; }
+    }catch (boost::exception &e) {}
+
 
     double64_t speed = 0;
     double64_t speedAvg = 0;
@@ -161,8 +159,7 @@ void TaskRow::updateDataChild()
         speedAvg = _data.at("speedAvg").as_double();
         remainingTime = double64_t(_size - _data.at("bytes").as_int64()) / speed;
     }
-    catch (boost::wrapexcept<std::invalid_argument> &e) {}
-    catch (boost::wrapexcept<std::out_of_range> &e) {}
+    catch (boost::exception &e) {}
 
 
     // remainingTime to hh:mm:ss
@@ -203,8 +200,7 @@ void TaskRow::setSpeed()
         double64_t speedValue;
         speedValue = _data.at("speed").as_double();
         at(8)->setText((Iridium::Utility::sizeToString(speedValue) + "/s").c_str());
-    } catch (boost::wrapexcept<std::invalid_argument> &e) {}
-    catch (boost::wrapexcept<std::out_of_range> &e) {}
+    } catch (boost::exception &e) {}
 }
 
 
@@ -222,8 +218,7 @@ void TaskRow::normal()
         setSpeed();
         averageSpeedValue = _data.at("speedAvg").as_double();
     }
-    catch (boost::wrapexcept<std::invalid_argument> &e) {}
-    catch (boost::wrapexcept<std::out_of_range> &e) {}
+    catch (boost::exception &e) {}
     at(9)->setText(Iridium::Utility::sizeToString(averageSpeedValue).c_str());
 }
 
@@ -233,8 +228,7 @@ void TaskRow::normal()
 void TaskRow::finished()
 {
     try { _size = _data.at("totalBytes").as_int64(); }
-    catch (boost::wrapexcept<std::invalid_argument> &e) {}
-    catch (boost::wrapexcept<std::out_of_range> &e) {}
+    catch (boost::exception &e) {}
 
     at(2)->setText(Iridium::Utility::sizeToString(_size).c_str());
 
@@ -260,8 +254,7 @@ void TaskRow::error()
     {
         this->at(5)->setToolTip(_data.at("msg").as_string().c_str());
 
-    } catch (boost::wrapexcept<std::invalid_argument> &e) {}
-    catch (boost::wrapexcept<std::out_of_range> &e) {}
+    } catch (boost::exception &e) {}
     this->at(6)->setText("00:00:00");
 }
 
