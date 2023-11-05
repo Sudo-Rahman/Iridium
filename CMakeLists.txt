@@ -3,8 +3,13 @@ project(Iridium)
 
 set(Iridium_VERSION_MAJOR 0)
 set(Iridium_VERSION_MINOR 8)
-set(Iridium_VERSION_PATCH 92)
+set(Iridium_VERSION_PATCH 93)
 set(Iridium_VERSION "${Iridium_VERSION_MAJOR}.${Iridium_VERSION_MINOR}.${Iridium_VERSION_PATCH}")
+if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+    set(BUILD_TYPE 0)
+elseif (${CMAKE_BUILD_TYPE} STREQUAL "Release")
+    set(BUILD_TYPE 1)
+endif ()
 
 configure_file(src/Config/Version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/src/Config/Version.h @ONLY)
 
@@ -25,13 +30,11 @@ include_directories(${Boost_INCLUDE_DIRS})
 find_package(QT NAMES Qt6 REQUIRED COMPONENTS
         Core
         Gui
-        Widgets
-        LinguistTools)
+        Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS
         Core
         Gui
-        Widgets
-        LinguistTools)
+        Widgets)
 
 message(STATUS "Qt version: ${Qt${QT_VERSION_MAJOR}_VERSION}")
 
@@ -73,8 +76,6 @@ else ()
     set_source_files_properties(${TRANSLATION} PROPERTIES
             OUTPUT_LOCATION ${CMAKE_CURRENT_BINARY_DIR}/Translations)
 endif ()
-
-qt_add_translation(QM_FILES ${TRANSLATION})
 
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
