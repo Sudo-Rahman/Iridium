@@ -46,13 +46,6 @@ SearchWidget::SearchWidget(QWidget *parent) : QWidget(parent)
     view->setMinimumWidth(150);
     _remotes_comboBox->setMaxVisibleItems(3);
 
-    Settings::list_remote_changed.connect(
-            [this]()
-            {
-                _remotes = Iridium::Global::remotes;
-                fillRemotesComboBox();
-            });
-
     _search = new RoundedLineEdit(this);
     _search->setPlaceholderText(".png");
     _start = new QPushButton(tr("Rechercher"), this);
@@ -181,6 +174,32 @@ void SearchWidget::fillRemotesComboBox()
         item->setIcon(QIcon(it->get()->icon.c_str()));
         item->setData(Qt::Unchecked, Qt::CheckStateRole);
         item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
+        item->setCheckState(_remotes_status[*it] ? Qt::Checked : Qt::Unchecked);
         model->appendRow(item);
     }
+}
+
+void SearchWidget::showEvent(QShowEvent *event)
+{
+    if (_remotes not_eq Iridium::Global::remotes)
+    {
+        _remotes = Iridium::Global::remotes;
+        fillRemotesComboBox();
+    }
+    QWidget::showEvent(event);
+}
+
+void SearchWidget::hideEvent(QHideEvent *event)
+{
+    _remotes.clear();
+    auto model = dynamic_cast<QStandardItemModel *>(_remotes_comboBox->model());
+    for (int i = 0; i < model->rowCount(); i++)
+    {
+        auto item = model->item(i);
+        if (item->checkState() == Qt::Checked)
+        {
+            _remotes_status[_remotes[i]] = true;
+        }
+    }
+    QWidget::hideEvent(event);
 }

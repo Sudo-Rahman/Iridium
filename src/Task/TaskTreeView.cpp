@@ -200,7 +200,7 @@ void TaskTreeView::addTask(const QString &src, const QString &dst, const RcloneP
                     if (it != _tasks.end())
                         it->second.parent->updateData(obj.at("stats").as_object());
 
-                    if(obj.at("stats").as_object().contains("transferring"))
+                    if (obj.at("stats").as_object().contains("transferring"))
                         transfer = obj.at("stats").at("transferring").as_array();
                 }
                     // if invalid argument
@@ -210,8 +210,9 @@ void TaskTreeView::addTask(const QString &src, const QString &dst, const RcloneP
                     return;
                 } // if out of range
                 catch (const boost::wrapexcept<std::out_of_range> &e) { std::cout << "no Data" << std::endl; }
-                catch (const boost::exception &e) {
-                    std::cout << "Error on TaskTreeView : " << diagnostic_information_what(e,true)<< std::endl;
+                catch (const boost::exception &e)
+                {
+                    std::cout << "Error on TaskTreeView : " << diagnostic_information_what(e, true) << std::endl;
                 }
 
 

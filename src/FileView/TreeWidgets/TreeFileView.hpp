@@ -41,7 +41,8 @@ public:
 
     explicit TreeFileView(QWidget *parent = nullptr);
 
-    ~TreeFileView() override{
+    ~TreeFileView() override
+    {
         _reload_thread.interrupt();
         _reload_thread.join();
     }

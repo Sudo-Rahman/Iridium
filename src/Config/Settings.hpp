@@ -53,20 +53,23 @@ public:
         ReloadTime,
     };
 
-    enum Os{
+    enum Os
+    {
         Windows,
         Linux,
         MacOs,
         UnknownSystem,
     };
 
-    enum Arch{
+    enum Arch
+    {
         X86,
         x86_64,
         Arm64,
         UnknownArch,
     };
-    struct System{
+    struct System
+    {
         Os os;
         Arch arch;
     };
@@ -123,7 +126,8 @@ public:
      * @param value
      */
     template<class Type>
-    static void setValue(const Node &node, const Type &value){
+    static void setValue(const Node &node, const Type &value)
+    {
         try
         {
             _settings.put(_nodes.at(node), value);

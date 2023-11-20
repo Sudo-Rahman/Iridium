@@ -13,7 +13,7 @@ const std::shared_ptr<RcloneFile> &TreeFileItem::getFile() const
     return _file;
 }
 
-TreeFileItem::TreeFileItem(const QString &path, const RemoteInfoPtr &remoteInfo)  : QStandardItem()
+TreeFileItem::TreeFileItem(const QString &path, const RemoteInfoPtr &remoteInfo) : QStandardItem()
 {
     TreeFileItem::_file = std::make_shared<RcloneFile>(
             path,
@@ -64,13 +64,12 @@ void TreeFileItem::initIcon()
     setToolTip(_file->getName());
 }
 
-TreeFileItem::TreeFileItem()
-{}
+TreeFileItem::TreeFileItem() {}
 
 void TreeFileItem::appendRow(const QList<QStandardItem *> &row)
 {
     QStandardItem::appendRow(row);
     for (auto *item: row)
-        if(auto *tree_item = dynamic_cast<TreeFileItem *>(item); tree_item not_eq nullptr)
+        if (auto *tree_item = dynamic_cast<TreeFileItem *>(item); tree_item not_eq nullptr)
             _children.push_back(tree_item);
 }

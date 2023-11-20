@@ -75,7 +75,11 @@ ListRemoteWidget::ListRemoteWidget(QWidget *parent) : QScrollArea(parent)
 
     _remoteselected = std::make_shared<remotes_selected>();
 
-    Settings::list_remote_changed.connect([this] { getAllRemote(); });
+    Settings::list_remote_changed.connect(
+            [this]
+            {
+                qGuiApp->postEvent(this, new QEvent(RefreshRemoteEvent::refreshRemoteType), Qt::HighEventPriority);
+            });
 
     // no border
     setFrameShape(QFrame::NoFrame);
@@ -240,4 +244,14 @@ void ListRemoteWidget::hideAnimation(QWidget *widget) const
     animation->setEasingCurve(QEasingCurve::InOutQuad);
     animation->start(QAbstractAnimation::DeleteWhenStopped);
     connect(animation, &QPropertyAnimation::finished, widget, [widget]() { widget->hide(); });
+}
+
+bool ListRemoteWidget::event(QEvent *event)
+{
+    if (event->type() == RefreshRemoteEvent::refreshRemoteType)
+    {
+        getAllRemote();
+    }
+
+    return QScrollArea::event(event);
 }

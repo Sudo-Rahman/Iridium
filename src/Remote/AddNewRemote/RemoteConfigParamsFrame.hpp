@@ -34,7 +34,7 @@ public:
 
     virtual void reset();
 
-    void focusLineEdit(){if(_remote_name)_remote_name->setFocus();}
+    void focusLineEdit() { if (_remote_name)_remote_name->setFocus(); }
 
 protected:
     virtual void addRemote();

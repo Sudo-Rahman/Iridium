@@ -115,9 +115,25 @@ std::vector<RemoteInfoPtr> Settings::getLocalRemotes()
 
 void Settings::refreshRemotesList()
 {
-    auto remotes = Settings::getLocalRemotes();
-    Iridium::Global::remotes = Rclone::create_unique()->listRemotes();
-    Iridium::Global::remotes.insert(Iridium::Global::remotes.begin(), remotes.begin(), remotes.end());
+    auto distants = Rclone::create_unique()->listRemotes();
+    auto locals = Settings::getLocalRemotes();
+//    insert remotes in refresh
+    distants.insert(distants.end(), locals.begin(), locals.end());
+    auto remotes = &Iridium::Global::remotes;
+    for (auto it = distants.begin(); it != distants.end(); it++)
+    {
+        find_if(remotes->begin(), remotes->end(), [&it](const RemoteInfoPtr &remoteInfo)
+        {
+            return remoteInfo->name() == it->get()->name();
+        }) == remotes->end() ? remotes->emplace_back(*it) : nullptr;
+    }
+    for (auto it = remotes->begin(); it != remotes->end(); it++)
+    {
+        find_if(distants.begin(), distants.end(), [&it](const RemoteInfoPtr &remoteInfo)
+        {
+            return remoteInfo->name() == it->get()->name();
+        }) == distants.end() ? remotes->erase(it) : it;
+    }
     list_remote_changed();
 }
 

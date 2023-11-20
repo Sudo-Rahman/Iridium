@@ -23,8 +23,9 @@ public:
 
     explicit CmdTextEdit(QWidget *parent = nullptr);
 
-    ~CmdTextEdit() override{
-        if(_process)
+    ~CmdTextEdit() override
+    {
+        if (_process)
             _process->kill();
     }
 

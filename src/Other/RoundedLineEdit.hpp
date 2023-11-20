@@ -12,7 +12,7 @@ class RoundedLineEdit : public QLineEdit
 {
 Q_OBJECT
 
-    QString _styleSheet{},_boder_radius{};
+    QString _styleSheet{}, _boder_radius{};
 
 public:
     explicit RoundedLineEdit(QWidget *parent = nullptr);

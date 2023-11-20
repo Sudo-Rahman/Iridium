@@ -171,8 +171,8 @@ void RemoteWidget::init()
             else
             {
                 auto rclone = Rclone::create_unique();
-                rclone->deleteRemote(_remote_info->name());
-                rclone->waitForFinished();
+                 rclone->deleteRemote(_remote_info->name());
+                 rclone->waitForFinished();
                 if (rclone->exitCode() != 0)
                 {
                     auto msgb = QMessageBox(QMessageBox::Critical, tr("Suppression"),

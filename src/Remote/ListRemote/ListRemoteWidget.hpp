@@ -11,12 +11,14 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QList>
+#include <QEvent>
 
 #include "RemoteWidget.hpp"
 #include <Remote.h>
 #include <RoundedButton.hpp>
 #include <RoundedLineEdit.hpp>
 #include <Rclone.hpp>
+#include <boost/asio/io_service.hpp>
 
 struct remotes_selected
 {
@@ -54,6 +56,7 @@ private:
     int _width{};
     bool _is_expand = true;
 
+
 public:
     explicit ListRemoteWidget(QWidget *parent = nullptr);
 
@@ -70,10 +73,18 @@ private:
 
     void hideAnimation(QWidget *widget) const;
 
+protected:
+    bool event(QEvent *event) override;
+
 signals:
 
     void remoteClicked(const std::shared_ptr<remotes_selected> &);
 };
 
+class RefreshRemoteEvent : public QEvent
+{
+public:
+    static const QEvent::Type refreshRemoteType = static_cast<QEvent::Type>(300);
+};
 
 #endif //IRIDIUM_LISTREMOTEWIDGET_HPP

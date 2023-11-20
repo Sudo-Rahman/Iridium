@@ -25,8 +25,8 @@ const std::string HARDDRIVEICON = ":/ressources/drive-harddisk-solidstate.svg";
 
 enum RemoteType
 {
-    LocalHardDrive,Drive, Sftp, OneDrive, Dropbox, Ftp, Mega,
-    OpenDrive, Pcloud, Box, Smb,Cmd, END
+    LocalHardDrive, Drive, Sftp, OneDrive, Dropbox, Ftp, Mega,
+    OpenDrive, Pcloud, Box, Smb, Cmd, END
 };
 
 const std::map<RemoteType, std::string> remoteIco = {
@@ -79,7 +79,7 @@ public:
                 return remoteIco.at(type);
             } catch (std::out_of_range &e)
             {
-                if(type == RemoteType::LocalHardDrive)
+                if (type == RemoteType::LocalHardDrive)
                     return HARDDRIVEICON;
                 else
                     return CMD;
@@ -116,10 +116,13 @@ public:
 
     RemoteInfo() = default;
 
-    [[nodiscard]] static const RemoteType findType(const std::string &type){
-        try {
+    [[nodiscard]] static const RemoteType findType(const std::string &type)
+    {
+        try
+        {
             return stringToRemoteType.at(type);
-        } catch (std::out_of_range &e) {
+        } catch (std::out_of_range &e)
+        {
             return RemoteType::Cmd;
         }
     }

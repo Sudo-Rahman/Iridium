@@ -133,7 +133,7 @@ void TaskRow::updateDataParent()
                         .arg(hours, 2, 10, QChar('0'))
                         .arg(minutes, 2, 10, QChar('0'))
                         .arg(seconds, 2, 10, QChar('0')));
-    }    catch (boost::exception &e) {}
+    } catch (boost::exception &e) {}
 
 }
 
@@ -144,7 +144,7 @@ void TaskRow::updateDataChild()
         _progressBar->setValue(
                 _data.at("percentage").as_int64());
 
-    }catch (boost::exception &e) {}
+    } catch (boost::exception &e) {}
 
 
     double64_t speed = 0;
@@ -322,7 +322,8 @@ void TaskRow::init()
     averageSpeed->setText("0 B/s");
 }
 
-void TaskRow::cancel() {
+void TaskRow::cancel()
+{
     if (_state not_eq TaskRow::Finished and _state not_eq TaskRow::Error)
     {
         _state = TaskRow::Cancelled;

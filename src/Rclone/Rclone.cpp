@@ -401,7 +401,7 @@ void Rclone::waitForFinished()
 Rclone::~Rclone()
 {
     // if mutex is not available, wait for it
-    lock_guard<mutex> lock(_mutex);
+    auto lock = new lock_guard<mutex>(_mutex);
     if (BUILD_TYPE == BuildType::Debug)
         cout << "destructeur rclone : " << this << endl;
 //    Rclone::kill();
@@ -410,6 +410,7 @@ Rclone::~Rclone()
         cerr << "destructeur rclone : " << this << " is running" << endl;
         std::terminate();
     }
+    delete lock;
 }
 
 /**

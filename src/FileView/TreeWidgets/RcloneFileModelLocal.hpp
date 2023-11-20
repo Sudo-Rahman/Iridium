@@ -27,7 +27,8 @@ protected:
 
     void init() override;
 
-    void reload(TreeFileItem *item) override;};
+    void reload(TreeFileItem *item) override;
+};
 
 
 #endif //IRIDIUM_RCLONEFILEMODELLOCAL_HPP

@@ -247,7 +247,7 @@ void ItemInfoDialog::initType()
 
 ItemInfoDialog::~ItemInfoDialog()
 {
-    if(_rclone->isRunning())
+    if (_rclone->isRunning())
         _rclone->kill();
     if (not _thread)
         return;

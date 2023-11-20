@@ -66,7 +66,8 @@ void MenuBar::connectSignals()
         formLayout.addRow(new QLabel(tr("Boost Version : ")), &boostVersion);
 
         auto rcloneVersion = QLabel(
-                "<a href=\"https://rclone.org/\">" + QString::fromStdString(Rclone::create_unique()->version()) + "</a>");
+                "<a href=\"https://rclone.org/\">" + QString::fromStdString(Rclone::create_unique()->version()) +
+                "</a>");
         rcloneVersion.setOpenExternalLinks(true);
         formLayout.addRow(new QLabel(tr("Rclone Version : ")), &rcloneVersion);
 

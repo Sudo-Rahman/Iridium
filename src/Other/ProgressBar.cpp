@@ -8,7 +8,7 @@
 
 ProgressBar::ProgressBar(const ProgressBar::Type &type, QWidget *parent) : QWidget(parent)
 {
-    if(type == Circular)
+    if (type == Circular)
         setMinimumSize(100, 100);
     else
         setMinimumHeight(10);
@@ -78,8 +78,7 @@ void ProgressBar::setIsIndeterminate(bool isIndeterminate)
     {
         _timer->start();
         _current = _highlight;
-    }
-    else
+    } else
     {
         _timer->stop();
         _timer_counter = 0;

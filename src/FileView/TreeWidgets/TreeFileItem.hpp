@@ -39,9 +39,11 @@ public:
     void appendRow(const QList<QStandardItem *> &row);
 
 
-    static QList<QStandardItem *> decorateList(){
+    static QList<QStandardItem *> decorateList()
+    {
         QList<QStandardItem *> decoratedItems;
-        for (int i = 0; i < 4; ++i) {
+        for (int i = 0; i < 4; ++i)
+        {
             auto *item = new QStandardItem;
             decoratedItems << item;
         }

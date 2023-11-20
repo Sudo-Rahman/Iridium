@@ -15,7 +15,7 @@ Q_OBJECT
 public:
     explicit EscDiasableDialog(QWidget *parent = nullptr) : QDialog(parent)
     {
-        setWindowFlags(Qt::Dialog |Qt::FramelessWindowHint);
+        setWindowFlags(Qt::Dialog | Qt::FramelessWindowHint);
     }
 
     void keyPressEvent(QKeyEvent *event) override

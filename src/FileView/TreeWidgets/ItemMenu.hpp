@@ -14,7 +14,7 @@ class ItemMenu : public QMenu
 Q_OBJECT
 
 private:
-    QAction *_info{}, *_copy{}, *_paste{}, *_delete{}, *_new_folder{}, *_tree{},*_sync{},*_preview{};
+    QAction *_info{}, *_copy{}, *_paste{}, *_delete{}, *_new_folder{}, *_tree{}, *_sync{}, *_preview{};
 
 public:
 

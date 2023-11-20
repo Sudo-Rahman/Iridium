@@ -114,17 +114,18 @@ void RcloneFileModelDistant::reload(TreeFileItem *parent)
         for (const auto &file: files)
             files_ptr->append(file);
 
-        auto *items =  new std::vector<QList<QStandardItem *>>();
+        auto *items = new std::vector<QList<QStandardItem *>>();
 
-        connect(rclone.get(), &Rclone::readDataJson, this, [files_ptr, items, tree_item, this](const boost::json::object &obj)
-        {
-            auto *item = new TreeFileItemDistant(tree_item->getFile()->getPath(), _remote_info, obj);
-            files_ptr->removeIf([item](const RcloneFilePtr &file) { return *(item->getFile()) == *file; });
-            if (not fileInFolder(item->getFile(), tree_item))
-                items->push_back( getItemList(item));
-            else
-                delete item;
-        });
+        connect(rclone.get(), &Rclone::readDataJson, this,
+                [files_ptr, items, tree_item, this](const boost::json::object &obj)
+                {
+                    auto *item = new TreeFileItemDistant(tree_item->getFile()->getPath(), _remote_info, obj);
+                    files_ptr->removeIf([item](const RcloneFilePtr &file) { return *(item->getFile()) == *file; });
+                    if (not fileInFolder(item->getFile(), tree_item))
+                        items->push_back(getItemList(item));
+                    else
+                        delete item;
+                });
 
         connectRclone(rclone, tree_item, false);
         connect(rclone.get(), &Rclone::finished, this, [items, files_ptr, tree_item, this](int exit)
@@ -138,7 +139,8 @@ void RcloneFileModelDistant::reload(TreeFileItem *parent)
             delete files_ptr;
         });
         rclone->lsJson(*tree_item->getFile());
-    }}
+    }
+}
 
 /**
  * @brief connect rclone signals to tree_item

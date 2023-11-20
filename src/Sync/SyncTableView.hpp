@@ -30,7 +30,8 @@ Q_OBJECT
 public:
     explicit SyncTableView(QWidget *parent = nullptr);
 
-    void setFiles(const RcloneFilePtr &src, const RcloneFilePtr &dst){
+    void setFiles(const RcloneFilePtr &src, const RcloneFilePtr &dst)
+    {
         _src = src;
         _dst = dst;
     }

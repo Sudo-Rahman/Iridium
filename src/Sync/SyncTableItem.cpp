@@ -10,17 +10,20 @@ SyncTableItem::SyncTableItem(const RcloneFilePtr &file, int col)
     setEditable(false);
     switch (col)
     {
-        case 0:{
+        case 0:
+        {
             setText(file->getName());
         }
             break;
-        case 1:{
+        case 1:
+        {
             setText(QObject::tr("Oui"));
         }
             break;
         case 2:
             break;
-        case 3:{
+        case 3:
+        {
         }
 
     }

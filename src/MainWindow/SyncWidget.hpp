@@ -25,7 +25,8 @@ Q_OBJECT
     ProgressBar *_sync_progressBar{};
     QPushButton *_sync_button{}, *_stop{};
 
-    enum State{
+    enum State
+    {
         None,
         Analyse,
         Sync

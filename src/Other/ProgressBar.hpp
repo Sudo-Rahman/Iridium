@@ -33,7 +33,8 @@ private:
     QTimer *_timer{};
     State _state{Progress};
 
-    QColor _current{},_progress{69, 164, 235}, _success{128, 211, 132}, _error{255, 118, 118},_highlight{palette().color(QPalette::Highlight)};
+    QColor _current{}, _progress{69, 164, 235}, _success{128, 211, 132}, _error{255, 118, 118}, _highlight{
+            palette().color(QPalette::Highlight)};
 
 public:
     explicit ProgressBar(const Type &type, QWidget *parent = nullptr);

@@ -23,6 +23,7 @@ Q_OBJECT
 
     ProgressBar *_progressBar{};
     std::vector<RemoteInfoPtr> _remotes{};
+    std::map<RemoteInfoPtr, bool> _remotes_status{};
     QComboBox *_remotes_comboBox{};
     RoundedLineEdit *_search{};
     QPushButton *_start{}, *_stop;
@@ -35,6 +36,10 @@ public:
 
 protected:
     bool event(QEvent *event) override;
+
+    void showEvent(QShowEvent *event) override;
+
+    void hideEvent(QHideEvent *event) override;
 
 private:
     void connectSignals();
