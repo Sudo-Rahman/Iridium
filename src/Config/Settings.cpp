@@ -10,6 +10,7 @@
 #include <fstream>
 #include <QTranslator>
 #include <memory>
+#include <iostream>
 #include <Global.hpp>
 
 using namespace std;
@@ -118,22 +119,25 @@ void Settings::refreshRemotesList()
     auto distants = Rclone::create_unique()->listRemotes();
     auto locals = Settings::getLocalRemotes();
 //    insert remotes in refresh
-    distants.insert(distants.end(), locals.begin(), locals.end());
-    auto remotes = &Iridium::Global::remotes;
-    for (auto it = distants.begin(); it != distants.end(); it++)
+    distants.insert(distants.begin(), locals.begin(), locals.end());
+    const auto remotes = &Iridium::Global::remotes;
+
+    // remove remotes in remotes but not in distants
+    for (const auto remote : *remotes)
     {
-        find_if(remotes->begin(), remotes->end(), [&it](const RemoteInfoPtr &remoteInfo)
-        {
-            return remoteInfo->name() == it->get()->name();
-        }) == remotes->end() ? remotes->emplace_back(*it) : nullptr;
+        if(std::ranges::none_of(distants.begin(), distants.end(), [remote](const RemoteInfoPtr &r)
+        { return *r == *remote; }))
+            remotes->erase(std::ranges::find_if(remotes->begin(), remotes->end(), [remote](const RemoteInfoPtr &r)
+            { return *r == *remote; }));
     }
-    for (auto it = remotes->begin(); it != remotes->end(); it++)
+    // add remotes in distants but not in remotes
+    for (const auto &remote: distants)
     {
-        find_if(distants.begin(), distants.end(), [&it](const RemoteInfoPtr &remoteInfo)
-        {
-            return remoteInfo->name() == it->get()->name();
-        }) == distants.end() ? remotes->erase(it) : it;
+        if (std::ranges::none_of(remotes->begin(), remotes->end(), [remote](const RemoteInfoPtr &r)
+        { return *r == *remote; }))
+            remotes->emplace_back(remote);
     }
+
     list_remote_changed();
 }
 
@@ -226,6 +230,8 @@ void Settings::loadSettings()
     } else
     {
         bf::create_directories(path.parent_path());
+        ofstream(path.string(), ios::out | ios::trunc).close();
+        bf::permissions(path, bf::perms::owner_all);
         resetSettings(All);
     }
 

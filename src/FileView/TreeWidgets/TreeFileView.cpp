@@ -419,6 +419,7 @@ void TreeFileView::changeRemote(const RemoteInfoPtr &info)
     if (_remote_info == info)
         return;
 
+    _remote_info = nullptr;
     _remote_info = info;
     delete _model;
     if (!_remote_info->isLocal())

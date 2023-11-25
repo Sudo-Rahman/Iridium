@@ -3,7 +3,7 @@ project(Iridium)
 
 set(Iridium_VERSION_MAJOR 0)
 set(Iridium_VERSION_MINOR 8)
-set(Iridium_VERSION_PATCH 93)
+set(Iridium_VERSION_PATCH 94)
 set(Iridium_VERSION "${Iridium_VERSION_MAJOR}.${Iridium_VERSION_MINOR}.${Iridium_VERSION_PATCH}")
 if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
     set(BUILD_TYPE 0)
@@ -17,7 +17,7 @@ configure_file(src/Config/Version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/src/Config/Ve
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++2b -D NDEBUG -Wno-deprecated-declarations -O3")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++2b -DNDEBUG -Wno-deprecated-declarations -O3")
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -42,7 +42,7 @@ file(GLOB_RECURSE SRC
         src/*.cpp
         src/*.h
         src/*.hpp
-        )
+)
 
 include_directories(src
         src/Task
@@ -63,7 +63,7 @@ include_directories(src
 
 file(GLOB_RECURSE TRANSLATION
         languages/iridium_*.ts
-        )
+)
 
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -102,7 +102,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
         Boost::thread
         Boost::json
         Boost::chrono
-        )
+)
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     target_link_libraries(Iridium PRIVATE ws2_32
             -static gcc stdc++ winpthread -dynamic)
@@ -113,5 +113,5 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
             MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_NAME} ${Iridium_VERSION}"
             MACOSX_BUNDLE_COPYRIGHT "© 2023 ${PROJECT_NAME}"
             MACOSX_BUNDLE_ICON_FILE Iridium.icns
-            )
+    )
 endif ()

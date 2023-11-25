@@ -30,9 +30,21 @@ struct remotes_selected
         first = nullptr;
         second = nullptr;
     }
+
+    void swap()
+    {
+        std::swap(first, second);
+    }
+    void remove(RemoteWidget *remote)
+    {
+        if (first == remote)
+            first = nullptr;
+        if (second == remote)
+            second = nullptr;
+    }
 };
 
-class ListRemoteWidget : public QScrollArea
+class ListRemoteWidget final : public QScrollArea
 {
 Q_OBJECT
 
@@ -46,11 +58,11 @@ private:
 
     QList<RemoteWidget *> _remotes{};
 
-    std::shared_ptr<remotes_selected> _remoteselected{};
+    static std::shared_ptr<remotes_selected> _remoteselected;
 
     QPushButton *_expand{};
 
-    bool _selected{};
+    bool _selected{true};
 
 
     int _width{};
@@ -66,6 +78,10 @@ public:
 
 private:
     void getAllRemote();
+
+    void addRemote(RemoteWidget *remote);
+
+    void removeRemote(RemoteWidget *remote);
 
     void searchRemote(const QString &name);
 
