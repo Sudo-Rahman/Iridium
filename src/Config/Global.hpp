@@ -5,6 +5,7 @@
 #ifndef IRIDIUM_GLOBAL_HPP
 #define IRIDIUM_GLOBAL_HPP
 
+#include <any>
 #include <RcloneFile.hpp>
 
 namespace Iridium
@@ -24,6 +25,7 @@ namespace Iridium
         static Load load_type;
         static uint8_t max_depth;
         static uint8_t reload_time;
+        static std::map<RemoteInfoPtr , std::any> remote_model;
 
         static void clear_and_swap_copy_files(const std::vector<RcloneFilePtr> &files)
         {

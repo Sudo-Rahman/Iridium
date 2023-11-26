@@ -122,6 +122,9 @@ void Settings::refreshRemotesList()
     distants.insert(distants.begin(), locals.begin(), locals.end());
     const auto remotes = &Iridium::Global::remotes;
 
+    remotes->erase(std::ranges::remove_if(*remotes, [](const RemoteInfoPtr &remote)
+    { return remote == nullptr; }).begin(), remotes->end());
+
     // remove remotes in remotes but not in distants
     for (const auto remote : *remotes)
     {

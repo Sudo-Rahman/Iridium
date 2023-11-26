@@ -6,12 +6,10 @@
 #define IRIDIUM_FILEVIEWWIDGET_HPP
 
 #include <TreeFileViewContainer.hpp>
-#include <QLayout>
-#include <QProgressBar>
 #include <ListRemoteWidget.hpp>
 #include <QSplitter>
 
-class FileViewWidget : public QWidget
+class FileViewWidget final : public QWidget
 {
 Q_OBJECT
 

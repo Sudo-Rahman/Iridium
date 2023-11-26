@@ -288,7 +288,7 @@ void Rclone::execute()
         return;
     }
     if (BUILD_TYPE == BuildType::Debug)
-        cout << "execute " << boost::algorithm::join(_args, " ") << endl;
+        cout << "execute " << boost::algorithm::join(_args, " ") << " : " << this << endl;
 
 #ifdef _WIN32
     std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
@@ -336,7 +336,8 @@ void Rclone::execute()
             {
                 try
                 {
-                    ba::post(*_ioc, [this] { readLoop(*_pipe, _out); });
+                    ba::post(*_ioc, [this]
+                    { readLoop(*_pipe, _out); });
                     _ioc->run();
                     _child->wait();
                     _exit = _child->exit_code();
@@ -391,7 +392,8 @@ void Rclone::waitForFinished()
     if (_state == Running)
     {
         unique_lock<mutex> lock(_mutex);
-        _cv.wait(lock, [this] { return _state == Finsished or _state == Error; });
+        _cv.wait(lock, [this]
+        { return _state == Finsished or _state == Error; });
     }
 }
 
@@ -471,7 +473,8 @@ void Rclone::reset()
 void Rclone::waitForStarted()
 {
     std::unique_lock<std::mutex> lock(_mutex);
-    _cv.wait(lock, [this] { return _state == Running or _state == Error; });
+    _cv.wait(lock, [this]
+    { return _state == Running or _state == Error; });
 }
 
 /**
@@ -480,28 +483,31 @@ void Rclone::waitForStarted()
  */
 void Rclone::size(const RcloneFile &path)
 {
-    _finished.connect(
-            [this](const int exit)
-            {
-                if (exit == 0)
+    ba::post(*_ioc, [this]
+    {
+        _finished.connect(
+                [this](const int exit)
                 {
-                    for (const auto &string: _out)
+                    if (exit == 0)
                     {
-                        try
+                        for (const auto &string: _out)
                         {
-                            auto json = bj::parse(string);
-                            auto count = json.at("count").as_int64();
-                            auto sizeBytes = json.at("bytes").as_int64();
-                            auto humanReadable = Iridium::Utility::sizeToString((double64_t) sizeBytes);
-                            emit sizeFinished(count, sizeBytes, std::move(humanReadable));
-                        } catch (boost::exception &e)
-                        {
-                            cerr << "Erreur parse json" << endl;
-                            cerr << boost::diagnostic_information(e) << endl;
+                            try
+                            {
+                                auto json = bj::parse(string);
+                                auto count = json.at("count").as_int64();
+                                auto sizeBytes = json.at("bytes").as_int64();
+                                auto humanReadable = Iridium::Utility::sizeToString((double64_t) sizeBytes);
+                                emit sizeFinished(count, sizeBytes, std::move(humanReadable));
+                            } catch (boost::exception &e)
+                            {
+                                cerr << "Erreur parse json" << endl;
+                                cerr << boost::diagnostic_information(e) << endl;
+                            }
                         }
                     }
-                }
-            });
+                });
+    });
     _args = {"size", path.getPath().toStdString(), "--json"};
     if (not _lockable)
         execute();
@@ -604,7 +610,8 @@ boost::thread RcloneManager::_launch_thread = boost::thread(
                         rclone->execute();
                         ++RcloneManager::_rclone_locked;
                     }
-                } catch (boost::thread_interrupted &e) { break; }
+                } catch (boost::thread_interrupted &e)
+                { break; }
             }
         });
 

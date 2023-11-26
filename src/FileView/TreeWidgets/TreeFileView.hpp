@@ -5,13 +5,9 @@
 #ifndef IRIDIUM_TREEFILEVIEW_HPP
 #define IRIDIUM_TREEFILEVIEW_HPP
 
-#include <QTreeView>
-#include <QTimer>
-#include <QStandardItemModel>
 #include "TreeFileItem.hpp"
 #include "RcloneFileModel.hpp"
 #include <QTreeWidgetItem>
-#include <thread>
 #include <QMessageBox>
 #include <Rclone.hpp>
 #include <Global.hpp>
@@ -22,7 +18,7 @@ class TreeFileView : public QTreeView
 Q_OBJECT
 
     RcloneFileModel *_model{};
-    QList<QModelIndex> _index_back{}, _index_front{};
+    std::vector<std::pair<QModelIndex, uint32_t>> _index_back{}, _index_front{};
     RemoteInfoPtr _remote_info{};
 
     uint64_t _clickTime{};

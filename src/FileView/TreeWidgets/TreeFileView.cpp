@@ -20,6 +20,7 @@
 #include <QSysInfo>
 #include <QTextEdit>
 #include <QThread>
+#include <QScrollBar>
 #include <ImagePreviewDialog.hpp>
 #include <boost/algorithm/string/join.hpp>
 #include <Settings.hpp>
@@ -28,13 +29,14 @@
 /**
  * @brief Classe permettant de définir la taille des items
  */
-class MyItemDelegate : public QItemDelegate
-{
+class MyItemDelegate : public QItemDelegate {
 public:
-    explicit MyItemDelegate(QObject *parent = nullptr) : QItemDelegate(parent) {}
+    explicit MyItemDelegate(QObject *parent = nullptr) : QItemDelegate(parent)
+    {}
 
     void paint(QPainter *painter, const QStyleOptionViewItem &option,
-               const QModelIndex &index) const override { QItemDelegate::paint(painter, option, index); }
+               const QModelIndex &index) const override
+    { QItemDelegate::paint(painter, option, index); }
 
     [[nodiscard]] QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override
     {
@@ -105,7 +107,8 @@ void TreeFileView::initUI()
 
     setStyleSheet("QTreeView { outline:none; }");
 
-    _reload_thread = boost::thread([this] { autoReload(); });
+    _reload_thread = boost::thread([this]
+                                   { autoReload(); });
 }
 
 TreeFileView::TreeFileView(QWidget *parent) : QTreeView(parent)
@@ -166,7 +169,8 @@ void TreeFileView::connectSignals()
     connect(this, &QTreeView::customContextMenuRequested, this, &TreeFileView::showContextMenu);
 
 
-    connect(_search_line_edit, &QLineEdit::textChanged, this, [this](const QString &text) { search(text); });
+    connect(_search_line_edit, &QLineEdit::textChanged, this, [this](const QString &text)
+    { search(text); });
 
     connect(this, &TreeFileView::pathChanged, this, [this]()
     {
@@ -214,12 +218,14 @@ void TreeFileView::resizeEvent(QResizeEvent *event)
 void TreeFileView::back()
 {
     if (not _model) return;
-    if (_index_back.length() > 0)
+    if (_index_back.size() > 0)
     {
-        auto index = _index_back.back();
+        auto index = _index_back.back().first;
+        auto val = _index_back.back().second;
         _index_back.pop_back();
-        _index_front << QTreeView::rootIndex();
+        _index_front.push_back(std::pair(QTreeView::rootIndex(), verticalScrollBar()->value()));
         QTreeView::setRootIndex(index);
+        verticalScrollBar()->setValue(val);
     } else
         QTreeView::setRootIndex(_model->getRootIndex());
     emit pathChanged(getPath());
@@ -231,12 +237,14 @@ void TreeFileView::back()
 void TreeFileView::front()
 {
     if (not _model) return;
-    if (_index_front.length() > 0)
+    if (_index_front.size() > 0)
     {
-        auto index = _index_front.back();
+        auto index = _index_front.back().first;
+        auto val = _index_front.back().second;
         _index_front.pop_back();
-        _index_back << index.parent();
+        _index_back.push_back(std::pair(index.parent(), verticalScrollBar()->value()));
         QTreeView::setRootIndex(index);
+        verticalScrollBar()->setValue(val);
     }
     emit pathChanged(getPath());
 }
@@ -280,12 +288,13 @@ void TreeFileView::doubleClick(const QModelIndex &index)
 
 //     get parent index
     auto id = index.parent();
-    _index_back.push_back(id);
+    _index_back.push_back(std::pair(id, verticalScrollBar()->value()));
     _index_front.clear();
     // if item getParent is null,it's first column item, else we get first column item.
     QTreeView::setRootIndex(item->siblingAtFirstColumn()->index());
     emit pathChanged(getPath());
     selectionModel()->clearSelection();
+    verticalScrollBar()->setValue(0);
 }
 
 /**
@@ -421,11 +430,23 @@ void TreeFileView::changeRemote(const RemoteInfoPtr &info)
 
     _remote_info = nullptr;
     _remote_info = info;
-    delete _model;
-    if (!_remote_info->isLocal())
-        _model = new RcloneFileModelDistant(_remote_info, this);
-    else
-        _model = new RcloneFileModelLocal(_remote_info, this);
+
+    try {
+        auto it = std::ranges::find_if(Iridium::Global::remote_model, [info](const auto &pair)
+        {return *std::any_cast<RemoteInfoPtr>(pair.first) == *info;});
+
+        if(it == Iridium::Global::remote_model.end()) {
+            if (!_remote_info->isLocal())
+                _model = new RcloneFileModelDistant(_remote_info, this);
+            else
+                _model = new RcloneFileModelLocal(_remote_info, this);
+            Iridium::Global::remote_model.emplace(info, _model);
+        }else {
+            _model = std::any_cast<RcloneFileModel*>(it->second);
+        }
+
+    }catch (std::exception &e)
+    {qDebug() << e.what();}
 
     QTreeView::setModel(_model);
 }
