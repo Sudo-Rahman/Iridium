@@ -6,12 +6,11 @@
 #include <Rclone.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/dll.hpp>
-#include <boost/system.hpp>
 #include <fstream>
 #include <QTranslator>
-#include <memory>
 #include <iostream>
 #include <Global.hpp>
+#include <iridium/process.hpp>
 
 using namespace std;
 using namespace Iridium;
@@ -187,6 +186,7 @@ void Settings::deleteRemote(const RemoteInfoPtr &remoteInfo)
 void Settings::init()
 {
     // init rclone path
+    iridium::rclone::process::initialize();
     auto rclonePath = boost::process::search_path("rclone");
     if (rclonePath.empty())
     {

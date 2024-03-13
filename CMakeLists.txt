@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.24)
+cmake_minimum_required(VERSION 3.25)
 project(Iridium)
 
 set(Iridium_VERSION_MAJOR 0)
@@ -17,26 +17,20 @@ configure_file(src/Config/Version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/src/Config/Ve
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++2b -DNDEBUG -Wno-deprecated-declarations -O3")
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-set(Boost_USE_STATIC_LIBS ON)
-find_package(Boost COMPONENTS system filesystem json thread chrono REQUIRED)
-include_directories(${Boost_INCLUDE_DIRS})
+find_package(rclone_cpp REQUIRED)
+find_package(Boost REQUIRED)
 
-find_package(QT NAMES Qt6 REQUIRED COMPONENTS
-        Core
-        Gui
-        Widgets)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS
+find_package(Qt6 REQUIRED COMPONENTS
         Core
         Gui
         Widgets)
 
-message(STATUS "Qt version: ${Qt${QT_VERSION_MAJOR}_VERSION}")
+message(STATUS "Qt version: ${Qt6_VERSION}")
 
 file(GLOB_RECURSE SRC
         src/*.cpp
@@ -54,6 +48,7 @@ include_directories(src
         src/Other
         src/Rclone
         src/Search
+        src/Application
         src/Sync
         src/Remote
         src/Remote/AddNewRemote
@@ -94,20 +89,17 @@ else ()
 endif ()
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
-        Qt::Core
-        Qt::Gui
-        Qt::Widgets
-        Boost::system
-        Boost::filesystem
-        Boost::thread
-        Boost::json
-        Boost::chrono
+        rclone_cpp::rclone_cpp
+        boost::boost
+        Qt6::Core Qt6::Gui Qt6::Widgets
 )
+
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     target_link_libraries(Iridium PRIVATE ws2_32
             -static gcc stdc++ winpthread -dynamic)
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    target_link_libraries(${PROJECT_NAME} PRIVATE "-framework Cocoa")
+    find_library(COCOA Cocoa)
+    target_link_libraries(${PROJECT_NAME} PRIVATE ${COCOA})
     set_target_properties(${PROJECT_NAME} PROPERTIES
             MACOSX_BUNDLE_BUNDLE_NAME ${PROJECT_NAME}
             MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_NAME} ${Iridium_VERSION}"

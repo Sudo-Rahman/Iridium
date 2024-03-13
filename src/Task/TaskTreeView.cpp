@@ -9,6 +9,7 @@
 #include "TaskTreeView.hpp"
 #include "TaskRow.hpp"
 #include <boost/chrono.hpp>
+#include <boost/uuid/uuid.hpp>
 
 using namespace std;
 using namespace boost;

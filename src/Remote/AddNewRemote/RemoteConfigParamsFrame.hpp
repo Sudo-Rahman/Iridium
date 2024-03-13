@@ -12,6 +12,9 @@
 #include <QLabel>
 #include <QSpinBox>
 #include <QComboBox>
+#include <iridium/process/process.hpp>
+#include <iridium/process/config_create.hpp>
+#include <iridium/entities/remote.hpp>
 
 #include <Rclone.hpp>
 #include <RoundedLineEdit.hpp>
@@ -26,7 +29,7 @@ protected:
     QVBoxLayout *_layout{};
     QFormLayout *_form_layout{};
     RoundedLineEdit *_remote_name{};
-    RcloneUniquePtr _rclone{};
+    std::unique_ptr<iridium::rclone::process> _process{};
     std::vector<RemoteInfoPtr> _remotes{};
 
 public:

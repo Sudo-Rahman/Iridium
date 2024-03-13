@@ -9,9 +9,10 @@
 #include <QEvent>
 #include <QPropertyAnimation>
 #include <utility>
+#include <IridiumApp.hpp>
 #include <QGraphicsDropShadowEffect>
 #include <QMessageBox>
-#include <Rclone.hpp>
+#include <iridium/process/process.hpp>
 
 RemoteWidget::RemoteWidget(const RemoteInfo &remoteInfo, bool deletable, QWidget *parent) : QGroupBox(parent),
                                                                                             _remote_info(std::move(
@@ -170,18 +171,22 @@ void RemoteWidget::init()
                 Settings::deleteRemote(_remote_info);
             else
             {
-                auto rclone = Rclone::create_unique();
-                 rclone->deleteRemote(_remote_info->name());
-                 rclone->waitForFinished();
-                if (rclone->exitCode() != 0)
+                using namespace iridium::rclone;
+                auto rclone = process();
+                rclone.delete_remote(entity::remote(_remote_info->name(),entity::remote::none,""))
+                .execute()
+                .on_finish([&rclone,this](int exit)
                 {
-                    auto msgb = QMessageBox(QMessageBox::Critical, tr("Suppression"),
-                                            tr("Une erreur est survenue lors de la suppression du remote"),
-                                            QMessageBox::Ok, this);
-                    msgb.setDetailedText(QString::fromStdString(rclone->readAll().back()));
-                    msgb.exec();
-                    return;
-                }
+                    IridiumApp::runOnMainThread([exit,this,&rclone]
+                    {
+                        // auto msgb = QMessageBox(QMessageBox::Critical, tr("Suppression"),
+                        //                     tr("Une erreur est survenue lors de la suppression du remote"),
+                        //                     QMessageBox::Ok, this);
+                        // msgb.setDetailedText(QString::fromStdString(rclone.get_output().front()));
+                        // msgb.exec();
+                    });
+                })
+                .wait_for_finish();
             }
             emit deleted(this);
         }

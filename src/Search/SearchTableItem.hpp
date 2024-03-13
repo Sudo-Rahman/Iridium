@@ -6,7 +6,6 @@
 #define IRIDIUM_SEARCHTABLEITEM_HPP
 
 #include <QStandardItem>
-#include <boost/json.hpp>
 #include <RcloneFile.hpp>
 
 class SearchTableItem : public QStandardItem

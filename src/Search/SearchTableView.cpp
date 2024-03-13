@@ -216,6 +216,16 @@ void SearchTableView::searchDistant(const std::vector<Rclone::Filter> &filters, 
         });
     });
     rclone->search(filters, *remoteInfo);
+    auto process = new iridium::rclone::process();
+    auto file = iridium::rclone::entity::file();
+    file.set_remote(
+    iridium::rclone::entity::remote::create_shared_ptr(remoteInfo->path, iridium::rclone::entity::remote::none, ""));
+        file.set_is_dir(true);
+    process->lsl(file).every_line([](const std::string &str)
+    {
+        qDebug() << str;
+    }).execute();
+    _pool.add_process(std::unique_ptr<iridium::rclone::process>(process));
     _searching++;
     _cv.notify_one();
 }
@@ -234,6 +244,7 @@ void SearchTableView::terminateSearch()
  */
 void SearchTableView::stopAllSearch()
 {
+    _pool.stop();
     _rows.clear();
     _searching = 0;
     for (auto &thread: _threads)

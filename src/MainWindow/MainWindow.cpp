@@ -10,6 +10,7 @@
 #include <SearchWidget.hpp>
 #include <ExplorerWidget.hpp>
 #include <SyncWidget.hpp>
+#include <IridiumApp.hpp>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {

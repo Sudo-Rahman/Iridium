@@ -13,6 +13,7 @@
 #include <boost/thread.hpp>
 #include <QThreadPool>
 #include <Rclone.hpp>
+#include <iridium/process.hpp>
 
 
 class SearchTableView : public QTableView
@@ -27,6 +28,7 @@ Q_OBJECT
 
     QStandardItemModel *_model{};
     std::vector<RclonePtr> _rclones{};
+    iridium::rclone::process_pool _pool{10};
     std::vector<boost::thread> _threads{};
     std::unique_ptr<boost::thread> _adder{};
     std::vector<Row> _rows{};

@@ -10,6 +10,7 @@
 #include <QKeyEvent>
 #include <QTimer>
 #include <QProcess>
+#include <iridium/process.hpp>
 
 
 class CmdTextEdit : public QTextEdit
@@ -17,7 +18,9 @@ class CmdTextEdit : public QTextEdit
 Q_OBJECT
 
     QString _cmd;
-    QProcess *_process{};
+    iridium::rclone::process *_process;
+    QTimer *_timer;
+    std::vector<std::string> _lines_tmp;
 
 public:
 
@@ -25,8 +28,9 @@ public:
 
     ~CmdTextEdit() override
     {
-        if (_process)
-            _process->kill();
+        if (_process->is_running())
+            _process->stop();
+        delete _process;
     }
 
 protected:
