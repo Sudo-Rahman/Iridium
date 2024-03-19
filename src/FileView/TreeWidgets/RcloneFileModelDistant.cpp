@@ -22,6 +22,7 @@ RcloneFileModelDistant::RcloneFileModelDistant(const RemoteInfoPtr &remoteInfo, 
 void RcloneFileModelDistant::init()
 {
     auto *drive = new TreeFileItem(_remote_info->full_path().c_str(), _remote_info);
+    std::cout << _remote_info->full_path()<< std::endl;
     drive->getFile()->setSize(0);
     drive->setIcon(QIcon(_remote_info->icon().c_str()));
     _root_index = drive->index();

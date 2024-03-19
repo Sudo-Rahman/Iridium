@@ -42,7 +42,8 @@ const std::map<ire::remote::remote_type, std::string> remoteIco = {
 class RemoteInfo : public ire::remote
 {
 public:
-	RemoteInfo(std::string name, remote_type type, std::string path) : remote(name, type, path) {};
+	RemoteInfo(const std::string &name,remote_type type,const std::string& path) : remote(name, type, path)
+	{}
 
 	auto icon() const -> std::string { return remoteIco.at(type()); }
 
@@ -52,12 +53,7 @@ public:
 	{
 		if (isLocal())
 			return path();
-	}
-
-	[[nodiscard]] std::string root_path() const
-	{
-		if (isLocal())
-			return path();
+		return root_path() + path();
 	}
 };
 

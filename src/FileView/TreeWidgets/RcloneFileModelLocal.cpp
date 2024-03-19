@@ -53,17 +53,18 @@ void RcloneFileModelLocal::addItem(const RcloneFilePtr &file, TreeFileItem *pare
 
 void RcloneFileModelLocal::init()
 {
-    auto *drive = new TreeFileItem(_remote_info->full_path().c_str(), _remote_info);
-    drive->getFile()->setSize(0);
-    drive->setIcon(Settings::hardDriveIcon());
-    _root_index = drive->index();
-    drive->appendRow(TreeFileItem::decorateList());
+    std::cout << *_remote_info << std::endl;
+    auto *local = new TreeFileItem(_remote_info->full_path().c_str(), _remote_info);
+    local->getFile()->setSize(0);
+    local->setIcon(Settings::hardDriveIcon());
+    _root_index = local->index();
+    local->appendRow(TreeFileItem::decorateList());
 
     appendRow({
-                      drive,
-                      new TreeFileItem(1, drive->getFile()),
-                      new TreeFileItem(2, drive->getFile()),
-                      new TreeFileItem(3, drive->getFile())
+                      local,
+                      new TreeFileItem(1, local->getFile()),
+                      new TreeFileItem(2, local->getFile()),
+                      new TreeFileItem(3, local->getFile())
               });
 }
 
