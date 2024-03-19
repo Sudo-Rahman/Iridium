@@ -162,7 +162,7 @@ void SearchWidget::fillRemotesComboBox()
     model->clear();
     auto it = _remotes.begin();
     auto *item = new QStandardItem(it->get()->name().c_str());
-    item->setIcon(QIcon(it->get()->icon.c_str()));
+    item->setIcon(QIcon(it->get()->icon().c_str()));
     item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
     item->setData(Qt::Checked, Qt::CheckStateRole);
     model->appendRow(item);
@@ -171,7 +171,7 @@ void SearchWidget::fillRemotesComboBox()
     {
         auto *item = new QStandardItem(it->get()->name().c_str());
         item->setToolTip(it->get()->name().c_str());
-        item->setIcon(QIcon(it->get()->icon.c_str()));
+        item->setIcon(QIcon(it->get()->icon().c_str()));
         item->setData(Qt::Unchecked, Qt::CheckStateRole);
         item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
         item->setCheckState(_remotes_status[*it] ? Qt::Checked : Qt::Unchecked);

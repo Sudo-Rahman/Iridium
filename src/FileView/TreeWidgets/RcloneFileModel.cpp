@@ -96,9 +96,9 @@ void RcloneFileModel::addItem(const RcloneFilePtr &file, TreeFileItem *parent)
             }
             _check_is_valid = true;
         });
-        switch (_remote_info->type)
+        switch (_remote_info->type())
         {
-            case RemoteType::Smb:
+            case iridium::rclone::entity::remote::smb:
                 break;
             default:
                 _rclone->about(*_remote_info);

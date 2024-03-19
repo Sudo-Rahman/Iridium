@@ -210,7 +210,7 @@ RcloneFile RcloneFile::fromJson(const boost::json::object &json, const RemoteInf
 {
     try
     {
-        auto path = remoteInfo->path + json.at("Path").as_string().c_str();
+        auto path = remoteInfo->full_path() + json.at("Path").as_string().c_str();
         auto size = json.at("Size").as_int64();
         auto dir = json.at("IsDir").as_bool();
         auto modTime = QDateTime::fromString(json.at("ModTime").as_string().c_str(), Qt::ISODateWithMs);

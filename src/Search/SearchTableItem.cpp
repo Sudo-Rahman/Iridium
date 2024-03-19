@@ -19,7 +19,7 @@ SearchTableItem::SearchTableItem(const int &col, const RcloneFilePtr &file)
         case 1:
             setText(file->getRemoteInfo()->name().c_str());
             SearchTableItem::setData(file->getRemoteInfo()->name().c_str(), Qt::UserRole + 1);
-            setIcon(QIcon(file->getRemoteInfo()->icon.c_str()).pixmap(16, 16));
+            setIcon(QIcon(file->getRemoteInfo()->icon().c_str()).pixmap(16, 16));
             break;
         case 2:
             setText(file->getPath());

@@ -113,7 +113,7 @@ void RemoteWidget::init()
     {
         icon = Settings::hardDriveIcon();
     } else
-        icon = QIcon(_remote_info->icon.c_str());
+        icon = QIcon(_remote_info->icon().c_str());
     labelIcon->setPixmap(icon.pixmap(32, 32, QIcon::Normal, QIcon::On));
 
 

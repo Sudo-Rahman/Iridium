@@ -109,7 +109,7 @@ void SearchTableView::addFile()
     try
     {
         RcloneFilePtr rcloneFile = std::make_shared<RcloneFile>(
-                (remoteInfo->path + std::string(file.at("Path").as_string())).c_str(),
+                (remoteInfo->full_path() + std::string(file.at("Path").as_string())).c_str(),
                 file.at("Size").as_int64(),
                 file.at("IsDir").as_bool(),
                 QDateTime::fromString(file.at("ModTime").as_string().c_str(), Qt::ISODate),
@@ -146,7 +146,7 @@ void SearchTableView::searchLocal(const QString &text, const RemoteInfoPtr &remo
                 {
                     emit searchStarted();
                     _searching++;
-                    QDirIterator it(remoteInfo->path.c_str(),
+                    QDirIterator it(remoteInfo->full_path().c_str(),
                                     QDir::Files | QDir::System | QDir::Hidden | QDir::NoDotAndDotDot,
                                     QDirIterator::Subdirectories);
                     while (it.hasNext())
@@ -219,7 +219,7 @@ void SearchTableView::searchDistant(const std::vector<Rclone::Filter> &filters, 
     auto process = new iridium::rclone::process();
     auto file = iridium::rclone::entity::file();
     file.set_remote(
-    iridium::rclone::entity::remote::create_shared_ptr(remoteInfo->path, iridium::rclone::entity::remote::none, ""));
+    iridium::rclone::entity::remote::create_shared_ptr(remoteInfo->full_path(), iridium::rclone::entity::remote::none, ""));
         file.set_is_dir(true);
     process->lsl(file).every_line([](const std::string &str)
     {

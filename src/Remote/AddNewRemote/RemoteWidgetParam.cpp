@@ -26,7 +26,8 @@
 #include <QEvent>
 #include <QGraphicsDropShadowEffect>
 
-RemoteWidgetParam::RemoteWidgetParam(RemoteType type, QWidget *parent) :
+
+RemoteWidgetParam::RemoteWidgetParam(ire::remote::remote_type type, QWidget *parent) :
         QGroupBox(parent), _type(type)
 {
     setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
@@ -44,48 +45,48 @@ RemoteWidgetParam::RemoteWidgetParam(RemoteType type, QWidget *parent) :
 
     auto *labelRemoteName = new QLabel(this);
     layout->addWidget(labelRemoteName);
-    switch (RemoteWidgetParam::_type)
+    switch (_type)
     {
-        case Drive:
+        case ire::remote::remote_type::google_drive:
             labelRemoteName->setText("Google Drive");
             break;
-        case Sftp:
+        case ire::remote::remote_type::sftp:
             labelRemoteName->setText("Sftp");
             break;
-        case LocalHardDrive:
+        case ire::remote::remote_type::none:
             labelRemoteName->setText("Local");
             break;
-        case OneDrive:
+        case ire::remote::remote_type::onedrive:
             labelRemoteName->setText("OneDrive");
             break;
-        case Dropbox:
+        case ire::remote::remote_type::dropbox:
             labelRemoteName->setText("Dropbox");
             break;
-        case Ftp:
+        case ire::remote::remote_type::ftp:
             labelRemoteName->setText("Ftp");
             break;
-        case Mega:
+        case ire::remote::remote_type::mega:
             labelRemoteName->setText("Mega");
             break;
-        case OpenDrive:
+        case ire::remote::remote_type::opendrive:
             labelRemoteName->setText("OpenDrive");
             break;
-        case Pcloud:
+        case ire::remote::remote_type::pcloud:
             labelRemoteName->setText("Pcloud");
             break;
-        case Box:
+        case ire::remote::remote_type::box:
             labelRemoteName->setText("Box");
             break;
-        case Smb:
+        case ire::remote::remote_type::smb:
             labelRemoteName->setText("Smb");
             break;
-        case Cmd:
+        case ire::remote::remote_type::cmd:
             labelRemoteName->setText(tr("Manuel"));
             break;
         default:
             break;
     }
-    if (type == RemoteType::LocalHardDrive)
+    if (type == iridium::rclone::entity::remote::none)
         _icon = Settings::hardDriveIcon();
     else
         _icon = QIcon(QString::fromStdString(remoteIco.find(RemoteWidgetParam::_type)->second));
@@ -117,40 +118,40 @@ void RemoteWidgetParam::initParamsFrame()
 {
     switch (_type)
     {
-        case Drive:
+        case ire::remote::remote_type::google_drive:
             _paramsFrame = new GoogleDriveRemoteConfigParamsFrame();
             break;
-        case Sftp:
+        case ire::remote::remote_type::sftp:
             _paramsFrame = new SftpRemoteConfigParamsFrame();
             break;
-        case LocalHardDrive:
+        case ire::remote::remote_type::none:
             _paramsFrame = new LocalRemoteConfigParamsFrame();
             break;
-        case OneDrive:
+        case ire::remote::remote_type::onedrive:
             _paramsFrame = new OneDriveRemoteConfigParamsFrame();
             break;
-        case Dropbox:
+        case ire::remote::remote_type::dropbox:
             _paramsFrame = new DropboxRemoteConfigParamsFrame();
             break;
-        case Ftp:
+        case ire::remote::remote_type::ftp:
             _paramsFrame = new FtpRemoteConfigParamsFrame();
             break;
-        case Mega:
+        case ire::remote::remote_type::mega:
             _paramsFrame = new MegaRemoteConfigParamsFrame();
             break;
-        case OpenDrive:
+        case ire::remote::remote_type::opendrive:
             _paramsFrame = new OpenDriveRemoteConfigParamsFrame();
             break;
-        case Pcloud:
+        case ire::remote::remote_type::pcloud:
             _paramsFrame = new PcloudRemoteConfigParamsFrame();
             break;
-        case Box:
+        case ire::remote::remote_type::box:
             _paramsFrame = new BoxRemoteConfigParamsFrame();
             break;
-        case Smb:
+        case ire::remote::remote_type::smb:
             _paramsFrame = new SmbRemoteConfigParamsFrame();
             break;
-        case Cmd:
+        case ire::remote::remote_type::cmd:
             _paramsFrame = new CmdRemoteConfigParamsFrame();
             break;
         default:

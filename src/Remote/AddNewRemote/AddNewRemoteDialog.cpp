@@ -27,11 +27,23 @@ AddNewRemoteDialog::AddNewRemoteDialog(QWidget *parent) : QDialog(parent)
     scrollWidgetLayout->setAlignment(Qt::AlignTop);
     scrollArea->setWidget(scrollWidget);
 
-    for (int t = 0; t != END; t++)
+
+    auto *local = new RemoteWidgetParam(ire::remote::remote_type::none, this);
+    connect(local, &RemoteWidgetParam::clicked, this, [this, local]
     {
-        auto type = static_cast<RemoteType>(t);
-        auto *widget = new RemoteWidgetParam(type);
-        connect(widget, &RemoteWidgetParam::clicked, this, [this, widget]()
+        for (auto *wid: findChildren<RemoteWidgetParam *>())
+            wid->unselect();
+        local->select();
+        changeParamsFrame(local->getParamsFrame());
+        local->getParamsFrame()->focusLineEdit();
+    });
+    scrollWidgetLayout->addWidget(local);
+
+    for (int t = 0; t != ire::remote::remote_type::none; t++)
+    {
+        auto type = static_cast<ire::remote::remote_type>(t);
+        auto *widget = new RemoteWidgetParam(type,this);
+        connect(widget, &RemoteWidgetParam::clicked, this, [this, widget]
         {
             for (auto *wid: findChildren<RemoteWidgetParam *>())
                 wid->unselect();

@@ -122,8 +122,15 @@ void RemoteConfigParamsFrame::addRemote()
 				});
 			});
 
-	auto rclone_liste_remote = Rclone::create_unique();
-	_remotes = rclone_liste_remote->listRemotes();
+	std::vector<RemoteInfoPtr> rclone_liste_remote;
+	iridium::rclone::process().list_remotes([this](const std::vector<iridium::rclone::remote_ptr> & remotes)
+	{
+		_remotes.clear();
+		for (const auto & remote : remotes)
+		{
+			_remotes.push_back(std::make_shared<RemoteInfo>(remote->name(), remote->type(), remote->path()));
+		}
+	});
 }
 
 /**

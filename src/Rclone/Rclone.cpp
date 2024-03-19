@@ -113,56 +113,6 @@ void Rclone::deleteFile(const RcloneFile &file)
 
 
 /**
- * @brief Rclone::config, configure a remote
- * @param type
- * @param params
- */
-void Rclone::config(RemoteType type, const string &name, const vector<string> &params)
-{
-    vector<string> args = {"config", "create", name};
-    switch (type)
-    {
-        case Drive:
-            args.emplace_back("drive");
-            break;
-        case Sftp:
-            args.emplace_back("sftp");
-            break;
-        case OneDrive:
-            args.emplace_back("onedrive");
-            break;
-        case Dropbox:
-            args.emplace_back("dropbox");
-            break;
-        case Ftp:
-            args.emplace_back("ftp");
-            break;
-        case Mega:
-            args.emplace_back("mega");
-            break;
-        case OpenDrive:
-            args.emplace_back("opendrive");
-            break;
-        case Pcloud:
-            args.emplace_back("pcloud");
-            break;
-        case Box:
-            args.emplace_back("box");
-            break;
-        case Smb:
-            args.emplace_back("smb");
-            break;
-        default:
-            break;
-    }
-    args.insert(args.end(), params.begin(), params.end());
-    _args = args;
-    if (not _lockable)
-        execute();
-}
-
-
-/**
  * @brief Rclone::about, rclone about command : get info about remote
  * @param info
  */
@@ -177,32 +127,9 @@ void Rclone::about(const RemoteInfo &info)
                     _map_data["json"] = boost::json::serialize(json);
                 }
             });
-    _args = {"about", info.path, "--json"};
+    _args = {"about", info.path(), "--json"};
     if (not _lockable)
         execute();
-}
-
-/**
- * @brief Rclone::lstRemote, return a list of remote
- */
-vector<RemoteInfoPtr> Rclone::listRemotes()
-{
-    _args = {"listremotes", "--long"};
-    execute();
-    waitForFinished();
-    vector<RemoteInfoPtr> remotes;
-    for (auto &string: _out)
-    {
-        auto name_regex = std::regex("([a-zA-Z0-9]+):");
-        auto type_regex = std::regex("([a-zA-Z0-9]+)$");
-        std::smatch match;
-        std::regex_search(string, match, name_regex);
-        auto name = match[0].str();
-        std::regex_search(string, match, type_regex);
-        auto type = match[0].str();
-        remotes.emplace_back(std::make_shared<RemoteInfo>(name, RemoteInfo::findType(type)));
-    }
-    return remotes;
 }
 
 /**
@@ -240,10 +167,12 @@ void Rclone::search(const vector<Filter> &filters, const RemoteInfo &info)
                     std::cerr << " probleme search " << line << std::endl;
                 }
             });
-    _args = {"lsl", info.path};
+    _args = {"lsl", info.full_path()};
     for (auto &filter: filters)
         _args.emplace_back(filter.str());
     _args.emplace_back("--ignore-case");
+    for (auto &arg : _args)
+        cout << arg << " ";
     if (not _lockable)
         execute();
 }

@@ -127,8 +127,6 @@ public:
 
     static std::string pathRclone() { return Iridium::Global::path_rclone; }
 
-    void config(RemoteType type, const std::string &name, const std::vector<std::string> &args = {});
-
     void lsJson(const RcloneFile &, bool recursive = false);
 
     void copyTo(const RcloneFile &src, const RcloneFile &dest);
@@ -140,8 +138,6 @@ public:
     void mkdir(const RcloneFile &dir);
 
     void moveto(const RcloneFile &src, const RcloneFile &dest);
-
-    std::vector<RemoteInfoPtr> listRemotes();
 
     void size(const RcloneFile &);
 

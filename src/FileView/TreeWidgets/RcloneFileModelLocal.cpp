@@ -53,7 +53,7 @@ void RcloneFileModelLocal::addItem(const RcloneFilePtr &file, TreeFileItem *pare
 
 void RcloneFileModelLocal::init()
 {
-    auto *drive = new TreeFileItem(_remote_info->path.c_str(), _remote_info);
+    auto *drive = new TreeFileItem(_remote_info->full_path().c_str(), _remote_info);
     drive->getFile()->setSize(0);
     drive->setIcon(Settings::hardDriveIcon());
     _root_index = drive->index();

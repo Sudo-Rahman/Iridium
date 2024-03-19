@@ -6,7 +6,7 @@
 #define IRIDIUM_REMOTEWIDGETPARAM_HPP
 
 #include <QGroupBox>
-#include <Remote.h>
+#include <iridium/entities/remote.hpp>
 #include "RemoteConfigParamsFrame.hpp"
 #include <Rclone.hpp>
 
@@ -15,7 +15,7 @@ class RemoteWidgetParam : public QGroupBox
 Q_OBJECT
 
 private:
-    RemoteType _type;
+    iridium::rclone::entity::remote::remote_type _type;
     QIcon _icon{};
     bool _hover{}, _click{}, _selected{};
     RemoteConfigParamsFrame *_paramsFrame{};
@@ -25,7 +25,7 @@ private:
     void addBlur();
 
 public:
-    explicit RemoteWidgetParam(RemoteType type, QWidget *parent = nullptr);
+    explicit RemoteWidgetParam(iridium::rclone::entity::remote::remote_type type, QWidget *parent = nullptr);
 
     [[nodiscard]] RemoteConfigParamsFrame *getParamsFrame() const;
 

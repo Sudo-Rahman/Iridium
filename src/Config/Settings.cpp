@@ -3,7 +3,6 @@
 //
 
 #include "Settings.hpp"
-#include <Rclone.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/dll.hpp>
 #include <fstream>
@@ -11,12 +10,17 @@
 #include <iostream>
 #include <Global.hpp>
 #include <iridium/process.hpp>
+#include <iridium/entities/remote.hpp>
+
+#include "AddNewRemoteDialog.hpp"
+#include "AddNewRemoteDialog.hpp"
 
 using namespace std;
 using namespace Iridium;
 using namespace boost;
 namespace bf = boost::filesystem;
 namespace pt = boost::property_tree;
+using namespace iridium::rclone;
 
 QIcon Settings::DIR_ICON;
 QIcon Settings::HARDDRIVE_ICON;
@@ -106,7 +110,7 @@ std::vector<RemoteInfoPtr> Settings::getLocalRemotes()
         try
         {
             remotes.emplace_back(std::make_shared<RemoteInfo>(
-                    remote.second.get<string>("path"), RemoteType::LocalHardDrive, remote.first));
+                    remote.second.get<string>("path"), entity::remote::none, remote.first));
         }
         catch (boost::wrapexcept<boost::property_tree::ptree_bad_path> &e) { continue; }
     }
@@ -115,7 +119,12 @@ std::vector<RemoteInfoPtr> Settings::getLocalRemotes()
 
 void Settings::refreshRemotesList()
 {
-    auto distants = Rclone::create_unique()->listRemotes();
+    std::vector<RemoteInfoPtr> distants;
+    iridium::rclone::process().list_remotes([&distants](const std::vector<remote_ptr>& remotes)
+    {
+        for (auto &remote: remotes)
+            distants.emplace_back(std::make_shared<RemoteInfo>(remote->name(), remote->type(), remote->full_path()));
+    }).execute().wait_for_finish();
     auto locals = Settings::getLocalRemotes();
 //    insert remotes in refresh
     distants.insert(distants.begin(), locals.begin(), locals.end());
@@ -151,7 +160,7 @@ void Settings::refreshRemotesList()
 void Settings::addLocalRemote(const RemoteInfo &remoteInfo)
 {
     pt::ptree remote, ptree_path;
-    ptree_path.put("", remoteInfo.path);
+    ptree_path.put("", remoteInfo.full_path());
     remote.add_child("path", ptree_path);
 
     pt::ptree array = _settings.get_child(_nodes.at(Remotes));
@@ -286,8 +295,8 @@ void Settings::initSettings()
     _settings.put(_nodes.at(ReloadTime), 10);
 
     pt::ptree remote, ptree_path;
-    RemoteInfo remoteInfo = {"/", RemoteType::LocalHardDrive, "Local"};
-    ptree_path.put("", remoteInfo.path);
+    RemoteInfo remoteInfo = {"/", entity::remote::none, "Local"};
+    ptree_path.put("", remoteInfo.full_path());
     remote.add_child("path", ptree_path);
 
     pt::ptree array = _settings.get_child(_nodes.at(Remotes));
