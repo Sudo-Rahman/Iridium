@@ -4,12 +4,9 @@
 
 #include "TreeFileItemLocal.hpp"
 
-TreeFileItemLocal::TreeFileItemLocal(const QString &path, const RemoteInfoPtr &remoteInfo, TreeFileItem *parent)
+TreeFileItemLocal::TreeFileItemLocal(const RcloneFile &file, TreeFileItem *parent)
 {
-    TreeFileItem::_file = std::make_shared<RcloneFile>(
-            path,
-            remoteInfo
-    );
+    TreeFileItem::_file = std::make_shared<RcloneFile>(file);
     setText(_file->getName());
     QStandardItem::setData(_file->getName(), SORT_ROLE);
     initIcon();

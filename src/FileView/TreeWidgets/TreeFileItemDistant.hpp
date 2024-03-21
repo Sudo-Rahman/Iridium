@@ -12,8 +12,7 @@
 class TreeFileItemDistant : public TreeFileItem
 {
 public:
-    explicit TreeFileItemDistant(const QString &path, const RemoteInfoPtr &remoteInfo, const boost::json::object &data,
-                                 TreeFileItem * = nullptr);
+    explicit TreeFileItemDistant(const RcloneFile &,TreeFileItem * = nullptr);
 
 };
 

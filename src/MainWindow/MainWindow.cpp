@@ -14,6 +14,8 @@
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
+    Settings::refreshRemotesList();
+
     setWindowTitle("Iridium");
     setContentsMargins(0, 0, 0, 0);
     resize(Settings::getValue<int>(Settings::Width), Settings::getValue<int>(Settings::Height));
@@ -37,7 +39,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
     connectSignals();
 
-    Settings::refreshRemotesList();
 }
 
 void MainWindow::connectSignals()

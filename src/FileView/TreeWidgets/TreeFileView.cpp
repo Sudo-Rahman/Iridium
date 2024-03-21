@@ -25,6 +25,8 @@
 #include <boost/algorithm/string/join.hpp>
 #include <Settings.hpp>
 
+#include "Utility/Utility.hpp"
+
 
 /**
  * @brief Classe permettant de définir la taille des items
@@ -479,7 +481,8 @@ void TreeFileView::copyto(const std::vector<RcloneFilePtr> &files, TreeFileItem 
             continue;
 
         RcloneFilePtr newFile = std::make_shared<RcloneFile>(
-                treePaste->getFile()->getPath() + file->getName(),
+                file->parent(),
+                file->getName(),
                 file->getSize(),
                 file->isDir(),
                 file->isDir() ? QDateTime::currentDateTime() : file->getModTime(),
@@ -737,7 +740,8 @@ void TreeFileView::mkdir()
         return;
     auto items = getSelectedItems();
     auto rcloneFile = std::make_shared<RcloneFile>(
-            getPath() + name,
+            items.first()->getFile()->parent(),
+            name,
             0,
             true,
             QDateTime::currentDateTime(),
@@ -839,7 +843,7 @@ void TreeFileView::rename(const TreeFileItem *item, const QString &newName)
             return;
         if (exit == 0)
         {
-            item->getFile()->changeName(newName);
+            // item->getFile()->changeName(newName);
             const_cast<TreeFileItem *>(item)->setText(newName);
             reload(const_cast<TreeFileItem *>(item));
         } else
@@ -847,7 +851,7 @@ void TreeFileView::rename(const TreeFileItem *item, const QString &newName)
     });
     auto oldFile = *(item->getFile());
     auto newFile = oldFile;
-    newFile.changeName(newName);
+    // newFile.changeName(newName);
     emit taskAdded(oldFile.getPath(), newFile.getPath(), rclone, [oldFile, newFile, rclone]()
     {
         rclone->moveto(oldFile, newFile);

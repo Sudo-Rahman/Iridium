@@ -32,6 +32,7 @@ Q_OBJECT
     std::vector<boost::thread> _threads{};
     std::unique_ptr<boost::thread> _adder{};
     std::vector<Row> _rows{};
+    std::map<RemoteInfo *, RcloneFile> _remote_to_root_file{};
     std::mutex _mutex{};
     std::condition_variable _cv{};
     std::atomic_uint8_t _searching = 0;
@@ -52,13 +53,11 @@ public :
     }
 
 private:
-    void addFile();
+    void addFile(const RcloneFilePtr &file);
 
     void showCustomContextMenu();
 
     void terminateSearch();
-
-    void initThread();
 
 protected:
     void resizeEvent(QResizeEvent *event) override;

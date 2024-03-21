@@ -19,3 +19,4 @@ string Global::path_rclone;
 Load Global::load_type = Load::Dynamic;
 uint8_t Global::max_depth = 2;
 uint8_t Global::reload_time = 10;
+ir::process_pool Global::process_pool{max_process};

@@ -13,14 +13,11 @@ const std::shared_ptr<RcloneFile> &TreeFileItem::getFile() const
     return _file;
 }
 
-TreeFileItem::TreeFileItem(const QString &path, const RemoteInfoPtr &remoteInfo) : QStandardItem()
+TreeFileItem::TreeFileItem(const RcloneFile &file) : QStandardItem()
 {
-    TreeFileItem::_file = std::make_shared<RcloneFile>(
-            path,
-            remoteInfo
-    );
-    setText(path);
-    QStandardItem::setData(path, SORT_ROLE);
+    TreeFileItem::_file = std::make_shared<RcloneFile>(file);
+    setText(file.path().c_str());
+    QStandardItem::setData(file.path().c_str(), SORT_ROLE);
     setFlags(flags() & ~Qt::ItemIsDropEnabled);
 }
 

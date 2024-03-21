@@ -58,7 +58,7 @@ void SyncTableView::analyse()
     {
         if (file.at("IsDir").as_bool())
             return;
-        auto item = new SyncTableItem(std::make_shared<RcloneFile>(RcloneFile::fromJson(file, _src->getRemoteInfo())));
-        _model->appendRow({item,});
+        // auto item = new SyncTableItem(std::make_shared<RcloneFile>(RcloneFile::fromJson(file, _src->getRemoteInfo())));
+        // _model->appendRow({item,});
     });
 }

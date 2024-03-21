@@ -20,7 +20,7 @@ using namespace Iridium;
  * @param space
  * @return string
  */
-string Utility::numberToString(uint64_t num, int space)
+string Utility::numberToString(int64_t num, int space)
 {
     string tmpSize;
 
@@ -44,6 +44,12 @@ string Utility::numberToString(uint64_t num, int space)
     return tmpSize;
 }
 
+std::string Utility::numberToString(uint64_t num, int space)
+{
+    return numberToString((int64_t)num, space);
+}
+
+
 /**
  * @brief Utility::numberToString, converti un nombre en string avec des espaces
  * @param num
@@ -59,8 +65,8 @@ string Utility::numberToString(double64_t num, int space)
     string str = ss.str();
     auto str1 = str.substr(0, str.find('.'));
     auto str2 = str.substr(str.find('.'), str.size());
-    tmpSize += numberToString((uint64_t) stoull(str2), space);
-    tmpSize += numberToString((uint64_t) stoull(str1), space);
+    tmpSize += numberToString(stoll(str2), space);
+    tmpSize += numberToString(stoll(str1), space);
     return tmpSize;
 }
 

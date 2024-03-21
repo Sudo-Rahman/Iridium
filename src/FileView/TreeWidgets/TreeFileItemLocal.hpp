@@ -10,7 +10,7 @@
 class TreeFileItemLocal : public TreeFileItem
 {
 public:
-    explicit TreeFileItemLocal(const QString &path, const RemoteInfoPtr &remoteInfo, TreeFileItem * = nullptr);
+    explicit TreeFileItemLocal(const RcloneFile &, TreeFileItem * = nullptr);
 
 
 };

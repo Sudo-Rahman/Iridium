@@ -12,7 +12,6 @@ class RcloneFileModelDistant : public RcloneFileModel
 {
 Q_OBJECT
 
-private:
 
     std::vector<RclonePtr> _rclones_static{}, _rclones_dynamic{};
 

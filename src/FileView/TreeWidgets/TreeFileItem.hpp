@@ -28,9 +28,9 @@ protected:
 public:
     explicit TreeFileItem();
 
-    explicit TreeFileItem(const QString &path, const RemoteInfoPtr &remoteInfo);
+    explicit TreeFileItem(const RcloneFile &file);
 
-    explicit TreeFileItem(const int &column, const std::shared_ptr<RcloneFile> &file);
+    explicit TreeFileItem(const int &column, const RcloneFilePtr &file);
 
     [[nodiscard]] const std::shared_ptr<RcloneFile> &getFile() const;
 

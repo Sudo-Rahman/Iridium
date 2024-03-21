@@ -14,6 +14,7 @@
 
 #include "AddNewRemoteDialog.hpp"
 #include "AddNewRemoteDialog.hpp"
+#include "AddNewRemoteDialog.hpp"
 
 using namespace std;
 using namespace Iridium;
@@ -111,8 +112,6 @@ std::vector<RemoteInfoPtr> Settings::getLocalRemotes()
         {
             remotes.emplace_back(std::make_shared<RemoteInfo>(
                     remote.first, entity::remote::none, remote.second.get<string>("path")));
-            std::cout << remote.second.get<string>("path") << std::endl;
-            std::cout << remotes.back()->path() << std::endl;
 
         }
         catch (boost::wrapexcept<boost::property_tree::ptree_bad_path> &e) { continue; }
@@ -123,9 +122,9 @@ std::vector<RemoteInfoPtr> Settings::getLocalRemotes()
 void Settings::refreshRemotesList()
 {
     std::vector<RemoteInfoPtr> distants;
-    iridium::rclone::process().list_remotes([&distants](const std::vector<remote_ptr>& remotes)
+    iridium::rclone::process().list_remotes([&distants]( const std::vector<remote_ptr>& remotes)
     {
-        for (auto &remote: remotes)
+        for (const auto &remote: remotes)
             distants.emplace_back(std::make_shared<RemoteInfo>(remote->name(), remote->type(), remote->path()));
     }).execute().wait_for_finish();
     auto locals = Settings::getLocalRemotes();

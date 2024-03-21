@@ -9,17 +9,14 @@
 #include <QLabel>
 #include <QGridLayout>
 #include <boost/thread.hpp>
-#include <Utility/Utility.hpp>
-#include <QTimer>
 #include "TreeFileItem.hpp"
-#include <Rclone.hpp>
+#include <iridium/process.hpp>
 #include <ProgressBar.hpp>
 
 class ItemInfoDialog : public QDialog
 {
 Q_OBJECT
 
-private:
     QGridLayout *_layout{};
     std::shared_ptr<RcloneFile> _file{};
     TreeFileItem *_item{};
@@ -28,7 +25,7 @@ private:
     QTimer _timer{};
     int _row{};
     boost::shared_ptr<boost::thread> _thread{};
-    RcloneUniquePtr _rclone{};
+    ir::process _process;
 
 public:
     explicit ItemInfoDialog(TreeFileItem *item, QWidget *parent = nullptr);

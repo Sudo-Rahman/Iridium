@@ -88,6 +88,8 @@ ListRemoteWidget::ListRemoteWidget(QWidget* parent) : QScrollArea(parent)
     setFrameShape(QFrame::NoFrame);
 
     _width = QScrollArea::sizeHint().width();
+
+    getAllRemote();
 }
 
 /**

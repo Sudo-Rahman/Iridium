@@ -1,43 +1,29 @@
-//
-// Created by Rahman on 10/01/2023.
-//
-
-#ifndef IRIDIUM_RCLONEFILE_HPP
-#define IRIDIUM_RCLONEFILE_HPP
+#pragma once
 
 
-#include <QObject>
-#include <QDateTime>
-#include <QFile>
+
 #include <QDir>
 #include <QIcon>
 #include <boost/json.hpp>
 #include <Remote.h>
 #include <QMimeType>
+#include <iridium/entities.hpp>
 
-class RcloneFile : public QObject
+class RcloneFile : public ire::file
 {
-Q_OBJECT
-
-    RemoteInfoPtr _remote_info{};
-    QString _path{};
-    uint64_t _size{};
-    uint32_t _objs{};
-    bool _is_dir{};
-    QDateTime _mod_time{};
-
-    void init();
-
 public:
 
-    RcloneFile(const QString &pathFile, const RemoteInfoPtr &remoteInfo);
+    RcloneFile(file * parent, const QString &file_name, int64_t size, bool is_dir,
+               const QDateTime &mod_time, const RemoteInfoPtr &remote = nullptr);
 
-    RcloneFile(const QString &pathFile, uint64_t size, bool isDir, QDateTime modTime,
-               const RemoteInfoPtr &remoteInfo);
+	explicit RcloneFile(const ire::file &file);
 
-    [[nodiscard]] const QString &getPath() const;
+	RcloneFile() = default;
 
-    void setPath(const QString &path);
+
+    [[nodiscard]] const QString getPath() const;
+
+    void setName(const QString &path);
 
     [[nodiscard]] uint64_t getSize() const;
 
@@ -47,13 +33,11 @@ public:
 
     void setIsDir(bool isDir);
 
-    [[nodiscard]] const QDateTime &getModTime() const;
+    [[nodiscard]] const QDateTime getModTime() const;
 
     void setModTime(const QDateTime &modTime);
 
     [[nodiscard]] QString getName() const;
-
-    void changeName(const QString &newName);
 
     [[nodiscard]] QString getSizeString() const;
 
@@ -61,53 +45,15 @@ public:
 
     [[nodiscard]] QString getModTimeString() const;
 
-    [[nodiscard]] std::shared_ptr<RemoteInfo> getRemoteInfo() const;
+    [[nodiscard]] RemoteInfoPtr getRemoteInfo() const;
 
     [[nodiscard]] uint32_t getObjs() const;
 
-    void setObjs(uint32_t objs);
-
     [[nodiscard]] QString getFileType() const;
 
-    [[nodiscard]] QIcon getIcon();
-
-    [[nodiscard]] RcloneFile getParentDir() const;
+    [[nodiscard]] QIcon getIcon() const;
 
     [[nodiscard]]  QList<QMimeType> mimeTypes() const;
-
-    static RcloneFile fromJson(const boost::json::object &json, const RemoteInfoPtr &remoteInfo);
-
-    // define copy operator and copy constructor
-    RcloneFile(const RcloneFile &other)
-    {
-        setPath(other._path);
-        _size = other._size;
-        _is_dir = other._is_dir;
-        _mod_time = other._mod_time;
-        _remote_info = other._remote_info;
-    }
-
-    // ostream operator
-    friend std::ostream &operator<<(std::ostream &os, const RcloneFile &file)
-    {
-        os << "path: " << file._path.toStdString() << std::endl;
-        os << "size: " << file._size << std::endl;
-        os << "is_dir: " << file._is_dir << std::endl;
-        os << "modTime: " << file._mod_time.toString().toStdString() << std::endl;
-        os << "remoteInfo: " << file._remote_info->name() << std::endl;
-        return os;
-    }
-
-    bool operator==(const RcloneFile &rhs) const
-    {
-        return _path == rhs._path &&
-               _is_dir == rhs._is_dir &&
-               _mod_time == rhs._mod_time &&
-               _remote_info == rhs._remote_info;
-    }
 };
 
 typedef std::shared_ptr<RcloneFile> RcloneFilePtr;
-
-
-#endif //IRIDIUM_RCLONEFILE_HPP

@@ -22,6 +22,8 @@ namespace Iridium
     {
 
     public:
+        [[nodiscard]] static std::string numberToString(int64_t num, int space = 3);
+
         [[nodiscard]] static std::string numberToString(uint64_t num, int space = 3);
 
         [[nodiscard]] static std::string numberToString(double64_t num, int space = 3);

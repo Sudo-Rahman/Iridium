@@ -22,8 +22,8 @@ SearchTableItem::SearchTableItem(const int &col, const RcloneFilePtr &file)
             setIcon(QIcon(file->getRemoteInfo()->icon().c_str()).pixmap(16, 16));
             break;
         case 2:
-            setText(file->getPath());
-            SearchTableItem::setData(file->getPath(), Qt::UserRole + 1);
+            setText(file->parent()->path().c_str());
+            SearchTableItem::setData(file->parent()->path().c_str(), Qt::UserRole + 1);
             break;
         case 3:
             setText(Iridium::Utility::sizeToString(file->getSize()).c_str());

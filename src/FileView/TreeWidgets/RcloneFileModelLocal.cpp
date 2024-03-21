@@ -36,7 +36,9 @@ void RcloneFileModelLocal::addItem(const RcloneFilePtr &file, TreeFileItem *pare
                     for (const QFileInfo &info: list_file)
                     {
                         boost::this_thread::interruption_point();
-                        auto *item = new TreeFileItemLocal(info.filePath(), _remote_info);
+                        auto *item = new TreeFileItemLocal(RcloneFile(file.get(), info.fileName(),
+                                                                     info.size(), info.isDir(),
+                                                                     info.lastModified(), _remote_info));
                         files.removeIf([item](const RcloneFilePtr &file) { return *(item->getFile()) == *file; });
                         if (not fileInFolder(item->getFile(), tree_item))
                             tree_item->appendRow(getItemList(item));
@@ -53,8 +55,7 @@ void RcloneFileModelLocal::addItem(const RcloneFilePtr &file, TreeFileItem *pare
 
 void RcloneFileModelLocal::init()
 {
-    std::cout << *_remote_info << std::endl;
-    auto *local = new TreeFileItem(_remote_info->full_path().c_str(), _remote_info);
+    auto *local = new TreeFileItem(RcloneFile(nullptr,"", 0, true, QDateTime::currentDateTime(), _remote_info));
     local->getFile()->setSize(0);
     local->setIcon(Settings::hardDriveIcon());
     _root_index = local->index();
