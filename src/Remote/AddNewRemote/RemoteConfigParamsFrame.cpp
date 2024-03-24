@@ -82,7 +82,7 @@ void RemoteConfigParamsFrame::createUi()
  */
 void RemoteConfigParamsFrame::addRemote()
 {
-	_process	= iridium::rclone::process::create_unique_ptr();
+	_process	= std::make_unique<ir::process>();
 
 	if (_remote_name->text().isEmpty())
 	{

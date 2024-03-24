@@ -311,12 +311,11 @@ void TreeFileView::showContextMenu()
     {
         if (QTreeView::selectedIndexes().isEmpty())
             return;
-        else
-        {
+
             menu.setActionEnabled(ItemMenu::Action::Copy, false,
                                   ItemMenu::Action::Delete, false,
                                   ItemMenu::Action::Sync, false);
-        }
+
     }
     if (lisItem.size() == 1)
         menu.setActionEnabled(ItemMenu::Action::Preview, Iridium::Utility::isPreviewable(*lisItem.first()->getFile()));

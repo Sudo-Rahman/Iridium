@@ -9,6 +9,9 @@
 #include <QEvent>
 #include <QStyledItemDelegate>
 #include <QListView>
+#include <iridium/options.hpp>
+
+using iridium::rclone::option::filter;
 
 class CustomStyledItemDelegate : public QStyledItemDelegate
 {
@@ -104,6 +107,7 @@ void SearchWidget::connectSignals()
     connect(_stop, &QPushButton::clicked, this, [this]()
     {
         _search_view->stopAllSearch();
+        _progressBar->hide();
     });
 
     connect(_start, &QPushButton::clicked, this, [this]()
@@ -125,9 +129,10 @@ void SearchWidget::connectSignals()
                     else
                     {
                         _search_view->searchDistant(
-                                {{Rclone::Include, "*" + _search->text().toStdString() + "*"},
-                                 {Rclone::Exclude, "*"}},
-                                _remotes[i]);
+                                {
+                                    filter::include("*"+_search->text().toStdString() + "*"),
+                                    filter::exclude("*")
+                                    },_remotes[i]);
                     }
                 }
             }

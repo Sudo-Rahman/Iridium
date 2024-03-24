@@ -27,14 +27,10 @@ Q_OBJECT
     };
 
     QStandardItemModel *_model{};
-    std::vector<RclonePtr> _rclones{};
     iridium::rclone::process_pool _pool{10};
     std::vector<boost::thread> _threads{};
-    std::unique_ptr<boost::thread> _adder{};
     std::vector<Row> _rows{};
     std::map<RemoteInfo *, RcloneFile> _remote_to_root_file{};
-    std::mutex _mutex{};
-    std::condition_variable _cv{};
     std::atomic_uint8_t _searching = 0;
 
 public :
@@ -42,18 +38,17 @@ public :
 
     void searchLocal(const QString &text, const RemoteInfoPtr &remoteInfo);
 
-    void searchDistant(const std::vector<Rclone::Filter> &filters, const RemoteInfoPtr &remoteInfo);
+    void searchDistant(const ir::option::vector &filters, const RemoteInfoPtr &remoteInfo);
 
     void stopAllSearch();
 
     ~SearchTableView() override
     {
-        _adder->interrupt();
-        _cv.notify_one();
+        _pool.stop();
     }
 
 private:
-    void addFile(const RcloneFilePtr &file);
+    void addFile(const RcloneFilePtr &file) const;
 
     void showCustomContextMenu();
 

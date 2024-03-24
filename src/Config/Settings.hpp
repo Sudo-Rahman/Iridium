@@ -126,7 +126,7 @@ public:
      * @param value
      */
     template<class Type>
-    static void setValue(const Node &node, const Type &value)
+    static void setValue(const Node &node, Type&& value)
     {
         try
         {

@@ -9,7 +9,6 @@
 #include <QMenu>
 #include <Global.hpp>
 #include <QDirIterator>
-#include <memory>
 #include <Settings.hpp>
 
 #include "IridiumApp.hpp"
@@ -61,7 +60,6 @@ SearchTableView::SearchTableView(QWidget * parent) : QTableView(parent)
 
 	for (auto const& remote: Iridium::Global::remotes)
 	{
-		std::cout << remote.get() << std::endl;
 		_remote_to_root_file[remote.get()] = RcloneFile(nullptr, "", -1, true, QDateTime::currentDateTime(), remote);
 	}
 }
@@ -106,20 +104,17 @@ void SearchTableView::showCustomContextMenu()
 	}
 }
 
-void SearchTableView::addFile(const RcloneFilePtr &file)
+void SearchTableView::addFile(const RcloneFilePtr& file) const
 {
-	IridiumApp::runOnMainThread([this,file = std::move(file) ]
-	{
 		QList<QStandardItem *> row = {
-				new SearchTableItem(0, file),
-				new SearchTableItem(1, file),
-				new SearchTableItem(2, file),
-				new SearchTableItem(3, file),
-				new SearchTableItem(4, file),
-				new SearchTableItem(5, file)
-		};
+						new SearchTableItem(0, file),
+						new SearchTableItem(1, file),
+						new SearchTableItem(2, file),
+						new SearchTableItem(3, file),
+						new SearchTableItem(4, file),
+						new SearchTableItem(5, file)
+				};
 		_model->appendRow(row);
-	});
 }
 
 
@@ -143,6 +138,7 @@ void SearchTableView::searchLocal(const QString& text, const RemoteInfoPtr& remo
 					it.next();
 					if (it.fileName().contains(text, Qt::CaseInsensitive))
 					{
+
 						RcloneFilePtr rcloneFile = std::make_shared<RcloneFile>(
 							nullptr,
 							it.filePath(),
@@ -174,46 +170,28 @@ void SearchTableView::searchLocal(const QString& text, const RemoteInfoPtr& remo
  * @param filters
  * @param remoteInfo
  */
-void SearchTableView::searchDistant(const std::vector<Rclone::Filter>& filters, const RemoteInfoPtr& remoteInfo)
+void SearchTableView::searchDistant(const option::vector& filters, const RemoteInfoPtr& remoteInfo)
 {
-	// if (filters.empty())
-	// 	return;
-	// auto rclone = [this]-> RclonePtr
-	// 		{
-	// 			for (auto& rclone: _rclones)
-	// 			{
-	// 				if (rclone->state() not_eq Rclone::Running)
-	// 					return rclone;
-	// 			}
-	// 			auto rclone = Rclone::create_shared();
-	// 			_rclones.push_back(rclone);
-	// 			return rclone;
-	// 		}
-	// 		();
-	// emit searchStarted();
-	// connect(rclone.get(), &Rclone::readDataJson,
-	//         [this, remoteInfo](boost::json::object file) { _rows.push_back({std::move(file), remoteInfo}); });
-	// connect(rclone.get(), &Rclone::finished, this, [this]()
-	// {
-	// 	terminateSearch();
-	// 	erase_if(_rclones, [](const RclonePtr& rclone) { return rclone->state() == Rclone::State::Finsished; });
-	// });
-	// rclone->search(filters, *remoteInfo);
-	std::cout <<  "qrwegthrd "<<remoteInfo.get() << std::endl;
-	auto process = process::create_unique_ptr();
-	std::cout << _remote_to_root_file[remoteInfo.get()] << std::endl;
+	auto process = std::make_unique<ir::process>();
+	process->add_option(filters);
 	process->lsl(_remote_to_root_file[remoteInfo.get()]).every_line_parser(
-		parser::file_parser::create(
-			new parser::file_parser(&_remote_to_root_file[remoteInfo.get()],
-			                            [this](const ire::file& file)
-			                            {
-			                            	std::cout << "file " << file.name() << std::endl;
-					                            addFile(std::make_shared<RcloneFile>(file));
-			                            },
-			                            parser::file_parser::lsl))).execute();
+				parser::file_parser::create(
+					new parser::file_parser(&_remote_to_root_file[remoteInfo.get()],
+					                        [this](const ire::file& file)
+					                        {
+					                        	// thread safe
+						                        addFile(std::make_shared<RcloneFile>(file));
+					                        },
+					                        parser::file_parser::lsl)))
+			.on_finish([this](auto) { terminateSearch(); })
+			.on_start([this]
+			{
+				_searching++;
+				emit searchStarted();
+			});
+	for (auto &option : filters)
+		std::cout << option << std::endl;
 	_pool.add_process(std::move(process));
-	_searching++;
-	_cv.notify_one();
 }
 
 /**
@@ -230,18 +208,9 @@ void SearchTableView::terminateSearch()
  */
 void SearchTableView::stopAllSearch()
 {
-	_pool.stop();
+	_pool.stop_all_processes_and_clear();
 	_rows.clear();
 	_searching = 0;
-	for (auto& thread: _threads)
-	{
-		thread.interrupt();
-		thread.join();
-	}
-	for (auto& rclone: _rclones)
-		rclone->kill();
-	_threads.clear();
-	emit searchFinished();
 }
 
 /**
