@@ -224,7 +224,7 @@ void ItemInfoDialog::initSize()
 	else
 	{
 		_size->setText(QString::fromStdString(Utility::numberToString(_file->getSize())) + " octets" + " (" +
-		               _file->getSizeString() + ")");
+		               Utility::sizeToString(_file->size()).c_str() + ")");
 		if (_file->isDir())
 		{
 			_objs->setText(QString::fromStdString(Utility::numberToString((uint64_t)_file->children().size())));

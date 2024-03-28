@@ -7,6 +7,8 @@
 #include <QMimeDatabase>
 #include <QPainter>
 
+#include "Utility/Utility.hpp"
+
 
 const std::shared_ptr<RcloneFile> &TreeFileItem::getFile() const
 {
@@ -32,7 +34,10 @@ TreeFileItem::TreeFileItem(const int &column, const std::shared_ptr<RcloneFile> 
             initIcon();
             break;
         case 1:
-            setText(file->getSizeString());
+            if(not file->is_dir())
+            {
+                setText(Iridium::Utility::sizeToString(file->size()).c_str());
+            }
             QStandardItem::setData((qulonglong) file->getSize(), SORT_ROLE);
             break;
         case 2:

@@ -29,7 +29,6 @@ Q_OBJECT
     QStandardItemModel *_model{};
     iridium::rclone::process_pool _pool{10};
     std::vector<boost::thread> _threads{};
-    std::vector<Row> _rows{};
     std::map<RemoteInfo *, RcloneFile> _remote_to_root_file{};
     std::atomic_uint8_t _searching = 0;
 

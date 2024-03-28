@@ -10,6 +10,7 @@
 #include <Global.hpp>
 #include <QDirIterator>
 #include <Settings.hpp>
+#include <iostream>
 
 #include "IridiumApp.hpp"
 
@@ -81,9 +82,9 @@ void SearchTableView::showCustomContextMenu()
 				copie->setText(tr("Copier le fichier"));
 				connect(parent, &QAction::triggered, this, [this, items]()
 				{
-					// auto item = dynamic_cast<SearchTableItem *>(_model->itemFromIndex(items[0]));
-					// Iridium::Global::clear_and_swap_copy_files(
-					//         {std::make_shared<RcloneFile>(item->getFile()->absolute_path().c_str())});
+					auto item = dynamic_cast<SearchTableItem *>(_model->itemFromIndex(items[0]));
+					Iridium::Global::clear_and_swap_copy_files(
+					{std::make_shared<RcloneFile>(*item->getFile()->parent())});
 				});
 			}
 			break;
@@ -97,8 +98,8 @@ void SearchTableView::showCustomContextMenu()
 		std::vector<RcloneFilePtr> files;
 		for (auto& item: items)
 		{
-			// auto item_cast = dynamic_cast<SearchTableItem *>(_model->itemFromIndex(item));
-			// files.push_back(item_cast->getFile());
+			auto item_cast = dynamic_cast<SearchTableItem *>(_model->itemFromIndex(item));
+			files.push_back(item_cast->getFile());
 		}
 		Iridium::Global::clear_and_swap_copy_files(files);
 	}
@@ -132,31 +133,38 @@ void SearchTableView::searchLocal(const QString& text, const RemoteInfoPtr& remo
 				QDirIterator it(remoteInfo->full_path().c_str(),
 				                QDir::Files | QDir::System | QDir::Hidden | QDir::NoDotAndDotDot,
 				                QDirIterator::Subdirectories);
+
 				while (it.hasNext())
 				{
 					boost::this_thread::interruption_point();
 					it.next();
 					if (it.fileName().contains(text, Qt::CaseInsensitive))
 					{
+						auto root_file = _remote_to_root_file[remoteInfo.get()];
 
-						RcloneFilePtr rcloneFile = std::make_shared<RcloneFile>(
-							nullptr,
-							it.filePath(),
+						auto parent_info = QFileInfo(it.filePath());
+						auto parent = std::make_shared<RcloneFile>(
+													nullptr,
+													parent_info.path(),
+													parent_info.size(),
+													true,
+													parent_info.lastModified(),
+													remoteInfo
+												);
+
+						root_file.add_child_if_not_exist(parent);
+
+						auto rcloneFile = std::make_shared<RcloneFile>(
+							parent.get(),
+							it.fileName(),
 							it.fileInfo().size(),
 							it.fileInfo().isDir(),
 							it.fileInfo().lastModified(),
 							remoteInfo
 						);
-						_model->appendRow({
-									new SearchTableItem(0, rcloneFile),
-									new SearchTableItem(1, rcloneFile),
-									new SearchTableItem(2, rcloneFile),
-									new SearchTableItem(3, rcloneFile),
-									new SearchTableItem(4, rcloneFile),
-									new SearchTableItem(5, rcloneFile)
-							});
+						addFile(rcloneFile);
 					}
-					boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
+					// boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
 				}
 				terminateSearch();
 			}
@@ -208,8 +216,12 @@ void SearchTableView::terminateSearch()
  */
 void SearchTableView::stopAllSearch()
 {
+	for (auto &remote: _remote_to_root_file)
+		remote.second.children().clear();
 	_pool.stop_all_processes_and_clear();
-	_rows.clear();
+	for (auto &th: _threads)
+		th.interrupt();
+	_threads.clear();
 	_searching = 0;
 }
 

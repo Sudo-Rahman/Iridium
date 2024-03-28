@@ -4,3 +4,5 @@
 build/
 rclone*
 cmake-build-debug/
+
+debug/

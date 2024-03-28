@@ -9,3 +9,5 @@ void IridiumApp::runOnMainThread(std::function<void()> f)
     QMetaObject::invokeMethod(qGuiApp, [func = std::move(f)]() { func(); });
 
 }
+
+

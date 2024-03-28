@@ -1,5 +1,6 @@
 #pragma once
 
+#include <any>
 #include <QApplication>
 
 class IridiumApp : public QApplication

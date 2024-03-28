@@ -76,7 +76,7 @@ void RcloneFile::setIsDir(bool isDir)
 
 QString RcloneFile::getSizeString() const
 {
-    return QString::fromStdString(Iridium::Utility::numberToString(size(),2));
+    return QString::fromStdString(Iridium::Utility::sizeToString(size()));
 }
 
 QString RcloneFile::getPathString() const

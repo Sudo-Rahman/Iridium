@@ -1,19 +1,14 @@
-//
-// Created by rahman on 05/02/23.
-//
+#pragma once
 
-#ifndef IRIDIUM_RCLONEFILEMODELDISTANT_HPP
-#define IRIDIUM_RCLONEFILEMODELDISTANT_HPP
 
 #include "RcloneFileModel.hpp"
-#include <QTimer>
+#include <iridium/process.hpp>
 
 class RcloneFileModelDistant : public RcloneFileModel
 {
 Q_OBJECT
 
-
-    std::vector<RclonePtr> _rclones_static{}, _rclones_dynamic{};
+    ir::process_pool _process_pool{4};
 
     static boost::signals2::signal<void()> _load_change;
 
@@ -41,15 +36,9 @@ public:
 
     void stop() override
     {
-        RcloneManager::lockLaunch();
         _stop = true;
-        RcloneManager::erase(_rclones_static);
-        for (auto &rclone: _rclones_static)rclone->kill();
-        for (auto &rclone: _rclones_dynamic) rclone->kill();
-        _rclones_static.clear();
-        _rclones_dynamic.clear();
+        _process_pool.stop_all_processes_and_clear();
         _stop = false;
-        RcloneManager::unlockLaunch();
     }
 
 
@@ -61,16 +50,10 @@ protected:
     void reload(TreeFileItem *item) override;
 
 private:
-    void connectRclone(const RclonePtr &rclone, TreeFileItem *tree_item, bool progress = true);
-
-    RclonePtr getRclone(bool dynamic = true);
+    void connectProcess(ir::process *process, TreeFileItem *tree_item, bool progress = true);
 
     void addItemDynamic(const RcloneFilePtr &file, TreeFileItem *parent);
-
 
     void addItemStatic(const RcloneFilePtr &file, TreeFileItem *parent, uint8_t depth = Iridium::Global::max_depth);
 
 };
-
-
-#endif //IRIDIUM_RCLONEFILEMODELDISTANT_HPP

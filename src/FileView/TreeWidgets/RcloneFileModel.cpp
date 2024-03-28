@@ -8,6 +8,8 @@
 #include <QMessageBox>
 #include <cmath>
 
+#include "IridiumApp.hpp"
+
 /**
  * @brief RcloneFileModel::RcloneFileModel
  * @param remoteInfo
@@ -49,26 +51,29 @@ const QModelIndex &RcloneFileModel::getRootIndex() const
  */
 void RcloneFileModel::addProgressBar(const QModelIndex &index)
 {
-    auto *container = new QWidget;
-    container->setContentsMargins(0, 0, 0, 0);
-    auto *layout = new QHBoxLayout(container);
-    layout->setContentsMargins(0, 0, 0, 0);
-    ProgressBar *progressBar;
+    IridiumApp::runOnMainThread([this, index]
+        {
+        auto *container = new QWidget;
+        container->setContentsMargins(0, 0, 0, 0);
+        auto *layout = new QHBoxLayout(container);
+        layout->setContentsMargins(0, 0, 0, 0);
+        ProgressBar *progressBar;
 
-    if (_expand_or_double_click)
-    {
-        progressBar = new ProgressBar(ProgressBar::Circular, container);
-        progressBar->setFixedSize(40, 40);
-    } else
-    {
-        progressBar = new ProgressBar(ProgressBar::Linear, container);
-        progressBar->setFixedSize(100, 15);
-    }
+        if (_expand_or_double_click)
+        {
+            progressBar = new ProgressBar(ProgressBar::Circular, container);
+            progressBar->setFixedSize(40, 40);
+        } else
+        {
+            progressBar = new ProgressBar(ProgressBar::Linear, container);
+            progressBar->setFixedSize(100, 15);
+        }
 
-    progressBar->setRange(0, 0);
-    layout->setAlignment(Qt::AlignLeft);
-    layout->addWidget(progressBar);
-    _view->setIndexWidget(index, container);
+        progressBar->setRange(0, 0);
+        layout->setAlignment(Qt::AlignLeft);
+        layout->addWidget(progressBar);
+        _view->setIndexWidget(index, container);
+    });
 }
 
 RcloneFileModel::RcloneFileModel()
@@ -138,7 +143,8 @@ bool RcloneFileModel::dropMimeData(const QMimeData *data, Qt::DropAction action,
 
 bool RcloneFileModel::fileInFolder(const RcloneFilePtr &file, const TreeFileItem *folder)
 {
-    return std::ranges::any_of(filesInFolder(folder), [file](const RcloneFilePtr &f)
+    auto files = filesInFolder(folder);
+    return std::ranges::any_of(files, [file](const RcloneFilePtr &f)
     {
         return *f == *file;
     });

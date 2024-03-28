@@ -20,7 +20,6 @@ public:
 
 	RcloneFile() = default;
 
-
     [[nodiscard]] const QString getPath() const;
 
     void setName(const QString &path);
@@ -57,3 +56,4 @@ public:
 };
 
 typedef std::shared_ptr<RcloneFile> RcloneFilePtr;
+typedef std::shared_ptr<RcloneFile> RcloneFileUPtr;
