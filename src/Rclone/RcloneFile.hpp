@@ -20,11 +20,11 @@ public:
 
 	RcloneFile() = default;
 
-    [[nodiscard]] const QString getPath() const;
+    [[nodiscard]] QString getPath() const;
 
     void setName(const QString &path);
 
-    [[nodiscard]] uint64_t getSize() const;
+    [[nodiscard]] int64_t getSize() const;
 
     void setSize(uint64_t size);
 
@@ -32,7 +32,7 @@ public:
 
     void setIsDir(bool isDir);
 
-    [[nodiscard]] const QDateTime getModTime() const;
+    [[nodiscard]] QDateTime getModTime() const;
 
     void setModTime(const QDateTime &modTime);
 

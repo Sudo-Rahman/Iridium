@@ -10,8 +10,9 @@
 #include <QTreeWidgetItem>
 #include <QMessageBox>
 #include <Rclone.hpp>
-#include <Global.hpp>
 #include <RoundedLineEdit.hpp>
+
+#include "TaskRowParent.hpp"
 
 class TreeFileView : public QTreeView
 {
@@ -31,6 +32,7 @@ Q_OBJECT
     RoundedLineEdit *_search_line_edit{};
 
     boost::thread _reload_thread{};
+    std::atomic_bool _reloadable{true};
 
 public:
     explicit TreeFileView(const RemoteInfoPtr &remoteInfo, QWidget *parent = nullptr);
@@ -58,6 +60,8 @@ public:
     void search(const QString &text);
 
     void preview(const TreeFileItem *);
+
+    std::atomic_bool set_reloadable(bool r) {_reloadable = r; }
 
 protected:
     void resizeEvent(QResizeEvent *event) override;
@@ -108,15 +112,19 @@ private:
 
     void autoReload();
 
+    void connectProcessreloadable(ir::process *process);
+
 signals:
 
     void pathChanged(const QString &);
 
     void pasted(const RcloneFilePtr &);
 
-    void
-    taskAdded(const QString &src, const QString &dst, const RclonePtr &rclone, const std::function<void()> &callable,
-              const Rclone::TaskType &type = Rclone::Unknown);
+    void taskAdded(const RcloneFile& src, const RcloneFile& dst, const ir::process_ptr& rclone,
+                   TaskRowParent::taskType type = TaskRowParent::Unknown);
+
+    void taskAdded2(const RcloneFile& src, const ir::process_ptr& rclone,
+                      TaskRowParent::taskType type = TaskRowParent::Unknown);
 
     void resized();
 

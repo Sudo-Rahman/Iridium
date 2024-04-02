@@ -19,7 +19,7 @@ class ConanApplication(ConanFile):
         tc.generate()
 
     def requirements(self):
-        self.requires("rclone_cpp/0.1")
+        self.requires("rclone_cpp/[>=0.1]")
         self.requires("boost/[>=1.80.0]")
 
 

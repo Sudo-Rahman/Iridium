@@ -5,7 +5,6 @@
 #include "RcloneFileModel.hpp"
 #include <QVBoxLayout>
 #include <ProgressBar.hpp>
-#include <QMessageBox>
 #include <cmath>
 
 #include "IridiumApp.hpp"
@@ -86,30 +85,7 @@ RcloneFileModel::RcloneFileModel()
 
 void RcloneFileModel::addItem(const RcloneFilePtr &file, TreeFileItem *parent)
 {
-    // if (not _check_is_valid)
-    // {
-    //     _rclone = Rclone::create_unique();
-    //     connect(_rclone.get(), &Rclone::finished, this, [this](int exit)
-    //     {
-    //         if (exit not_eq 0)
-    //         {
-    //             auto msgBox = QMessageBox(QMessageBox::Critical, tr("Erreur"),
-    //                                       tr("Impossible de se connecter au remote %1 !").arg(
-    //                                               _remote_info->name().c_str()), QMessageBox::Ok);
-    //             msgBox.setDetailedText(_rclone->readAll().back().c_str());
-    //             msgBox.exec();
-    //         }
-    //         _check_is_valid = true;
-    //     });
-    //     switch (_remote_info->type())
-    //     {
-    //         case iridium::rclone::entity::remote::none:
-    //             break;
-    //         default:
-    //             _rclone->about(*_remote_info);
-    //             break;
-    //     }
-    // }
+
 }
 
 QMimeData *RcloneFileModel::mimeData(const QModelIndexList &indexes) const

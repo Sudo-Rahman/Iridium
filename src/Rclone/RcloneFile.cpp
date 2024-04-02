@@ -19,7 +19,7 @@ RcloneFile::RcloneFile(file * parent, const QString & file_name, int64_t size, b
     set_remote(remote);
 }
 
-RcloneFile::RcloneFile(const ire::file & file)
+RcloneFile::RcloneFile(const file & file)
 {
     set_parent(file.parent());
     set_name(file.name());
@@ -29,7 +29,7 @@ RcloneFile::RcloneFile(const ire::file & file)
     set_remote(file.remote());
 }
 
-const QString RcloneFile::getPath() const
+QString RcloneFile::getPath() const
 {
     return QString::fromStdString(path());
 }
@@ -39,7 +39,7 @@ void RcloneFile::setName(const QString &path)
     set_name(path.toStdString());
 }
 
-uint64_t RcloneFile::getSize() const
+int64_t RcloneFile::getSize() const
 {
     return size();
 }
@@ -49,7 +49,7 @@ void RcloneFile::setSize(uint64_t size)
    set_size(std::move(size));
 }
 
-const QDateTime RcloneFile::getModTime() const
+QDateTime RcloneFile::getModTime() const
 {
     return QDateTime::fromSecsSinceEpoch(to_time_t(mod_time()));
 }

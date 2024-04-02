@@ -100,7 +100,7 @@ ItemInfoDialog::ItemInfoDialog(TreeFileItem * item, QWidget * parent) : QDialog(
 	{
 		_layout->addWidget(new QLabel(tr("Nombre d'objets: ")), _row, 0, 1, 1);
 		_layout->addWidget(_objs, _row, 1, 1, 1);
-		if (_file->getSize() == 0)
+		if (_file->getSize() <= 0)
 		{
 			_size->hide();
 			_loading1 = new ProgressBar(ProgressBar::Circular, this);
@@ -126,7 +126,7 @@ void ItemInfoDialog::initLabel()
 	_icon->setAlignment(Qt::AlignHCenter);
 	_icon->setMinimumHeight(200);
 
-	_path = new QLabel(_file->getPath(), this);
+	_path = new QLabel(_file->absolute_path().c_str(), this);
 	_path->setWordWrap(true);
 	_path->setAlignment(Qt::AlignLeft);
 
@@ -141,7 +141,7 @@ void ItemInfoDialog::initLabel()
 	if (_file->isDir())
 	{
 		_objs = new QLabel("", this);
-		if (_file->getSize() == 0)
+		if (_file->getSize() <= 0)
 			_objs->hide();
 		_objs->setWordWrap(true);
 		_objs->setAlignment(Qt::AlignLeft);
@@ -187,7 +187,7 @@ void ItemInfoDialog::initSize()
 			_size->show();
 			_objs->show();
 
-			_objs->setText(QString::fromStdString(Utility::numberToString((uint64_t)*objs)));
+			_objs->setText(QString::fromStdString(Utility::numberToString(*objs)));
 			_size->setText(QString::fromStdString(Utility::numberToString(*size)) + " octets" + " ("
 			               + QString::fromStdString(Utility::sizeToString(*size)) + ")");
 			_file->setSize(*size);
@@ -197,29 +197,30 @@ void ItemInfoDialog::initSize()
 			delete objs;
 		});
 	}
-	if (!_file->getRemoteInfo()->isLocal() and _file->getSize() == 0)
+	if (!_file->getRemoteInfo()->isLocal() and _file->getSize() <= 0 and _file->isDir())
 	{
-		auto parser = ir::parser::size_parser::create(new ir::parser::size_parser([this](const ire::size &size)
+		auto parser = ir::parser::size_parser::create(new ir::parser::size_parser([this](const ire::size& size)
 		{
 			IridiumApp::runOnMainThread([this,size = std::move(size)]
 			{
 				_layout->removeWidget(_loading1);
-				   _loading1->deleteLater();
-				   _layout->removeWidget(_loading2);
-				   _loading2->deleteLater();
-				   _size->show();
-				   _objs->show();
+				_loading1->deleteLater();
+				_layout->removeWidget(_loading2);
+				_loading2->deleteLater();
+				_size->show();
+				_objs->show();
 
-				   _size->setText(
-					   QString::fromStdString(Utility::numberToString(size.total_size)) + " octets" + " (" + std::to_string(size.total_size).c_str()+
-					   ")");
-				   _objs->setText(QString::fromStdString(Utility::numberToString(size.total_objects)));
-				   _file->setSize(size.total_size);
-				   _objs->setFont({});
-				   _size->setFont({});
+				_size->setText(
+					QString::fromStdString(Utility::numberToString(size.total_size)) + " octets" + " (" +
+					std::to_string(size.total_size).c_str() +
+					")");
+				_objs->setText(QString::fromStdString(Utility::numberToString(size.total_objects)));
+				_file->setSize(size.total_size);
+				_objs->setFont({});
+				_size->setFont({});
 			});
 		}));
-		// _process.size(*_file).on_finish_parser(parser).execute();
+		_process.size(*_file).on_finish_parser(parser).execute();
 	}
 	else
 	{

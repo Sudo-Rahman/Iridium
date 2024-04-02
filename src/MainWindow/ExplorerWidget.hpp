@@ -2,13 +2,8 @@
 // Created by sr-71 on 09/05/2023.
 //
 
-#ifndef IRIDIUM_EXPLORERWIDGET_HPP
-#define IRIDIUM_EXPLORERWIDGET_HPP
+#pragma once
 
-#include <QLayout>
-#include <QSplitter>
-#include <QTabWidget>
-#include <Rclone.hpp>
 #include <ListRemoteWidget.hpp>
 #include <FileViewWidget.hpp>
 #include <TaskTreeView.hpp>
@@ -31,6 +26,3 @@ private:
     void connectSignals();
 
 };
-
-
-#endif //IRIDIUM_EXPLORERWIDGET_HPP

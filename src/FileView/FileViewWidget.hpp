@@ -1,38 +1,33 @@
-//
-// Created by Rahman on 30/03/2023.
-//
-
-#ifndef IRIDIUM_FILEVIEWWIDGET_HPP
-#define IRIDIUM_FILEVIEWWIDGET_HPP
+#pragma once
 
 #include <TreeFileViewContainer.hpp>
 #include <ListRemoteWidget.hpp>
 #include <QSplitter>
+#include <iridium/process.hpp>
+#include <TaskRowChild.hpp>
+#include <RcloneFile.hpp>
 
 class FileViewWidget final : public QWidget
 {
-Q_OBJECT
+	Q_OBJECT
 
-private:
-    TreeFileViewContainer *_treeFileView1{}, *_treeFileView2{};
-    QHBoxLayout *_layout{};
+	TreeFileViewContainer *_treeFileView1{}, *_treeFileView2{};
+	QHBoxLayout * _layout{};
 
-    QSplitter *_splitter{};
+	QSplitter * _splitter{};
 
-    QList<TreeFileItem *> _current_file_list{};
+	QList<TreeFileItem *> _current_file_list{};
 
 public:
-    explicit FileViewWidget(QWidget *parent = nullptr);
+	explicit FileViewWidget(QWidget * parent = nullptr);
 
-    void changeRemote(const std::shared_ptr<remotes_selected> &);
+	void changeRemote(const std::shared_ptr<remotes_selected>&);
 
 
 signals:
+	void taskAdded(const RcloneFile& src, const RcloneFile& dst, const ir::process_ptr& rclone,
+			   TaskRowParent::taskType type = TaskRowParent::Unknown);
 
-    void
-    taskAdded(const QString &src, const QString &dst, const RclonePtr &rclone, const std::function<void()> &callable,
-              const Rclone::TaskType &type = Rclone::Unknown);
+	void taskAdded2(const RcloneFile& src, const ir::process_ptr& rclone,
+					  TaskRowParent::taskType type = TaskRowParent::Unknown);
 };
-
-
-#endif //IRIDIUM_FILEVIEWWIDGET_HPP

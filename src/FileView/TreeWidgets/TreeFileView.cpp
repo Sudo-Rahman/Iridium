@@ -29,6 +29,8 @@
 #include "Utility/Utility.hpp"
 
 
+using namespace iridium::rclone;
+
 /**
  * @brief Classe permettant de définir la taille des items
  */
@@ -472,7 +474,7 @@ QString TreeFileView::getPath()
 void TreeFileView::copyto(const std::vector<RcloneFilePtr>& files, TreeFileItem * paste)
 {
 	auto treePaste = paste == nullptr ? getSelectedItems().first() : paste;
-	if (!treePaste->getFile()->isDir())
+	if (not treePaste->getFile()->isDir())
 		return;
 	for (const auto& file: files)
 	{
@@ -480,15 +482,16 @@ void TreeFileView::copyto(const std::vector<RcloneFilePtr>& files, TreeFileItem 
 			continue;
 
 		RcloneFilePtr newFile = std::make_shared<RcloneFile>(
-			file->parent(),
+			treePaste->getFile().get(),
 			file->getName(),
 			file->getSize(),
 			file->isDir(),
 			file->isDir() ? QDateTime::currentDateTime() : file->getModTime(),
 			_remote_info
 		);
-		auto rclone = Rclone::create_shared();
-		connect(rclone.get(), &Rclone::finished, this, [this, newFile, treePaste](int exit)
+		auto process = process_ptr(new ir::process());
+		process->copy_to(*file, *newFile);
+		process->on_finish([this, newFile, treePaste](int exit)
 		{
 			if (exit == 0)
 			{
@@ -503,11 +506,12 @@ void TreeFileView::copyto(const std::vector<RcloneFilePtr>& files, TreeFileItem 
 				auto list = RcloneFileModel::getItemList(treeItem);
 				if (newFile->isDir())
 					treeItem->appendRow({});
+					treeItem->appendRow({});
 				treePaste->appendRow(list);
 			}
 		});
-		emit taskAdded(file->getPath(), newFile->getPath(), rclone,
-		               [rclone, newFile, file] { rclone->copyTo(*file, newFile.operator*()); }, Rclone::Copy);
+		connectProcessreloadable(process.get());
+		emit taskAdded(*file, *newFile, std::move(process), TaskRowParent::Copy);
 	}
 }
 
@@ -643,16 +647,15 @@ void TreeFileView::deleteFile(const QList<TreeFileItem *>& items)
 		return;
 	for (auto item: items)
 	{
-		auto rclone = Rclone::create_shared();
-		connect(rclone.get(), &Rclone::finished, this, [this, files, item, rclone](const int exit)
+		auto process = process_ptr(new ir::process());
+		connectProcessreloadable(process.get());
+		process->on_finish([item,this](int exit)
 		{
 			if (exit == 0 and item not_eq nullptr)
 				_model->removeRow(item->row(), _model->indexFromItem(item).parent());
 		});
-		emit taskAdded(item->getFile()->getPath(), "--", rclone, [rclone, item]()
-		{
-			rclone->deleteFile(*item->getFile());
-		}, Rclone::Delete);
+		process->delete_file(*item->getFile());
+		emit taskAdded2(*item->getFile(), std::move(process),TaskRowParent::Delete);
 	}
 }
 
@@ -727,14 +730,13 @@ void TreeFileView::mkdir()
 		return;
 	auto items = getSelectedItems();
 	auto rcloneFile = std::make_shared<RcloneFile>(
-		items.first()->getFile()->parent(),
+		items.first()->getFile().get(),
 		name,
 		0,
 		true,
 		QDateTime::currentDateTime(),
 		_remote_info
 	);
-	//	qDebug() << "mkdir" << rcloneFile->getPath();
 	if (RcloneFileModel::fileInFolder(rcloneFile->getName(), items.first()))
 	{
 		auto msgb = new QMessageBox(QMessageBox::Warning, tr("Création"), tr("Le dossier existe déjà"),
@@ -743,28 +745,26 @@ void TreeFileView::mkdir()
 		msgb->show();
 		return;
 	}
-	auto rclone = Rclone::create_shared();
-	auto * newItem = new TreeFileItem(0, rcloneFile);
-	connect(rclone.get(), &Rclone::finished, this, [this, rclone, name, newItem, items](const int exit)
+	auto process = process_ptr(new ir::process());
+	connectProcessreloadable(process.get());
+	process->mkdir(*rcloneFile);
+	process->on_finish([=,process = process.get()](int exit)
 	{
 		if (exit == 0)
-		{
-			// create new item
-			auto item_list = RcloneFileModel::getItemList(newItem);
-			items.first()->appendRow(item_list);
-		}
+			reload(items.first());
 		else
 		{
-			auto msgb = QMessageBox(QMessageBox::Critical, tr("Création"), tr("Le dossier n’a pas pu être créé"),
-			                        QMessageBox::Ok, this);
-			msgb.setDetailedText(rclone->readAll().back().c_str());
+			IridiumApp::runOnMainThread([=]
+			{
+				auto msgb = QMessageBox(QMessageBox::Critical, tr("Création"), tr("Le dossier n’a pas pu être créé"),
+									QMessageBox::Ok, this);
+			msgb.setDetailedText(process->get_error().back().c_str());
 			msgb.exec();
+			});
 		}
 	});
-	emit taskAdded("--", newItem->getFile()->getPath(), rclone, [rclone, newItem]
-	{
-		rclone->mkdir(newItem->getFile().operator*());
-	}, Rclone::Mkdir);
+	auto file = RcloneFile(nullptr, "--", 0, true, QDateTime::currentDateTime(), nullptr);
+	emit taskAdded(std::move(file), *rcloneFile, std::move(process), TaskRowParent::Mkdir);
 }
 
 
@@ -824,27 +824,18 @@ void TreeFileView::editItem(const QModelIndex& index)
  */
 void TreeFileView::rename(const TreeFileItem * item, const QString& newName)
 {
-	auto rclone = Rclone::create_shared();
-	connect(rclone.get(), &Rclone::finished, this, [this, rclone, item, newName](const int exit)
+	auto process = process_ptr(new ir::process());
+	process->on_finish([=](int exit)
 	{
-		if (not item->index().isValid())
-			return;
 		if (exit == 0)
-		{
-			// item->getFile()->changeName(newName);
-			const_cast<TreeFileItem *>(item)->setText(newName);
 			reload(const_cast<TreeFileItem *>(item));
-		}
-		else
-			_model->itemFromIndex(item->index())->setText(item->getFile()->getName());
 	});
-	auto oldFile = *(item->getFile());
+	auto oldFile = *item->getFile();
 	auto newFile = oldFile;
-	// newFile.changeName(newName);
-	emit taskAdded(oldFile.getPath(), newFile.getPath(), rclone, [oldFile, newFile, rclone]()
-	{
-		rclone->moveto(oldFile, newFile);
-	}, Rclone::Rename);
+	newFile.setName(newName);
+	process->move_to(oldFile, newFile);
+	connectProcessreloadable(process.get());
+	emit taskAdded(oldFile, newFile, std::move(process), TaskRowParent::Rename);
 }
 
 void TreeFileView::mousePressEvent(QMouseEvent * event)
@@ -924,10 +915,10 @@ void TreeFileView::dragMoveEvent(QDragMoveEvent * event)
 	else
 		selectionModel()->clearSelection();
 
-	auto item_to_drop = dynamic_cast<TreeFileItem *>(_model->itemFromIndex(index) == nullptr
+	auto item_to_drop = _model->itemFromIndex(index) == nullptr
 		                                                 ? dynamic_cast<TreeFileItem *>(_model->itemFromIndex(
 			                                                 rootIndex()))
-		                                                 : dynamic_cast<TreeFileItem *>(_model->itemFromIndex(index)));
+		                                                 : dynamic_cast<TreeFileItem *>(_model->itemFromIndex(index));
 	if (item_to_drop == nullptr)
 		return not_possible();
 
@@ -1015,25 +1006,37 @@ void TreeFileView::autoReload()
 		auto index = rootIndex().siblingAtColumn(0);
 		if (index.isValid())
 		{
+			qDebug() << "reload not possible " << Iridium::Global::reload_time << _reloadable;
 			auto item = dynamic_cast<TreeFileItem *>(_model->itemFromIndex(index));
-			if (item != nullptr)
-				_model->reload(item);
+			// if (item != nullptr and _reloadable)
+				// _model->reload(item);
 		}
 	}
+}
+
+void TreeFileView::connectProcessreloadable(process *process)
+{
+	process->on_start([this]
+	{
+		_reloadable = false;
+	}).on_finish([this](auto)
+	{
+		_reloadable = true;
+	});
 }
 
 void TreeFileView::preview(const TreeFileItem * item)
 {
 	if (item->getFile()->isDir())
 		return;
-	auto rclone = ir::make_uptr_process();
-	rclone->on_finish([rclone = rclone.get(),this](int exit)
+	auto process = process_uptr(new ir::process());
+	process->on_finish([rclone = process.get(),this](int exit)
 	{
 		if (exit not_eq 0)
 			return;
 		auto data = QByteArray::fromStdString(boost::algorithm::join(rclone->get_output(), "\n"));
 		emit previewed(data);
 	});
-	rclone->cat(*item->getFile());
-	Iridium::Global::process_pool.add_process(std::move(rclone));
+	process->cat(*item->getFile());
+	Iridium::Global::process_pool.add_process(std::move(process));
 }

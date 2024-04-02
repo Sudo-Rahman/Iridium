@@ -15,9 +15,9 @@ const std::shared_ptr<RcloneFile> &TreeFileItem::getFile() const
     return _file;
 }
 
-TreeFileItem::TreeFileItem(const RcloneFile &file) : QStandardItem()
+TreeFileItem::TreeFileItem(const RcloneFile &file)
 {
-    TreeFileItem::_file = std::make_shared<RcloneFile>(file);
+    _file = std::make_shared<RcloneFile>(file);
     setText(file.path().c_str());
     QStandardItem::setData(file.path().c_str(), SORT_ROLE);
     setFlags(flags() & ~Qt::ItemIsDropEnabled);
@@ -25,7 +25,7 @@ TreeFileItem::TreeFileItem(const RcloneFile &file) : QStandardItem()
 
 TreeFileItem::TreeFileItem(const int &column, const std::shared_ptr<RcloneFile> &file)
 {
-    TreeFileItem::_file = file;
+    _file = file;
     switch (column)
     {
         case 0:

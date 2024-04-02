@@ -5,6 +5,7 @@
 #include <QProgressBar>
 #include "RcloneFileModelDistant.hpp"
 #include "TreeFileItemDistant.hpp"
+#include <TreeFileView.hpp>
 #include <IridiumApp.hpp>
 #include <Global.hpp>
 
@@ -140,6 +141,7 @@ void RcloneFileModelDistant::reload(TreeFileItem * parent)
 			delete files_ptr;
 			tree_item->setState(TreeFileItem::Loaded);
 		};
+		connectProcess(rclone.get(), tree_item,false);
 		rclone->every_line_parser(std::move(parser)).on_finish(std::move(on_finish));
 		rclone->lsjson(*tree_item->getFile());
 		_process_pool.add_process(std::move(rclone));
@@ -158,11 +160,12 @@ void RcloneFileModelDistant::connectProcess(ir::process * process, TreeFileItem 
 		if (progress)
 			addProgressBar(tree_item->child(0, 0)->index());
 		tree_item->setState(TreeFileItem::Loading);
+		dynamic_cast<TreeFileView *>(_view)->set_reloadable(false);
 	});
-	// connect(rclone.get(), &Rclone::killed, this, [tree_item] { tree_item->setState(TreeFileItem::NotLoaded); });
 	process->on_finish([=](int exit)
 	{
 		if (exit == 0 and progress)tree_item->removeRow(0);
 		tree_item->setState(TreeFileItem::Loaded);
+		dynamic_cast<TreeFileView *>(_view)->set_reloadable(true);
 	});
 }
