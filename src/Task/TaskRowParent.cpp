@@ -30,7 +30,7 @@ TaskRowParent::TaskRowParent(const RcloneFile& file, const ire::json_log& data, 
 
 void TaskRowParent::finished()
 {
-	if(_data.get_stats() == nullptr) return;
+	if (_data.get_stats() == nullptr) return;
 
 	_size = _data.get_stats()->total_bytes;
 
@@ -105,7 +105,8 @@ void TaskRowParent::updateData()
 
 	_size = _data.get_stats()->total_bytes;
 	at(2)->setText(Iridium::Utility::sizeToString(_size).c_str());
-	_progressBar->setValue(_data.get_stats()->bytes/_size);
+	if (_size not_eq 0)
+		_progressBar->setValue(double_t(_data.get_stats()->bytes) / double_t(_size));
 	setSpeed();
 	auto averageSpeedValue = _data.get_stats()->speed;
 
@@ -117,10 +118,6 @@ void TaskRowParent::updateData()
 		_size = tmp;
 		at(2)->setText(Iridium::Utility::sizeToString(_size).c_str());
 	}
-	auto bytes = _data.get_stats()->bytes;
-
-	if (_size not_eq 0)
-		_progressBar->setValue(bytes /_size);
 	auto speed = _data.get_stats()->speed;
 	_avg.push_back(speed);
 	at(8)->setText((Iridium::Utility::sizeToString(speed) + "/s").c_str());

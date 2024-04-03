@@ -29,9 +29,6 @@ public:
 	void addTask(const RcloneFile& src, const RcloneFile& dst, const ir::process_ptr& rclone,
 	             TaskRowParent::taskType type = TaskRowParent::Unknown);
 
-	void addTask(const RcloneFile& src, const ir::process_ptr& rclone,
-	             TaskRowParent::taskType type = TaskRowParent::Unknown);
-
 	void initTask();
 
 signals:

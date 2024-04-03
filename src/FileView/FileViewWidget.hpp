@@ -28,6 +28,4 @@ signals:
 	void taskAdded(const RcloneFile& src, const RcloneFile& dst, const ir::process_ptr& rclone,
 			   TaskRowParent::taskType type = TaskRowParent::Unknown);
 
-	void taskAdded2(const RcloneFile& src, const ir::process_ptr& rclone,
-					  TaskRowParent::taskType type = TaskRowParent::Unknown);
 };

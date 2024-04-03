@@ -63,6 +63,8 @@ public:
 
     virtual void reload(TreeFileItem *item = nullptr) = 0;
 
+    // virtual void autoReload(TreeFileItem *item = nullptr) = 0;
+
     [[nodiscard]] const QModelIndex &getRootIndex() const;
 
     static QList<QStandardItem *> getItemList(TreeFileItem *item);

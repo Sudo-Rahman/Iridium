@@ -26,22 +26,12 @@ FileViewWidget::FileViewWidget(QWidget * parent) : QWidget(parent)
 	        {
 		        emit taskAdded(src, dst, rclone, type);
 	        });
-	connect(_treeFileView1->treeFileView(), &TreeFileView::taskAdded2, this,
-	        [this](const RcloneFile& src, const ir::process_ptr& rclone, const TaskRowParent::taskType& type)
-	        {
-		        emit taskAdded2(src, rclone, type);
-	        });
 
 	connect(_treeFileView2->treeFileView(), &TreeFileView::taskAdded, this,
 	        [this](const RcloneFile& src, const RcloneFile& dst, const ir::process_ptr& rclone,
 	               const TaskRowParent::taskType& type)
 	        {
 		        emit taskAdded(src, dst, rclone, type);
-	        });
-	connect(_treeFileView2->treeFileView(), &TreeFileView::taskAdded2, this,
-	        [this](const RcloneFile& src, const ir::process_ptr& rclone, const TaskRowParent::taskType& type)
-	        {
-		        emit taskAdded2(src, rclone, type);
 	        });
 }
 

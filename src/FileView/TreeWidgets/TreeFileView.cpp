@@ -111,8 +111,7 @@ void TreeFileView::initUI()
 
 	setStyleSheet("QTreeView { outline:none; }");
 
-	_reload_thread = boost::thread([this]
-	{ autoReload(); });
+	_reload_thread = boost::thread([this] { autoReload(); });
 }
 
 TreeFileView::TreeFileView(QWidget * parent) : QTreeView(parent) { initUI(); }
@@ -303,6 +302,8 @@ void TreeFileView::doubleClick(const QModelIndex& index)
  */
 void TreeFileView::showContextMenu()
 {
+	if (_model == nullptr)
+		return;
 	ItemMenu menu(this);
 	auto lisItem = getSelectedItems();
 	if (not rootIndex().isValid())
@@ -343,7 +344,6 @@ void TreeFileView::showContextMenu()
 			for (auto item: lisItem)
 			{
 				auto * dialog = new ItemInfoDialog(item, this);
-				dialog->move(QCursor::pos());
 				dialog->show();
 			}
 			break;
@@ -491,24 +491,10 @@ void TreeFileView::copyto(const std::vector<RcloneFilePtr>& files, TreeFileItem 
 		);
 		auto process = process_ptr(new ir::process());
 		process->copy_to(*file, *newFile);
-		process->on_finish([this, newFile, treePaste](int exit)
+		process->on_finish([this, treePaste](int exit)
 		{
 			if (exit == 0)
-			{
-				if (treePaste->state() == TreeFileItem::NotLoaded)
-					return;
-				if (RcloneFileModel::fileInFolder(newFile, treePaste))
-				{
-					reload(treePaste);
-					return;
-				}
-				auto * treeItem = new TreeFileItem(0, newFile);
-				auto list = RcloneFileModel::getItemList(treeItem);
-				if (newFile->isDir())
-					treeItem->appendRow({});
-					treeItem->appendRow({});
-				treePaste->appendRow(list);
-			}
+				reload(treePaste);
 		});
 		connectProcessreloadable(process.get());
 		emit taskAdded(*file, *newFile, std::move(process), TaskRowParent::Copy);
@@ -636,7 +622,8 @@ void TreeFileView::deleteFile(const QList<TreeFileItem *>& items)
 		return;
 	auto msgb = QMessageBox(QMessageBox::Question, tr("Suppression"),
 	                        tr("Suppression de ") + QString::number(files.size()) +
-	                        (files.size() > 1 ? tr(" fichiers") : tr(" fichier")) + " ?");
+	                        (files.size() > 1 ? tr(" fichiers") : tr(" fichier")) + " ?", {}, this);
+
 
 	msgb.addButton(tr("Supprimer"), QMessageBox::YesRole);
 	auto cancel = msgb.addButton(tr("Annuler"), QMessageBox::NoRole);
@@ -655,7 +642,10 @@ void TreeFileView::deleteFile(const QList<TreeFileItem *>& items)
 				_model->removeRow(item->row(), _model->indexFromItem(item).parent());
 		});
 		process->delete_file(*item->getFile());
-		emit taskAdded2(*item->getFile(), std::move(process),TaskRowParent::Delete);
+		auto emptyFile = file{};
+		emptyFile.set_name("--");
+		emit taskAdded(*item->getFile(), std::move(static_cast<RcloneFile>(emptyFile)), std::move(process),
+		               TaskRowParent::Delete);
 	}
 }
 
@@ -706,6 +696,8 @@ QDialog* TreeFileView::mkdirDialog()
 	auto * name = new RoundedLineEdit(dialog);
 	name->setObjectName("name");
 	name->setPlaceholderText(tr("Nom du dossier"));
+	name->setClearButtonEnabled(true);
+	name->setFocus();
 	layout->addWidget(name, 0, 1, 1, 2);
 	auto * buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, dialog);
 	connect(buttonBox, &QDialogButtonBox::accepted, dialog, &QDialog::accept);
@@ -757,9 +749,9 @@ void TreeFileView::mkdir()
 			IridiumApp::runOnMainThread([=]
 			{
 				auto msgb = QMessageBox(QMessageBox::Critical, tr("Création"), tr("Le dossier n’a pas pu être créé"),
-									QMessageBox::Ok, this);
-			msgb.setDetailedText(process->get_error().back().c_str());
-			msgb.exec();
+				                        QMessageBox::Ok, this);
+				msgb.setDetailedText(process->get_error().back().c_str());
+				msgb.exec();
 			});
 		}
 	});
@@ -916,9 +908,9 @@ void TreeFileView::dragMoveEvent(QDragMoveEvent * event)
 		selectionModel()->clearSelection();
 
 	auto item_to_drop = _model->itemFromIndex(index) == nullptr
-		                                                 ? dynamic_cast<TreeFileItem *>(_model->itemFromIndex(
-			                                                 rootIndex()))
-		                                                 : dynamic_cast<TreeFileItem *>(_model->itemFromIndex(index));
+		                    ? dynamic_cast<TreeFileItem *>(_model->itemFromIndex(
+			                    rootIndex()))
+		                    : dynamic_cast<TreeFileItem *>(_model->itemFromIndex(index));
 	if (item_to_drop == nullptr)
 		return not_possible();
 
@@ -1009,20 +1001,14 @@ void TreeFileView::autoReload()
 			qDebug() << "reload not possible " << Iridium::Global::reload_time << _reloadable;
 			auto item = dynamic_cast<TreeFileItem *>(_model->itemFromIndex(index));
 			// if (item != nullptr and _reloadable)
-				// _model->reload(item);
+			// _model->reload(item);
 		}
 	}
 }
 
-void TreeFileView::connectProcessreloadable(process *process)
+void TreeFileView::connectProcessreloadable(process * process)
 {
-	process->on_start([this]
-	{
-		_reloadable = false;
-	}).on_finish([this](auto)
-	{
-		_reloadable = true;
-	});
+	process->on_start([this] { _reloadable = false; }).on_finish([this](auto) { _reloadable = true; });
 }
 
 void TreeFileView::preview(const TreeFileItem * item)

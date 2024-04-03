@@ -104,12 +104,14 @@ ItemInfoDialog::ItemInfoDialog(TreeFileItem * item, QWidget * parent) : QDialog(
 		{
 			_size->hide();
 			_loading1 = new ProgressBar(ProgressBar::Circular, this);
-			_loading1->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+			_loading1->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+			_loading1->setFixedSize(48, 48);
 			_loading1->setRange(0, 0);
 			_layout->addWidget(_loading1, 5, 1, 1, 1, Qt::AlignLeft);
 
 			_loading2 = new ProgressBar(ProgressBar::Circular, this);
 			_loading2->setRange(0, 0);
+			_loading2->setFixedSize(48, 48);
 			_loading2->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 			_layout->addWidget(_loading2, 7, 1, 1, 1, Qt::AlignLeft);
 		}
@@ -215,7 +217,6 @@ void ItemInfoDialog::initSize()
 					std::to_string(size.total_size).c_str() +
 					")");
 				_objs->setText(QString::fromStdString(Utility::numberToString(size.total_objects)));
-				_file->setSize(size.total_size);
 				_objs->setFont({});
 				_size->setFont({});
 			});

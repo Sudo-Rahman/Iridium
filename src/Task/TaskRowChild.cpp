@@ -33,7 +33,7 @@ void TaskRowChild::updateDataChild()
 
 	at(9)->setText(Iridium::Utility::sizeToString(_data.speed_avg).c_str());
 
-	_progressBar->setValue(_data.percentage / 100);
+	_progressBar->setValue(_data.percentage / 100.0);
 
 	if (_data.speed == 0)
 		return;

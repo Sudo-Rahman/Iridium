@@ -48,13 +48,4 @@ void ExplorerWidget::connectSignals()
 			        _splitter->setSizes({1000, 400});
 		        _task_treeView->addTask(src, dst, rclone, type);
 	        });
-
-	connect(_file_viewWidget, &FileViewWidget::taskAdded2, this,
-			[this](const RcloneFile& src, const ir::process_ptr& rclone,
-				   TaskRowParent::taskType type)
-			{
-				if (_splitter->sizes()[1] == 0)
-					_splitter->setSizes({1000, 400});
-				_task_treeView->addTask(src, rclone, type);
-			});
 }
