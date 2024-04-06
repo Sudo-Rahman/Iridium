@@ -2,13 +2,12 @@
 // Created by Rahman on 02/02/2023.
 //
 
-#ifndef IRIDIUM_RCLONEFILEMODEL_HPP
-#define IRIDIUM_RCLONEFILEMODEL_HPP
+#pragma once
+
 
 #include <QStandardItemModel>
 #include "TreeFileItem.hpp"
 #include <QTreeView>
-#include <Rclone.hpp>
 #include <QMimeData>
 
 class TreeMimeData : public QMimeData
@@ -84,6 +83,3 @@ public:
 
     virtual void stop() = 0;
 };
-
-
-#endif //IRIDIUM_RCLONEFILEMODEL_HPP

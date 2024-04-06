@@ -4,11 +4,14 @@
 #include "RcloneFileModel.hpp"
 #include <iridium/process.hpp>
 
+#include "Global.hpp"
+
 class RcloneFileModelDistant : public RcloneFileModel
 {
 Q_OBJECT
 
     ir::process_pool _process_pool{4};
+    std::vector<TreeFileItem *> _items_static_load{};
 
     static boost::signals2::signal<void()> _load_change;
 
@@ -34,12 +37,7 @@ public:
         RcloneFileModelDistant::stop();
     }
 
-    void stop() override
-    {
-        _stop = true;
-        _process_pool.stop_all_processes_and_clear();
-        _stop = false;
-    }
+    void stop() override;
 
 
 protected:

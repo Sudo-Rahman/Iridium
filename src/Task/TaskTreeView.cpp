@@ -94,7 +94,7 @@ TaskTreeView::TaskTreeView(QWidget * parent) : QTreeView(parent)
 		if (action == cancel)
 		{
 			QMessageBox info = QMessageBox(QMessageBox::Information, tr("Annuler la tâche"),
-			                               tr("Voulez-vous vraiment annuler la tâche ?"));
+			                               tr("Voulez-vous vraiment annuler la tâche ?"), {}, this);
 			info.addButton(tr("Oui"), QMessageBox::YesRole);
 			info.addButton(tr("Non"), QMessageBox::NoRole);
 			if (info.exec() == QMessageBox::NRoles)
@@ -115,12 +115,6 @@ TaskTreeView::TaskTreeView(QWidget * parent) : QTreeView(parent)
 				}
 			}
 		}
-	});
-
-	connect(this, &TaskTreeView::taskFinished, this, [](const std::pair<size_t, Tasks *>& task)
-	{
-		if (task.second->parent->state() not_eq TaskRowChild::State::Error)
-			task.second->parent->terminate();
 	});
 }
 
@@ -229,9 +223,12 @@ void TaskTreeView::addTask(const RcloneFile& src, const RcloneFile& dst, const p
 						// if the child task not exist in the task list, create it
 						else
 						{
-							auto childSrc = RcloneFile(src.parent(), transfer.name.c_str(), transfer.size, false, QDateTime(), src.getRemoteInfo());
-							auto childDst = RcloneFile(dst.parent(), transfer.name.c_str(), transfer.size, false, QDateTime(), dst.getRemoteInfo());
-							auto taskChild = std::make_unique<TaskRowChild>(std::move(childSrc), std::move(childDst), transfer);
+							auto childSrc = RcloneFile(src.parent(), transfer.name.c_str(), transfer.size, false,
+							                           QDateTime(), src.getRemoteInfo());
+							auto childDst = RcloneFile(dst.parent(), transfer.name.c_str(), transfer.size, false,
+							                           QDateTime(), dst.getRemoteInfo());
+							auto taskChild = std::make_unique<TaskRowChild>(
+								std::move(childSrc), std::move(childDst), transfer);
 							_tasks[idParent].parent->first()->appendRow(*taskChild);
 							setIndexWidget(taskChild->progressBarIndex(), taskChild->progressBar());
 							_tasks[idParent].children.insert({childId, std::move(taskChild)});
@@ -258,20 +255,23 @@ void TaskTreeView::addTask(const RcloneFile& src, const RcloneFile& dst, const p
 		auto it = _tasks.find(id);
 		if (it == _tasks.end())
 			return;
-		if (exit == 0)
-			IridiumApp::runOnMainThread([it]
+		IridiumApp::runOnMainThread([=]
+		{
+			if (exit == 0)
 			{
 				it->second.parent->finished();
 				for (auto& child: it->second.children)
 					child.second->finished();
-			});
-		else
-		{
-			it->second.parent->error("");
-			it->second.parent->setMessageToolTip(rclone->get_error().empty() ? "" : rclone->get_error().back());
-			it->second.parent->progressBar()->error();
-		}
-		emit taskFinished(std::pair{id, &it->second});
+			}
+			else
+			{
+				it->second.parent->error("");
+				it->second.parent->setMessageToolTip(rclone->get_error().empty() ? "" : rclone->get_error().back());
+				it->second.parent->progressBar()->error();
+			}
+			if (it->second.parent->state() not_eq TaskRowChild::State::Error)
+				it->second.parent->terminate();
+		});
 	});
 	rclone->add_option(option::logging::use_json_log(), option::logging::verbose(), option::logging::stats("0.1"));
 	rclone->execute();

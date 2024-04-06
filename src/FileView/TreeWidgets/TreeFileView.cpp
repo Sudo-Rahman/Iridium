@@ -12,7 +12,6 @@
 #include <QPainter>
 #include <QLineEdit>
 #include <QLayout>
-#include <QPushButton>
 #include <QDialogButtonBox>
 #include <QDropEvent>
 #include <QDrag>
@@ -57,7 +56,7 @@ void TreeFileView::initUI()
 	setIndentation(15);
 	setSelectionMode(QAbstractItemView::ExtendedSelection);
 	setSelectionBehavior(QAbstractItemView::SelectRows);
-	setSortingEnabled(true);
+	// setSortingEnabled(true);
 	setRootIsDecorated(true);
 	setAnimated(true);
 	setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -111,7 +110,7 @@ void TreeFileView::initUI()
 
 	setStyleSheet("QTreeView { outline:none; }");
 
-	_reload_thread = boost::thread([this] { autoReload(); });
+	// _reload_thread = boost::thread([this] { autoReload(); });
 }
 
 TreeFileView::TreeFileView(QWidget * parent) : QTreeView(parent) { initUI(); }
@@ -224,6 +223,8 @@ void TreeFileView::back()
 		_index_front.push_back(std::pair(QTreeView::rootIndex(), verticalScrollBar()->value()));
 		QTreeView::setRootIndex(index);
 		verticalScrollBar()->setValue(val);
+		if (index not_eq _model->getRootIndex())
+			setRowHidden(0, index, true);
 	}
 	else
 		QTreeView::setRootIndex(_model->getRootIndex());
@@ -305,7 +306,7 @@ void TreeFileView::showContextMenu()
 	if (_model == nullptr)
 		return;
 	ItemMenu menu(this);
-	auto lisItem = getSelectedItems();
+	auto lisItem = getSelectedItems().empty() ? QList{getRootItem()} : getSelectedItems();
 	if (not rootIndex().isValid())
 	{
 		if (QTreeView::selectedIndexes().isEmpty())
@@ -370,38 +371,40 @@ void TreeFileView::showContextMenu()
 			break;
 		case ItemMenu::Action::Tree:
 			{
-				QDialog diag(this);
-				diag.setMinimumSize(400, 400);
-				diag.setWindowTitle(tr("Arborescence"));
-				auto layout = new QVBoxLayout(&diag);
-				auto progress = new ProgressBar(ProgressBar::Circular, &diag);
+				auto diag = new QDialog(this);
+				diag->setMinimumSize(400, 400);
+				diag->setWindowTitle(tr("Arborescence"));
+				auto layout = new QVBoxLayout(diag);
+				auto progress = new ProgressBar(ProgressBar::Circular, diag);
 				progress->setRange(0, 0);
 				layout->addWidget(progress, 0, Qt::AlignCenter);
-				auto rclone = ir::process_uptr(new ir::process());
-				auto file = dynamic_cast<TreeFileItem *>(_model->itemFromIndex(currentIndex()))->getFile();
-				rclone->on_finish([=,this,&diag,rclone = rclone.get()](int exit)
+				auto rclone = new ir::process();
+				auto file = lisItem.front()->getFile();
+				rclone->on_finish([=,this,rclone = rclone](int exit)
 				{
-					IridiumApp::runOnMainThread([=,&diag]
+					IridiumApp::runOnMainThread([=]
 					{
-						delete progress;
-						auto * text = new QTextEdit(&diag);
+						progress->hide();
+						auto * text = new QTextEdit(diag);
 						text->setReadOnly(true);
 						text->setWordWrapMode(QTextOption::NoWrap);
 						text->setStyleSheet(
 							"QTextEdit{background-color: #282c34; color: #abb2bf; border-radius: 25px; padding: 15px 10px;}");
-						diag.layout()->addWidget(text);
+						diag->layout()->addWidget(text);
 						if (exit == 0)
 							text->setText(boost::algorithm::join(rclone->get_output(), "\n").c_str());
 					});
 				});
 				rclone->tree(*file);
-				Iridium::Global::process_pool.add_process(std::move(rclone));
-				diag.exec();
+				Iridium::Global::process_pool.add_process(rclone);
+				diag->exec();
+				if (rclone->is_running())
+					rclone->stop();
 			}
 			break;
 		case ItemMenu::Action::Sync:
-			Iridium::Global::sync_dirs.push_back(
-				dynamic_cast<TreeFileItem *>(_model->itemFromIndex(currentIndex()))->getFile());
+			if (lisItem.size() == 1)
+				Iridium::Global::sync_dirs.push_back(lisItem.front()->getFile());
 			break;
 		case ItemMenu::Action::Preview:
 			preview(lisItem.front());
@@ -458,13 +461,13 @@ void TreeFileView::changeRemote(const RemoteInfoPtr& info)
  * @brief return path of current folder
  * @return path
  */
-QString TreeFileView::getPath()
+QString TreeFileView::getPath() const
 {
 	auto index = QTreeView::rootIndex();
 	if (!index.isValid())
 		return "";
 	auto * item = dynamic_cast<TreeFileItem *>(_model->itemFromIndex(index));
-	return item->getFile()->getPath();
+	return item->getFile()->absolute_path().c_str();
 }
 
 /**
@@ -473,7 +476,7 @@ QString TreeFileView::getPath()
  */
 void TreeFileView::copyto(const std::vector<RcloneFilePtr>& files, TreeFileItem * paste)
 {
-	auto treePaste = paste == nullptr ? getSelectedItems().first() : paste;
+	auto treePaste = paste == nullptr ? getRootItem() : paste;
 	if (not treePaste->getFile()->isDir())
 		return;
 	for (const auto& file: files)
@@ -507,7 +510,7 @@ void TreeFileView::copyto(const std::vector<RcloneFilePtr>& files, TreeFileItem 
  * @param can_be_empty
  * @return selected items or root item if can_be_empty is false
  */
-QList<TreeFileItem *> TreeFileView::getSelectedItems(bool can_be_empty)
+QList<TreeFileItem *> TreeFileView::getSelectedItems()
 {
 	QList<TreeFileItem *> lst;
 	for (int i = 0; i < QTreeView::selectedIndexes().length(); i = i + 4)
@@ -515,22 +518,6 @@ QList<TreeFileItem *> TreeFileView::getSelectedItems(bool can_be_empty)
 		auto index = QTreeView::selectedIndexes().at(i);
 		auto * item = dynamic_cast<TreeFileItem *>(_model->itemFromIndex(index));
 		if (index not_eq QTreeView::rootIndex() and item not_eq nullptr)
-			lst << item;
-	}
-	if (can_be_empty)
-		return lst;
-	if (lst.isEmpty())
-	{
-		auto index = QTreeView::rootIndex();
-		TreeFileItem * item;
-		if (index.isValid())
-			item = dynamic_cast<TreeFileItem *>(_model->itemFromIndex(index));
-		else
-		{
-			index = _model->index(0, 0, QTreeView::rootIndex());
-			item = dynamic_cast<TreeFileItem *>(_model->itemFromIndex(index));
-		}
-		if (item not_eq nullptr)
 			lst << item;
 	}
 	return lst;
@@ -552,11 +539,11 @@ void TreeFileView::keyPressEvent(QKeyEvent * event)
 	// if ctrl + r for reload
 	if (QKeySequence(event->modifiers() | event->key()).matches(Qt::CTRL + Qt::Key_R))
 	{
-		reload();
+		reloadRoot();
 		return;
 	}
 
-	auto lisItem = getSelectedItems(true);
+	auto lisItem = getSelectedItems();
 
 	if (lisItem.isEmpty() and getPath().isEmpty())
 		return;
@@ -584,7 +571,6 @@ void TreeFileView::keyPressEvent(QKeyEvent * event)
 				for (auto item: getSelectedItems())
 				{
 					auto * info = new ItemInfoDialog(item, this);
-					// show in random position
 					info->move(QCursor::pos());
 					info->show();
 				}
@@ -675,12 +661,8 @@ void TreeFileView::removeItem(TreeFileItem * item)
  */
 void TreeFileView::reload(TreeFileItem * treeItem)
 {
-	if (not _model) return;
-
-	auto lstItem = treeItem == nullptr ? getSelectedItems() : QList<TreeFileItem *>{treeItem};
-
-	// all tree selected
-	for (auto item: lstItem) { _model->reload(item); }
+	if (not _model or treeItem == nullptr) return;
+	_model->reload(treeItem);
 }
 
 QDialog* TreeFileView::mkdirDialog()
@@ -720,16 +702,17 @@ void TreeFileView::mkdir()
 	auto name = dialog->findChild<QLineEdit *>("name")->text();
 	if (name.isEmpty())
 		return;
-	auto items = getSelectedItems();
+	auto item = getSelectedItems().empty() ? getRootItem() : getSelectedItems().first();
+	if (item == nullptr) return;
 	auto rcloneFile = std::make_shared<RcloneFile>(
-		items.first()->getFile().get(),
+		item->getFile().get(),
 		name,
 		0,
 		true,
 		QDateTime::currentDateTime(),
 		_remote_info
 	);
-	if (RcloneFileModel::fileInFolder(rcloneFile->getName(), items.first()))
+	if (RcloneFileModel::fileInFolder(rcloneFile->getName(), item))
 	{
 		auto msgb = new QMessageBox(QMessageBox::Warning, tr("Création"), tr("Le dossier existe déjà"),
 		                            QMessageBox::Ok, this);
@@ -743,7 +726,7 @@ void TreeFileView::mkdir()
 	process->on_finish([=,process = process.get()](int exit)
 	{
 		if (exit == 0)
-			reload(items.first());
+			reload(item);
 		else
 		{
 			IridiumApp::runOnMainThread([=]
@@ -820,7 +803,7 @@ void TreeFileView::rename(const TreeFileItem * item, const QString& newName)
 	process->on_finish([=](int exit)
 	{
 		if (exit == 0)
-			reload(const_cast<TreeFileItem *>(item));
+			reload(dynamic_cast<TreeFileItem *>(item->parent()));
 	});
 	auto oldFile = *item->getFile();
 	auto newFile = oldFile;
@@ -856,6 +839,9 @@ void TreeFileView::mousePressEvent(QMouseEvent * event)
  */
 void TreeFileView::dropEvent(QDropEvent * event)
 {
+	setStyleSheet("");
+	_drag_border = true;
+
 	if (not dynamic_cast<TreeFileView *>(event->source())->_dragable)
 	{
 		event->ignore();
@@ -889,14 +875,17 @@ void TreeFileView::dropEvent(QDropEvent * event)
 void TreeFileView::dragMoveEvent(QDragMoveEvent * event)
 {
 	// get TreeMimeData
+	_drag_border = true;
 	auto mimeData = qobject_cast<const TreeMimeData *>(event->mimeData());
 
 	auto tree = dynamic_cast<TreeFileView *>(event->source());
 	auto index = indexAt(event->pos()).siblingAtColumn(0);
-	auto not_possible = [event, tree]
+	auto not_possible = [this,event, tree]
 	{
 		event->ignore();
 		tree->_dragable = false;
+		setStyleSheet("");
+		_drag_border = true;
 	};
 	if (not tree->rootIndex().isValid())
 		return not_possible();
@@ -907,18 +896,29 @@ void TreeFileView::dragMoveEvent(QDragMoveEvent * event)
 	else
 		selectionModel()->clearSelection();
 
-	auto item_to_drop = _model->itemFromIndex(index) == nullptr
-		                    ? dynamic_cast<TreeFileItem *>(_model->itemFromIndex(
-			                    rootIndex()))
-		                    : dynamic_cast<TreeFileItem *>(_model->itemFromIndex(index));
+	auto item_to_drop = dynamic_cast<TreeFileItem *>(_model->itemFromIndex(index));
+
+	if (item_to_drop == nullptr)
+	{
+		selectionModel()->clearSelection();
+		item_to_drop = getRootItem();
+	}
+
 	if (item_to_drop == nullptr)
 		return not_possible();
 
-	if (not item_to_drop->getFile()->isDir())
-		return not_possible();
-
-	if (item_to_drop->index() == dynamic_cast<TreeFileView *>(event->source())->rootIndex())
-		return not_possible();
+	if (item_to_drop->getFile()->isDir())
+	{
+		_drag_border = false;
+		setStyleSheet("");
+	}
+	else
+	{
+		item_to_drop = getRootItem();
+		if (item_to_drop == nullptr)
+			return not_possible();
+		selectionModel()->clearSelection();
+	}
 
 
 	// not drop in itself
@@ -930,6 +930,12 @@ void TreeFileView::dragMoveEvent(QDragMoveEvent * event)
 			    RcloneFileModel::fileInFolder(item->getFile(), item_to_drop))
 				return not_possible();
 		}
+	}
+
+	if (styleSheet() == "" and _drag_border)
+	{
+		setStyleSheet("QTreeView { border: 1px solid #2e86de; }");
+		_drag_border = false;
 	}
 
 	tree->_dragable = true;
@@ -944,7 +950,7 @@ void TreeFileView::search(const QString& text)
 {
 	if (not QTreeView::rootIndex().isValid())
 		return;
-	for (int i = 0; i < _model->itemFromIndex(QTreeView::rootIndex())->rowCount(); i++)
+	for (int i = 1; i < _model->itemFromIndex(QTreeView::rootIndex())->rowCount(); i++)
 	{
 		auto item = _model->itemFromIndex(QTreeView::rootIndex())->child(i);
 		if (item->text().contains(text, Qt::CaseInsensitive))
@@ -952,6 +958,13 @@ void TreeFileView::search(const QString& text)
 		else
 			setRowHidden(i, QTreeView::rootIndex(), true);
 	}
+}
+
+void TreeFileView::dragLeaveEvent(QDragLeaveEvent * event)
+{
+	QTreeView::dragLeaveEvent(event);
+	setStyleSheet("");
+	_drag_border = true;
 }
 
 bool TreeFileView::event(QEvent * event)
@@ -995,20 +1008,26 @@ void TreeFileView::autoReload()
 	{
 		boost::this_thread::sleep_for(boost::chrono::seconds(Iridium::Global::reload_time));
 		// get index
-		auto index = rootIndex().siblingAtColumn(0);
-		if (index.isValid())
-		{
-			qDebug() << "reload not possible " << Iridium::Global::reload_time << _reloadable;
-			auto item = dynamic_cast<TreeFileItem *>(_model->itemFromIndex(index));
-			// if (item != nullptr and _reloadable)
-			// _model->reload(item);
-		}
+		reloadRoot();
 	}
 }
 
-void TreeFileView::connectProcessreloadable(process * process)
+void TreeFileView::connectProcessreloadable(process * process) {}
+
+TreeFileItem* TreeFileView::getRootItem() const
 {
-	process->on_start([this] { _reloadable = false; }).on_finish([this](auto) { _reloadable = true; });
+	auto index = rootIndex().siblingAtColumn(0);
+	if (index.isValid())
+		if (auto * item = dynamic_cast<TreeFileItem *>(_model->itemFromIndex(index)))
+			return item;
+	return nullptr;
+}
+
+void TreeFileView::reloadRoot()
+{
+	auto rootItem = getRootItem();
+	if (rootItem not_eq nullptr)
+		reload(rootItem);
 }
 
 void TreeFileView::preview(const TreeFileItem * item)

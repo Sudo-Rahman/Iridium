@@ -49,7 +49,7 @@ public:
 
 	[[nodiscard]] bool isLocal() const { return type() == none; }
 
-	[[nodiscard]] std::string full_path() const
+	[[nodiscard]] std::string full_path() const override
 	{
 		if (isLocal())
 			return path();

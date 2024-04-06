@@ -2,13 +2,11 @@
 // Created by Rahman on 11/01/2023.
 //
 
-#ifndef IRIDIUM_REMOTEWIDGETPARAM_HPP
-#define IRIDIUM_REMOTEWIDGETPARAM_HPP
+#pragma once
 
 #include <QGroupBox>
 #include <iridium/entities/remote.hpp>
 #include "RemoteConfigParamsFrame.hpp"
-#include <Rclone.hpp>
 
 class RemoteWidgetParam : public QGroupBox
 {
@@ -54,6 +52,3 @@ signals:
 
     void newRemoteAdded();
 };
-
-
-#endif //IRIDIUM_REMOTEWIDGETPARAM_HPP

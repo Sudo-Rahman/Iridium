@@ -9,9 +9,6 @@
 
 SyncTableView::SyncTableView(QWidget *parent) : QTableView(parent)
 {
-    _analyse = Rclone::create_unique();
-    _sync = Rclone::create_unique();
-
     _model = new QStandardItemModel(0, 4, this);
 
     _model->setHorizontalHeaderLabels(
@@ -54,11 +51,4 @@ SyncTableView::SyncTableView(QWidget *parent) : QTableView(parent)
 
 void SyncTableView::analyse()
 {
-    connect(_analyse.get(), &Rclone::readDataJson, this, [this](const boost::json::object &file)
-    {
-        if (file.at("IsDir").as_bool())
-            return;
-        // auto item = new SyncTableItem(std::make_shared<RcloneFile>(RcloneFile::fromJson(file, _src->getRemoteInfo())));
-        // _model->appendRow({item,});
-    });
 }

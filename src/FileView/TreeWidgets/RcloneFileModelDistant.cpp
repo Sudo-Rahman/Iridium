@@ -19,9 +19,20 @@ RcloneFileModelDistant::RcloneFileModelDistant(const RemoteInfoPtr& remoteInfo, 
 		[this] { stop(); });
 }
 
+void RcloneFileModelDistant::stop()
+{
+	_stop = true;
+	_process_pool.stop_all_processes_and_clear();
+	for (const auto& item: _items_static_load)
+		_view->setRowHidden(0, item->index(), true);
+	_items_static_load.clear();
+	_stop = false;
+}
+
 void RcloneFileModelDistant::init()
 {
 	auto * drive = new TreeFileItem(RcloneFile(nullptr, "", 0, true, QDateTime::currentDateTime(), _remote_info));
+	drive->setText(_remote_info->full_path().c_str());
 	drive->getFile()->setSize(0);
 	drive->setIcon(QIcon(_remote_info->icon().c_str()));
 	_root_index = drive->index();
@@ -69,6 +80,7 @@ void RcloneFileModelDistant::addItemStatic(const RcloneFilePtr& file, TreeFileIt
 		stop();
 
 	auto * tree_item = parent->siblingAtFirstColumn();
+	_items_static_load.push_back(tree_item);
 	if (tree_item == nullptr)return;
 	if (tree_item->state() == TreeFileItem::NotLoaded)
 	{
@@ -141,7 +153,7 @@ void RcloneFileModelDistant::reload(TreeFileItem * parent)
 			delete files_ptr;
 			tree_item->setState(TreeFileItem::Loaded);
 		};
-		connectProcess(rclone.get(), tree_item,false);
+		connectProcess(rclone.get(), tree_item);
 		rclone->every_line_parser(std::move(parser)).on_finish(std::move(on_finish));
 		rclone->lsjson(*tree_item->getFile());
 		_process_pool.add_process(std::move(rclone));
@@ -158,14 +170,19 @@ void RcloneFileModelDistant::connectProcess(ir::process * process, TreeFileItem 
 	process->on_start([=, this]
 	{
 		if (progress)
-			addProgressBar(tree_item->child(0, 0)->index());
+		{
+			IridiumApp::runOnMainThread([=]
+			{
+				addProgressBar(tree_item->child(0, 0)->index());
+				_view->setRowHidden(0, tree_item->index(), false);
+			});
+		}
 		tree_item->setState(TreeFileItem::Loading);
-		dynamic_cast<TreeFileView *>(_view)->set_reloadable(false);
 	});
 	process->on_finish([=](int exit)
 	{
-		if (exit == 0 and progress)tree_item->removeRow(0);
+		if (exit == 0 and progress)
+			IridiumApp::runOnMainThread([=] { _view->setRowHidden(0, tree_item->index(), true); });
 		tree_item->setState(TreeFileItem::Loaded);
-		dynamic_cast<TreeFileView *>(_view)->set_reloadable(true);
 	});
 }

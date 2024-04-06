@@ -56,6 +56,7 @@ void RcloneFileModelLocal::addItem(const RcloneFilePtr &file, TreeFileItem *pare
 void RcloneFileModelLocal::init()
 {
     auto *local = new TreeFileItem(RcloneFile(nullptr,"", 0, true, QDateTime::currentDateTime(), _remote_info));
+    local->setText(_remote_info->full_path().c_str());
     local->getFile()->setSize(0);
     local->setIcon(Settings::hardDriveIcon());
     _root_index = local->index();

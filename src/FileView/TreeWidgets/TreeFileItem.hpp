@@ -6,7 +6,6 @@
 #define IRIDIUM_TREEFILEITEM_HPP
 
 #include <QStandardItem>
-#include <QJsonObject>
 #include <RcloneFile.hpp>
 
 #define SORT_ROLE (Qt::UserRole + 1)

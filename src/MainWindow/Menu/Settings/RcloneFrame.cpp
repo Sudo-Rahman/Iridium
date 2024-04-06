@@ -35,12 +35,12 @@ RcloneFrame::RcloneFrame(QWidget *parent) : QFrame(parent)
     {
         Settings::setValue(Settings::Node::RclonePath, path.toStdString());
         Iridium::Global::path_rclone = path.toStdString();
-        auto rclone = Rclone::create_unique();
-        if (not rclone->version().empty())
-        {
-            Settings::refreshRemotesList();
-            Rclone::check_rclone(true);
-        }
+        // auto rclone = Rclone::create_unique();
+        // if (not rclone->version().empty())
+        // {
+        //     Settings::refreshRemotesList();
+        //     Rclone::check_rclone(true);
+        // }
     });
     gridLayout->addWidget(new QLabel(tr("Chemin vers rclone : "), this), 0, 0, 1, 2, Qt::AlignCenter);
     gridLayout->addWidget(_rclone_path, 1, 0, 1, 1);
@@ -51,7 +51,7 @@ RcloneFrame::RcloneFrame(QWidget *parent) : QFrame(parent)
     auto groupLayout = new QFormLayout(group);
     _parallel_transfers = new QSpinBox(this);
     _parallel_transfers->setRange(1, 100);
-    _parallel_transfers->setValue(QString(Rclone::getFlag(Rclone::Transfers).value.c_str()).toInt());
+    // _parallel_transfers->setValue(QString(Rclone::getFlag(Rclone::Transfers).value.c_str()).toInt());
     groupLayout->addRow(tr("Transfert simultané : "), _parallel_transfers);
 
     layout->addWidget(group);
@@ -98,7 +98,7 @@ RcloneFrame::RcloneFrame(QWidget *parent) : QFrame(parent)
     _stats_refresh = new QSpinBox(this);
     _stats_refresh->setRange(100, 5000);
     _stats_refresh->setSingleStep(100);;
-    _stats_refresh->setValue((int) (std::stod(Settings::getRcloneFlag(Rclone::Flag::Stats)) * 1000));
+    // _stats_refresh->setValue((int) (std::stod(Settings::getRcloneFlag(Rclone::Flag::Stats)) * 1000));
     group4Layout->addRow(tr("Durée de rafraichissement des statistiques (ms) : "), _stats_refresh);
 
     auto reset = new QPushButton(tr("Réinitialiser"), this);
@@ -106,11 +106,11 @@ RcloneFrame::RcloneFrame(QWidget *parent) : QFrame(parent)
     connect(reset, &QPushButton::clicked, [this]()
     {
         Settings::resetSettings(Settings::Rclone);
-        _parallel_transfers->setValue(std::stoi(Settings::getRcloneFlag(Rclone::Transfers)));
+        // _parallel_transfers->setValue(std::stoi(Settings::getRcloneFlag(Rclone::Transfers)));
         _load_type->setCurrentIndex(Settings::getValue<uint8_t>(Settings::LoadType));
         _max_depth->setValue(Settings::getValue<uint8_t>(Settings::MaxDepth));
         _max_rclone_execution->setValue(Settings::getValue<uint8_t>(Settings::MaxProcess));
-        _stats_refresh->setValue((int) (std::stod(Settings::getRcloneFlag(Rclone::Flag::Stats)) * 1000));
+        // _stats_refresh->setValue((int) (std::stod(Settings::getRcloneFlag(Rclone::Flag::Stats)) * 1000));
         _rclone_path->setText(Settings::getValue<std::string>(Settings::Node::RclonePath).c_str());
     });
 
@@ -130,11 +130,11 @@ void RcloneFrame::connectSignals()
     connect(_max_rclone_execution, &QSpinBox::valueChanged, [=](int value)
     {
         Settings::setValue(Settings::MaxProcess, value);
-        RcloneManager::setMaxProcess(value);
+        // RcloneManager::setMaxProcess(value);
     });
     connect(_parallel_transfers, &QSpinBox::valueChanged, [=](int value)
     {
-        Settings::setRcloneFlag(Rclone::Flag::Transfers, std::to_string(value));
+        // Settings::setRcloneFlag(Rclone::Flag::Transfers, std::to_string(value));
     });
     connect(_load_type, &QComboBox::currentIndexChanged, [=](int index)
     {
@@ -148,6 +148,6 @@ void RcloneFrame::connectSignals()
     });
     connect(_stats_refresh, &QSpinBox::valueChanged, [=](int value)
     {
-        Settings::setRcloneFlag(Rclone::Flag::Stats, std::to_string(value / 1000.0));
+        // Settings::setRcloneFlag(Rclone::Flag::Stats, std::to_string(value / 1000.0));
     });
 }

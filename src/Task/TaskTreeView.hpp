@@ -31,6 +31,4 @@ public:
 
 	void initTask();
 
-signals:
-	void taskFinished(std::pair<size_t, Tasks*>);
 };

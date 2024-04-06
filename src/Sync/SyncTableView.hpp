@@ -2,21 +2,16 @@
 // Created by sr-71 on 14/06/2023.
 //
 
-#ifndef IRIDIUM_SYNCTABLEVIEW_HPP
-#define IRIDIUM_SYNCTABLEVIEW_HPP
-
+#pragma once
 
 #include <QTableView>
 #include <QStandardItemModel>
-#include <Rclone.hpp>
+
+#include "RcloneFile.hpp"
 
 class SyncTableItem : public QStandardItem
 {
-    RcloneFilePtr _file;
-public:
-    explicit SyncTableItem(const RcloneFilePtr &file) { _file = file; }
 
-    [[nodiscard]] const RcloneFilePtr &getFile() const { return _file; }
 };
 
 class SyncTableView : public QTableView
@@ -24,7 +19,6 @@ class SyncTableView : public QTableView
 Q_OBJECT
 
     QStandardItemModel *_model{};
-    RcloneUniquePtr _analyse{}, _sync{};
     RcloneFilePtr _src{}, _dst{};
 
 public:
@@ -40,10 +34,4 @@ public:
 
     void sync();
 
-private:
-
-
 };
-
-
-#endif //IRIDIUM_SYNCTABLEVIEW_HPP

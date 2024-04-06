@@ -2,8 +2,7 @@
 // Created by rahman on 13/01/23.
 //
 
-#ifndef IRIDIUM_REMOTECONFIGPARAMSFRAME_HPP
-#define IRIDIUM_REMOTECONFIGPARAMSFRAME_HPP
+#pragma once
 
 #include <QFrame>
 #include <QPushButton>
@@ -14,10 +13,10 @@
 #include <QComboBox>
 #include <iridium/process/process.hpp>
 #include <iridium/process/config_create.hpp>
-#include <iridium/entities/remote.hpp>
 
-#include <Rclone.hpp>
 #include <RoundedLineEdit.hpp>
+
+#include "Remote.h"
 
 class RemoteConfigParamsFrame : public QFrame
 {
@@ -54,6 +53,3 @@ signals:
     void remoteAdded();
 
 };
-
-
-#endif //IRIDIUM_REMOTECONFIGPARAMSFRAME_HPP

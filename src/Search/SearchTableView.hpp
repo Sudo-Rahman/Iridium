@@ -2,17 +2,14 @@
 // Created by sr-71 on 07/05/2023.
 //
 
-#ifndef IRIDIUM_SEARCHTABLEVIEW_HPP
-#define IRIDIUM_SEARCHTABLEVIEW_HPP
+#pragma once
 
 
 #include <QTableView>
-#include <QStandardItemModel>
 #include <TreeFileItem.hpp>
 #include <boost/json.hpp>
 #include <boost/thread.hpp>
 #include <QThreadPool>
-#include <Rclone.hpp>
 #include <iridium/process.hpp>
 
 
@@ -63,6 +60,3 @@ signals:
     void searchStarted();
 
 };
-
-
-#endif //IRIDIUM_SEARCHTABLEVIEW_HPP

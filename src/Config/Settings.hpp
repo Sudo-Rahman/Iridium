@@ -2,8 +2,7 @@
 // Created by Rahman on 05/04/2023.
 //
 
-#ifndef IRIDIUM_SETTINGS_HPP
-#define IRIDIUM_SETTINGS_HPP
+#pragma once
 
 #include <QSettings>
 #include <QIcon>
@@ -92,8 +91,6 @@ private:
 
     static std::vector<RemoteInfoPtr> getLocalRemotes();
 
-    static RcloneUniquePtr _rclone;
-
 public:
 
     static boost::signals2::signal<void()> list_remote_changed;
@@ -158,15 +155,8 @@ public:
         return _settings.get_child(_nodes.at(node)).BOOST_NESTED_TEMPLATE get_value<Type>();
     }
 
-    static void setRcloneFlag(const Rclone::Flag &, const std::string &);
-
-    static std::string getRcloneFlag(const Rclone::Flag &);
-
     static void setLanguage(const QLocale::Language &);
 
     static System getSystem();
 
 };
-
-
-#endif //IRIDIUM_SETTINGS_HPP

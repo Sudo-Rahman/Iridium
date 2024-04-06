@@ -7,7 +7,6 @@
 #include <QMessageBox>
 #include <QFormLayout>
 #include <QLabel>
-#include <Rclone.hpp>
 #include <Config.h>
 #include <Settings.hpp>
 #include <boost/version.hpp>

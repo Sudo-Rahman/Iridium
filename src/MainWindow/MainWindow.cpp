@@ -44,23 +44,23 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 void MainWindow::connectSignals()
 {
 
-    Rclone::check_rclone.connect(
-            [this](bool exist)
-            {
-                if (exist and _check_rclone)
-                {
-                    _statusBar->removeWidget(_statusBar->findChild<QLabel *>("rclone"));
-                    _check_rclone = false;
-                    return;
-                }
-                if (_check_rclone)
-                    return;
-                auto label = new QLabel(tr("Rclone n’a pas été trouvé !!"), this);
-                label->setObjectName("rclone");
-                label->setStyleSheet("color: red");
-                _statusBar->addWidget(label);
-                _check_rclone = true;
-            });
+    // Rclone::check_rclone.connect(
+    //         [this](bool exist)
+    //         {
+    //             if (exist and _check_rclone)
+    //             {
+    //                 _statusBar->removeWidget(_statusBar->findChild<QLabel *>("rclone"));
+    //                 _check_rclone = false;
+    //                 return;
+    //             }
+    //             if (_check_rclone)
+    //                 return;
+    //             auto label = new QLabel(tr("Rclone n’a pas été trouvé !!"), this);
+    //             label->setObjectName("rclone");
+    //             label->setStyleSheet("color: red");
+    //             _statusBar->addWidget(label);
+    //             _check_rclone = true;
+    //         });
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -68,7 +68,6 @@ void MainWindow::closeEvent(QCloseEvent *event)
     Settings::setValue(Settings::Width, width(), Settings::Height, height());
     Settings::saveSettings();
     QMainWindow::closeEvent(event);
-    RcloneManager::stopAll();
 }
 
 

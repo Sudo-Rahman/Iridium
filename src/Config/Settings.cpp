@@ -44,7 +44,6 @@ const map<Settings::Node, string> Settings::_nodes = {
         {Settings::Node::Height,       "general.size.height"},
         {Settings::Node::ReloadTime,   "general.reload_time"},
 };
-RcloneUniquePtr Settings::_rclone = Rclone::create_unique();
 
 /**
  * @brief change the color of the directory icon
@@ -121,34 +120,33 @@ std::vector<RemoteInfoPtr> Settings::getLocalRemotes()
 
 void Settings::refreshRemotesList()
 {
-    std::vector<RemoteInfoPtr> distants;
-    iridium::rclone::process().list_remotes([&distants]( const std::vector<remote_ptr>& remotes)
+    std::vector<RemoteInfoPtr> new_remotes;
+    iridium::rclone::process().list_remotes([&new_remotes]( const std::vector<remote_ptr>& remotes)
     {
         for (const auto &remote: remotes)
-            distants.emplace_back(std::make_shared<RemoteInfo>(remote->name(), remote->type(), remote->path()));
+            new_remotes.push_back(std::make_shared<RemoteInfo>(remote->name(), remote->type(), remote->path()));
     }).execute().wait_for_finish();
     auto locals = Settings::getLocalRemotes();
 //    insert remotes in refresh
-    distants.insert(distants.begin(), locals.begin(), locals.end());
-    const auto remotes = &Iridium::Global::remotes;
+    new_remotes.insert(new_remotes.begin(), locals.begin(), locals.end());
+    const auto remotes = &Global::remotes;
 
-    remotes->erase(std::ranges::remove_if(*remotes, [](const RemoteInfoPtr &remote)
-    { return remote == nullptr; }).begin(), remotes->end());
+    std::erase(*remotes, nullptr);
 
-    // remove remotes in remotes but not in distants
-    for (const auto remote : *remotes)
+    // remove remotes in remotes but not in new_remotes
+    for (const auto &remote : *remotes)
     {
-        if(std::ranges::none_of(distants.begin(), distants.end(), [remote](const RemoteInfoPtr &r)
+        if(std::ranges::none_of(new_remotes.begin(), new_remotes.end(), [&remote](const RemoteInfoPtr &r)
         { return *r == *remote; }))
-            remotes->erase(std::ranges::find_if(remotes->begin(), remotes->end(), [remote](const RemoteInfoPtr &r)
-            { return *r == *remote; }));
+            std::erase_if(*remotes, [remote](const RemoteInfoPtr &r)
+            { return *r == *remote; });
     }
-    // add remotes in distants but not in remotes
-    for (const auto &remote: distants)
+    // add remotes in new_remotes but not in remotes
+    for (const auto &remote: new_remotes)
     {
-        if (std::ranges::none_of(remotes->begin(), remotes->end(), [remote](const RemoteInfoPtr &r)
+        if (std::ranges::none_of(remotes->begin(), remotes->end(), [&remote](const RemoteInfoPtr &r)
         { return *r == *remote; }))
-            remotes->emplace_back(remote);
+            remotes->push_back(remote);
     }
     list_remote_changed();
 }
@@ -304,19 +302,6 @@ void Settings::initSettings()
     array.push_back(std::make_pair(remoteInfo.name(), remote));
     _settings.put_child(_nodes.at(Remotes), array);
 
-    // init flags
-    pt::ptree flags;
-    for (int i = 0; i < 100; ++i)
-    {
-        if (Rclone::getFlag(static_cast<Rclone::Flag>(i)).value.empty())
-            break;
-        pt::ptree flag;
-        flag.put("name", Rclone::getFlag(static_cast<Rclone::Flag>(i)).name);
-        flag.put("value", Rclone::getFlag(static_cast<Rclone::Flag>(i)).value);
-        flags.push_back(std::make_pair(std::to_string(i), flag));
-    }
-    _settings.put_child(_nodes.at(Flags), flags);
-
     _default = _settings;
 
 //    std::stringstream ss;
@@ -356,12 +341,6 @@ void Settings::loadValues()
     }
     try
     {
-        auto flags = _settings.get_child(_nodes.at(Flags));
-        for (const auto &flag: flags)
-        {
-            Rclone::setFlag(static_cast<Rclone::Flag>(std::stoi(flag.first)),
-                            flag.second.get<string>("value"));
-        }
         Global::load_type = static_cast<Iridium::Load>(getValue<uint8_t>(LoadType));
         Global::max_depth = getValue<uint8_t>(MaxDepth);
         Global::max_process = getValue<uint8_t>(MaxProcess);
@@ -374,35 +353,6 @@ void Settings::loadValues()
     {
         cout << diagnostic_information_what(e, true) << endl;
     }
-}
-
-void Settings::setRcloneFlag(const Rclone::Flag &flag, const std::string &value)
-{
-    pt::ptree flags;
-    flags.put("name", Rclone::getFlag(flag).name);
-    flags.put("value", value);
-
-    pt::ptree array = _settings.get_child(_nodes.at(Flags));
-
-    while (array.find(to_string(flag)) != array.not_found())
-        array.erase(to_string(flag));
-    array.push_back(std::make_pair(to_string(flag), flags));
-    _settings.put_child(_nodes.at(Flags), array);
-
-    Rclone::setFlag(flag, value);
-    saveSettings();
-}
-
-std::string Settings::getRcloneFlag(const Rclone::Flag &flag)
-{
-    pt::ptree array = _settings.get_child(_nodes.at(Flags));
-    for (auto &it: array)
-    {
-        if (it.first == to_string(flag))
-            return it.second.get<string>("value");
-    }
-    resetSettings(All);
-    return getRcloneFlag(flag);
 }
 
 void Settings::setLanguage(const QLocale::Language &lang)

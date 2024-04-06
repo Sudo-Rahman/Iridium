@@ -4,7 +4,6 @@
 
 #include "SearchTableView.hpp"
 #include <QHeaderView>
-#include <Rclone.hpp>
 #include <SearchTableItem.hpp>
 #include <QMenu>
 #include <Global.hpp>
@@ -84,7 +83,7 @@ void SearchTableView::showCustomContextMenu()
 				{
 					auto item = dynamic_cast<SearchTableItem *>(_model->itemFromIndex(items[0]));
 					Iridium::Global::clear_and_swap_copy_files(
-					{std::make_shared<RcloneFile>(*item->getFile()->parent())});
+						{std::make_shared<RcloneFile>(*item->getFile()->parent())});
 				});
 			}
 			break;
@@ -99,7 +98,14 @@ void SearchTableView::showCustomContextMenu()
 		for (auto& item: items)
 		{
 			auto item_cast = dynamic_cast<SearchTableItem *>(_model->itemFromIndex(item));
-			files.push_back(item_cast->getFile());
+
+			auto file_not_exist = std::ranges::find_if(files.begin(), files.end(), [item_cast](const RcloneFilePtr& file)
+			{
+				return file.get() == item_cast->getFile().get();
+			}) == files.end();
+
+			if (item_cast and file_not_exist)
+				files.push_back(item_cast->getFile());
 		}
 		Iridium::Global::clear_and_swap_copy_files(files);
 	}
@@ -107,15 +113,15 @@ void SearchTableView::showCustomContextMenu()
 
 void SearchTableView::addFile(const RcloneFilePtr& file) const
 {
-		QList<QStandardItem *> row = {
-						new SearchTableItem(0, file),
-						new SearchTableItem(1, file),
-						new SearchTableItem(2, file),
-						new SearchTableItem(3, file),
-						new SearchTableItem(4, file),
-						new SearchTableItem(5, file)
-				};
-		_model->appendRow(row);
+	QList<QStandardItem *> row = {
+					new SearchTableItem(0, file),
+					new SearchTableItem(1, file),
+					new SearchTableItem(2, file),
+					new SearchTableItem(3, file),
+					new SearchTableItem(4, file),
+					new SearchTableItem(5, file)
+			};
+	_model->appendRow(row);
 }
 
 
@@ -144,13 +150,13 @@ void SearchTableView::searchLocal(const QString& text, const RemoteInfoPtr& remo
 
 						auto parent_info = QFileInfo(it.filePath());
 						auto parent = std::make_shared<RcloneFile>(
-													nullptr,
-													parent_info.path(),
-													parent_info.size(),
-													true,
-													parent_info.lastModified(),
-													remoteInfo
-												);
+							nullptr,
+							parent_info.path(),
+							parent_info.size(),
+							true,
+							parent_info.lastModified(),
+							remoteInfo
+						);
 
 						root_file.add_child_if_not_exist(parent);
 
@@ -187,7 +193,7 @@ void SearchTableView::searchDistant(const option::vector& filters, const RemoteI
 					new parser::file_parser(&_remote_to_root_file[remoteInfo.get()],
 					                        [this](const ire::file& file)
 					                        {
-					                        	// thread safe
+						                        // thread safe
 						                        addFile(std::make_shared<RcloneFile>(file));
 					                        },
 					                        parser::file_parser::lsl)))
@@ -197,8 +203,6 @@ void SearchTableView::searchDistant(const option::vector& filters, const RemoteI
 				_searching++;
 				emit searchStarted();
 			});
-	for (auto &option : filters)
-		std::cout << option << std::endl;
 	_pool.add_process(std::move(process));
 }
 
@@ -216,10 +220,10 @@ void SearchTableView::terminateSearch()
  */
 void SearchTableView::stopAllSearch()
 {
-	for (auto &remote: _remote_to_root_file)
+	for (auto& remote: _remote_to_root_file)
 		remote.second.children().clear();
 	_pool.stop_all_processes_and_clear();
-	for (auto &th: _threads)
+	for (auto& th: _threads)
 		th.interrupt();
 	_threads.clear();
 	_searching = 0;
