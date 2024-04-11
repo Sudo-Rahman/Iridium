@@ -18,7 +18,7 @@ void OneDriveRemoteConfigParamsFrame::addRemote()
 
     using iridium::rclone::entity;
     iridium::rclone::process().config_create().name(_remote_name->text().toStdString())
-            .type(entity::remote::remote_type_to_string(entity::remote::onedrive))
+            .type(ire::remote::remote_type_to_string(ire::remote::onedrive))
             .execute();
 
 }

@@ -16,19 +16,36 @@
 using namespace std;
 using namespace boost;
 using namespace iridium::rclone;
-using iridium::rclone::entity;
+using namespace iridium::rclone::entities;
 
 std::unordered_map<size_t, Tasks> TaskTreeView::_tasks;
+
+void TaskTreeView::cancelTask()
+{
+	auto indexes = QTreeView::selectedIndexes();
+	for (int i = 0; i < indexes.size(); i = i + 10)
+	{
+		auto id = indexes[i].siblingAtColumn(0);
+		auto it = _tasks.find(id.data(Qt::UserRole + 1).toULongLong());
+		if (it not_eq _tasks.end())
+		{
+			if (it->second.rclone->is_running())
+				it->second.rclone->stop();
+			it->second.parent->cancel();
+			for (const auto &child: it->second.children)
+				child.second->cancel();
+		}
+	}
+}
 
 /**
  * @brief TaskTreeView::TaskTreeView
  * @param parent
  */
-TaskTreeView::TaskTreeView(QWidget * parent) : QTreeView(parent)
+TaskTreeView::TaskTreeView(QWidget *parent) : QTreeView(parent)
 {
 	setAlternatingRowColors(true);
 	setUniformRowHeights(true);
-
 
 	_model = new QStandardItemModel(0, 10, this);
 	QTreeView::setModel(_model);
@@ -57,7 +74,7 @@ TaskTreeView::TaskTreeView(QWidget * parent) : QTreeView(parent)
 	{
 		if (QTreeView::selectedIndexes().empty())
 			return;
-		for (const auto& index: QTreeView::selectedIndexes())
+		for (const auto &index: QTreeView::selectedIndexes())
 		{
 			if (index.parent().isValid())
 				return;
@@ -100,20 +117,7 @@ TaskTreeView::TaskTreeView(QWidget * parent) : QTreeView(parent)
 			if (info.exec() == QMessageBox::NRoles)
 				return;
 
-			auto indexes = QTreeView::selectedIndexes();
-			for (int i = 0; i < indexes.size(); i = i + 10)
-			{
-				auto id = indexes[i].siblingAtColumn(0);
-				auto it = _tasks.find(id.data(Qt::UserRole + 1).toULongLong());
-				if (it not_eq _tasks.end())
-				{
-					if (it->second.rclone->is_running())
-						it->second.rclone->stop();
-					it->second.parent->cancel();
-					for (const auto& child: it->second.children)
-						child.second->cancel();
-				}
-			}
+			cancelTask();
 		}
 	});
 }
@@ -124,7 +128,7 @@ TaskTreeView::TaskTreeView(QWidget * parent) : QTreeView(parent)
  * @param dst
  * @param rclone
  */
-void TaskTreeView::addTask(const RcloneFile& src, const RcloneFile& dst, const process_ptr& rclone,
+void TaskTreeView::addTask(const RcloneFile &src, const RcloneFile &dst, const process_ptr &rclone,
                            TaskRowParent::taskType type)
 {
 	auto idParent = boost::hash<std::string>{}(src.absolute_path() + dst.absolute_path() + to_string(type));
@@ -149,7 +153,7 @@ void TaskTreeView::addTask(const RcloneFile& src, const RcloneFile& dst, const p
 	_tasks.insert({idParent, Tasks{std::move(task), rclone, {}}});
 
 	auto parser = irp::json_log_parser::create(
-		new irp::json_log_parser([this, src, dst, type, idParent](const ire::json_log& log)
+		new irp::json_log_parser([this, src, dst, type, idParent](const ire::json_log &log)
 		{
 			IridiumApp::runOnMainThread([=,log = std::move(log)]
 			{
@@ -170,7 +174,7 @@ void TaskTreeView::addTask(const RcloneFile& src, const RcloneFile& dst, const p
 						_tasks[idParent].parent->error(log.message());
 						_tasks[idParent].parent->setMessageToolTip(log.message());
 						if (not _tasks[idParent].children.empty())
-							for (auto& child: _tasks[idParent].children)
+							for (auto &child: _tasks[idParent].children)
 								child.second->error("");
 						return;
 					}
@@ -202,7 +206,7 @@ void TaskTreeView::addTask(const RcloneFile& src, const RcloneFile& dst, const p
 
 				size_t childId;
 				std::vector<size_t> hashList;
-				for (const auto& transfer: log.get_stats()->transferring)
+				for (const auto &transfer: log.get_stats()->transferring)
 				{
 					// hash the name of the file
 					childId = boost::hash<std::string>{}(
@@ -260,7 +264,7 @@ void TaskTreeView::addTask(const RcloneFile& src, const RcloneFile& dst, const p
 			if (exit == 0)
 			{
 				it->second.parent->finished();
-				for (auto& child: it->second.children)
+				for (auto &child: it->second.children)
 					child.second->finished();
 			}
 			else
@@ -273,6 +277,6 @@ void TaskTreeView::addTask(const RcloneFile& src, const RcloneFile& dst, const p
 				it->second.parent->terminate();
 		});
 	});
-	rclone->add_option(option::logging::use_json_log(), option::logging::verbose(), option::logging::stats("0.1"));
+	rclone->add_option(option::logging::use_json_log(), option::logging::verbose());
 	rclone->execute();
 }

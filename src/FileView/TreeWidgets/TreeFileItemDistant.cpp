@@ -10,7 +10,8 @@ TreeFileItemDistant::TreeFileItemDistant(const RcloneFile& file, TreeFileItem * 
 	setText(_file->getName());
 	QStandardItem::setData(_file->getName(), SORT_ROLE);
 	initIcon();
-	if (_file->isDir()) { appendRow(TreeFileItem::decorateList()); }
+	if (_file->isDir())
+	{}
 	else
 		setFlags(flags() & ~Qt::ItemIsDropEnabled);
 }

@@ -41,6 +41,7 @@ GeneralFrame::GeneralFrame(QWidget *parent) : QFrame(parent)
     _reload_time = new QSpinBox(this);
     _reload_time->setRange(1, 60);
     _reload_time->setValue(Settings::getValue<int>(Settings::ReloadTime));
+    box->hide();
 
     boxLayout->addRow(tr("Temps de rafraîchissement automatique du dossier courant : "), _reload_time);
     layout->addWidget(box);

@@ -165,7 +165,7 @@ void RemoteWidget::init()
             else
             {
                 auto rclone = process();
-                rclone.delete_remote(entity::remote(_remote_info->name(),entity::remote::none,""))
+                rclone.delete_remote(ire::remote(_remote_info->name(),ire::remote::none,""))
                 .execute()
                 .on_finish([&rclone,this](int exit)
                 {

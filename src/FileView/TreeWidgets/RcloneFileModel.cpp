@@ -5,8 +5,6 @@
 #include "RcloneFileModel.hpp"
 #include <QVBoxLayout>
 #include <ProgressBar.hpp>
-#include <cmath>
-
 #include "IridiumApp.hpp"
 
 /**
@@ -22,8 +20,6 @@ RcloneFileModel::RcloneFileModel(const RemoteInfoPtr& remoteInfo, QTreeView * Vi
 	setRowCount(0);
 	setSortRole(SORT_ROLE);
 	setHorizontalHeaderLabels({tr("Nom"), tr("Taille"), tr("Date de modification"), tr("Type")});
-
-	connect(this, &QStandardItemModel::sort, this, &RcloneFileModel::sort);
 }
 
 /**

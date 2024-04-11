@@ -33,7 +33,7 @@ void OpenDriveRemoteConfigParamsFrame::addRemote()
 		return;
 	using iridium::rclone::entity;
 	_process->config_create().name(_remote_name->text().toStdString())
-			.type(entity::remote::remote_type_to_string(entity::remote::opendrive))
+			.type(ire::remote::remote_type_to_string(ire::remote::opendrive))
 			.add_param(
 				"username=" + _user->text().toStdString(),
 				"password=" + _password->text().toStdString()

@@ -5,8 +5,7 @@
 #pragma once
 
 #include <QSettings>
-#include <QIcon>
-#include <QTranslator>
+#include <iridium/options.hpp>
 #include <QApplication>
 #include <RcloneFileModelDistant.hpp>
 #include <Remote.h>
@@ -52,6 +51,12 @@ public:
         ReloadTime,
     };
 
+    enum ProcessOptions
+    {
+        Stats,
+        Transfers,
+    };
+
     enum Os
     {
         Windows,
@@ -75,7 +80,12 @@ public:
 
 private:
     static boost::property_tree::ptree _settings;
+
     static const std::map<Node, std::string> _nodes;
+
+    static const std::map<ProcessOptions, std::string> _nodes_options;
+
+    static std::map<ProcessOptions,iro::basic_opt_uptr> _options_process;
 
     static boost::property_tree::ptree _default;
 
@@ -115,6 +125,11 @@ public:
 
     static void loadValues();
 
+    static void setProcessOptions(const ProcessOptions &option, iro::basic_opt_uptr &&value);
+
+    static void setProcessOptions(const ProcessOptions &option, const iro::basic_option &value);
+
+    static iro::basic_option getProcessOptions(const ProcessOptions &option);
 
     /**
      * @brief set the value of a node and save the settings
@@ -149,10 +164,9 @@ public:
      * @return
      */
     template<class Type>
-    inline
     static Type getValue(const Node &node)
     {
-        return _settings.get_child(_nodes.at(node)).BOOST_NESTED_TEMPLATE get_value<Type>();
+        return _settings.get_child(_nodes.at(node)).get_value<Type>();
     }
 
     static void setLanguage(const QLocale::Language &);

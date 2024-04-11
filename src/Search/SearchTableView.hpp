@@ -34,7 +34,7 @@ public :
 
     void searchLocal(const QString &text, const RemoteInfoPtr &remoteInfo);
 
-    void searchDistant(const ir::option::vector &filters, const RemoteInfoPtr &remoteInfo);
+    void searchDistant(ir::option::basic_opt_uptr &&filters, const RemoteInfoPtr &remoteInfo);
 
     void stopAllSearch();
 

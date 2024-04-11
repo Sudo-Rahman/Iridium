@@ -19,6 +19,6 @@ void GoogleDriveRemoteConfigParamsFrame::addRemote()
         return;
     using iridium::rclone::entity;
     _process->config_create().name(_remote_name->text().toStdString())
-            .type(entity::remote::remote_type_to_string(entity::remote::google_drive))
+            .type(ire::remote::remote_type_to_string(ire::remote::google_drive))
             .execute();
 }

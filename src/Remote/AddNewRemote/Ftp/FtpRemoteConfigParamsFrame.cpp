@@ -64,7 +64,7 @@ void FtpRemoteConfigParamsFrame::addRemote()
 		return;
 	using iridium::rclone::entity;
 	_process->config_create().name(_remote_name->text().toStdString())
-			.type(entity::remote::remote_type_to_string(entity::remote::ftp))
+			.type(ire::remote::remote_type_to_string(ire::remote::ftp))
 			.add_param(
 				"host=" + _host->text().toStdString(),
 				"port=" + std::to_string(_port->value()),

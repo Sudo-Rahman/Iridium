@@ -23,12 +23,12 @@ class TaskTreeView : public QTreeView
 
 	QStandardItemModel * _model{};
 
+	void cancelTask();
+
 public:
 	explicit TaskTreeView(QWidget * parent = nullptr);
 
 	void addTask(const RcloneFile& src, const RcloneFile& dst, const ir::process_ptr& rclone,
 	             TaskRowParent::taskType type = TaskRowParent::Unknown);
-
-	void initTask();
 
 };

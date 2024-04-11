@@ -24,6 +24,7 @@ namespace Iridium
         static ir::process_pool process_pool;
         static std::map<RemoteInfoPtr , std::any> remote_model;
 
+
         static void clear_and_swap_copy_files(const std::vector<RcloneFilePtr> &files)
         {
             copy_files.swap(const_cast<std::vector<RcloneFilePtr> &>(files));

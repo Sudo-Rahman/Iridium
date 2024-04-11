@@ -14,6 +14,7 @@ Q_OBJECT
     std::vector<TreeFileItem *> _items_static_load{};
 
     static boost::signals2::signal<void()> _load_change;
+    static boost::signals2::signal<void(uint8_t)> _simultaneous_processes_change;
 
     bool _stop{false};
 
@@ -27,6 +28,8 @@ public:
     }
 
     static void setMaxDepth(uint8_t maxDepth) { Iridium::Global::max_depth = maxDepth; }
+
+    static void setSimultaneousProcesses(uint8_t maxProcess) { _simultaneous_processes_change(maxProcess); }
 
     static Iridium::Load loadType() { return Iridium::Global::load_type; }
 
@@ -48,7 +51,7 @@ protected:
     void reload(TreeFileItem *item) override;
 
 private:
-    void connectProcess(ir::process *process, TreeFileItem *tree_item, bool progress = true);
+    void connectProcess(ir::process *process, TreeFileItem *tree_item);
 
     void addItemDynamic(const RcloneFilePtr &file, TreeFileItem *parent);
 

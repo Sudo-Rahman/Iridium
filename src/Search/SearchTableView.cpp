@@ -184,10 +184,10 @@ void SearchTableView::searchLocal(const QString& text, const RemoteInfoPtr& remo
  * @param filters
  * @param remoteInfo
  */
-void SearchTableView::searchDistant(const option::vector& filters, const RemoteInfoPtr& remoteInfo)
+void SearchTableView::searchDistant(option::basic_opt_uptr&& filters, const RemoteInfoPtr& remoteInfo)
 {
 	auto process = std::make_unique<ir::process>();
-	process->add_option(filters);
+	process->add_option(std::move(filters));
 	process->lsl(_remote_to_root_file[remoteInfo.get()]).every_line_parser(
 				parser::file_parser::create(
 					new parser::file_parser(&_remote_to_root_file[remoteInfo.get()],

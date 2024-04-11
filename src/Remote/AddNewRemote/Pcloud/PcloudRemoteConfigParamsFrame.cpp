@@ -17,6 +17,6 @@ void PcloudRemoteConfigParamsFrame::addRemote()
 		return;
 	using iridium::rclone::entity;
 	_process->config_create().name(_remote_name->text().toStdString())
-			.type(entity::remote::remote_type_to_string(entity::remote::pcloud))
+			.type(ire::remote::remote_type_to_string(ire::remote::pcloud))
 			.execute();
 }

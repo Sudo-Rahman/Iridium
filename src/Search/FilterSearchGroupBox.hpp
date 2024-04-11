@@ -14,9 +14,6 @@ Q_OBJECT
     QPushButton *_add_include, *_add_exclude{}, *m_remove{}, *m_up{}, *m_down{}, *m_edit{};
     QVBoxLayout *_layout{};
 
-    ir::option::filter *_filter{};
-
-
     enum FilterType
     {
         Include,
@@ -28,12 +25,7 @@ Q_OBJECT
 public:
     explicit FilterSearchGroupBox(QWidget *parent = nullptr);
 
-    ~FilterSearchGroupBox() override
-    {
-        delete _filter;
-    };
-
-    [[nodiscard]] ir::option::vector getFilters();
+    [[nodiscard]] ir::option::basic_opt_uptr getFilters();
 
 private :
     void connectSignals();

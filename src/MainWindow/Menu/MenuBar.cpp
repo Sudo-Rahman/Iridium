@@ -73,7 +73,7 @@ void MenuBar::connectSignals()
 				.version()
 				.on_finish_parser(iridium::rclone::parser::version_parser::create(
 					new iridium::rclone::parser::version_parser(
-						[&](const iridium::rclone::entity::version& version)
+						[&](const ire::version& version)
 						{
 							IridiumApp::runOnMainThread([&rcloneVersion,version = std::move(version)]
 							{

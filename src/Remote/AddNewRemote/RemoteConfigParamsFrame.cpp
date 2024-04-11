@@ -123,7 +123,7 @@ void RemoteConfigParamsFrame::addRemote()
 			});
 
 	std::vector<RemoteInfoPtr> rclone_liste_remote;
-	iridium::rclone::process().list_remotes([this](const std::vector<iridium::rclone::remote_ptr> & remotes)
+	iridium::rclone::process().list_remotes([this](const std::vector<ire::remote_ptr> & remotes)
 	{
 		_remotes.clear();
 		for (const auto & remote : remotes)

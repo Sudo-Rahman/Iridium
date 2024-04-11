@@ -12,7 +12,7 @@ using namespace ir;
 
 class FilterItem : public QStandardItem
 {
-	std::unique_ptr<option::filter> _filter{};
+	std::string _filter{};
 	FilterSearchGroupBox::FilterType _type;
 
 public:
@@ -35,14 +35,12 @@ public:
 	{
 		QStandardItem::setData(value, role);
 		if (_type == FilterSearchGroupBox::FilterType::Include)
-			_filter = std::make_unique<option::filter>(
-				option::filter::filter_file("+ " + value.toString().toStdString()));
+			_filter = std::string("+ " + value.toString().toStdString());
 		else
-			_filter = std::make_unique<option::filter>(
-				option::filter::filter_file("- " + value.toString().toStdString()));
+			_filter = std::string("- " + value.toString().toStdString());
 	}
 
-	[[nodiscard]] option::basic_option getFilter() const { return *_filter; }
+	[[nodiscard]] std::string getFilter() const { return _filter; }
 };
 
 
@@ -204,15 +202,15 @@ void FilterSearchGroupBox::connectSignals()
  * @brief get filters from listview
  * @return filters
  */
-option::vector FilterSearchGroupBox::getFilters()
+option::basic_opt_uptr FilterSearchGroupBox::getFilters()
 {
-	option::vector filters;
+	auto filters = option::filter::filter_file::uptr();
 	auto model = dynamic_cast<QStandardItemModel *>(m_listView->model());
 	for (int i = 0; i < model->rowCount(); ++i)
 	{
 		auto item = dynamic_cast<FilterItem *>(model->item(i));
 		if (item)
-			filters.push_back(item->getFilter());
+			filters->add_filter(item->getFilter());
 	}
 	return filters;
 }
