@@ -96,8 +96,6 @@ void ListRemoteWidget::getAllRemote()
 {
 	//     creation des remoteWidget
 	const auto remotes = &Iridium::Global::remotes;
-	if (remotes->empty())
-		return;
 
 	// add new remote widget if not exist in _remotes but exist in remotes
 	for (const auto &remote: *remotes)

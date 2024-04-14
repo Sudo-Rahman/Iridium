@@ -137,7 +137,7 @@ void Settings::refreshRemotesList()
 	auto remotes = Global::remotes;
 
 	// remove remotes in remotes but not in new_remotes
-	for (const auto &remote: Global::remotes)
+	for (const auto &remote: *(&Global::remotes))
 	{
 		if (std::ranges::none_of(new_remotes.begin(), new_remotes.end(), [&remote](const RemoteInfoPtr &r)
 		{
@@ -165,11 +165,11 @@ void Settings::refreshRemotesList()
 void Settings::addLocalRemote(const RemoteInfo &remoteInfo)
 {
 	pt::ptree remote, ptree_path;
-	ptree_path.put("", remoteInfo.full_path());
+	ptree_path.put("", remoteInfo.name());
 	remote.add_child("path", ptree_path);
 
 	pt::ptree array = _settings.get_child(_nodes.at(Remotes));
-	array.push_back(std::make_pair(remoteInfo.name(), remote));
+	array.push_back(std::make_pair(remoteInfo.full_path(), remote));
 	_settings.put_child(_nodes.at(Remotes), array);
 
 	saveSettings();
@@ -299,7 +299,7 @@ void Settings::initSettings()
 	_settings.put(_nodes.at(ReloadTime), 10);
 
 	pt::ptree remote, ptree_path;
-	RemoteInfo remoteInfo = {"/", remote::none, "Local"};
+	RemoteInfo remoteInfo = {"Local", remote::none, "/"};
 	ptree_path.put("", remoteInfo.full_path());
 	remote.add_child("path", ptree_path);
 

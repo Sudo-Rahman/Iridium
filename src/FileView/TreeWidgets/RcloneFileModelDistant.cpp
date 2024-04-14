@@ -126,45 +126,42 @@ void RcloneFileModelDistant::reload(TreeFileItem *parent)
 	auto *tree_item = parent->siblingAtFirstColumn();
 	if (tree_item == nullptr)
 		return;
-	if (tree_item->state() == TreeFileItem::Loaded)
-	{
-		tree_item->setState(TreeFileItem::NotLoaded);
-		auto rclone = ir::process_uptr(new ir::process());
-		auto files = filesInFolder(tree_item);
-		// create pointer to files
-		auto *files_ptr = new QList<RcloneFilePtr>();
-		for (const auto &file: files)
-			files_ptr->append(file);
+	tree_item->setState(TreeFileItem::NotLoaded);
+	auto rclone = ir::process_uptr(new ir::process());
+	auto files = filesInFolder(tree_item);
+	// create pointer to files
+	auto *files_ptr = new QList<RcloneFilePtr>();
+	for (const auto &file: files)
+		files_ptr->append(file);
 
-		auto *items = new std::vector<QList<QStandardItem *>>();
+	auto *items = new std::vector<QList<QStandardItem *>>();
 
-		auto parser = ir::parser::file_parser::create(
-			new ir::parser::file_parser(tree_item->getFile().get(), [items,tree_item,files_ptr](const ire::file &f)
-			{
-				auto *item = new TreeFileItemDistant(RcloneFile(f));
-				files_ptr->removeIf([item](const RcloneFilePtr &file) { return *(item->getFile()) == *file; });
-				if (not fileInFolder(item->getFile(), tree_item))
-					items->push_back(getItemList(item));
-				else
-					delete item;
-			}));
-
-		auto on_finish = [items, files_ptr, tree_item, this](auto)
+	auto parser = ir::parser::file_parser::create(
+		new ir::parser::file_parser(tree_item->getFile().get(), [items,tree_item,files_ptr](const ire::file &f)
 		{
-			for (const auto &file: *files_ptr)
-				tree_item->removeRow(getTreeFileItem(file, tree_item)->row());
-			for (const auto &item: *items)
-				tree_item->appendRow(item);
-			items->clear();
-			delete items;
-			delete files_ptr;
-			tree_item->setState(TreeFileItem::Loaded);
-		};
-		connectProcess(rclone.get(), tree_item);
-		rclone->every_line_parser(std::move(parser)).on_finish(std::move(on_finish));
-		rclone->lsjson(*tree_item->getFile());
-		_process_pool.add_process(std::move(rclone));
-	}
+			auto *item = new TreeFileItemDistant(RcloneFile(f));
+			files_ptr->removeIf([item](const RcloneFilePtr &file) { return *(item->getFile()) == *file; });
+			if (not fileInFolder(item->getFile(), tree_item))
+				items->push_back(getItemList(item));
+			else
+				delete item;
+		}));
+
+	auto on_finish = [items, files_ptr, tree_item, this](auto)
+	{
+		for (const auto &file: *files_ptr)
+			tree_item->removeRow(getTreeFileItem(file, tree_item)->row());
+		for (const auto &item: *items)
+			tree_item->appendRow(item);
+		items->clear();
+		delete items;
+		delete files_ptr;
+		tree_item->setState(TreeFileItem::Loaded);
+	};
+	connectProcess(rclone.get(), tree_item);
+	rclone->every_line_parser(std::move(parser)).on_finish(std::move(on_finish));
+	rclone->lsjson(*tree_item->getFile());
+	_process_pool.add_process(std::move(rclone));
 }
 
 /**

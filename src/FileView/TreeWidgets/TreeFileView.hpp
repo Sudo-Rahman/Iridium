@@ -13,6 +13,10 @@
 
 class TreeFileView : public QTreeView
 {
+protected:
+	void dragEnterEvent(QDragEnterEvent *event) override;
+
+private:
 	Q_OBJECT
 
 	RcloneFileModel * _model{};
@@ -24,25 +28,21 @@ class TreeFileView : public QTreeView
 
 	bool _dragable{};
 	bool _drag_border{true};
+	bool _drag_sys_files{false};
+	std::vector<RcloneFilePtr> _tmp_files{};
+	TreeFileItem *_drop_destination{};
 
 	std::map<std::string, bool> _operations{};
 
 	RoundedLineEdit * _search_line_edit{};
 
-	boost::thread _reload_thread{};
-
-	std::pair<uint8_t, Qt::SortOrder> _sort_order{0, Qt::AscendingOrder};
 
 public:
 	explicit TreeFileView(const RemoteInfoPtr& remoteInfo, QWidget * parent = nullptr);
 
 	explicit TreeFileView(QWidget * parent = nullptr);
 
-	~TreeFileView() override
-	{
-		_reload_thread.interrupt();
-		_reload_thread.join();
-	}
+	~TreeFileView() override = default;
 
 	void back();
 
@@ -66,8 +66,6 @@ protected:
 
 public:
 	void preview(const TreeFileItem *);
-
-	std::pair<uint8_t, Qt::SortOrder> sortOrder() const{ return _sort_order; }
 
 protected:
 	void resizeEvent(QResizeEvent * event) override;
