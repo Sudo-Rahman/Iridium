@@ -2,20 +2,18 @@
 // Created by Rahman on 11/01/2023.
 //
 
-#ifndef IRIDIUM_REMOTEWIDGETPARAM_HPP
-#define IRIDIUM_REMOTEWIDGETPARAM_HPP
+#pragma once
 
 #include <QGroupBox>
-#include <Remote.h>
+#include <iridium/entities/remote.hpp>
 #include "RemoteConfigParamsFrame.hpp"
-#include <Rclone.hpp>
 
 class RemoteWidgetParam : public QGroupBox
 {
 Q_OBJECT
 
 private:
-    RemoteType _type;
+    ire::remote::remote_type _type;
     QIcon _icon{};
     bool _hover{}, _click{}, _selected{};
     RemoteConfigParamsFrame *_paramsFrame{};
@@ -25,7 +23,7 @@ private:
     void addBlur();
 
 public:
-    explicit RemoteWidgetParam(RemoteType type, QWidget *parent = nullptr);
+    explicit RemoteWidgetParam(ire::remote::remote_type type, QWidget *parent = nullptr);
 
     [[nodiscard]] RemoteConfigParamsFrame *getParamsFrame() const;
 
@@ -54,6 +52,3 @@ signals:
 
     void newRemoteAdded();
 };
-
-
-#endif //IRIDIUM_REMOTEWIDGETPARAM_HPP

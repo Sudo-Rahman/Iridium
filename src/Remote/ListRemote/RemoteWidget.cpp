@@ -7,20 +7,14 @@
 
 #include <QPainter>
 #include <QEvent>
-#include <QPropertyAnimation>
 #include <utility>
+#include <IridiumApp.hpp>
 #include <QGraphicsDropShadowEffect>
 #include <QMessageBox>
-#include <Rclone.hpp>
+#include <iridium/process/process.hpp>
 
-RemoteWidget::RemoteWidget(const RemoteInfo &remoteInfo, bool deletable, QWidget *parent) : QGroupBox(parent),
-                                                                                            _remote_info(std::move(
-                                                                                                    std::make_shared<RemoteInfo>(
-                                                                                                            remoteInfo))),
-                                                                                            _deletable(deletable)
-{
-    init();
-}
+using namespace iridium::rclone;
+
 
 void RemoteWidget::paintEvent(QPaintEvent *event)
 {
@@ -91,7 +85,7 @@ void RemoteWidget::addBlur()
     this->setGraphicsEffect(effect);
 }
 
-RemoteWidget::RemoteWidget(const RemoteInfoPtr &remoteInfo, bool deletable, QWidget *parent)
+RemoteWidget::RemoteWidget(const RemoteInfoPtr &remoteInfo, bool deletable, QWidget *parent) : QGroupBox(parent)
 {
     _remote_info = remoteInfo;
     this->_deletable = deletable;
@@ -112,7 +106,7 @@ void RemoteWidget::init()
     {
         icon = Settings::hardDriveIcon();
     } else
-        icon = QIcon(_remote_info->icon.c_str());
+        icon = QIcon(_remote_info->icon().c_str());
     labelIcon->setPixmap(icon.pixmap(32, 32, QIcon::Normal, QIcon::On));
 
 
@@ -159,9 +153,9 @@ void RemoteWidget::init()
             return;
         }
         auto msgbox = QMessageBox(QMessageBox::Question, tr("Suppression"),
-                                  tr("Êtes-vous sûr de vouloir supprimer ce remote ?"));
+                                  tr("Êtes-vous sûr de vouloir supprimer ce remote ?"),{},this);
         auto yes = msgbox.addButton(tr("Oui"), QMessageBox::YesRole);
-        auto no = msgbox.addButton(tr("Non"), QMessageBox::NoRole);
+        msgbox.addButton(tr("Non"), QMessageBox::NoRole);
         msgbox.exec();
 
         if (msgbox.clickedButton() == yes)
@@ -170,18 +164,23 @@ void RemoteWidget::init()
                 Settings::deleteRemote(_remote_info);
             else
             {
-                auto rclone = Rclone::create_unique();
-                 rclone->deleteRemote(_remote_info->name());
-                 rclone->waitForFinished();
-                if (rclone->exitCode() != 0)
+                auto rclone = process();
+                rclone.delete_remote(ire::remote(_remote_info->name(),ire::remote::none,""))
+                .execute()
+                .on_finish([&rclone,this](int exit)
                 {
-                    auto msgb = QMessageBox(QMessageBox::Critical, tr("Suppression"),
-                                            tr("Une erreur est survenue lors de la suppression du remote"),
-                                            QMessageBox::Ok, this);
-                    msgb.setDetailedText(QString::fromStdString(rclone->readAll().back()));
-                    msgb.exec();
-                    return;
-                }
+                    if (exit not_eq 0)
+                        IridiumApp::runOnMainThread([exit,this,&rclone]
+                        {
+                            auto msgb = QMessageBox(QMessageBox::Critical, tr("Suppression"),
+                                                    tr("Une erreur est survenue lors de la suppression du remote"),
+                                                    QMessageBox::Ok, this);
+                            if (not rclone.get_error().empty())
+                                msgb.setDetailedText(QString::fromStdString(rclone.get_error().front()));
+                            msgb.exec();
+                        });
+                })
+                .wait_for_finish();
             }
             emit deleted(this);
         }

@@ -2,12 +2,9 @@
 // Created by Rahman on 11/01/2023.
 //
 
-#ifndef IRIDIUM_ADDNEWREMOTEDIALOG_HPP
-#define IRIDIUM_ADDNEWREMOTEDIALOG_HPP
+#pragma once
 
 #include <QDialog>
-#include <QLayout>
-#include <Rclone.hpp>
 #include "RemoteConfigParamsFrame.hpp"
 
 
@@ -29,6 +26,3 @@ signals:
     void newRemoteAdded();
 
 };
-
-
-#endif //IRIDIUM_ADDNEWREMOTEDIALOG_HPP

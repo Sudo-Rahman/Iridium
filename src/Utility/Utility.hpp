@@ -22,6 +22,8 @@ namespace Iridium
     {
 
     public:
+        [[nodiscard]] static std::string numberToString(int64_t num, int space = 3);
+
         [[nodiscard]] static std::string numberToString(uint64_t num, int space = 3);
 
         [[nodiscard]] static std::string numberToString(double64_t num, int space = 3);
@@ -33,20 +35,6 @@ namespace Iridium
         static bool isPreviewable(const RcloneFile &file);
 
         static bool isPreviewable(const QList<RcloneFilePtr> &files);
-
-        template<class OBJ>
-        [[nodiscard]] static std::string addressObject(const OBJ &obj)
-        {
-            std::stringstream ss;
-            ss << &obj;
-            return ss.str();
-        }
-
-        template<class OBJ>
-        [[nodiscard]] static std::string addressObject(const OBJ *obj)
-        {
-            return addressObject(*obj);
-        }
 
     };
 

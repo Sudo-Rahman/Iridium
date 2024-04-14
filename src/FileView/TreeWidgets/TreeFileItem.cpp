@@ -7,26 +7,25 @@
 #include <QMimeDatabase>
 #include <QPainter>
 
+#include "Utility/Utility.hpp"
+
 
 const std::shared_ptr<RcloneFile> &TreeFileItem::getFile() const
 {
     return _file;
 }
 
-TreeFileItem::TreeFileItem(const QString &path, const RemoteInfoPtr &remoteInfo) : QStandardItem()
+TreeFileItem::TreeFileItem(const RcloneFile &file)
 {
-    TreeFileItem::_file = std::make_shared<RcloneFile>(
-            path,
-            remoteInfo
-    );
-    setText(path);
-    QStandardItem::setData(path, SORT_ROLE);
+    _file = std::make_shared<RcloneFile>(file);
+    setText(file.path().c_str());
+    QStandardItem::setData(file.path().c_str(), SORT_ROLE);
     setFlags(flags() & ~Qt::ItemIsDropEnabled);
 }
 
 TreeFileItem::TreeFileItem(const int &column, const std::shared_ptr<RcloneFile> &file)
 {
-    TreeFileItem::_file = file;
+    _file = file;
     switch (column)
     {
         case 0:
@@ -35,7 +34,10 @@ TreeFileItem::TreeFileItem(const int &column, const std::shared_ptr<RcloneFile> 
             initIcon();
             break;
         case 1:
-            setText(file->getSizeString());
+            if(not file->is_dir())
+            {
+                setText(Iridium::Utility::sizeToString(file->size()).c_str());
+            }
             QStandardItem::setData((qulonglong) file->getSize(), SORT_ROLE);
             break;
         case 2:

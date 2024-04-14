@@ -1,12 +1,8 @@
-//
-// Created by sr-71 on 07/05/2023.
-//
-
-#ifndef IRIDIUM_GLOBAL_HPP
-#define IRIDIUM_GLOBAL_HPP
+#pragma once
 
 #include <any>
 #include <RcloneFile.hpp>
+#include <iridium/process.hpp>
 
 namespace Iridium
 {
@@ -25,14 +21,15 @@ namespace Iridium
         static Load load_type;
         static uint8_t max_depth;
         static uint8_t reload_time;
+        static ir::process_pool process_pool;
         static std::map<RemoteInfoPtr , std::any> remote_model;
+
 
         static void clear_and_swap_copy_files(const std::vector<RcloneFilePtr> &files)
         {
             copy_files.swap(const_cast<std::vector<RcloneFilePtr> &>(files));
         }
+
+        static void add_process(ir::process_uptr &process);
     };
 };
-
-
-#endif //IRIDIUM_GLOBAL_HPP

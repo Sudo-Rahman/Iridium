@@ -1,94 +1,55 @@
 //
-// Created by Rahman on 12/04/2023.
+// Created by sr-71 on 31/03/2024.
 //
 
-#ifndef IRIDIUM_TASKROW_HPP
-#define IRIDIUM_TASKROW_HPP
+#pragma once
 
-#include <QStandardItem>
-#include <QList>
+
+#include <iridium/entities.hpp>
 #include <ProgressBar.hpp>
+#include <boost/variant2/variant.hpp>
 #include <QTimer>
-#include <boost/json.hpp>
-#include <Rclone.hpp>
 
 class TaskRow : public QList<QStandardItem *>
 {
-    ProgressBar *_progressBar{};
-
-    QTimer _elapsed_time{};
-    uint64_t _elapsed_time_count{};
-
-    QString _src{}, _dest{};
-
-    uint64_t _size{};
-
-    boost::json::object _data{};
-
-    std::vector<double> _avg{};
-
 public:
+	enum State
+	{
+		Normal,
+		Finished,
+		Error,
+		Cancelled
+	};
 
-    enum State
-    {
-        Normal,
-        Finished,
-        Error,
-        Cancelled
-    };
+	virtual ~TaskRow() = default;
 
-    enum Type
-    {
-        Parent,
-        Child
-    };
+	[[nodiscard]] ProgressBar* progressBar() const;
 
-private:
-    State _state{};
+	[[nodiscard]] QModelIndex progressBarIndex() const;
 
-    Type _type{};
+	virtual void updateData(const boost::variant2::variant<ire::json_log, ire::json_log::stats::transfer>&) = 0;
 
-    void init();
+	[[nodiscard]] State state() const;
 
-    void normal();
+	void setMessageToolTip(const std::string& message) const;
 
-    void finished();
+	virtual void finished() = 0;
 
-    void error();
+	virtual void error(const std::string &message);
 
-    void setSpeed();
+	virtual void cancel();
 
-    void updateDataParent();
+	virtual void terminate();
 
-    void updateDataChild();
+	virtual void connectTimer();
 
-public:
+	virtual  void init();
 
-    explicit TaskRow(const QString &src, const QString &dest, const boost::json::object &,
-                     const Rclone::TaskType &taskType = Rclone::Unknown, const State &state = Normal,
-                     const Type &type = Child);
+protected:
+	ProgressBar * _progressBar{};
 
-    [[nodiscard]] ProgressBar *progressBar() { return _progressBar; }
+	QTimer _elapsed_time{};
+	uint64_t _elapsed_time_count{};
+	State _state{Normal};
 
-    [[nodiscard]] QModelIndex progressBarIndex() const { return this->at(4)->index(); };
-
-    void updateData(const boost::json::object &);
-
-    [[nodiscard]] const State &state() const { return _state; }
-
-    void setMessageToolTip(const std::string &message)
-    {
-        at(5)->setToolTip(message.c_str());
-    }
-
-    void setState(const State &state);
-
-    void cancel();
-
-    void terminate();
 };
-
-typedef std::shared_ptr<TaskRow> TaskRowPtr;
-
-
-#endif //IRIDIUM_TASKROW_HPP

@@ -6,7 +6,6 @@
 #define IRIDIUM_TREEFILEITEM_HPP
 
 #include <QStandardItem>
-#include <QJsonObject>
 #include <RcloneFile.hpp>
 
 #define SORT_ROLE (Qt::UserRole + 1)
@@ -28,9 +27,9 @@ protected:
 public:
     explicit TreeFileItem();
 
-    explicit TreeFileItem(const QString &path, const RemoteInfoPtr &remoteInfo);
+    explicit TreeFileItem(const RcloneFile &file);
 
-    explicit TreeFileItem(const int &column, const std::shared_ptr<RcloneFile> &file);
+    explicit TreeFileItem(const int &column, const RcloneFilePtr &file);
 
     [[nodiscard]] const std::shared_ptr<RcloneFile> &getFile() const;
 

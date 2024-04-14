@@ -15,8 +15,12 @@ void OneDriveRemoteConfigParamsFrame::addRemote()
     RemoteConfigParamsFrame::addRemote();
     if (not checkFields())
         return;
-    _rclone->config(RemoteType::OneDrive, _remote_name->text().toStdString());
-    _rclone->waitForStarted();
+
+    using iridium::rclone::entity;
+    iridium::rclone::process().config_create().name(_remote_name->text().toStdString())
+            .type(ire::remote::remote_type_to_string(ire::remote::onedrive))
+            .execute();
+
 }
 
 

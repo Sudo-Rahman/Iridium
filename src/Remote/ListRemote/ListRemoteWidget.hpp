@@ -2,14 +2,10 @@
 // Created by Rahman on 29/03/2023.
 //
 
-#ifndef IRIDIUM_LISTREMOTEWIDGET_HPP
-#define IRIDIUM_LISTREMOTEWIDGET_HPP
+#pragma once
 
 #include <QScrollArea>
 #include <QLayout>
-#include <QLabel>
-#include <QLineEdit>
-#include <QPushButton>
 #include <QList>
 #include <QEvent>
 
@@ -17,7 +13,6 @@
 #include <Remote.h>
 #include <RoundedButton.hpp>
 #include <RoundedLineEdit.hpp>
-#include <Rclone.hpp>
 #include <boost/asio/io_service.hpp>
 
 struct remotes_selected
@@ -53,8 +48,6 @@ private:
 
     RoundedLineEdit *_recherche{};
     RoundedButton *_add{};
-
-    RclonePtr _rclone{};
 
     QList<RemoteWidget *> _remotes{};
 
@@ -102,5 +95,3 @@ class RefreshRemoteEvent : public QEvent
 public:
     static const QEvent::Type refreshRemoteType = static_cast<QEvent::Type>(300);
 };
-
-#endif //IRIDIUM_LISTREMOTEWIDGET_HPP

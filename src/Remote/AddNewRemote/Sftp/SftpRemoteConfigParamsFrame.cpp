@@ -14,10 +14,16 @@ void SftpRemoteConfigParamsFrame::addRemote()
     RemoteConfigParamsFrame::addRemote();
     if (not checkFields())
         return;
-    _rclone->config(RemoteType::Sftp, _remote_name->text().toStdString(),
-                    {"host=" + _host->text().toStdString(), "port=" + _port->text().toStdString(),
-                     "user=" + _user->text().toStdString(), "pass=" + _password->text().toStdString()});
-    _rclone->waitForFinished();
+    using iridium::rclone::entity;
+    _process->config_create().name(_remote_name->text().toStdString())
+            .type(ire::remote::remote_type_to_string(ire::remote::sftp))
+            .add_param(
+                    "host=" + _host->text().toStdString(),
+                    "port=" + std::to_string(_port->value()),
+                    "user=" + _user->text().toStdString(),
+                    "pass=" + _password->text().toStdString()
+            )
+            .execute();
 }
 
 void SftpRemoteConfigParamsFrame::createUi()

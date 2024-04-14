@@ -2,8 +2,7 @@
 // Created by rahman on 13/01/23.
 //
 
-#ifndef IRIDIUM_REMOTECONFIGPARAMSFRAME_HPP
-#define IRIDIUM_REMOTECONFIGPARAMSFRAME_HPP
+#pragma once
 
 #include <QFrame>
 #include <QPushButton>
@@ -12,9 +11,12 @@
 #include <QLabel>
 #include <QSpinBox>
 #include <QComboBox>
+#include <iridium/process/process.hpp>
+#include <iridium/process/config_create.hpp>
 
-#include <Rclone.hpp>
 #include <RoundedLineEdit.hpp>
+
+#include "Remote.h"
 
 class RemoteConfigParamsFrame : public QFrame
 {
@@ -26,7 +28,7 @@ protected:
     QVBoxLayout *_layout{};
     QFormLayout *_form_layout{};
     RoundedLineEdit *_remote_name{};
-    RcloneUniquePtr _rclone{};
+    std::unique_ptr<iridium::rclone::process> _process{};
     std::vector<RemoteInfoPtr> _remotes{};
 
 public:
@@ -51,6 +53,3 @@ signals:
     void remoteAdded();
 
 };
-
-
-#endif //IRIDIUM_REMOTECONFIGPARAMSFRAME_HPP

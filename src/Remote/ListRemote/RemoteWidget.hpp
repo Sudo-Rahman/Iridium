@@ -2,8 +2,7 @@
 // Created by Rahman on 29/03/2023.
 //
 
-#ifndef IRIDIUM_REMOTEWIDGET_HPP
-#define IRIDIUM_REMOTEWIDGET_HPP
+#pragma once
 
 #include <QGroupBox>
 #include <QGridLayout>
@@ -37,10 +36,9 @@ protected:
 
     Selection _selection = None;
 
-protected:
     void paintEvent(QPaintEvent *event) override;
 
-    virtual bool event(QEvent *event) override;
+    bool event(QEvent *event) override;
 
 private:
     void init();
@@ -48,8 +46,6 @@ private:
     void addBlur();
 
 public:
-
-    explicit RemoteWidget(const RemoteInfo &remoteInfo, bool deletable = true, QWidget *parent = nullptr);
 
     explicit RemoteWidget(const RemoteInfoPtr &remoteInfo, bool deletable = true, QWidget *parent = nullptr);
 
@@ -65,7 +61,3 @@ signals:
 
     void deleted(RemoteWidget *);
 };
-
-
-#endif //IRIDIUM_REMOTEWIDGET_HPP
-

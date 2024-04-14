@@ -131,7 +131,7 @@ void ProgressBar::drawCircular(QPainter &painter)
             return;
         // draw text percentage
         painter.setPen(QColor(255, 255, 255, 255));
-        painter.drawText(rect(), Qt::AlignCenter, QString::number((_value * 100) / _max_value) + "%");
+        painter.drawText(rect(), Qt::AlignCenter, QString::number(uint8_t((_value * 100) / _max_value)) + "%");
 
     }
 
@@ -222,7 +222,7 @@ void ProgressBar::drawLinear(QPainter &painter)
             return;
 
         painter.setPen(QWidget::palette().color(QPalette::Text));
-        auto text = QString::number((_value * 100) / _max_value) + "%";
+        auto text = QString::number(uint8_t((_value * 100) / _max_value)) + "%";
         QRectF textRect = painter.boundingRect(rect(), Qt::AlignCenter, text);
         painter.drawText(textRect, Qt::AlignCenter, text);
     }

@@ -42,11 +42,11 @@ ItemMenu::ItemMenu(QWidget *parent) : QMenu(parent)
         emit tree();
     });
 
-    _sync = addAction(tr("Synchroniser"), this, [this]
-    {
-        _action = Sync;
-        emit sync();
-    });
+    // _sync = addAction(tr("Synchroniser"), this, [this]
+    // {
+    //     _action = Sync;
+    //     emit sync();
+    // });
     _preview = addAction(tr("Aperçu"), this, [this]
     {
         _action = Preview;
@@ -60,7 +60,7 @@ ItemMenu::ItemMenu(QWidget *parent) : QMenu(parent)
     _delete->setIcon(QIcon(":/ressources/delete.png"));
     _new_folder->setIcon(QIcon(":/ressources/new-folder.png"));
     _tree->setIcon(QIcon(":/ressources/tree.png"));
-    _sync->setIcon(QIcon(":/ressources/sync-cloud.png"));
+    // _sync->setIcon(QIcon(":/ressources/sync-cloud.png"));
     _preview->setIcon(QIcon(":/ressources/preview.png"));
 
     // show shortcuts
@@ -102,7 +102,7 @@ void ItemMenu::setActionEnabled(const ItemMenu::Action &action, bool enabled)
             _tree->setEnabled(enabled);
             break;
         case Sync:
-            _sync->setEnabled(enabled);
+            // _sync->setEnabled(enabled);
             break;
         case Preview:
             _preview->setEnabled(enabled);

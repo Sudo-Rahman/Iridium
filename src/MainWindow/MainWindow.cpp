@@ -10,9 +10,12 @@
 #include <SearchWidget.hpp>
 #include <ExplorerWidget.hpp>
 #include <SyncWidget.hpp>
+#include <IridiumApp.hpp>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
+    Settings::refreshRemotesList();
+
     setWindowTitle("Iridium");
     setContentsMargins(0, 0, 0, 0);
     resize(Settings::getValue<int>(Settings::Width), Settings::getValue<int>(Settings::Height));
@@ -36,29 +39,28 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
     connectSignals();
 
-    Settings::refreshRemotesList();
 }
 
 void MainWindow::connectSignals()
 {
 
-    Rclone::check_rclone.connect(
-            [this](bool exist)
-            {
-                if (exist and _check_rclone)
-                {
-                    _statusBar->removeWidget(_statusBar->findChild<QLabel *>("rclone"));
-                    _check_rclone = false;
-                    return;
-                }
-                if (_check_rclone)
-                    return;
-                auto label = new QLabel(tr("Rclone n’a pas été trouvé !!"), this);
-                label->setObjectName("rclone");
-                label->setStyleSheet("color: red");
-                _statusBar->addWidget(label);
-                _check_rclone = true;
-            });
+    // Rclone::check_rclone.connect(
+    //         [this](bool exist)
+    //         {
+    //             if (exist and _check_rclone)
+    //             {
+    //                 _statusBar->removeWidget(_statusBar->findChild<QLabel *>("rclone"));
+    //                 _check_rclone = false;
+    //                 return;
+    //             }
+    //             if (_check_rclone)
+    //                 return;
+    //             auto label = new QLabel(tr("Rclone n’a pas été trouvé !!"), this);
+    //             label->setObjectName("rclone");
+    //             label->setStyleSheet("color: red");
+    //             _statusBar->addWidget(label);
+    //             _check_rclone = true;
+    //         });
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -66,7 +68,6 @@ void MainWindow::closeEvent(QCloseEvent *event)
     Settings::setValue(Settings::Width, width(), Settings::Height, height());
     Settings::saveSettings();
     QMainWindow::closeEvent(event);
-    RcloneManager::stopAll();
 }
 
 

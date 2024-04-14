@@ -36,7 +36,9 @@ void RcloneFileModelLocal::addItem(const RcloneFilePtr &file, TreeFileItem *pare
                     for (const QFileInfo &info: list_file)
                     {
                         boost::this_thread::interruption_point();
-                        auto *item = new TreeFileItemLocal(info.filePath(), _remote_info);
+                        auto *item = new TreeFileItemLocal(RcloneFile(file.get(), info.fileName(),
+                                                                     info.size(), info.isDir(),
+                                                                     info.lastModified(), _remote_info));
                         files.removeIf([item](const RcloneFilePtr &file) { return *(item->getFile()) == *file; });
                         if (not fileInFolder(item->getFile(), tree_item))
                             tree_item->appendRow(getItemList(item));
@@ -53,17 +55,18 @@ void RcloneFileModelLocal::addItem(const RcloneFilePtr &file, TreeFileItem *pare
 
 void RcloneFileModelLocal::init()
 {
-    auto *drive = new TreeFileItem(_remote_info->path.c_str(), _remote_info);
-    drive->getFile()->setSize(0);
-    drive->setIcon(Settings::hardDriveIcon());
-    _root_index = drive->index();
-    drive->appendRow(TreeFileItem::decorateList());
+    auto *local = new TreeFileItem(RcloneFile(nullptr,"", 0, true, QDateTime::currentDateTime(), _remote_info));
+    local->setText(_remote_info->full_path().c_str());
+    local->getFile()->setSize(0);
+    local->setIcon(Settings::hardDriveIcon());
+    _root_index = local->index();
+    local->appendRow(TreeFileItem::decorateList());
 
     appendRow({
-                      drive,
-                      new TreeFileItem(1, drive->getFile()),
-                      new TreeFileItem(2, drive->getFile()),
-                      new TreeFileItem(3, drive->getFile())
+                      local,
+                      new TreeFileItem(1, local->getFile()),
+                      new TreeFileItem(2, local->getFile()),
+                      new TreeFileItem(3, local->getFile())
               });
 }
 

@@ -2,42 +2,33 @@
 // Created by Rahman on 12/04/2023.
 //
 
-#ifndef IRIDIUM_TASKTREEVIEW_HPP
-#define IRIDIUM_TASKTREEVIEW_HPP
+#pragma once
 
-#include <QList>
-#include <QTreeView>
-#include <QLayout>
-#include <QThread>
-#include <QModelIndex>
-#include "TaskRow.hpp"
+#include <RcloneFile.hpp>
+#include "TaskRowChild.hpp"
+#include "TaskRowParent.hpp"
 
 struct Tasks
 {
-    TaskRowPtr parent;
-    RclonePtr rclone;
-    std::map<size_t, TaskRowPtr> children;
+	std::unique_ptr<TaskRowParent> parent;
+	ir::process_ptr rclone;
+	std::map<size_t, std::unique_ptr<TaskRowChild>> children;
 };
 
 class TaskTreeView : public QTreeView
 {
-Q_OBJECT
+	Q_OBJECT
 
-    static std::unordered_map<size_t, Tasks> _tasks;
+	static std::unordered_map<size_t, Tasks> _tasks;
 
-    QStandardItemModel *_model{};
+	QStandardItemModel * _model{};
+
+	void cancelTask();
 
 public:
-    explicit TaskTreeView(QWidget *parent = nullptr);
+	explicit TaskTreeView(QWidget * parent = nullptr);
 
-    void addTask(const QString &src, const QString &dst, const RclonePtr &rclone, const std::function<void()> &callable,
-                 const Rclone::TaskType &type = Rclone::Unknown);
-
-signals:
-
-    void taskFinished(std::pair<size_t, Tasks>);
+	void addTask(const RcloneFile& src, const RcloneFile& dst, const ir::process_ptr& rclone,
+	             TaskRowParent::taskType type = TaskRowParent::Unknown);
 
 };
-
-
-#endif //IRIDIUM_TASKTREEVIEW_HPP
