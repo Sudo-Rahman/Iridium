@@ -8,7 +8,6 @@
 #include "ItemMenu.hpp"
 #include "ItemInfoDialog.hpp"
 #include <QEvent>
-#include <QDragEnterEvent>
 #include <QItemDelegate>
 #include <QPainter>
 #include <QLineEdit>
@@ -22,6 +21,7 @@
 #include <QThread>
 #include <QScrollBar>
 #include <ImagePreviewDialog.hpp>
+#include <QStyledItemDelegate>
 #include <boost/algorithm/string/join.hpp>
 #include <Settings.hpp>
 
@@ -33,18 +33,20 @@ using namespace iridium::rclone;
 /**
  * @brief Classe permettant de définir la taille des items
  */
-class MyItemDelegate : public QItemDelegate
+class MyItemDelegate : public QStyledItemDelegate
 {
 public:
-	explicit MyItemDelegate(QObject *parent = nullptr) : QItemDelegate(parent) {}
-
-	void paint(QPainter *painter, const QStyleOptionViewItem &option,
-	           const QModelIndex &index) const override { QItemDelegate::paint(painter, option, index); }
+	explicit MyItemDelegate(QObject *parent = nullptr) : QStyledItemDelegate(parent) {}
 
 	[[nodiscard]] QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override
 	{
-		return {35, 35};
+		return {30, 30};
 	}
+
+	void initStyleOption(QStyleOptionViewItem *option, const QModelIndex &index) const {
+		QStyledItemDelegate::initStyleOption(option, index);
+	}
+
 };
 
 /**
@@ -59,14 +61,14 @@ void TreeFileView::initUI()
 	setRootIsDecorated(true);
 	setAnimated(true);
 	setEditTriggers(QAbstractItemView::NoEditTriggers);
-	setIconSize(QSize(30, 30));
-	setFont(QFont("Arial", 15));
+	setIconSize(QSize(24, 24));
+	setFont(QFont("Arial", 12));
 	setAlternatingRowColors(true);
-	setUniformRowHeights(true);
+	setUniformRowHeights(false);
 	setFocusPolicy(Qt::StrongFocus);
 
 	header()->setSectionsMovable(true);
-	header()->setFont(QFont("Arial", 13));
+	header()->setFont(QFont("Arial", 11, QFont::Bold));
 	header()->setSortIndicatorShown(true);
 	header()->setSectionsClickable(true);
 	header()->setStretchLastSection(false);
@@ -98,18 +100,14 @@ void TreeFileView::initUI()
 	setColumnWidth(0, 0);
 
 	setDragDropMode(DragDrop);
-	// setAcceptDrops(true);
-	// setDragDropOverwriteMode(true);
 	setDropIndicatorShown(true);
 
 	auto p = palette();
-	p.setColor(QPalette::HighlightedText, palette().color(QPalette::Text));
+	// p.setColor(QPalette::HighlightedText, palette().color(QPalette::Text));
 	// if other than macos change alternate base color
 	if (QSysInfo::productType() not_eq "macos")
 		p.setColor(QPalette::AlternateBase, palette().color(QPalette::Midlight));
 	setPalette(p);
-
-	setStyleSheet("QTreeView { outline:none; }");
 }
 
 TreeFileView::TreeFileView(QWidget *parent) : QTreeView(parent) { initUI(); }
@@ -621,10 +619,10 @@ void TreeFileView::deleteFile(const QList<TreeFileItem *> &items)
 			if (exit == 0)
 				reload(reloadItem);
 		});
-		if(item->getFile()->isDir())
+		if (item->getFile()->isDir())
 			process->purge(*item->getFile());
 		else
-				process->delete_file(*item->getFile());
+			process->delete_file(*item->getFile());
 		auto emptyFile = ire::file{};
 		emptyFile.set_name("--");
 		emit taskAdded(*item->getFile(), std::move(static_cast<RcloneFile>(emptyFile)), std::move(process),
@@ -845,7 +843,6 @@ void TreeFileView::dragEnterEvent(QDragEnterEvent *event)
  */
 void TreeFileView::dragMoveEvent(QDragMoveEvent *event)
 {
-
 	_drag_border = true;
 	auto tree = _drag_sys_files ? this : dynamic_cast<TreeFileView *>(event->source());
 
@@ -918,7 +915,7 @@ void TreeFileView::dragMoveEvent(QDragMoveEvent *event)
 		}
 	}
 
-	if (styleSheet() == "" and _drag_border)
+	if (styleSheet().isEmpty() and _drag_border)
 	{
 		setStyleSheet("QTreeView { border: 1px solid #2e86de; }");
 		_drag_border = false;
@@ -980,7 +977,7 @@ void TreeFileView::dropEvent(QDropEvent *event)
 	}
 	else
 	{
-		auto tree =dynamic_cast<TreeFileView *>(event->source());
+		auto tree = dynamic_cast<TreeFileView *>(event->source());
 		if (not tree->_dragable)
 		{
 			event->ignore();
@@ -1008,7 +1005,7 @@ void TreeFileView::dropEvent(QDropEvent *event)
 void TreeFileView::dragLeaveEvent(QDragLeaveEvent *event)
 {
 	QTreeView::dragLeaveEvent(event);
-	setStyleSheet("");
+setStyleSheet("");
 	_drag_border = true;
 	_drag_sys_files = false;
 	event->accept();

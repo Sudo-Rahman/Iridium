@@ -19,6 +19,8 @@ set(CMAKE_AUTOUIC ON)
 
 find_package(rclone_cpp REQUIRED)
 find_package(Boost REQUIRED)
+find_package(CURL REQUIRED)
+find_package(libzip REQUIRED)
 
 find_package(Qt6 REQUIRED COMPONENTS
         Core
@@ -88,6 +90,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
         rclone_cpp::rclone_cpp
         boost::boost
         Qt6::Core Qt6::Gui Qt6::Widgets
+        CURL::libcurl libzip::zip
 )
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")

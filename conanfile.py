@@ -15,12 +15,13 @@ class ConanApplication(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.user_presets_path = False
         tc.generate()
 
     def requirements(self):
         self.requires("rclone_cpp/[>=0.1]")
         self.requires("boost/[>=1.80.0]")
+        self.requires("libcurl/[>=8.0.0]")
+        self.requires("libzip/[>=1.10.0]")
 
 
     def build_requirements(self):

@@ -49,9 +49,7 @@ void MenuBar::connectSignals()
 		formLayout.addRow(&icon);
 
 		auto version = QLabel(
-			"<a href=\"https://github.com/Sudo-Rahman/Iridium/releases/tag/v" +
-			QString::fromStdString(IRIDIUM_VERSION) +
-			"\">" + QString::fromStdString(IRIDIUM_VERSION) + "</a>");
+			"<a href=\"https://github.com/Sudo-Rahman/Iridium/releases/\">" + QString::fromStdString(IRIDIUM_VERSION) + "</a>");
 		version.setOpenExternalLinks(true);
 		formLayout.addRow(new QLabel(tr("Version d'Iridium : ")), &version);
 
@@ -64,7 +62,7 @@ void MenuBar::connectSignals()
 		formLayout.addRow(new QLabel(tr("Qt Version : ")), &qtVersion);
 
 		auto boostVersion = QLabel(
-			"<a href=\"https://www.boostVersion.org/\">" + QString::fromStdString(BOOST_LIB_VERSION) + "</a>");
+			"<a href=\"https://www.boost.org/\">" + QString::fromStdString(BOOST_LIB_VERSION) + "</a>");
 		boostVersion.setOpenExternalLinks(true);
 		formLayout.addRow(new QLabel(tr("Boost Version : ")), &boostVersion);
 

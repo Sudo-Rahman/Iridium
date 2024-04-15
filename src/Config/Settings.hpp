@@ -94,7 +94,6 @@ private:
     static boost::filesystem::path getPathSettings();
 
     static void initSettings();
-
     static QIcon DIR_ICON;
 
     static QIcon HARDDRIVE_ICON;
@@ -106,6 +105,10 @@ public:
     static boost::signals2::signal<void()> list_remote_changed;
 
     static void init();
+
+    static void initRlclone(std::function<void(bool)> && rclone_init_ok = nullptr);
+
+    auto static rcloneBaseName() -> QString;
 
     static void changeDirIcon(const ThemeColor &color);
 

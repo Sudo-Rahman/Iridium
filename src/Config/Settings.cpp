@@ -199,17 +199,6 @@ void Settings::deleteRemote(const RemoteInfoPtr &remoteInfo)
  */
 void Settings::init()
 {
-	// init rclone path
-	auto rclonePath = boost::process::search_path("rclone");
-	if (rclonePath.empty())
-	{
-		rclonePath = dll::program_location().parent_path().append("rclone");
-		if (QSysInfo::productType() == "windows")
-			rclonePath += ".exe";
-	}
-	Global::path_rclone = rclonePath.string();
-	ir::process::initialize(Global::path_rclone);
-
 	Settings::HARDDRIVE_ICON = QIcon::fromTheme("drive-harddisk-solidstate");
 	initSettings();
 	loadSettings();
@@ -228,6 +217,28 @@ void Settings::init()
 	                           translation_dir.string().c_str());
 	QApplication::installTranslator(translator);
 	QLocale::setDefault(QLocale(getValue<string>(Language).c_str()));
+}
+
+void Settings::initRlclone(std::function<void(bool)> &&rclone_init_ok)
+{
+	// init rclone path
+
+	bf::path rclonePath;
+	if(not _settings.get<string>(_nodes.at(RclonePath)).empty())
+		rclonePath = _settings.get<string>(_nodes.at(RclonePath));
+	else rclonePath = boost::process::search_path(rcloneBaseName().toStdString());
+
+	if (rclonePath.empty())
+		rclonePath = dll::program_location().parent_path().append(rcloneBaseName().toStdString());
+
+	Global::path_rclone = rclonePath.string();
+	rclone_init_ok(ir::process::initialize(Global::path_rclone));
+	_settings.put(_nodes.at(RclonePath), Global::path_rclone);
+}
+
+auto Settings::rcloneBaseName() -> QString
+{
+	return QSysInfo::productType() == "windows" ? "rclone.exe" : "rclone";
 }
 
 /**
@@ -290,7 +301,7 @@ void Settings::initSettings()
 	_settings.put(_nodes.at(DirIconColor), 0);
 	_settings.put(_nodes.at(LoadType), 0);
 	_settings.put(_nodes.at(MaxDepth), 2);
-	_settings.put(_nodes.at(RclonePath), Global::path_rclone);
+	_settings.put(_nodes.at(RclonePath), "");
 	_settings.put(_nodes.at(MaxProcess), std::thread::hardware_concurrency());
 	_settings.put(_nodes.at(Remotes), "");
 	_settings.put(_nodes.at(Flags), "");
@@ -312,10 +323,6 @@ void Settings::initSettings()
 
 
 	_default = _settings;
-
-	//    std::stringstream ss;
-	//    property_tree::json_parser::write_json(ss, m_settings);
-	//    cout << ss.str() << endl;
 }
 
 void Settings::resetSettings(const Node &node)

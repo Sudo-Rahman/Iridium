@@ -5,14 +5,14 @@ Graphical application for managing remote storage services such as Google Drive,
 
 ## Technologies
 
-- [Qt](https://www.qt.io/)
 - [C++](https://isocpp.org/)
 - [CMake](https://cmake.org/)
+- [Qt](https://www.qt.io/)
+- [Conan](https://conan.io/)
 - [Boost](https://www.boost.org/)
 - [Rclone](https://rclone.org/)
-
-[//]: # (- [Libcurl]&#40;https://curl.se/libcurl/&#41;)
-[//]: # (- [LibZip]&#40;https://libzip.org/&#41;)
+- [Libcurl](https://curl.se/libcurl/)
+- [LibZip](https://libzip.org/)
 
 ## Features
 
@@ -64,28 +64,25 @@ Graphical application for managing remote storage services such as Google Drive,
 
 ### Dependencies
 
-- [Qt](https://www.qt.io/)
 - [CMake](https://cmake.org/)
+- [Qt](https://www.qt.io/)
 - [Boost](https://www.boost.org/)
-
-[//]: # (- [Libcurl]&#40;https://curl.se/libcurl/&#41;)
-[//]: # (- [LibZip]&#40;https://libzip.org/&#41;)
+- [Libcurl](https://curl.se/libcurl/)
+- [LibZip](https://libzip.org/)
 
 ### Compilation
 
-```bash
-git clone https://github.com/Sudo-Rahman/Iridium.git
-cd Iridium
-```
-- Set Cmake prefix path to Qt installation directory
-- Set Cmake boost path to Boost installation directory
+#### MacOS/Linux
+  - Install conan package manager for boost, libcurl, libzip dependencies.
+  - Download shared Qt library or build it from source.
 
-```bash
-mkdir build
-cd build
-cmake ..
-make
-```
+    ```bash
+    git clone https://github.com/Sudo-Rahman/Iridium.git
+    cd Iridium
+    conan install . --build=missing
+    cmake --preset conan-release -DCMAKE_PREFIX_PATH="path/to/Qt/installation/cmake"
+    cmake --build --parallel --preset conan-release
+    ```
 
 <br>
 
