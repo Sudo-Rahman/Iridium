@@ -43,7 +43,7 @@ public:
 		return {30, 30};
 	}
 
-	void initStyleOption(QStyleOptionViewItem *option, const QModelIndex &index) const {
+	void initStyleOption(QStyleOptionViewItem *option, const QModelIndex &index) const override {
 		QStyledItemDelegate::initStyleOption(option, index);
 	}
 
@@ -372,6 +372,7 @@ void TreeFileView::showContextMenu()
 				progress->setRange(0, 0);
 				layout->addWidget(progress, 0, Qt::AlignCenter);
 				auto rclone = new ir::process();
+				rclone->add_option(option::basic_option::uptr("--color" ,"NEVER"));
 				auto file = lisItem.front()->getFile();
 				rclone->on_finish([=,this,rclone = rclone](int exit)
 				{

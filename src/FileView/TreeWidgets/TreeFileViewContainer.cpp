@@ -33,15 +33,15 @@ void TreeFileViewContainer::initUI()
     btnLayout->setContentsMargins(0, 0, 0, 0);
     _layout->addLayout(btnLayout);
 
-    _back_button = new RoundedButton("<", this);
+    _back_button = new RoundedButton("←", this);
     _back_button->setFixedSize(35, 35);
     btnLayout->addWidget(_back_button);
 
-    _front_button = new RoundedButton(">", this);
+    _front_button = new RoundedButton("→", this);
     _front_button->setFixedSize(35, 35);
     btnLayout->addWidget(_front_button);
 
-    _refresh_button = new RoundedButton("↻", this);
+    _refresh_button = new RoundedButton("↺", this);
     _refresh_button->setFixedSize(35, 35);
     btnLayout->addWidget(_refresh_button);
 

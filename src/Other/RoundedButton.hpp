@@ -24,7 +24,7 @@ protected:
     void paintEvent(QPaintEvent *event) override;
 
 
-    virtual bool event(QEvent *event) override;
+    bool event(QEvent *event) override;
 
 };
 

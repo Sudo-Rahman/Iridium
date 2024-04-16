@@ -23,7 +23,7 @@ Q_OBJECT
 private:
     TreeFileView *_treeFileView{};
     QVBoxLayout *_layout{};
-    RoundedButton *_back_button{}, *_front_button{}, *_refresh_button{};
+    QPushButton *_back_button{}, *_front_button{}, *_refresh_button{};
     QLabel *_path_label{};
     QLineEdit *_search_line_edit{};
 
