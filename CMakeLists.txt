@@ -17,16 +17,15 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-find_package(rclone_cpp REQUIRED)
-find_package(Boost REQUIRED)
-find_package(CURL REQUIRED)
-find_package(libzip REQUIRED)
-
 find_package(Qt6 REQUIRED COMPONENTS
         Core
         Gui
         LinguistTools
         Widgets)
+find_package(Boost REQUIRED)
+find_package(rclone_cpp REQUIRED)
+find_package(CURL REQUIRED)
+find_package(libzip REQUIRED)
 
 message(STATUS "Qt version: ${Qt6_VERSION}")
 
@@ -59,6 +58,12 @@ file(GLOB_RECURSE TRANSLATION
 )
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+
+    # Assume your plist file is named Info.plist.in and located in the same directory as CMakeLists.txt
+    set(MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist.in)
+
+    configure_file(${MACOSX_BUNDLE_INFO_PLIST} Info.plist)
+
     file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Iridium.app/Contents/Translations)
     set_source_files_properties(${TRANSLATION}
             PROPERTIES OUTPUT_LOCATION ${CMAKE_CURRENT_BINARY_DIR}/Iridium.app/Contents/Translations)
@@ -104,5 +109,7 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
             MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_NAME} ${Iridium_VERSION}"
             MACOSX_BUNDLE_COPYRIGHT "© 2023 ${PROJECT_NAME}"
             MACOSX_BUNDLE_ICON_FILE Iridium.icns
+            MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_BINARY_DIR}/Info.plist
+
     )
 endif ()

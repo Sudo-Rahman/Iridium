@@ -20,9 +20,13 @@ GeneralFrame::GeneralFrame(QWidget *parent) : QFrame(parent)
     box->setTitle(tr("Le changement de langue nécessite un redémarrage de l’application."));
     auto *boxLayout = new QFormLayout(box);
     _language = new QComboBox(this);
-    _language->addItems({"English", "Français"});
-    _language->setItemData(0, QLocale::English, Qt::UserRole);
-    _language->setItemData(1, QLocale::French, Qt::UserRole);
+    auto index = 0;
+    for(const auto &pair : Settings::languages)
+    {
+        _language->addItem(pair.first.c_str());
+        _language->setItemData(index,pair.second , Qt::UserRole);
+        ++index;
+    }
     for (int i = 0; i < _language->count(); ++i)
     {
         if (_language->itemData(i, Qt::UserRole).value<QLocale::Language>() ==
@@ -59,6 +63,7 @@ void GeneralFrame::connectSignals()
     {
         auto lang = _language->itemData(index, Qt::UserRole).value<QLocale::Language>();
         Settings::setLanguage(lang);
+
     });
 
     connect(_reload_time, &QSpinBox::valueChanged, [](const int &value)

@@ -1,0 +1,9 @@
+{
+    "version": 4,
+    "vendor": {
+        "conan": {}
+    },
+    "include": [
+        "/Users/sr-71/Documents/Iridium/build/Release/generators/CMakePresets.json"
+    ]
+}

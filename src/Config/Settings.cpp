@@ -7,6 +7,7 @@
 #include <boost/dll.hpp>
 #include <fstream>
 #include <QTranslator>
+#include <QLocale>
 #include <iostream>
 #include <Global.hpp>
 #include <iridium/process.hpp>
@@ -26,6 +27,7 @@ QIcon Settings::DIR_ICON;
 QIcon Settings::HARDDRIVE_ICON;
 property_tree::ptree Settings::_settings, Settings::_default;
 signals2::signal<void()> Settings::list_remote_changed;
+QTranslator Settings::_translator;
 
 map<Settings::ProcessOptions, iro::basic_opt_uptr> Settings::_options_process = {};
 
@@ -51,6 +53,11 @@ const map<Settings::ProcessOptions, string> Settings::_nodes_options = {
 				{Transfers, _nodes.at(Flags)+".transfers"},
 				{Stats, _nodes.at(Flags)+".stats"},
 		};
+
+const map<std::string, QLocale::Language> Settings::languages = {
+				{"English", QLocale::English},
+				{"Français", QLocale::French}};
+
 
 /**
  * @brief change the color of the directory icon
@@ -212,10 +219,9 @@ void Settings::init()
 	else
 		translation_dir = dll::program_location().parent_path().append("Translations");
 
-	auto *translator = new QTranslator();
-	auto ok = translator->load(QLocale(getValue<string>(Language).c_str()), "iridium", "_",
+	auto ok = _translator.load(QLocale(getValue<string>(Language).c_str()), "iridium", "_",
 	                           translation_dir.string().c_str());
-	QApplication::installTranslator(translator);
+	QApplication::installTranslator(&_translator);
 	QLocale::setDefault(QLocale(getValue<string>(Language).c_str()));
 }
 

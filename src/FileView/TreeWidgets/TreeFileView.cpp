@@ -43,10 +43,20 @@ public:
 		return {30, 30};
 	}
 
-	void initStyleOption(QStyleOptionViewItem *option, const QModelIndex &index) const override {
+	void initStyleOption(QStyleOptionViewItem *option, const QModelIndex &index) const override
+	{
 		QStyledItemDelegate::initStyleOption(option, index);
-	}
+		auto *model(static_cast<const RcloneFileModel *>(index.model()));
+		if (model == nullptr)
+			return;
 
+		if (index == model->index(0, 0)) return;
+		auto *item = dynamic_cast<TreeFileItem *>(model->itemFromIndex(index));
+		if (item and item->getFile()->isDir() and index.column() == 0)
+		{
+			option->icon = Settings::dirIcon();
+		}
+	}
 };
 
 /**
@@ -372,7 +382,7 @@ void TreeFileView::showContextMenu()
 				progress->setRange(0, 0);
 				layout->addWidget(progress, 0, Qt::AlignCenter);
 				auto rclone = new ir::process();
-				rclone->add_option(option::basic_option::uptr("--color" ,"NEVER"));
+				rclone->add_option(option::basic_option::uptr("--color", "NEVER"));
 				auto file = lisItem.front()->getFile();
 				rclone->on_finish([=,this,rclone = rclone](int exit)
 				{
@@ -1006,7 +1016,7 @@ void TreeFileView::dropEvent(QDropEvent *event)
 void TreeFileView::dragLeaveEvent(QDragLeaveEvent *event)
 {
 	QTreeView::dragLeaveEvent(event);
-setStyleSheet("");
+	setStyleSheet("");
 	_drag_border = true;
 	_drag_sys_files = false;
 	event->accept();

@@ -87,6 +87,8 @@ private:
 
     static std::map<ProcessOptions,iro::basic_opt_uptr> _options_process;
 
+    static QTranslator _translator;
+
     static boost::property_tree::ptree _default;
 
     static void loadSettings();
@@ -103,6 +105,7 @@ private:
 public:
 
     static boost::signals2::signal<void()> list_remote_changed;
+    static const std::map<std::string, QLocale::Language> languages;
 
     static void init();
 

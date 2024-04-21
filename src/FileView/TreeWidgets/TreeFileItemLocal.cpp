@@ -6,12 +6,12 @@
 
 TreeFileItemLocal::TreeFileItemLocal(const RcloneFile &file, TreeFileItem *parent)
 {
-    TreeFileItem::_file = std::make_shared<RcloneFile>(file);
+    _file = std::make_shared<RcloneFile>(file);
     setText(_file->getName());
     QStandardItem::setData(_file->getName(), SORT_ROLE);
     initIcon();
     if (_file->isDir())
-        appendRow(TreeFileItem::decorateList());
+        appendRow(decorateList());
     else
         setFlags(flags() & ~Qt::ItemIsDropEnabled);
 }
