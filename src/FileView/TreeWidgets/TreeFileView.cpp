@@ -83,6 +83,7 @@ void TreeFileView::initUI()
 	header()->setSectionsClickable(true);
 	header()->setStretchLastSection(false);
 	setContextMenuPolicy(Qt::CustomContextMenu);
+	header()->verticalScrollBar()->setStyleSheet("background-color: transparent;");
 
 	_search_line_edit = new RoundedLineEdit(this);
 	_search_line_edit->setClearButtonEnabled(false);

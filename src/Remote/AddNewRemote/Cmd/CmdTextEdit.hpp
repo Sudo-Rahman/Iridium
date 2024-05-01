@@ -10,17 +10,14 @@
 #include <QKeyEvent>
 #include <QTimer>
 #include <QProcess>
-#include <iridium/process.hpp>
 
 
 class CmdTextEdit : public QTextEdit
 {
-Q_OBJECT
+    Q_OBJECT
 
-    QString _cmd;
-    iridium::rclone::process *_process;
-    QTimer *_timer;
-    std::vector<std::string> _lines_tmp;
+        QString _cmd;
+    QProcess *_process{};
 
 public:
 
@@ -28,9 +25,8 @@ public:
 
     ~CmdTextEdit() override
     {
-        if (_process->is_running())
-            _process->stop();
-        delete _process;
+        if (_process)
+            _process->kill();
     }
 
 protected:
@@ -47,9 +43,9 @@ private:
 
     void cursorPosition();
 
-signals:
+    signals:
 
-    void cmdOutputReady(QString);
+        void cmdOutputReady(QString);
 
 };
 

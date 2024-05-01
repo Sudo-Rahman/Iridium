@@ -23,10 +23,10 @@ public:
 		switch (type)
 		{
 			case FilterSearchGroupBox::FilterType::Include:
-				setIcon(QIcon(":/ressources/add.png"));
+				setIcon(QIcon(":/resources/add.png"));
 				break;
 			case FilterSearchGroupBox::FilterType::Exclude:
-				setIcon(QIcon(":/ressources/remove.png"));
+				setIcon(QIcon(":/resources/remove.png"));
 				break;
 		}
 	}
@@ -69,9 +69,9 @@ FilterSearchGroupBox::FilterSearchGroupBox(QWidget * parent) : QGroupBox(parent)
 	_add_exclude = new QPushButton(tr("Exclure"), this);
 	m_remove = new QPushButton(tr("Retirer"), this);
 
-	m_up = new QPushButton(QIcon(":/ressources/arrow-up.png").pixmap(20, 20), "", this);
-	m_edit = new QPushButton(QIcon(":/ressources/edit.png").pixmap(20, 20), "", this);
-	m_down = new QPushButton(QIcon(":/ressources/arrow-down.png").pixmap(20, 20), "", this);
+	m_up = new QPushButton(QIcon(":/resources/arrow-up.png").pixmap(20, 20), "", this);
+	m_edit = new QPushButton(QIcon(":/resources/edit.png").pixmap(20, 20), "", this);
+	m_down = new QPushButton(QIcon(":/resources/arrow-down.png").pixmap(20, 20), "", this);
 
 
 	m_up->setFixedWidth(30);

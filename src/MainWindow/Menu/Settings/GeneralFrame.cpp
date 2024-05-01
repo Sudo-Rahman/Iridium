@@ -68,7 +68,7 @@ void GeneralFrame::connectSignals()
 
     connect(_reload_time, &QSpinBox::valueChanged, [](const int &value)
     {
-        Settings::setValue(Settings::ReloadTime, value);
+        Settings::setValue(std::pair(Settings::ReloadTime, value));
         Iridium::Global::reload_time = value;
     });
 }

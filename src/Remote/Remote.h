@@ -7,19 +7,19 @@
 #include <iridium/entities.hpp>
 
 
-const std::string DRIVEICON = ":/ressources/google-drive.png";
-const std::string SFTPICON = ":/ressources/sftp.png";
-const std::string ONEDRIVEICON = ":/ressources/one-drive.png";
-const std::string DROPBOX = ":/ressources/dropbox.png";
-const std::string FTP = ":/ressources/ftp.png";
-const std::string MEGA = ":/ressources/mega.png";
-const std::string OPENDRIVE = ":/ressources/open-drive.png";
-const std::string PCLOUD = ":/ressources/pcloud.png";
-const std::string BOX = ":/ressources/box.png";
-const std::string SMB = ":/ressources/smb.png";
-const std::string CMD = ":/ressources/cmd.png";
+const std::string DRIVEICON = ":/resources/google-drive.png";
+const std::string SFTPICON = ":/resources/sftp.png";
+const std::string ONEDRIVEICON = ":/resources/one-drive.png";
+const std::string DROPBOX = ":/resources/dropbox.png";
+const std::string FTP = ":/resources/ftp.png";
+const std::string MEGA = ":/resources/mega.png";
+const std::string OPENDRIVE = ":/resources/open-drive.png";
+const std::string PCLOUD = ":/resources/pcloud.png";
+const std::string BOX = ":/resources/box.png";
+const std::string SMB = ":/resources/smb.png";
+const std::string CMD = ":/resources/cmd.png";
 
-const std::string HARDDRIVEICON = ":/ressources/drive-harddisk-solidstate.svg";
+const std::string HARDDRIVEICON = ":/resources/drive-harddisk-solidstate.svg";
 
 
 const std::map<ire::remote::remote_type, std::string> remoteIco = {

@@ -48,7 +48,7 @@ void MainWindow::connectSignals()
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    Settings::setValue(Settings::Width, width(), Settings::Height, height());
+    Settings::setValue(std::pair(Settings::Width, width()), std::pair(Settings::Height, height()));
     Settings::saveSettings();
     QMainWindow::closeEvent(event);
 }

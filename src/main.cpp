@@ -3,6 +3,7 @@
 #include <Settings.hpp>
 #include <Config.h>
 #include <QMessageBox>
+#include <boost/process.hpp>
 
 #include "RcloneNotFoundWidget.hpp"
 
@@ -11,7 +12,7 @@ int main(int argc, char *argv[])
 	IridiumApp a(argc, argv);
 	IridiumApp::setApplicationName("Iridium");
 	IridiumApp::setApplicationVersion(IRIDIUM_VERSION.c_str());
-	QGuiApplication::setWindowIcon(QIcon(":/ressources/Iridium.svg"));
+	QGuiApplication::setWindowIcon(QIcon(":/resources/Iridium.svg"));
 	// Looks not very pretty on Windows
 	//    if (QSysInfo::productType() == "windows")
 	//        QApplication::setStyle("fusion");
@@ -29,4 +30,5 @@ int main(int argc, char *argv[])
 	MainWindow app;
 	app.show();
 	return IridiumApp::exec();
+
 }

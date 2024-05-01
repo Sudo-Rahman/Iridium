@@ -33,7 +33,7 @@ RcloneFrame::RcloneFrame(QWidget *parent) : QFrame(parent)
 	});
 	connect(_rclone_path, &QLineEdit::textChanged, this, [](const QString &path)
 	{
-		Settings::setValue(Settings::Node::RclonePath, path.toStdString());
+		Settings::setValue(std::pair(Settings::Node::RclonePath, path.toStdString()));
 		Iridium::Global::path_rclone = path.toStdString();
 		ir::process::initialize(path.toStdString());
 		Settings::refreshRemotesList();
@@ -129,7 +129,7 @@ void RcloneFrame::connectSignals()
 {
 	connect(_max_rclone_execution, &QSpinBox::valueChanged, [=](int value)
 	{
-		Settings::setValue(Settings::MaxProcess, value);
+		Settings::setValue(std::pair(Settings::MaxProcess, value));
 		Iridium::Global::max_process = value;
 		RcloneFileModelDistant::setSimultaneousProcesses(value);
 	});
@@ -140,12 +140,12 @@ void RcloneFrame::connectSignals()
 	connect(_load_type, &QComboBox::currentIndexChanged, [=](int index)
 	{
 		RcloneFileModelDistant::setLoadType(static_cast<Iridium::Load>(index));
-		Settings::setValue(Settings::LoadType, index);
+		Settings::setValue(std::pair(Settings::LoadType, index));
 	});
 	connect(_max_depth, &QSpinBox::valueChanged, [=](int value)
 	{
 		RcloneFileModelDistant::setMaxDepth(value);
-		Settings::setValue(Settings::MaxDepth, value);
+		Settings::setValue(std::pair(Settings::MaxDepth, value));
 	});
 	connect(_stats_refresh, &QSpinBox::valueChanged, [=](int value)
 	{

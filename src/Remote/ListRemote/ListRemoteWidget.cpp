@@ -52,6 +52,7 @@ ListRemoteWidget::ListRemoteWidget(QWidget * parent) : QScrollArea(parent)
 
 	_add = new RoundedButton("＋");
 	_add->setFixedSize(35, 35);
+	_add->setCircular(true);
 	connect(_add, &QPushButton::clicked, this, [this]()
 	{
 		auto * addRemote = new AddNewRemoteDialog(this);

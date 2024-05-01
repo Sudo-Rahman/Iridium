@@ -6,94 +6,77 @@
 #include <QEvent>
 #include <QPainter>
 #include <QGraphicsDropShadowEffect>
+#include <qguiapplication.h>
 
+#include "IridiumApp.hpp"
+
+const QString lightMode = "QPushButton {"
+		"border: none;"
+		"color: black;"
+		"background-color: transparent;"
+		"height: {height}px;"
+		"width: {width}px;"
+		"padding: {padding}px;"
+		"border-radius: {radius}px;"
+		"}"
+		"QPushButton:hover {"
+		"background-color: rgba(200, 200, 200, 0.6);"
+		"}"
+		"QPushButton:pressed {"
+		"background-color: rgba(200, 200, 200, 1);"
+		"}";
+
+const QString darkMode = "QPushButton {"
+		"border: none;"
+		"color: white;"
+		"background-color: transparent;"
+		"height: {height}px;"
+		"width: {width}px;"
+		"padding: {padding}px;"
+		"border-radius: {radius}px;"
+		"}"
+		"QPushButton:hover {"
+		"background-color: rgba(110, 110, 110, 0.6);"
+		"}"
+		"QPushButton:pressed {"
+		"background-color: rgba(110, 110, 110, 1);"
+		"}";
+
+QString RoundedButton::getStyleSheet()
+{
+	auto style = qApp->property("dark").toBool() ? darkMode : lightMode;
+
+	style.replace("{height}", QString::number(height()));
+	style.replace("{width}", QString::number(width()));
+	style.replace("{padding}", QString::number(_padding));
+	style.replace("{radius}", QString::number(_circular ? height() / 2 : _radius));
+	return style;
+}
 
 /**
  * @brief Construct a new Tree File View Rounded Button:: Tree File View Rounded Button object
  * @param text
  * @param parent
  */
-RoundedButton::RoundedButton(const QString &text, QWidget *parent) : QPushButton(text, parent)
+RoundedButton::RoundedButton(const QString &text, QWidget *parent)
+	: QPushButton(text, parent)
 {
-    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    // size font to fit button
-    QFont font = this->font();
-    font.setPixelSize(17);
-    setFont(font);
+	// size font to fit button
+	QFont font = this->font();
+	font.setPixelSize(17);
+	setFont(font);
+	setStyleSheet(getStyleSheet());
+	IridiumApp::onThemeChange.connect([this] { setStyleSheet(getStyleSheet()); });
 }
 
-void RoundedButton::paintEvent(QPaintEvent *event)
+RoundedButton::RoundedButton(const QIcon &icon, QWidget *parent)
+	: QPushButton(parent)
 {
-    QPainter painter(this);
-    painter.setRenderHint(QPainter::Antialiasing);
-
-    painter.setPen(QPushButton::palette().color(QPalette::Light));
-    _click ? painter.setBrush(QPushButton::palette().color(QPalette::Window)) : painter.setBrush(
-            QPushButton::palette().color(QPalette::Mid).lighter(130));
-
-    // draw rounded rect
-    QRect rect = this->rect().marginsRemoved(QMargins(5, 5, 5, 5));
-    if (_hover)
-    {
-        rect.setWidth(rect.width() + 1);
-        rect.setHeight(rect.height() + 1);
-    } else
-    {
-
-        rect.setWidth(rect.width());
-        rect.setHeight(rect.height());
-    }
-    painter.drawRoundedRect(rect, 10, 10);
-
-    // draw text
-    painter.setPen(QPushButton::palette().color(QPalette::WindowText));
-    painter.drawText(rect, Qt::AlignCenter, text());
-}
-
-bool RoundedButton::event(QEvent *event)
-{
-
-    switch (event->type())
-    {
-        // mouse hover repaint
-        case QEvent::Enter:
-            _hover = true;
-            addBlur();
-            break;
-        case QEvent::Leave:
-            _hover = false;
-            addBlur();
-            break;
-        case QEvent::MouseButtonPress:
-            // change cursor
-            _click = true;
-            repaint();
-            setCursor(Qt::PointingHandCursor);
-            break;
-        case QEvent::MouseButtonRelease:
-            // change cursor
-            _click = false;
-            repaint();
-            setCursor(Qt::ArrowCursor);
-            break;
-        default:
-            break;
-    }
-    return QPushButton::event(event);
-}
-
-void RoundedButton::addBlur()
-{
-    // if not hover remove effect
-    if (!_hover)
-    {
-        this->setGraphicsEffect(nullptr);
-        return;
-    }
-    // resize effect
-    auto effect = new QGraphicsDropShadowEffect(this);
-    effect->setBlurRadius(15);
-    effect->setOffset(0, 0);
-    effect->setColor(QPushButton::palette().color(QPalette::Dark));
-    this->setGraphicsEffect(effect);
+	setIcon(icon);
+	// size font to fit button
+	QFont font = this->font();
+	font.setPixelSize(17);
+	setFont(font);
+	setStyleSheet(getStyleSheet());
+	IridiumApp::onThemeChange.connect([this] { setStyleSheet(getStyleSheet()); });
 }

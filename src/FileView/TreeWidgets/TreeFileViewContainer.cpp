@@ -27,22 +27,31 @@ void TreeFileViewContainer::initUI()
     _layout = new QVBoxLayout(this);
     setContentsMargins(0, 0, 0, 0);
     _layout->setContentsMargins(0, 0, 0, 0);
-    _layout->setSpacing(0);
+    _layout->setSpacing(4);
 
     auto btnLayout = new QHBoxLayout();
     btnLayout->setContentsMargins(0, 0, 0, 0);
     _layout->addLayout(btnLayout);
 
-    _back_button = new RoundedButton("←", this);
-    _back_button->setFixedSize(35, 35);
+    _back_button = new RoundedButton(QIcon(":/resources/back_browser_arrow.png"),this);
+    _back_button->setIconSize(QSize(24, 24));
+    _back_button->setFixedSize(QSize(30, 30));
+    _back_button->setContentsMargins(4, 4, 4, 4);
+    _back_button->setCircular(true);
     btnLayout->addWidget(_back_button);
 
-    _front_button = new RoundedButton("→", this);
-    _front_button->setFixedSize(35, 35);
+    _front_button = new RoundedButton(QIcon(":/resources/front_browser_arrow.png"),this);
+    _front_button->setCircular(true);
+    _front_button->setIconSize(QSize(24, 24));
+    _front_button->setFixedSize(QSize(30, 30));
+    _front_button->setContentsMargins(4, 4, 4, 4);
     btnLayout->addWidget(_front_button);
 
-    _refresh_button = new RoundedButton("↺", this);
-    _refresh_button->setFixedSize(35, 35);
+    _refresh_button = new RoundedButton(QIcon(":/resources/reload_browser.png"),this);
+    _refresh_button->setCircular(true);
+    _refresh_button->setIconSize(QSize(24, 24));
+    _refresh_button->setFixedSize(QSize(30, 30));
+    _refresh_button->setContentsMargins(10, 10, 10, 10);
     btnLayout->addWidget(_refresh_button);
 
 

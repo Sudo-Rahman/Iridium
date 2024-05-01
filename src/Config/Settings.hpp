@@ -78,6 +78,8 @@ public:
         Arch arch;
     };
 
+    static const std::map<std::string, QLocale::Language> languages;
+
 private:
     static boost::property_tree::ptree _settings;
 
@@ -86,8 +88,6 @@ private:
     static const std::map<ProcessOptions, std::string> _nodes_options;
 
     static std::map<ProcessOptions,iro::basic_opt_uptr> _options_process;
-
-    static QTranslator _translator;
 
     static boost::property_tree::ptree _default;
 
@@ -105,7 +105,6 @@ private:
 public:
 
     static boost::signals2::signal<void()> list_remote_changed;
-    static const std::map<std::string, QLocale::Language> languages;
 
     static void init();
 
@@ -139,28 +138,22 @@ public:
 
     /**
      * @brief set the value of a node and save the settings
-     * @tparam Type
-     * @param node
-     * @param value
+     * @tparam Args
      */
-    template<class Type>
-    static void setValue(const Node &node, Type&& value)
-    {
-        try
-        {
-            _settings.put(_nodes.at(node), value);
-            saveSettings();
-        } catch (boost::exception &e)
-        {
-            std::cout << "eror set Value" << diagnostic_information_what(e, true) << std::endl;
-        }
-    }
-
     template<class ... Args>
-    static void setValue(const Node &node, const auto &value, Args &&... args)
+    requires (... && std::is_same_v<std::pair<Node, typename Args::second_type>, Args>)
+    static void setValue(Args &&... args)
     {
-        setValue(node, value);
-        setValue(std::forward<Args>(args)...);
+        for (auto &&arg : {args...})
+        {
+            try
+            {
+                _settings.put(_nodes.at(arg.first), arg.second);
+            } catch (boost::exception &e)
+            {
+                std::cout << "eror set Value" << diagnostic_information_what(e, true) << std::endl;
+            }
+        }
     }
 
     /**

@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.25)
 project(Iridium)
 
 set(Iridium_VERSION_MAJOR 0)
-set(Iridium_VERSION_MINOR 8)
-set(Iridium_VERSION_PATCH 95)
+set(Iridium_VERSION_MINOR 9)
+set(Iridium_VERSION_PATCH 0)
 set(Iridium_VERSION "${Iridium_VERSION_MAJOR}.${Iridium_VERSION_MINOR}.${Iridium_VERSION_PATCH}")
 
 configure_file(src/Config/Version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/src/Config/Version.h @ONLY)
@@ -79,7 +79,7 @@ qt_add_translation(QM_FILES ${TRANSLATION})
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     file(COPY ${RCLONE} DESTINATION Iridium.app/Contents/MacOS)
     set(MACOSX_BUNDLE_ICON_FILE Iridium.icns)
-    set(myApp_ICON ressources/Iridium.icns)
+    set(myApp_ICON resources/Iridium.icns)
     set_source_files_properties(${myApp_ICON} PROPERTIES
             MACOSX_PACKAGE_LOCATION "Resources")
     qt6_add_executable(${PROJECT_NAME} MACOSX_BUNDLE application.qrc ${myApp_ICON} ${SRC} ${QM_FILES})
@@ -99,8 +99,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 )
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-    target_link_libraries(Iridium PRIVATE ws2_32
-            -static gcc stdc++ winpthread -dynamic)
+    target_link_libraries(Iridium)
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     find_library(COCOA Cocoa)
     target_link_libraries(${PROJECT_NAME} PRIVATE ${COCOA})

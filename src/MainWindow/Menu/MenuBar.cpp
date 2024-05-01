@@ -43,7 +43,7 @@ void MenuBar::connectSignals()
 		// add icon
 		auto icon = QLabel();
 		icon.setPixmap(
-			QPixmap(":/ressources/Iridium.png").scaled(100, 100, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+			QPixmap(":/resources/Iridium.png").scaled(100, 100, Qt::KeepAspectRatio, Qt::SmoothTransformation));
 		icon.setAlignment(Qt::AlignCenter);
 		icon.setContentsMargins(0, 0, 0, 20);
 		formLayout.addRow(&icon);

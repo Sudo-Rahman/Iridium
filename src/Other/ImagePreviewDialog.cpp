@@ -21,21 +21,21 @@ ImagePreviewDialog::ImagePreviewDialog(const QByteArray &data, QWidget *parent) 
     _extend_button = new QPushButton(this);
     _extend_button->setFixedSize(35, 35);
     _extend_button->setStyleSheet("background-color: rgba(0,0,0,0);");
-    _extend_button->setIcon(QIcon(":/ressources/extend.png"));
+    _extend_button->setIcon(QIcon(":/resources/extend.png"));
     connect(_extend_button, &QPushButton::clicked, this,
             [this] { resizeImage(QSize(_size.width() + 100, _size.height() + 100)); });
 
     _shrink_button = new QPushButton(this);
     _shrink_button->setFixedSize(35, 35);
     _shrink_button->setStyleSheet("background-color: rgba(0,0,0,0);");
-    _shrink_button->setIcon(QIcon(":/ressources/shrink.png"));
+    _shrink_button->setIcon(QIcon(":/resources/shrink.png"));
     connect(_shrink_button, &QPushButton::clicked, this,
             [this] { resizeImage(QSize(_size.width() - 100, _size.height() - 100)); });
 
     _rotate_button = new QPushButton(this);
     _rotate_button->setFixedSize(35, 35);
     _rotate_button->setStyleSheet("background-color: rgba(0,0,0,0);");
-    _rotate_button->setIcon(QIcon(":/ressources/rotate-left.png"));
+    _rotate_button->setIcon(QIcon(":/resources/rotate-left.png"));
     connect(_rotate_button, &QPushButton::clicked, this, &ImagePreviewDialog::rotate);
 
     // add button above the image

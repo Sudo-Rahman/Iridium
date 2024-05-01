@@ -71,7 +71,7 @@ void SearchTableView::showCustomContextMenu()
 		return;
 	auto menu = QMenu(this);
 	auto copie = menu.addAction(tr("Copier les fichiers"));
-	copie->setIcon(QIcon(":/ressources/copy.png"));
+	copie->setIcon(QIcon(":/resources/copy.png"));
 	switch (items.size() / horizontalHeader()->count())
 	{
 		case 1:

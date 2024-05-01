@@ -95,7 +95,7 @@ RemoteWidget::RemoteWidget(const RemoteInfoPtr &remoteInfo, bool deletable, QWid
 void RemoteWidget::init()
 {
     _layout = new QHBoxLayout(this);
-    _layout->setContentsMargins(10, 5, 5, 5);
+    _layout->setContentsMargins(10, 7, 7, 5);
     _layout->setSpacing(0);
 
     auto *labelIcon = new QLabel;
@@ -134,7 +134,9 @@ void RemoteWidget::init()
 
 
     _delete = new RoundedButton("✕", this);
-    _delete->setFixedSize(25, 25);
+    _delete->setFixedSize(20, 20);
+    _delete->setPadding(0);
+    _delete->setCircular(true);
     // get max font size for _delete
     auto size = _delete->fontMetrics().boundingRect(_delete->text()).size();
     _delete->setFont(QFont("Arial", size.height() - 5));

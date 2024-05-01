@@ -54,14 +54,14 @@ ItemMenu::ItemMenu(QWidget *parent) : QMenu(parent)
     });
 
     // add icons
-    _info->setIcon(QIcon(":/ressources/information.png"));
-    _copy->setIcon(QIcon(":/ressources/copy.png"));
-    _paste->setIcon(QIcon(":/ressources/paste.png"));
-    _delete->setIcon(QIcon(":/ressources/delete.png"));
-    _new_folder->setIcon(QIcon(":/ressources/new-folder.png"));
-    _tree->setIcon(QIcon(":/ressources/tree.png"));
-    // _sync->setIcon(QIcon(":/ressources/sync-cloud.png"));
-    _preview->setIcon(QIcon(":/ressources/preview.png"));
+    _info->setIcon(QIcon(":/resources/information.png"));
+    _copy->setIcon(QIcon(":/resources/copy.png"));
+    _paste->setIcon(QIcon(":/resources/paste.png"));
+    _delete->setIcon(QIcon(":/resources/delete.png"));
+    _new_folder->setIcon(QIcon(":/resources/new-folder.png"));
+    _tree->setIcon(QIcon(":/resources/tree.png"));
+    // _sync->setIcon(QIcon(":/resources/sync-cloud.png"));
+    _preview->setIcon(QIcon(":/resources/preview.png"));
 
     // show shortcuts
     _info->setShortcut(Qt::Key_Space);

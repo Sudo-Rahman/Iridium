@@ -84,11 +84,11 @@ TaskTreeView::TaskTreeView(QWidget *parent) : QTreeView(parent)
 		auto size = QTreeView::selectedIndexes().size() / header()->count();
 		auto cancel = menu.addAction(
 			size > 1 ? QObject::tr("Annuler les %1 tâches").arg(size) : QObject::tr("Annuler la tâche"));
-		cancel->setIcon(QIcon(":/ressources/cancel.png"));
+		cancel->setIcon(QIcon(":/resources/cancel.png"));
 
 		auto remove = menu.addAction(
 			size > 1 ? QObject::tr("Supprimer les %1 tâches").arg(size) : QObject::tr("Supprimer la tâche"));
-		remove->setIcon(QIcon(":/ressources/trash.png"));
+		remove->setIcon(QIcon(":/resources/trash.png"));
 		connect(remove, &QAction::triggered, this, [this]()
 		{
 			auto indexes = QTreeView::selectedIndexes();
