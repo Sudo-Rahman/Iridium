@@ -45,6 +45,7 @@ public:
 
 	void initStyleOption(QStyleOptionViewItem *option, const QModelIndex &index) const override
 	{
+		QStyledItemDelegate::initStyleOption(option, index);
 		auto *model(static_cast<const RcloneFileModel *>(index.model()));
 		if (model == nullptr)
 			return;
@@ -54,7 +55,6 @@ public:
 		{
 			option->icon = Settings::dirIcon();
 		}
-		QStyledItemDelegate::initStyleOption(option, index);
 	}
 };
 
