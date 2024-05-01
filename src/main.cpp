@@ -2,8 +2,6 @@
 #include <MainWindow.hpp>
 #include <Settings.hpp>
 #include <Config.h>
-#include <QMessageBox>
-#include <boost/process.hpp>
 
 #include "RcloneNotFoundWidget.hpp"
 
@@ -14,8 +12,8 @@ int main(int argc, char *argv[])
 	IridiumApp::setApplicationVersion(IRIDIUM_VERSION.c_str());
 	QGuiApplication::setWindowIcon(QIcon(":/resources/Iridium.svg"));
 	// Looks not very pretty on Windows
-	//    if (QSysInfo::productType() == "windows")
-	//        QApplication::setStyle("fusion");
+	if (QSysInfo::productType() == "windows")
+	    QApplication::setStyle("fusion");
 	Settings::init();
 	Settings::initRlclone([](bool ok)
 	{

@@ -45,17 +45,16 @@ public:
 
 	void initStyleOption(QStyleOptionViewItem *option, const QModelIndex &index) const override
 	{
-		QStyledItemDelegate::initStyleOption(option, index);
 		auto *model(static_cast<const RcloneFileModel *>(index.model()));
 		if (model == nullptr)
 			return;
-
 		if (index == model->index(0, 0)) return;
 		auto *item = dynamic_cast<TreeFileItem *>(model->itemFromIndex(index));
 		if (item and item->getFile()->isDir() and index.column() == 0)
 		{
 			option->icon = Settings::dirIcon();
 		}
+		QStyledItemDelegate::initStyleOption(option, index);
 	}
 };
 

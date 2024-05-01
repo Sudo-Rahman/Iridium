@@ -20,10 +20,10 @@ const QString lightMode = "QPushButton {"
 		"border-radius: {radius}px;"
 		"}"
 		"QPushButton:hover {"
-		"background-color: rgba(200, 200, 200, 0.6);"
+		"background-color: rgba(200, 200, 200, 0.4);"
 		"}"
 		"QPushButton:pressed {"
-		"background-color: rgba(200, 200, 200, 1);"
+		"background-color: rgba(200, 200, 200, 0.6);"
 		"}";
 
 const QString darkMode = "QPushButton {"

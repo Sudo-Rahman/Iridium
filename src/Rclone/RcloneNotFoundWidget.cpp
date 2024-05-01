@@ -106,18 +106,23 @@ void RcloneNotFoundWidget::downloadRclone()
 	_thread = boost::thread(
 		[this,pwd, url, dialog]
 		{
+			int error = 0;
 			auto downloader = FileDownloader();
 			downloader.setProgressCallback([progressBar = dialog->findChild<ProgressBar *>()](double progress)
 			{
 				progressBar->setValue(progress);
 			});
-			downloader.setErrorCallback([dialog](std::string error)
+			downloader.setErrorCallback([err = &error,dialog](std::string error)
 			{
-				dialog->close();
+				dialog->hide();
 				cerr << "Error downloading rclone: " << error << endl;
+				*err = 1;
 			});
 
 			downloader.downloadFile(url, pwd + "rclone.zip");
+
+			 if (error)
+				 return;
 
 			// Unzip
 			int err = 0;

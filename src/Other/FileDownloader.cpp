@@ -28,6 +28,8 @@ void FileDownloader::downloadFile(const std::string &url, const std::string &des
 		FILE *file = fopen(destination.c_str(), "wb");
 		if (file)
 		{
+			curl_easy_setopt(_curl_handle, CURLOPT_SSL_VERIFYPEER, 0L);
+
 			curl_easy_setopt(_curl_handle, CURLOPT_URL, url.c_str());
 			curl_easy_setopt(_curl_handle, CURLOPT_WRITEDATA, file);
 			curl_easy_setopt(_curl_handle, CURLOPT_WRITEFUNCTION, writeCallback);

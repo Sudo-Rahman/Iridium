@@ -27,16 +27,15 @@ void TreeFileViewContainer::initUI()
     _layout = new QVBoxLayout(this);
     setContentsMargins(0, 0, 0, 0);
     _layout->setContentsMargins(0, 0, 0, 0);
-    _layout->setSpacing(4);
+    _layout->setSpacing(0);
 
     auto btnLayout = new QHBoxLayout();
-    btnLayout->setContentsMargins(0, 0, 0, 0);
+    btnLayout->setContentsMargins(5, 5, 5, 5);
     _layout->addLayout(btnLayout);
 
     _back_button = new RoundedButton(QIcon(":/resources/back_browser_arrow.png"),this);
     _back_button->setIconSize(QSize(24, 24));
     _back_button->setFixedSize(QSize(30, 30));
-    _back_button->setContentsMargins(4, 4, 4, 4);
     _back_button->setCircular(true);
     btnLayout->addWidget(_back_button);
 
