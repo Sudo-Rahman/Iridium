@@ -1,4 +1,4 @@
-# <img src="https://github.com/Sudo-Rahman/Iridium/blob/main/ressources/Iridium.png" width="50" height="50" align="center" /> Iridium
+# <img src="https://github.com/Sudo-Rahman/Iridium/blob/main/resources/Iridium.png" width="50" height="50" align="center" /> Iridium
 
 Graphical application for managing remote storage services such as Google Drive, Dropbox, OneDrive, etc. Written in C++, using Qt framework, boost library and rclone binary.
 <br>
@@ -74,6 +74,7 @@ Graphical application for managing remote storage services such as Google Drive,
 
 #### MacOS/Linux
   - Install conan package manager for boost, libcurl, libzip dependencies.
+  - Download and build [rclone_cpp library](https://github.com/Sudo-Rahman/rclone_cpp).
   - Download shared Qt library or build it from source.
 
     ```bash

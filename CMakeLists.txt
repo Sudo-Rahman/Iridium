@@ -58,16 +58,6 @@ file(GLOB_RECURSE TRANSLATION
 )
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-
-    # Assume your plist file is named Info.plist.in and located in the same directory as CMakeLists.txt
-    set(MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist.in)
-
-    configure_file(${MACOSX_BUNDLE_INFO_PLIST} Info.plist)
-
-    file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Iridium.app/Contents/Translations)
-    set_source_files_properties(${TRANSLATION}
-            PROPERTIES OUTPUT_LOCATION ${CMAKE_CURRENT_BINARY_DIR}/Iridium.app/Contents/Translations)
-
 else ()
     file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Translations)
     set_source_files_properties(${TRANSLATION} PROPERTIES
@@ -77,7 +67,8 @@ endif ()
 qt_add_translation(QM_FILES ${TRANSLATION})
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    file(COPY ${RCLONE} DESTINATION Iridium.app/Contents/MacOS)
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "14.0" CACHE STRING "Minimum OS X deployment version")
+    set_source_files_properties("${QM_FILES}" PROPERTIES MACOSX_PACKAGE_LOCATION "Translations")
     set(MACOSX_BUNDLE_ICON_FILE Iridium.icns)
     set(myApp_ICON resources/Iridium.icns)
     set_source_files_properties(${myApp_ICON} PROPERTIES
@@ -108,7 +99,6 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
             MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_NAME} ${Iridium_VERSION}"
             MACOSX_BUNDLE_COPYRIGHT "© 2023 ${PROJECT_NAME}"
             MACOSX_BUNDLE_ICON_FILE Iridium.icns
-            MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_BINARY_DIR}/Info.plist
-
+            MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/Info.plist.in"
     )
 endif ()
