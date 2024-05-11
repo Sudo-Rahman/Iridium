@@ -30,21 +30,22 @@ signals2::signal<void()> Settings::list_remote_changed;
 map<Settings::ProcessOptions, iro::basic_opt_uptr> Settings::_options_process = {};
 
 const map<Settings::Node, string> Settings::_nodes = {
-				{Settings::Node::All, ""},
-				{Settings::Node::General, "general"},
-				{Settings::Node::Rclone, "rclone"},
-				{Settings::Node::RclonePath, "rclone.path"},
-				{Settings::Node::Theme, "theme"},
-				{Settings::Node::MaxProcess, "rclone.max_process"},
-				{Settings::Node::LoadType, "rclone.load_type"},
-				{Settings::Node::DirIconColor, "theme.dir_color"},
-				{Settings::Node::Remotes, "remotes"},
-				{Settings::Node::MaxDepth, "rclone.max_depth"},
-				{Settings::Node::Flags, "rclone.flags"},
-				{Settings::Node::Language, "general.language"},
-				{Settings::Node::Width, "general.size.width"},
-				{Settings::Node::Height, "general.size.height"},
-				{Settings::Node::ReloadTime, "general.reload_time"},
+				{Node::All, ""},
+				{Node::General, "general"},
+				{Node::Rclone, "rclone"},
+				{Node::RclonePath, "rclone.path"},
+				{Node::Theme, "theme"},
+				{Node::MaxProcess, "rclone.max_process"},
+				{Node::LoadType, "rclone.load_type"},
+				{Node::DirIconColor, "theme.dir_color"},
+				{Node::Remotes, "remotes"},
+				{Node::MaxDepth, "rclone.max_depth"},
+				{Node::Flags, "rclone.flags"},
+				{Node::Language, "general.language"},
+				{Node::Width, "general.size.width"},
+				{Node::Height, "general.size.height"},
+				{Node::ReloadTime, "general.reload_time"},
+				{Node::TempFiles, "temp_files"}
 		};
 
 const map<Settings::ProcessOptions, string> Settings::_nodes_options = {
@@ -313,6 +314,7 @@ void Settings::initSettings()
 	_settings.put(_nodes.at(Width), 1200);
 	_settings.put(_nodes.at(Height), 600);
 	_settings.put(_nodes.at(ReloadTime), 10);
+	_settings.put(_nodes.at(TempFiles), "");
 
 	pt::ptree remote, ptree_path;
 	RemoteInfo remoteInfo = {"Local", remote::none, "/"};
@@ -324,7 +326,7 @@ void Settings::initSettings()
 	_settings.put_child(_nodes.at(Remotes), array);
 
 	_settings.put_child(_nodes_options.at(Transfers), pt::ptree{"4"});
-	_settings.put_child(_nodes_options.at(Stats), pt::ptree{"0.5"});
+	_settings.put_child(_nodes_options.at(Stats), pt::ptree{"0.5s"});
 
 
 	_default = _settings;
@@ -390,6 +392,38 @@ void Settings::setProcessOptions(const ProcessOptions &option, iro::basic_opt_up
 void Settings::setProcessOptions(const ProcessOptions &option, const iro::basic_option &value)
 {
 	setProcessOptions(option,std::make_unique<iro::basic_option>(value));
+}
+
+QFile Settings::saveFileToTemp(const QByteArray &data, const QString &name)
+{
+	auto path = bf::temp_directory_path().append(name.toStdString());
+	// check if file already exists and compare data
+	if(bf::exists(path) and bf::is_regular_file(path))
+		bf::remove(path);
+	ofstream ofs(path.string(), ios::out | ios::binary);
+	ofs.write(data.data(), data.size());
+	ofs.close();
+	// add file to temp_files array
+	auto temp_files = _settings.get_child(_nodes.at(TempFiles));
+	// check if file already exists
+	for (const auto &[_, file]: temp_files)
+	{
+		if (file.get_value<string>() == path.string())
+			return QFile(path.string().c_str());
+	}
+	temp_files.push_back(std::make_pair("", pt::ptree(path.string())));
+	_settings.put_child(_nodes.at(TempFiles), temp_files);
+	saveSettings();
+	return QFile(path.string().c_str());
+}
+
+void Settings::deleteAllTempFiles()
+{
+	auto temp_files = _settings.get_child(_nodes.at(TempFiles));
+	for (const auto &[_, file]: temp_files)
+		bf::remove(file.get_value<string>());
+	_settings.put_child(_nodes.at(TempFiles), pt::ptree{});
+	saveSettings();
 }
 
 iro::basic_option Settings::getProcessOptions(const ProcessOptions &option)

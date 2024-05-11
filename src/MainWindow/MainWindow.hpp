@@ -17,9 +17,7 @@ Q_OBJECT
 
     QHBoxLayout *_layout{};
     QTabWidget *_tabWidget{};
-    QStatusBar *_statusBar{};
 
-    bool _check_rclone = false;
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);

@@ -182,10 +182,6 @@ void ItemInfoDialog::initSize()
 
 		connect(this, &ItemInfoDialog::threadFinished, this, [this, objs, size]()
 		{
-			_layout->removeWidget(_loading1);
-			_loading1->deleteLater();
-			_layout->removeWidget(_loading2);
-			_loading2->deleteLater();
 			_size->show();
 			_objs->show();
 

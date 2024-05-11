@@ -118,19 +118,12 @@ void RemoteWidget::init()
     labelRemoteName->setToolTip(QString::fromStdString(_remote_info->name()));
     labelRemoteName->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
     labelRemoteName->setAlignment(Qt::AlignCenter);
-    // set auto size font
-    QFont font = labelRemoteName->font();
-    font.setPointSize(15);
-    labelRemoteName->setFont(font);
     _layout->addWidget(labelRemoteName);
 
     auto rightLayout = new QVBoxLayout;
     rightLayout->setSpacing(10);
     rightLayout->setContentsMargins(0, 0, 0, 0);
     _selected_label = new QLabel(this);
-    font = _selected_label->font();
-    font.setPointSize(15);
-    _selected_label->setFont(font);
 
 
     _delete = new RoundedButton("✕", this);

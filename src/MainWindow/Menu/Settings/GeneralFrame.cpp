@@ -10,6 +10,8 @@
 #include <QLabel>
 #include <Settings.hpp>
 
+#include <iostream>
+
 GeneralFrame::GeneralFrame(QWidget *parent) : QFrame(parent)
 {
     auto *layout = new QVBoxLayout(this);

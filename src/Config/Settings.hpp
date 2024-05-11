@@ -49,6 +49,7 @@ public:
         Width,
         Height,
         ReloadTime,
+        TempFiles
     };
 
     enum ProcessOptions
@@ -133,6 +134,10 @@ public:
     static void setProcessOptions(const ProcessOptions &option, iro::basic_opt_uptr &&value);
 
     static void setProcessOptions(const ProcessOptions &option, const iro::basic_option &value);
+
+    static QFile saveFileToTemp(const QByteArray &data, const QString &name);
+
+    static void deleteAllTempFiles();
 
     static iro::basic_option getProcessOptions(const ProcessOptions &option);
 

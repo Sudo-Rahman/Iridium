@@ -128,5 +128,5 @@ signals:
 
 	void resized();
 
-	void previewed(const QByteArray& data);
+	void previewed(const QByteArray& data, const QString& name);
 };

@@ -26,6 +26,7 @@
 #include <Settings.hpp>
 
 #include "IridiumApp.hpp"
+#include "Preview.hpp"
 #include "Utility/Utility.hpp"
 
 using namespace iridium::rclone;
@@ -51,10 +52,7 @@ public:
 			return;
 		if (index == model->index(0, 0)) return;
 		auto *item = dynamic_cast<TreeFileItem *>(model->itemFromIndex(index));
-		if (item and item->getFile()->isDir() and index.column() == 0)
-		{
-			option->icon = Settings::dirIcon();
-		}
+		if (item and item->getFile()->isDir() and index.column() == 0) { option->icon = Settings::dirIcon(); }
 	}
 };
 
@@ -192,10 +190,9 @@ void TreeFileView::connectSignals()
 		_search_line_edit->move(x_y);
 	});
 
-	connect(this, &TreeFileView::previewed, this, [this](const QByteArray &data)
+	connect(this, &TreeFileView::previewed, this, [this](const QByteArray &data, const QString &name)
 	{
-		ImagePreviewDialog dialog(data, this);
-		dialog.exec();
+		Preview preview(name, data);
 	});
 }
 
@@ -282,8 +279,12 @@ void TreeFileView::doubleClick(const QModelIndex &index)
 	if (item == nullptr)
 		return;
 
-	if (not item->getFile()->isDir())
+	if (not item->getFile()->isDir() )
+	{
+		if(Iridium::Utility::isPreviewable(*item->getFile()))
+			preview(item);
 		return;
+	}
 
 	search("");
 
@@ -1107,13 +1108,18 @@ void TreeFileView::preview(const TreeFileItem *item)
 {
 	if (item->getFile()->isDir())
 		return;
+	if(item->getFile()->getRemoteInfo()->isLocal())
+	{
+		Preview preview(std::make_unique<QFile>(item->getFile()->absolute_path().c_str()));
+		return;
+	}
 	auto process = process_uptr(new ir::process());
-	process->on_finish([rclone = process.get(),this](int exit)
+	process->on_finish([name = item->getFile()->name(),rclone = process.get(),this](int exit)
 	{
 		if (exit not_eq 0)
 			return;
 		auto data = QByteArray::fromStdString(boost::algorithm::join(rclone->get_output(), "\n"));
-		emit previewed(data);
+		emit previewed(data, name.c_str());
 	});
 	process->cat(*item->getFile());
 	Iridium::Global::process_pool.add_process(std::move(process));

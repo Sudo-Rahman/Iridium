@@ -32,11 +32,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 //    _tabWidget->addTab(new SyncWidget(this), tr("Synchronisation"));
 
 
-    _statusBar = new QStatusBar(this);
-    setStatusBar(_statusBar);
-    _statusBar->setLayoutDirection(Qt::RightToLeft);
-    _statusBar->setContentsMargins(10, 0, 10, 0);
-
     connectSignals();
 
 }
@@ -50,5 +45,6 @@ void MainWindow::closeEvent(QCloseEvent *event)
 {
     Settings::setValue(std::pair(Settings::Width, width()), std::pair(Settings::Height, height()));
     Settings::saveSettings();
+    Settings::deleteAllTempFiles();
     QMainWindow::closeEvent(event);
 }
