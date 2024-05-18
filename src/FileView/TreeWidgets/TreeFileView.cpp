@@ -321,10 +321,6 @@ void TreeFileView::showContextMenu()
 		                      ItemMenu::Action::Delete, false,
 		                      ItemMenu::Action::Sync, false);
 	}
-	if (lisItem.size() == 1)
-		menu.setActionEnabled(ItemMenu::Action::Preview, Preview::isPreviewable(*lisItem.first()->getFile()));
-	else
-		menu.setActionEnabled(ItemMenu::Action::Preview, false);
 
 	if (QTreeView::selectedIndexes().isEmpty())
 		menu.setActionEnabled(ItemMenu::Action::Copy, false,
@@ -410,9 +406,6 @@ void TreeFileView::showContextMenu()
 		case ItemMenu::Action::Sync:
 			if (lisItem.size() == 1)
 				Iridium::Global::sync_dirs.push_back(lisItem.front()->getFile());
-			break;
-		case ItemMenu::Action::Preview:
-			preview(lisItem.front());
 			break;
 		default:
 			break;

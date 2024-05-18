@@ -13,7 +13,7 @@ class Preview
 public:
 	explicit Preview(const QString &file, const QByteArray &data);
 
-	Preview(unique_file file);
+	explicit Preview(unique_file file);
 
 	static bool isPreviewable(const RcloneFile &file);
 
@@ -24,9 +24,5 @@ private:
 	QString _name;
 	unique_file _file{};
 
-	void macos();
-
-	void linuxPrev();
-
-	void windowsPrev();
+	void preview();
 };

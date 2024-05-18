@@ -28,7 +28,6 @@ public:
         NewFolder,
         Tree,
         Sync,
-        Preview
     };
 
     [[nodiscard]] Action action() const { return _action; }
@@ -69,8 +68,6 @@ signals:
     void tree();
 
     void sync();
-
-    void preview();
 
 };
 

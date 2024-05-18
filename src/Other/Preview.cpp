@@ -5,111 +5,79 @@
 #include "Preview.hpp"
 
 #include <QMessageBox>
+#include <QProcess>
 #include <boost/process.hpp>
 #include <Settings.hpp>
 
+
+#ifdef _WIN32 || _WIN64
+#include <boost/process/windows.hpp>
+#endif
+
 Preview::Preview(const QString &file, const QByteArray &data) : _data(data), _name(file)
 {
-	switch (Settings::getSystem().os)
-	{
-		case Settings::MacOs:
-			macos();
-			break;
-		case Settings::Linux:
-			linuxPrev();
-		break;
-		default:
-			QMessageBox::critical(nullptr, QObject::tr("Erreur"), QObject::tr("Système d'exploitation non supporté"));
-			break;
-	}
+    preview();
 }
 
 Preview::Preview(unique_file file) : _file(std::move(file))
 {
-	switch (Settings::getSystem().os)
-	{
-		case Settings::MacOs:
-			macos();
-			break;
-		case Settings::Linux:
-			linuxPrev();
-		break;
-		default:
-			QMessageBox::critical(nullptr, QObject::tr("Erreur"), QObject::tr("Système d'exploitation non supporté"));
-			break;
-	}
+    preview();
 }
 
-void Preview::macos()
+void Preview::preview()
 {
-	if(_file == nullptr)
-	{
-		auto file = new QFile(Settings::saveFileToTemp(_data, _name));
-		_file = unique_file(file);
-	}
-	try
-	{
-		boost::process::child proc(boost::process::shell ,"open",
-		                           boost::process::args = {QFileInfo(_file->fileName()).absoluteFilePath().toStdString()});
-		proc.wait();
-		if (proc.exit_code() not_eq 0)
-			QMessageBox::critical(nullptr, QObject::tr("Erreur"),
-			                      QObject::tr("Impossible d'ouvrir le fichier : ") + _name);
-	}
-	catch (std::exception &e) { QMessageBox::critical(nullptr, QObject::tr("Erreur"), e.what()); }
-}
+    if (_file == nullptr)
+    {
+        auto file = new QFile(Settings::saveFileToTemp(_data, _name));
+        _file = unique_file(file);
+    }
+    try
+    {
+        boost::process::child proc(boost::process::shell,
+#ifdef _WIN32 || _WIN64
+                                   "powershell /c start",
+#elif __APPLE__
+                                   "open",
+#elif __linux__
+            "xdg-open",
+#endif
+                                   boost::process::args = {
+                                       QFileInfo(_file->fileName()).absoluteFilePath().toStdString()
+                                   }
+#ifdef _WIN32 || _WIN64
+                                   , boost::process::windows::hide
+#endif
 
-void Preview::linuxPrev()
-{
-	if(_file == nullptr)
-	{
-		auto file = new QFile(Settings::saveFileToTemp(_data, _name));
-		_file = unique_file(file);
-	}
-	try
-	{
-		boost::process::child proc(boost::process::shell ,"xdg-open",
-								   boost::process::args = {QFileInfo(_file->fileName()).absoluteFilePath().toStdString()});
-		proc.wait();
-		if (proc.exit_code() not_eq 0)
-			QMessageBox::critical(nullptr, QObject::tr("Erreur"),
-								  QObject::tr("Impossible d'ouvrir le fichier : ") + _name);
-	}
-	catch (std::exception &e) { QMessageBox::critical(nullptr, QObject::tr("Erreur"), e.what()); }
-}
-
-void Preview::windowsPrev()
-{
-
+        );
+        proc.wait();
+        if (proc.exit_code() not_eq 0)
+            QMessageBox::critical(nullptr, QObject::tr("Erreur"),
+                                  QObject::tr("Impossible d'ouvrir le fichier : ") + _name);
+    } catch (std::exception &e) { QMessageBox::critical(nullptr, QObject::tr("Erreur"), e.what()); }
 }
 
 bool Preview::isPreviewable(const RcloneFile &file)
 {
-	if (Settings::getSystem().os != Settings::MacOs and Settings::getSystem().os != Settings::Linux)
-		return false;
-	if (file.isDir())
-		return false;
-	if(not file.getRemoteInfo()->isLocal())
-	{
-		// max 50 Mo
-		if (file.getSize() > 1024 * 1024 * 50 or file.getSize() == 0)
-			return false;
-	}
-	for (auto &i: file.mimeTypes())
-	{
-		if (i.name().contains("image") or i.name().contains("video") or i.name().contains("audio") or i.name().
-			contains("text") or i.name().contains("pdf"))
-			return true;
-	}
-	return false;
+
+    if (file.isDir())
+        return false;
+
+    if (file.getRemoteInfo()->isLocal())
+        return true;
+
+    // max 50 Mo
+    if (file.getSize() > 1024 * 1024 * 50 or file.getSize() == 0)
+        return false;
+
+    return std::ranges::any_of(file.mimeTypes(), [](const auto &i)
+    {
+        return i.name().contains("image") || i.name().contains("video") ||
+               i.name().contains("audio") || i.name().contains("text") ||
+               i.name().contains("pdf");
+    });
 }
 
 bool Preview::isPreviewable(const QList<RcloneFilePtr> &files)
 {
-	for (auto &i: files)
-	{
-		if (not isPreviewable(*i))
-			return false;
-	}
-	return true;
+    return std::ranges::all_of(files, [](const auto &i) { return isPreviewable(*i); });
 }
