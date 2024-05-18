@@ -15,10 +15,18 @@ public:
 
 	Preview(unique_file file);
 
+	static bool isPreviewable(const RcloneFile &file);
+
+	static bool isPreviewable(const QList<RcloneFilePtr> &files);
+
 private:
 	QByteArray _data;
 	QString _name;
 	unique_file _file{};
 
 	void macos();
+
+	void linuxPrev();
+
+	void windowsPrev();
 };

@@ -3,6 +3,7 @@
 
 #include "RcloneFileModel.hpp"
 #include <iridium/process.hpp>
+#include <boost/signals2.hpp>
 
 #include "Global.hpp"
 

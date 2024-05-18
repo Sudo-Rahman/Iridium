@@ -67,7 +67,7 @@ endif ()
 qt_add_translation(QM_FILES ${TRANSLATION})
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    set(CMAKE_OSX_DEPLOYMENT_TARGET "14.0" CACHE STRING "Minimum OS X deployment version")
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "13.0" CACHE STRING "Minimum OS X deployment version")
     set_source_files_properties("${QM_FILES}" PROPERTIES MACOSX_PACKAGE_LOCATION "Translations")
     set(MACOSX_BUNDLE_ICON_FILE Iridium.icns)
     set(myApp_ICON resources/Iridium.icns)

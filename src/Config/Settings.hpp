@@ -12,6 +12,7 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/signals2.hpp>
+#include <boost/exception/diagnostic_information.hpp>
 #include <Global.hpp>
 
 

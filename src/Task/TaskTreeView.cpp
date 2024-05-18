@@ -6,6 +6,7 @@
 #include <QHeaderView>
 #include <QMenu>
 #include <Global.hpp>
+#include <boost/functional/hash.hpp>
 #include <QMessageBox>
 #include "TaskTreeView.hpp"
 
@@ -277,6 +278,6 @@ void TaskTreeView::addTask(const RcloneFile &src, const RcloneFile &dst, const p
 				it->second.parent->terminate();
 		});
 	});
-	rclone->add_option(option::logging::use_json_log(), option::logging::verbose());
+	rclone->add_option(option::logging::use_json_log()).add_option(option::logging::verbose());
 	rclone->execute();
 }

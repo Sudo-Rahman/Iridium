@@ -281,7 +281,7 @@ void TreeFileView::doubleClick(const QModelIndex &index)
 
 	if (not item->getFile()->isDir() )
 	{
-		if(Iridium::Utility::isPreviewable(*item->getFile()))
+		if(Preview::isPreviewable(*item->getFile()))
 			preview(item);
 		return;
 	}
@@ -322,7 +322,7 @@ void TreeFileView::showContextMenu()
 		                      ItemMenu::Action::Sync, false);
 	}
 	if (lisItem.size() == 1)
-		menu.setActionEnabled(ItemMenu::Action::Preview, Iridium::Utility::isPreviewable(*lisItem.first()->getFile()));
+		menu.setActionEnabled(ItemMenu::Action::Preview, Preview::isPreviewable(*lisItem.first()->getFile()));
 	else
 		menu.setActionEnabled(ItemMenu::Action::Preview, false);
 

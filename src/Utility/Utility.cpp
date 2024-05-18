@@ -14,14 +14,13 @@
 
 using namespace std;
 using namespace Iridium;
-
 /**
  * @brief Utility::numberToString, coverti un nombre en string avec des espaces
  * @param num
  * @param space
  * @return string
  */
-string Utility::numberToString(int64_t num, int space)
+string Utility::numberToStringInt(int64_t num, int space)
 {
 	string tmpSize;
 
@@ -45,7 +44,7 @@ string Utility::numberToString(int64_t num, int space)
 	return tmpSize;
 }
 
-std::string Utility::numberToString(uint64_t num, int space) { return numberToString((int64_t)num, space); }
+
 
 /**
  * @brief Utility::numberToString, converti un nombre en string avec des espaces
@@ -53,7 +52,7 @@ std::string Utility::numberToString(uint64_t num, int space) { return numberToSt
  * @param space
  * @return string
  */
-string Utility::numberToString(double64_t num, int space)
+string Utility::numberToStringFloating(double64_t num, int space)
 {
 	string tmpSize;
 
@@ -117,35 +116,4 @@ void Utility::pushBack(vector<std::string> &dst, const std::vector<std::vector<s
 		for (auto &j: i)
 			dst.push_back(j);
 	}
-}
-
-bool Utility::isPreviewable(const RcloneFile &file)
-{
-	if (Settings::getSystem().os != Settings::MacOs)
-		return false;
-	if (file.isDir())
-		return false;
-	if(not file.getRemoteInfo()->isLocal())
-	{
-		// max 50 Mo
-		if (file.getSize() > 1024 * 1024 * 50 or file.getSize() == 0)
-			return false;
-	}
-	for (auto &i: file.mimeTypes())
-	{
-		if (i.name().contains("image") or i.name().contains("video") or i.name().contains("audio") or i.name().
-		    contains("text") or i.name().contains("pdf"))
-			return true;
-	}
-	return false;
-}
-
-bool Utility::isPreviewable(const QList<RcloneFilePtr> &files)
-{
-	for (auto &i: files)
-	{
-		if (not isPreviewable(*i))
-			return false;
-	}
-	return true;
 }

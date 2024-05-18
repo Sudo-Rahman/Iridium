@@ -2,8 +2,7 @@
 // Created by rahman on 12/02/23.
 //
 
-#ifndef IRIDIUM_UTILITY_HPP
-#define IRIDIUM_UTILITY_HPP
+#pragma once
 
 #include <iostream>
 #include <string>
@@ -13,30 +12,30 @@
 
 typedef long double double64_t;
 
+using std::string;
+
 namespace Iridium
 {
-    /**
-     * @brief The Utility class
-     */
-    class Utility
-    {
+	/**
+	 * @brief The Utility class
+	 */
+	class Utility
+	{
+	public:
+		[[nodiscard]] static std::string numberToStringInt(int64_t num, int space = 3);
 
-    public:
-        [[nodiscard]] static std::string numberToString(int64_t num, int space = 3);
+		[[nodiscard]] static std::string numberToStringFloating(double64_t num, int space = 3);
 
-        [[nodiscard]] static std::string numberToString(uint64_t num, int space = 3);
+		template<typename T>
+		[[nodiscard]] static string numberToString(T num, int space = 3) requires std::is_arithmetic_v<T>
+		{
+			if (std::is_floating_point_v<T>) { return Utility::numberToStringFloating(num, space); }
+			return Utility::numberToStringInt(num, space);
+		}
 
-        [[nodiscard]] static std::string numberToString(double64_t num, int space = 3);
+		[[nodiscard]] static std::string sizeToString(double64_t num);
 
-        [[nodiscard]] static std::string sizeToString(double64_t num);
+		static void pushBack(std::vector<std::string> &dst, const std::vector<std::vector<std::string>> &src);
 
-        static void pushBack(std::vector<std::string> &dst, const std::vector<std::vector<std::string>> &src);
-
-        static bool isPreviewable(const RcloneFile &file);
-
-        static bool isPreviewable(const QList<RcloneFilePtr> &files);
-
-    };
-
+	};
 }
-#endif //IRIDIUM_UTILITY_HPP

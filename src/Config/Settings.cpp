@@ -9,8 +9,8 @@
 #include <QTranslator>
 #include <iostream>
 #include <Global.hpp>
-#include <iridium/process.hpp>
-#include <iridium/entities/remote.hpp>
+#include <iridium/rclone.hpp>
+#include <boost/process.hpp>
 
 #include "AddNewRemoteDialog.hpp"
 

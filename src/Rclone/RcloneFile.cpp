@@ -8,6 +8,8 @@
 #include <Utility/Utility.hpp>
 #include <QMimeDatabase>
 
+using std::chrono::system_clock;
+
 RcloneFile::RcloneFile(file * parent, const QString & file_name, int64_t size, bool is_dir,
     const QDateTime & mod_time, const RemoteInfoPtr & remote)
 {
@@ -15,7 +17,7 @@ RcloneFile::RcloneFile(file * parent, const QString & file_name, int64_t size, b
     set_name(file_name.toStdString());
     set_size(size);
     set_is_dir(is_dir);
-    set_mod_time(boost::posix_time::from_time_t(mod_time.toSecsSinceEpoch()));
+    set_mod_time(system_clock::from_time_t(mod_time.toSecsSinceEpoch()));
     set_remote(remote);
 }
 
@@ -51,12 +53,13 @@ void RcloneFile::setSize(uint64_t size)
 
 QDateTime RcloneFile::getModTime() const
 {
-    return QDateTime::fromSecsSinceEpoch(to_time_t(mod_time()));
+    using  namespace  std::chrono;
+    return QDateTime::fromSecsSinceEpoch(duration_cast<seconds>(mod_time().time_since_epoch()).count());
 }
 
 void RcloneFile::setModTime(const QDateTime &modTime)
 {
-    set_mod_time(boost::posix_time::from_time_t(modTime.toSecsSinceEpoch()));
+    set_mod_time(system_clock::from_time_t(modTime.toSecsSinceEpoch()));
 }
 
 QString RcloneFile::getName() const
