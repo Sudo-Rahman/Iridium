@@ -16,6 +16,10 @@ public:
 
 	~FileDownloader();
 
+	/**
+	 * @brief Set the progress callback
+	 * @param callback the callback to call when the progress is updated (double between 0 and 1)
+	 */
 	void setProgressCallback(std::function<void(double)> callback);
 
 	void setCompletionCallback(std::function<void()> callback);

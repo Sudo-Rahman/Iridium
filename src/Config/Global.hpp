@@ -2,6 +2,7 @@
 
 #include <any>
 #include <RcloneFile.hpp>
+#include <boost/signals2.hpp>
 #include <iridium/process.hpp>
 
 namespace Iridium
@@ -23,6 +24,8 @@ namespace Iridium
         static uint8_t reload_time;
         static ir::process_pool process_pool;
         static std::map<RemoteInfoPtr , std::any> remote_model;
+        static boost::signals2::signal<void(std::any)> signal_add_info;
+        static boost::signals2::signal<void(std::any)> signal_remove_info;
 
 
         static void clear_and_swap_copy_files(const std::vector<RcloneFilePtr> &files)

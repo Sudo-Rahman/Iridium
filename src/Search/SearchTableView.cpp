@@ -10,12 +10,15 @@
 #include <QDirIterator>
 #include <Settings.hpp>
 #include <iostream>
+#include <QHBoxLayout>
+#include <QLabel>
 
+#include "CircularProgressBar.hpp"
 #include "IridiumApp.hpp"
 
 using namespace iridium::rclone;
 
-SearchTableView::SearchTableView(QWidget * parent) : QTableView(parent)
+SearchTableView::SearchTableView(QWidget *parent) : QTableView(parent)
 {
 	_model = new QStandardItemModel(0, 6, this);
 
@@ -58,7 +61,7 @@ SearchTableView::SearchTableView(QWidget * parent) : QTableView(parent)
 			"QTableView::item:selected:focus { background: palette(highlight); }\n"
 			"QTableView::item:!selected:focus { background:transparent; }");
 
-	for (auto const& remote: Iridium::Global::remotes)
+	for (auto const &remote: Iridium::Global::remotes)
 	{
 		_remote_to_root_file[remote.get()] = RcloneFile(nullptr, "", -1, true, QDateTime::currentDateTime(), remote);
 	}
@@ -95,14 +98,15 @@ void SearchTableView::showCustomContextMenu()
 	if (action == copie)
 	{
 		std::vector<RcloneFilePtr> files;
-		for (auto& item: items)
+		for (auto &item: items)
 		{
 			auto item_cast = dynamic_cast<SearchTableItem *>(_model->itemFromIndex(item));
 
-			auto file_not_exist = std::ranges::find_if(files.begin(), files.end(), [item_cast](const RcloneFilePtr& file)
-			{
-				return file.get() == item_cast->getFile().get();
-			}) == files.end();
+			auto file_not_exist = std::ranges::find_if(files.begin(), files.end(),
+			                                           [item_cast](const RcloneFilePtr &file)
+			                                           {
+				                                           return file.get() == item_cast->getFile().get();
+			                                           }) == files.end();
 
 			if (item_cast and file_not_exist)
 				files.push_back(item_cast->getFile());
@@ -111,7 +115,7 @@ void SearchTableView::showCustomContextMenu()
 	}
 }
 
-void SearchTableView::addFile(const RcloneFilePtr& file) const
+void SearchTableView::addFile(const RcloneFilePtr &file) const
 {
 	QList<QStandardItem *> row = {
 					new SearchTableItem(0, file),
@@ -124,13 +128,14 @@ void SearchTableView::addFile(const RcloneFilePtr& file) const
 	_model->appendRow(row);
 }
 
-
-void SearchTableView::searchLocal(const QString& text, const RemoteInfoPtr& remoteInfo)
+void SearchTableView::searchLocal(const QString &text, const RemoteInfoPtr &remoteInfo)
 {
 	if (text.size() < 3)
 		return;
+	auto widget = searchInfoWidget(remoteInfo->name().c_str());
+	widget->setParent(this);
 	auto th = boost::thread(
-		[this, text, remoteInfo]
+		[this, text, remoteInfo, widget]
 		{
 			try
 			{
@@ -150,32 +155,35 @@ void SearchTableView::searchLocal(const QString& text, const RemoteInfoPtr& remo
 
 						auto parent_info = QFileInfo(it.filePath());
 						auto parent = std::make_shared<RcloneFile>(
-							nullptr,
-							parent_info.path(),
-							parent_info.size(),
-							true,
-							parent_info.lastModified(),
-							remoteInfo
-						);
+								nullptr,
+								parent_info.path(),
+								parent_info.size(),
+								true,
+								parent_info.lastModified(),
+								remoteInfo
+							);
 
 						root_file.add_child_if_not_exist(parent);
 
 						auto rcloneFile = std::make_shared<RcloneFile>(
-							parent.get(),
-							it.fileName(),
-							it.fileInfo().size(),
-							it.fileInfo().isDir(),
-							it.fileInfo().lastModified(),
-							remoteInfo
-						);
+								parent.get(),
+								it.fileName(),
+								it.fileInfo().size(),
+								it.fileInfo().isDir(),
+								it.fileInfo().lastModified(),
+								remoteInfo
+							);
 						addFile(rcloneFile);
 					}
-					// boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
 				}
 				terminateSearch();
+				Iridium::Global::signal_remove_info(widget);
+				std::erase(_search_info_widgets, widget);
 			}
-			catch (boost::thread_interrupted& e) {}
+			catch (boost::thread_interrupted &e) {}
 		});
+	Iridium::Global::signal_add_info(widget);
+	_search_info_widgets.push_back(widget);
 	_threads.push_back(std::move(th));
 }
 
@@ -184,22 +192,31 @@ void SearchTableView::searchLocal(const QString& text, const RemoteInfoPtr& remo
  * @param filters
  * @param remoteInfo
  */
-void SearchTableView::searchDistant(option::basic_opt_uptr&& filters, const RemoteInfoPtr& remoteInfo)
+void SearchTableView::searchDistant(option::basic_opt_uptr &&filters, const RemoteInfoPtr &remoteInfo)
 {
 	auto process = std::make_unique<ir::process>();
+	auto widget = searchInfoWidget(remoteInfo->name().c_str());
+	widget->setParent(this);
 	process->add_option(std::move(filters));
 	process->lsl(_remote_to_root_file[remoteInfo.get()]).every_line_parser(
 				parser::file_parser::create(
 					new parser::file_parser(&_remote_to_root_file[remoteInfo.get()],
-					                        [this](const ire::file& file)
+					                        [this](const ire::file &file)
 					                        {
 						                        // thread safe
 						                        addFile(std::make_shared<RcloneFile>(file));
 					                        },
 					                        parser::file_parser::lsl)))
-			.on_finish([this](auto) { terminateSearch(); })
-			.on_start([this]
+			.on_finish([widget,this](auto)
 			{
+				Iridium::Global::signal_remove_info(widget);
+				std::erase(_search_info_widgets, widget);
+				terminateSearch();
+			})
+			.on_start([widget,this]
+			{
+				Iridium::Global::signal_add_info(widget);
+				_search_info_widgets.push_back(widget);
 				_searching++;
 				emit searchStarted();
 			});
@@ -220,20 +237,24 @@ void SearchTableView::terminateSearch()
  */
 void SearchTableView::stopAllSearch()
 {
-	for (auto& remote: _remote_to_root_file)
+	for (auto &remote: _remote_to_root_file)
 		remote.second.children().clear();
 	_pool.stop_all_processes_and_clear();
-	for (auto& th: _threads)
+	for (auto &th: _threads)
 		th.interrupt();
 	_threads.clear();
 	_searching = 0;
+
+	for(const auto &widget : _search_info_widgets)
+		Iridium::Global::signal_remove_info(widget);
+	_search_info_widgets.clear();
 }
 
 /**
  * @brief resize event
  * @param event
  */
-void SearchTableView::resizeEvent(QResizeEvent * event)
+void SearchTableView::resizeEvent(QResizeEvent *event)
 {
 	if (horizontalHeader()->count() > 0)
 		horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
@@ -242,4 +263,16 @@ void SearchTableView::resizeEvent(QResizeEvent * event)
 		horizontalHeader()->setSectionResizeMode(0, QHeaderView::Interactive);
 	if (horizontalHeader()->sectionSize(0) < QWidget::width() * .4)
 		setColumnWidth(0, QWidget::width() * .4);
+}
+
+auto SearchTableView::searchInfoWidget(const QString &remoteName) -> QWidget *
+{
+	auto infoWidget = new QWidget();
+	auto layout = new QHBoxLayout(infoWidget);
+	auto *progressBar = new CircularProgressBar(infoWidget);
+	progressBar->setSize(20);
+	layout->addWidget(new QLabel("Recherche dans " + remoteName + "..."));
+	infoWidget->findChild<QLabel *>()->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum);
+	layout->addWidget(progressBar);
+	return infoWidget;
 }

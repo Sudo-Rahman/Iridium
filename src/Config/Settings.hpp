@@ -160,6 +160,7 @@ public:
                 std::cout << "eror set Value" << diagnostic_information_what(e, true) << std::endl;
             }
         }
+        saveSettings();
     }
 
     /**

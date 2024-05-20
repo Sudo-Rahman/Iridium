@@ -45,10 +45,8 @@ ItemInfoDialog::ItemInfoDialog(TreeFileItem * item, QWidget * parent) : QDialog(
 	{
 		_name->setText(_file->getRemoteInfo()->name().c_str());
 		_mod_time->hide();
-		_loading1 = new ProgressBar(ProgressBar::Circular, this);
-		_loading1->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-		_loading1->setFixedSize(100, 100);
-		_loading1->setRange(0, 0);
+		_loading1 = new CircularProgressBar(this);
+		_loading1->setSize(100);
 		_layout->addWidget(_loading1, _row, 0, 1, 3, Qt::AlignCenter);
 
 		auto parser = ir::parser::about_parser::create(
@@ -103,16 +101,13 @@ ItemInfoDialog::ItemInfoDialog(TreeFileItem * item, QWidget * parent) : QDialog(
 		if (_file->getSize() <= 0)
 		{
 			_size->hide();
-			_loading1 = new ProgressBar(ProgressBar::Circular, this);
-			_loading1->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-			_loading1->setFixedSize(48, 48);
-			_loading1->setRange(0, 0);
+			_loading1 = new CircularProgressBar(this);
+			_loading1->setSize(30);
 			_layout->addWidget(_loading1, 5, 1, 1, 1, Qt::AlignLeft);
 
-			_loading2 = new ProgressBar(ProgressBar::Circular, this);
+			_loading2 = new CircularProgressBar(this);
 			_loading2->setRange(0, 0);
-			_loading2->setFixedSize(48, 48);
-			_loading2->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+			_loading2->setSize(30);
 			_layout->addWidget(_loading2, 7, 1, 1, 1, Qt::AlignLeft);
 		}
 	}

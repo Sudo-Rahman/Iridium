@@ -13,6 +13,8 @@ vector<RcloneFilePtr> Global::copy_files{};
 vector<RcloneFilePtr> Global::sync_dirs{};
 vector<RemoteInfoPtr> Global::remotes{};
 map<RemoteInfoPtr, any> Global::remote_model{};
+boost::signals2::signal<void(std::any)> Global::signal_add_info;
+boost::signals2::signal<void(std::any)> Global::signal_remove_info;
 
 uint8_t Global::max_process = thread::hardware_concurrency();
 string Global::path_rclone;

@@ -11,7 +11,8 @@
 #include <boost/thread.hpp>
 #include "TreeFileItem.hpp"
 #include <iridium/process.hpp>
-#include <ProgressBar.hpp>
+
+#include "CircularProgressBar.hpp"
 
 class ItemInfoDialog : public QDialog
 {
@@ -21,7 +22,7 @@ Q_OBJECT
     std::shared_ptr<RcloneFile> _file{};
     TreeFileItem *_item{};
     QLabel *_icon{}, *_name{}, *_size{}, *_type{}, *_path{}, *_mod_time{}, *_objs{};
-    ProgressBar *_loading1{}, *_loading2{};
+    CircularProgressBar *_loading1{}, *_loading2{};
     QTimer _timer{};
     int _row{};
     boost::shared_ptr<boost::thread> _thread{};

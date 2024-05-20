@@ -14,11 +14,6 @@ class ProgressBar : public QWidget
 Q_OBJECT
 
 public:
-    enum Type
-    {
-        Circular,
-        Linear
-    };
     enum State
     {
         Progress,
@@ -28,7 +23,6 @@ public:
 private:
 
     double_t _value{}, _max_value{}, _min_value{}, _timer_counter{};
-    Type _type{};
     bool _is_indeterminate{false}, _show_progress{false};
     QTimer *_timer{};
     State _state{Progress};
@@ -37,15 +31,13 @@ private:
             palette().color(QPalette::Highlight)};
 
 public:
-    explicit ProgressBar(const Type &type, QWidget *parent = nullptr);
+    explicit ProgressBar(QWidget *parent = nullptr);
 
     void setValue(double_t);
 
     void setMaxValue(double_t);
 
     void setMinValue(double_t);
-
-    void setType(Type mType);
 
     void setShowProgress(bool);
 
@@ -60,16 +52,10 @@ public:
 protected:
     void paintEvent(QPaintEvent *event) override;
 
-    void drawLinear(QPainter &painter);
-
-    void drawCircular(QPainter &painter);
-
     // resiez if circular width = height
     [[nodiscard]] QSize sizeHint() const override
     {
-        if (_type == Circular)
-            return {(QWidget::height() + QWidget::width()) / 2, (QWidget::height() + QWidget::width()) / 2};
-        return {QWidget::width(), QWidget::height()};
+        return QSize(100, 10);
     };
 };
 

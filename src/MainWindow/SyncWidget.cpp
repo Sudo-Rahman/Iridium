@@ -40,7 +40,7 @@ SyncWidget::SyncWidget(QWidget *parent) : QWidget(parent)
     _stop = new QPushButton(tr("Annuler"), this);
     _stop->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     _stop->hide();
-    _sync_progressBar = new ProgressBar(ProgressBar::Linear, this);
+    _sync_progressBar = new ProgressBar( this);
     _sync_progressBar->setMinimumHeight(15);
 
     top_left_layout->addLayout(combo_layout);

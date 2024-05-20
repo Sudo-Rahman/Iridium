@@ -29,6 +29,8 @@ Q_OBJECT
     std::map<RemoteInfo *, RcloneFile> _remote_to_root_file{};
     std::atomic_uint8_t _searching = 0;
 
+    std::vector<QWidget *> _search_info_widgets{};
+
 public :
     explicit SearchTableView(QWidget *parent = nullptr);
 
@@ -49,6 +51,8 @@ private:
     void showCustomContextMenu();
 
     void terminateSearch();
+
+    auto searchInfoWidget(const QString &remoteName) -> QWidget *;
 
 protected:
     void resizeEvent(QResizeEvent *event) override;

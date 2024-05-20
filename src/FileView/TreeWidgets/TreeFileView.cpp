@@ -25,6 +25,7 @@
 #include <boost/algorithm/string/join.hpp>
 #include <Settings.hpp>
 
+#include "CircularProgressBar.hpp"
 #include "IridiumApp.hpp"
 #include "Preview.hpp"
 #include "Utility/Utility.hpp"
@@ -375,8 +376,8 @@ void TreeFileView::showContextMenu()
 				diag->setMinimumSize(400, 400);
 				diag->setWindowTitle(tr("Arborescence"));
 				auto layout = new QVBoxLayout(diag);
-				auto progress = new ProgressBar(ProgressBar::Circular, diag);
-				progress->setRange(0, 0);
+				auto progress = new CircularProgressBar(diag);
+				progress->setSize(200);
 				layout->addWidget(progress, 0, Qt::AlignCenter);
 				auto rclone = new ir::process();
 				rclone->add_option(option::basic_option::uptr("--color", "NEVER"));
@@ -1107,13 +1108,24 @@ void TreeFileView::preview(const TreeFileItem *item)
 		return;
 	}
 	auto process = process_uptr(new ir::process());
-	process->on_finish([name = item->getFile()->name(),rclone = process.get(),this](int exit)
+
+	auto infoWidget = new QWidget(this);
+	auto layout = new QHBoxLayout(infoWidget);
+	auto *progressBar = new CircularProgressBar(infoWidget);
+	progressBar->setSize(20);
+	layout->addWidget(new QLabel(tr("Aperçu..."), infoWidget));
+	infoWidget->findChild<QLabel *>()->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum);
+	layout->addWidget(progressBar);
+
+	process->on_finish([infoWidget,name = item->getFile()->name(),rclone = process.get(),this](int exit)
 	{
+		Iridium::Global::signal_remove_info(std::any(infoWidget));
 		if (exit not_eq 0)
 			return;
 		auto data = QByteArray::fromStdString(boost::algorithm::join(rclone->get_output(), "\n"));
 		emit previewed(data, name.c_str());
 	});
 	process->cat(*item->getFile());
+	Iridium::Global::signal_add_info(std::any(infoWidget));
 	Iridium::Global::process_pool.add_process(std::move(process));
 }

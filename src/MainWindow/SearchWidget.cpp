@@ -7,9 +7,12 @@
 #include "Config/Settings.hpp"
 #include <QPainter>
 #include <QEvent>
+#include <QLabel>
 #include <QStyledItemDelegate>
 #include <QListView>
 #include <iridium/options.hpp>
+
+#include "CircularProgressBar.hpp"
 
 using namespace iridium::rclone::option;
 
@@ -31,7 +34,7 @@ SearchWidget::SearchWidget(QWidget *parent) : QWidget(parent)
 {
 	_filter_search = new FilterSearchGroupBox(this);
 
-	_progressBar = new ProgressBar(ProgressBar::Linear, this);
+	_progressBar = new ProgressBar( this);
 	setFocusPolicy(Qt::StrongFocus);
 	_progressBar->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 	_progressBar->setFixedHeight(10);

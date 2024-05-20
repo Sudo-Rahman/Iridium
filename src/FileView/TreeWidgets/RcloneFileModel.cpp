@@ -5,6 +5,8 @@
 #include "RcloneFileModel.hpp"
 #include <QVBoxLayout>
 #include <ProgressBar.hpp>
+
+#include "CircularProgressBar.hpp"
 #include "IridiumApp.hpp"
 
 /**
@@ -49,20 +51,18 @@ void RcloneFileModel::addProgressBar(const QModelIndex &index)
 	container->setContentsMargins(0, 0, 0, 0);
 	auto *layout = new QHBoxLayout(container);
 	layout->setContentsMargins(0, 0, 0, 0);
-	ProgressBar *progressBar;
+	QWidget *progressBar;
 
 	if (_expand_or_double_click)
 	{
-		progressBar = new ProgressBar(ProgressBar::Circular, container);
-		progressBar->setFixedSize(40, 40);
+		progressBar = new CircularProgressBar(container);
+		dynamic_cast<CircularProgressBar*>(progressBar)->setSize(25);
 	}
 	else
 	{
-		progressBar = new ProgressBar(ProgressBar::Linear, container);
+		progressBar = new ProgressBar(container);
 		progressBar->setFixedSize(100, 15);
 	}
-
-	progressBar->setRange(0, 0);
 	layout->setAlignment(Qt::AlignLeft);
 	layout->addWidget(progressBar);
 	_view->setIndexWidget(index, container);

@@ -10,6 +10,9 @@
 #include <QLayout>
 #include <QTabWidget>
 #include <QStatusBar>
+#include <InfoWidgetsDialog.hpp>
+
+class InfoWidget;
 
 class MainWindow : public QMainWindow
 {
@@ -17,6 +20,10 @@ Q_OBJECT
 
     QHBoxLayout *_layout{};
     QTabWidget *_tabWidget{};
+    QWidget *_bottomWidget{};
+    QHBoxLayout *_bottomLayout{};
+
+    InfoWidget *_info_widget{};
 
 
 public:
@@ -26,7 +33,6 @@ public:
 private:
     void connectSignals();
 
-//    void downloadRclone();
 protected:
     void closeEvent(QCloseEvent *event) override;
 };

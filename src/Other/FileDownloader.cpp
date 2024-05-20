@@ -63,7 +63,7 @@ int FileDownloader::progressCallback(void *clientp, curl_off_t dltotal, curl_off
 	FileDownloader *downloader = static_cast<FileDownloader *>(clientp);
 	if (downloader && downloader->_progress_callback)
 	{
-		double progress = (dltotal > 0) ? (static_cast<double>(dlnow) / static_cast<double>(dltotal)) * 100.0 : 0.0;
+		double progress = dltotal > 0 ? static_cast<double>(dlnow) / static_cast<double>(dltotal): 0.0;
 		downloader->_progress_callback(progress);
 	}
 	return 0;

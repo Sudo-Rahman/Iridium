@@ -7,6 +7,8 @@
 #include <QFileDialog>
 #include <QVBoxLayout>
 #include <Settings.hpp>
+
+#include "CircularProgressBar.hpp"
 #include "MainWindow.hpp"
 
 RcloneNotFoundWidget::RcloneNotFoundWidget(QWidget *parent) : QDialog(parent)
@@ -64,9 +66,8 @@ void RcloneNotFoundWidget::downloadRclone()
 	auto label = new QLabel(tr("Téléchargement en cours..."), dialog);
 	label->setAlignment(Qt::AlignCenter);
 	layout->addWidget(label);
-	auto progressBar = new ProgressBar(ProgressBar::Circular, dialog);
-	progressBar->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-	progressBar->setFixedSize(100, 100);
+	auto progressBar = new CircularProgressBar(dialog);
+	progressBar->setSize(100);
 	progressBar->setRange(0, 1.0);
 	layout->addWidget(progressBar, 0, Qt::AlignCenter);
 	dialog->open();
@@ -108,9 +109,9 @@ void RcloneNotFoundWidget::downloadRclone()
 		{
 			int error = 0;
 			auto downloader = FileDownloader();
-			downloader.setProgressCallback([progressBar = dialog->findChild<ProgressBar *>()](double progress)
+			downloader.setProgressCallback([progressBar = dialog->findChild<CircularProgressBar *>()](double progress)
 			{
-				progressBar->setValue(progress);
+				progressBar->setProgress(progress);
 			});
 			downloader.setErrorCallback([err = &error,dialog](std::string error)
 			{
@@ -171,6 +172,8 @@ void RcloneNotFoundWidget::downloadRclone()
 			::remove(string{pwd + "rclone.zip"}.c_str());
 			_downloaded = true;
 			Settings::setValue(std::pair(Settings::RclonePath, pwd + file_name));
+			Iridium::Global::path_rclone = pwd + file_name;
+			ir::process::initialize(Iridium::Global::path_rclone);
 			dialog->close();
 		});
 }

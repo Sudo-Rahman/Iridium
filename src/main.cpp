@@ -3,6 +3,7 @@
 #include <Settings.hpp>
 #include <Config.h>
 
+#include "CircularProgressBar.hpp"
 #include "RcloneNotFoundWidget.hpp"
 
 int main(int argc, char *argv[])
@@ -25,6 +26,7 @@ int main(int argc, char *argv[])
 				exit(1);
 		}
 	});
+
 	MainWindow app;
 	app.show();
 	return IridiumApp::exec();
