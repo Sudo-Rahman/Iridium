@@ -5,6 +5,7 @@
 #pragma once
 
 #include <RcloneFile.hpp>
+#include <QTreeView>
 #include "TaskRowChild.hpp"
 #include "TaskRowParent.hpp"
 

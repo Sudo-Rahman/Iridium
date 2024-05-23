@@ -42,7 +42,7 @@ public:
 
 	[[nodiscard]] QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override
 	{
-		return {30, 30};
+		return {option.rect.width(), 30};
 	}
 
 	void initStyleOption(QStyleOptionViewItem *option, const QModelIndex &index) const override
@@ -280,9 +280,9 @@ void TreeFileView::doubleClick(const QModelIndex &index)
 	if (item == nullptr)
 		return;
 
-	if (not item->getFile()->isDir() )
+	if (not item->getFile()->isDir())
 	{
-		if(Preview::isPreviewable(*item->getFile()))
+		if (Preview::isPreviewable(*item->getFile()))
 			preview(item);
 		return;
 	}
@@ -1102,7 +1102,7 @@ void TreeFileView::preview(const TreeFileItem *item)
 {
 	if (item->getFile()->isDir())
 		return;
-	if(item->getFile()->getRemoteInfo()->isLocal())
+	if (item->getFile()->getRemoteInfo()->isLocal())
 	{
 		Preview preview(std::make_unique<QFile>(item->getFile()->absolute_path().c_str()));
 		return;

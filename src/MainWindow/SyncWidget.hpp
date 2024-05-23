@@ -12,7 +12,7 @@
 #include <QLayout>
 #include <QPushButton>
 #include <RoundedLineEdit.hpp>
-#include <ProgressBar.hpp>
+#include <LinearProgressBar.hpp>
 #include <SyncTableView.hpp>
 
 class SyncWidget : public QWidget
@@ -22,7 +22,7 @@ Q_OBJECT
     QVBoxLayout *_layout{};
     SyncTableView *_view{};
     QComboBox *_src_comboBox{}, *_dst_comboBox{};
-    ProgressBar *_sync_progressBar{};
+    LinearProgressBar *_sync_progressBar{};
     QPushButton *_sync_button{}, *_stop{};
 
     enum State

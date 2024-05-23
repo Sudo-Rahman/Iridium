@@ -4,7 +4,8 @@
 #pragma once
 
 #include <TaskRow.hpp>
-#include <iridium/entities.hpp>
+#include <RcloneFile.hpp>
+
 
 class TaskRowParent : public TaskRow
 {

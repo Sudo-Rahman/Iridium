@@ -4,7 +4,8 @@
 
 #pragma once
 
-#include <iridium/entities.hpp>
+#include <iridium/rclone.hpp>
+#include <RcloneFile.hpp>
 
 #include "TaskRow.hpp"
 

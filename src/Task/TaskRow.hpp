@@ -5,10 +5,11 @@
 #pragma once
 
 
-#include <iridium/entities.hpp>
-#include <ProgressBar.hpp>
+#include <iridium/rclone.hpp>
+#include <LinearProgressBar.hpp>
 #include <boost/variant2/variant.hpp>
 #include <QTimer>
+#include <QStandardItem>
 
 class TaskRow : public QList<QStandardItem *>
 {
@@ -23,7 +24,7 @@ public:
 
 	virtual ~TaskRow() = default;
 
-	[[nodiscard]] ProgressBar* progressBar() const;
+	[[nodiscard]] LinearProgressBar* progressBar() const;
 
 	[[nodiscard]] QModelIndex progressBarIndex() const;
 
@@ -46,7 +47,7 @@ public:
 	virtual  void init();
 
 protected:
-	ProgressBar * _progressBar{};
+	LinearProgressBar * _progressBar{};
 
 	QTimer _elapsed_time{};
 	uint64_t _elapsed_time_count{};

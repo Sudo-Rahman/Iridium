@@ -34,12 +34,12 @@ SearchWidget::SearchWidget(QWidget *parent) : QWidget(parent)
 {
 	_filter_search = new FilterSearchGroupBox(this);
 
-	_progressBar = new ProgressBar( this);
+	_progressBar = new LinearProgressBar( this);
 	setFocusPolicy(Qt::StrongFocus);
 	_progressBar->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-	_progressBar->setFixedHeight(10);
+	_progressBar->setStyleSheet("padding: 0 15px;");
+	_progressBar->setFixedHeight(13);
 	_progressBar->hide();
-	_progressBar->setRange(0, 0);
 
 	auto model = new QStandardItemModel(this);
 	_remotes_comboBox = new QComboBox(this);
@@ -65,7 +65,7 @@ SearchWidget::SearchWidget(QWidget *parent) : QWidget(parent)
 	_stop->hide();
 
 	_layout = new QVBoxLayout(this);
-	_layout->setAlignment(Qt::AlignTop | Qt::AlignCenter);
+	_layout->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
 	_layout->setSpacing(10);
 	_layout->setContentsMargins(5, 5, 5, 5);
 	auto top_layout = new QHBoxLayout;

@@ -11,7 +11,7 @@
 #include <QLayout>
 #include <QComboBox>
 #include "Remote/Remote.h"
-#include "Other/ProgressBar.hpp"
+#include "Other/LinearProgressBar.hpp"
 #include <FilterSearchGroupBox.hpp>
 
 
@@ -21,7 +21,7 @@ class SearchWidget : public QWidget
 {
 Q_OBJECT
 
-    ProgressBar *_progressBar{};
+    LinearProgressBar *_progressBar{};
     std::vector<RemoteInfoPtr> _remotes{};
     std::map<RemoteInfoPtr, bool> _remotes_status{};
     QComboBox *_remotes_comboBox{};

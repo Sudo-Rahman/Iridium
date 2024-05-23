@@ -16,9 +16,9 @@ CircularProgressBar::CircularProgressBar(QWidget *parent)
 	m_timer->start();
 
 	m_accentColor = QApplication::palette().highlight().color();
-	m_progressColor = QColor(69, 164, 235);
-	m_successColor = QColor(128, 211, 132);
-	m_errorColor = QColor(255, 118, 118);
+	m_progressColor = QColor(0, 119, 190);
+	m_successColor = QColor(50, 192, 88);
+	m_errorColor = QColor(251, 81, 88);
 
 	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 }

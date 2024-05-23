@@ -4,7 +4,7 @@
 
 #include "RcloneFileModel.hpp"
 #include <QVBoxLayout>
-#include <ProgressBar.hpp>
+#include <LinearProgressBar.hpp>
 
 #include "CircularProgressBar.hpp"
 #include "IridiumApp.hpp"
@@ -60,7 +60,7 @@ void RcloneFileModel::addProgressBar(const QModelIndex &index)
 	}
 	else
 	{
-		progressBar = new ProgressBar(container);
+		progressBar = new LinearProgressBar(container);
 		progressBar->setFixedSize(100, 15);
 	}
 	layout->setAlignment(Qt::AlignLeft);

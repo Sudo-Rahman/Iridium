@@ -16,7 +16,7 @@ public:
 	enum State {
 		Progress,
 		Success,
-		Error
+		Error,
 	};
 	Q_ENUM(State)
 

@@ -106,7 +106,7 @@ void TaskRowParent::updateData()
 	_size = _data.get_stats()->total_bytes;
 	at(2)->setText(Iridium::Utility::sizeToString(_size).c_str());
 	if (_size not_eq 0)
-		_progressBar->setValue(double_t(_data.get_stats()->bytes) / double_t(_size));
+		_progressBar->setProgress(double_t(_data.get_stats()->bytes) / double_t(_size));
 	setSpeed();
 	auto averageSpeedValue = _data.get_stats()->speed;
 

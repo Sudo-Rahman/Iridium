@@ -39,7 +39,7 @@ RcloneNotFoundWidget::RcloneNotFoundWidget(QWidget *parent) : QDialog(parent)
 #include <fstream>
 #include <filesystem>
 #include <boost/dll.hpp>
-#include <ProgressBar.hpp>
+#include <LinearProgressBar.hpp>
 #include <EscDiasableDialog.hpp>
 
 /**

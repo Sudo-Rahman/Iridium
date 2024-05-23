@@ -2,9 +2,7 @@
 #include <MainWindow.hpp>
 #include <Settings.hpp>
 #include <Config.h>
-
-#include "CircularProgressBar.hpp"
-#include "RcloneNotFoundWidget.hpp"
+#include <RcloneNotFoundWidget.hpp>
 
 int main(int argc, char *argv[])
 {
@@ -14,7 +12,7 @@ int main(int argc, char *argv[])
 	QGuiApplication::setWindowIcon(QIcon(":/resources/Iridium.svg"));
 	// Looks not very pretty on Windows
 	if (QSysInfo::productType() == "windows")
-	    QApplication::setStyle("fusion");
+		QApplication::setStyle("fusion");
 	Settings::init();
 	Settings::initRlclone([](bool ok)
 	{
@@ -22,7 +20,7 @@ int main(int argc, char *argv[])
 		{
 			auto not_found = RcloneNotFoundWidget();
 			not_found.exec();
-			if(not not_found.rcloneInstalled())
+			if (not not_found.rcloneInstalled())
 				exit(1);
 		}
 	});
@@ -30,5 +28,4 @@ int main(int argc, char *argv[])
 	MainWindow app;
 	app.show();
 	return IridiumApp::exec();
-
 }

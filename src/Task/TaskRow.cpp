@@ -3,7 +3,7 @@
 //
 
 #include "TaskRow.hpp"
-ProgressBar* TaskRow::progressBar() const { return _progressBar; }
+LinearProgressBar* TaskRow::progressBar() const { return _progressBar; }
 
 QModelIndex TaskRow::progressBarIndex() const
 {
@@ -37,7 +37,7 @@ void TaskRow::cancel()
 void TaskRow::terminate()
 {
 	_elapsed_time.stop();
-	_progressBar->setValue(1);
+	_progressBar->setProgress(1);
 	_progressBar->setToolTip("100%");
 	this->at(5)->setText(QObject::tr("Terminé"));
 	this->at(6)->setText(QObject::tr("00:00:00"));
@@ -66,11 +66,11 @@ void TaskRow::connectTimer()
 */
 void TaskRow::init()
 {
-	_progressBar = new ProgressBar();
+	_progressBar = new LinearProgressBar();
 	_progressBar->setRange(0, 1);
-	_progressBar->setValue(0);
-	_progressBar->setShowProgress(true);
-	_progressBar->setMaximumHeight(20);
+	_progressBar->setProgress(0);
+	_progressBar->showPercentText(true);
+	_progressBar->setFixedHeight(20);
 
 	_elapsed_time.setInterval(1000);
 	_elapsed_time.start();
@@ -123,8 +123,6 @@ void TaskRow::error(const std::string& message)
 {
 	_state = Error;
 	_elapsed_time.stop();
-	_progressBar->setValue(0);
-	_progressBar->setToolTip("0%");
 	_progressBar->error();
 	this->at(5)->setText(QObject::tr("Erreur"));
 	this->at(5)->setToolTip(message.c_str());
