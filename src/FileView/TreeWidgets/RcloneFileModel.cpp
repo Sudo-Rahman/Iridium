@@ -61,7 +61,7 @@ void RcloneFileModel::addProgressBar(const QModelIndex &index)
 	else
 	{
 		progressBar = new LinearProgressBar(container);
-		progressBar->setFixedSize(100, 15);
+		progressBar->setFixedSize(100, 12);
 	}
 	layout->setAlignment(Qt::AlignLeft);
 	layout->addWidget(progressBar);

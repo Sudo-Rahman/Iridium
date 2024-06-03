@@ -12,7 +12,7 @@
 #include <QComboBox>
 #include "Remote/Remote.h"
 #include "Other/LinearProgressBar.hpp"
-#include <FilterSearchGroupBox.hpp>
+#include <FilterGroupBox.hpp>
 
 
 #include "Search/SearchTableView.hpp"
@@ -29,7 +29,7 @@ Q_OBJECT
     QPushButton *_start{}, *_stop;
     QVBoxLayout *_layout{};
     SearchTableView *_search_view{};
-    FilterSearchGroupBox *_filter_search{};
+    FilterGroupBox *_filter_search{};
 
 public:
     explicit SearchWidget(QWidget *parent = nullptr);

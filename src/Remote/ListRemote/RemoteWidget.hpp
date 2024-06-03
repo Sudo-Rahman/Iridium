@@ -8,6 +8,7 @@
 #include <QGridLayout>
 #include <QLabel>
 #include <QList>
+#include <QMouseEvent>
 #include <Remote.h>
 #include <RoundedButton.hpp>
 
@@ -39,6 +40,11 @@ protected:
     void paintEvent(QPaintEvent *event) override;
 
     bool event(QEvent *event) override;
+
+
+private:
+    bool m_dragging;
+    QPoint m_dragStartPosition;
 
 private:
     void init();

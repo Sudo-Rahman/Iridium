@@ -35,9 +35,8 @@ TreeFileItem::TreeFileItem(const int &column, const std::shared_ptr<RcloneFile> 
             break;
         case 1:
             if(not file->is_dir())
-            {
                 setText(Iridium::Utility::sizeToString(file->size()).c_str());
-            }
+            else setText("--");
             QStandardItem::setData((qulonglong) file->getSize(), SORT_ROLE);
             break;
         case 2:

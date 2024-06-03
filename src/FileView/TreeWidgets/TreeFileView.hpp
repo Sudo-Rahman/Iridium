@@ -80,7 +80,6 @@ protected:
 
 	void dragMoveEvent(QDragMoveEvent * event) override;
 
-	bool event(QEvent * event) override;
 
 protected slots:
 	void doubleClick(const QModelIndex& index);
@@ -92,7 +91,7 @@ private:
 
 	QString getPath() const;
 
-	QList<TreeFileItem *> getSelectedItems();
+	QList<TreeFileItem *> getSelectedItems() const;
 
 	void connectSignals();
 

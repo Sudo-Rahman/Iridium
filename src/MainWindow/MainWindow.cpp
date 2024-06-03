@@ -11,6 +11,7 @@
 #include <IridiumApp.hpp>
 
 #include "InfoWidget.hpp"
+#include "SyncWidget.hpp"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
@@ -34,7 +35,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	_tabWidget->setContentsMargins(0, 0, 0, 0);
 	_tabWidget->addTab(new ExplorerWidget(this), tr("Explorateur"));
 	_tabWidget->addTab(new SearchWidget(this), tr("Recherche"));
-	//    _tabWidget->addTab(new SyncWidget(this), tr("Synchronisation"));
+	_tabWidget->addTab(new SyncWidget(this), tr("Synchronisation"));
 
 	layout->addWidget(_tabWidget);
 

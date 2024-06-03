@@ -12,6 +12,9 @@ configure_file(src/Config/Version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/src/Config/Ve
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+
+
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)

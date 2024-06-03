@@ -6,32 +6,51 @@
 
 #include <QTableView>
 #include <QStandardItemModel>
+#include <iridium/rclone.hpp>
+#include <Sync.hpp>
 
 #include "RcloneFile.hpp"
+#include "SyncRow.hpp"
 
-class SyncTableItem : public QStandardItem
-{
-
-};
 
 class SyncTableView : public QTableView
 {
-Q_OBJECT
+	Q_OBJECT
 
-    QStandardItemModel *_model{};
-    RcloneFilePtr _src{}, _dst{};
+	QStandardItemModel *_model{};
+	RcloneFilePtr _src{}, _dst{};
+	std::map<std::string, std::unique_ptr<SyncRow>> _rows{};
+
+	ir::process *_process{nullptr};
+
+protected:
+	void resizeEvent(QResizeEvent *event) override;
 
 public:
-    explicit SyncTableView(QWidget *parent = nullptr);
+	explicit SyncTableView(QWidget *parent = nullptr);
 
-    void setFiles(const RcloneFilePtr &src, const RcloneFilePtr &dst)
-    {
-        _src = src;
-        _dst = dst;
-    }
+	void setFiles(const RcloneFilePtr &src, const RcloneFilePtr &dst);
 
-    void analyse();
+	void analyse(SyncType type, const iro::basic_opt_uptr &filters);
 
-    void sync();
+	void clear();
 
+	void sync(SyncType type, const iro::basic_opt_uptr &filters);
+
+	void stop() const;
+
+signals:
+	void analyseStarted() const;
+
+	void analyseFinished() const;
+
+	void syncStarted() const;
+
+	void syncFinished() const;
+
+	void progress(float value) const;
+
+	void errorSync();
+
+	void errorCheck();
 };

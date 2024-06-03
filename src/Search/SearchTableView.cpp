@@ -56,10 +56,6 @@ SearchTableView::SearchTableView(QWidget *parent) : QTableView(parent)
 
 	setFrameStyle(QFrame::NoFrame);
 	setShowGrid(false);
-	if (Settings::getSystem().os not_eq Settings::MacOs)
-		setStyleSheet("QTableView { outline:none; }\n"
-			"QTableView::item:selected:focus { background: palette(highlight); }\n"
-			"QTableView::item:!selected:focus { background:transparent; }");
 
 	for (auto const &remote: Iridium::Global::remotes)
 	{

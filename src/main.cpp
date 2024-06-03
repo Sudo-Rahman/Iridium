@@ -6,13 +6,19 @@
 
 int main(int argc, char *argv[])
 {
-	IridiumApp a(argc, argv);
+	IridiumApp app(argc, argv);
 	IridiumApp::setApplicationName("Iridium");
 	IridiumApp::setApplicationVersion(IRIDIUM_VERSION.c_str());
 	QGuiApplication::setWindowIcon(QIcon(":/resources/Iridium.svg"));
-	// Looks not very pretty on Windows
+
 	if (QSysInfo::productType() == "windows")
+	{
 		QApplication::setStyle("fusion");
+		app.setStyleSheet("QTableView { outline:none; }"
+			"QTableView::item:selected:focus { background: palette(highlight); }"
+			"QTableView::item:!selected:focus { background:transparent; }");
+	}
+
 	Settings::init();
 	Settings::initRlclone([](bool ok)
 	{
@@ -25,7 +31,8 @@ int main(int argc, char *argv[])
 		}
 	});
 
-	MainWindow app;
-	app.show();
+	MainWindow main_window;
+	main_window.show();
+
 	return IridiumApp::exec();
 }

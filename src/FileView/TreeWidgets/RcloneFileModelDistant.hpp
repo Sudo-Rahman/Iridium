@@ -4,6 +4,7 @@
 #include "RcloneFileModel.hpp"
 #include <iridium/process.hpp>
 #include <boost/signals2.hpp>
+#include <mutex>
 
 #include "Global.hpp"
 
@@ -18,6 +19,8 @@ Q_OBJECT
     static boost::signals2::signal<void(uint8_t)> _simultaneous_processes_change;
 
     bool _stop{false};
+
+    std::mutex _mutex;
 
 public:
     explicit RcloneFileModelDistant(const RemoteInfoPtr &remoteInfo, QTreeView *parent);

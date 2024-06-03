@@ -34,7 +34,6 @@ void RemoteWidget::paintEvent(QPaintEvent *event)
     rect.setWidth(rect.width() - 1);
     rect.setHeight(rect.height() - 1);
     painter.drawRoundedRect(rect, 10, 10);
-
 }
 
 bool RemoteWidget::event(QEvent *event)

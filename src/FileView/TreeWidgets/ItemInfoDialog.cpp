@@ -10,20 +10,19 @@
 
 using namespace Iridium;
 
-ItemInfoDialog::ItemInfoDialog(TreeFileItem * item, QWidget * parent) : QDialog(parent), _item(item)
+ItemInfoDialog::ItemInfoDialog(TreeFileItem *item, QWidget *parent) : QDialog(parent), _item(item)
 {
 	// delete on close
 	setAttribute(Qt::WA_DeleteOnClose);
 	_file = item->getFile();
 	setMaximumSize(500, 600);
-	setMinimumWidth(300);
+	setMinimumWidth(400);
 	setWindowTitle(tr("Information"));
 	setModal(false);
 	_layout = new QGridLayout(this);
 	_layout->setColumnStretch(1, 1);
 	_layout->setVerticalSpacing(20);
 	_layout->setAlignment(Qt::AlignTop);
-
 
 	initLabel();
 
@@ -50,7 +49,7 @@ ItemInfoDialog::ItemInfoDialog(TreeFileItem * item, QWidget * parent) : QDialog(
 		_layout->addWidget(_loading1, _row, 0, 1, 3, Qt::AlignCenter);
 
 		auto parser = ir::parser::about_parser::create(
-			new ir::parser::about_parser([&](const ire::about& about)
+			new ir::parser::about_parser([&](const ire::about &about)
 			{
 				IridiumApp::runOnMainThread([about = std::move(about), this]
 				{
@@ -77,11 +76,10 @@ ItemInfoDialog::ItemInfoDialog(TreeFileItem * item, QWidget * parent) : QDialog(
 						                    ")").c_str()), _row, 1, 1, 1);
 
 					// label wrap
-					for (auto const& lab: findChildren<QLabel *>())
+					for (auto const &lab: findChildren<QLabel *>())
 						lab->setWordWrap(true);
 				});
 			}));
-
 
 		_process.about(*_file->getRemoteInfo())
 				.on_finish_parser(parser).execute();
@@ -98,22 +96,17 @@ ItemInfoDialog::ItemInfoDialog(TreeFileItem * item, QWidget * parent) : QDialog(
 	{
 		_layout->addWidget(new QLabel(tr("Nombre d'objets: ")), _row, 0, 1, 1);
 		_layout->addWidget(_objs, _row, 1, 1, 1);
-		if (_file->getSize() <= 0)
-		{
-			_size->hide();
-			_loading1 = new CircularProgressBar(this);
-			_loading1->setSize(30);
-			_layout->addWidget(_loading1, 5, 1, 1, 1, Qt::AlignLeft);
-
-			_loading2 = new CircularProgressBar(this);
-			_loading2->setRange(0, 0);
-			_loading2->setSize(30);
-			_layout->addWidget(_loading2, 7, 1, 1, 1, Qt::AlignLeft);
-		}
+		_size->hide();
+		_loading1 = new CircularProgressBar(this);
+		_loading1->setSize(30);
+		_layout->addWidget(_loading1, 5, 1, 1, 1, Qt::AlignLeft);
+		_loading2 = new CircularProgressBar(this);
+		_loading2->setRange(0, 0);
+		_loading2->setSize(30);
+		_layout->addWidget(_loading2, 7, 1, 1, 1, Qt::AlignLeft);
 	}
 
-
-	for (auto const& lab: findChildren<QLabel *>())
+	for (auto const &lab: findChildren<QLabel *>())
 		lab->setTextInteractionFlags(Qt::TextSelectableByMouse);
 }
 
@@ -145,7 +138,6 @@ void ItemInfoDialog::initLabel()
 	}
 }
 
-
 void ItemInfoDialog::initSize()
 {
 	_layout->addWidget(new QLabel(tr("Taille: ")), _row, 0, 1, 1);
@@ -153,8 +145,27 @@ void ItemInfoDialog::initSize()
 
 	if (_file->getRemoteInfo()->isLocal() and _file->isDir())
 	{
-		auto * size = new uint64_t(0);
-		auto * objs = new uint64_t(0);
+		auto *size = new uint64_t(0);
+		auto *objs = new uint64_t(0);
+
+		connect(this, &ItemInfoDialog::threadFinished, this, [this, objs, size]()
+		{
+			_layout->removeWidget(_loading1);
+			_loading1->deleteLater();
+			_layout->removeWidget(_loading2);
+			_loading2->deleteLater();
+
+			_size->show();
+			_objs->show();
+
+			_objs->setText(QString::fromStdString(Utility::numberToString(*objs)));
+			_size->setText(QString::fromStdString(Utility::numberToString(*size)) + " octets" + " ("
+			               + QString::fromStdString(Utility::sizeToString(*size)) + ")");
+			_file->setSize(*size);
+			delete size;
+			delete objs;
+		});
+
 		_thread = boost::make_shared<boost::thread>(
 			[this, objs, size]
 			{
@@ -174,25 +185,10 @@ void ItemInfoDialog::initSize()
 				}
 				emit threadFinished();
 			});
-
-		connect(this, &ItemInfoDialog::threadFinished, this, [this, objs, size]()
-		{
-			_size->show();
-			_objs->show();
-
-			_objs->setText(QString::fromStdString(Utility::numberToString(*objs)));
-			_size->setText(QString::fromStdString(Utility::numberToString(*size)) + " octets" + " ("
-			               + QString::fromStdString(Utility::sizeToString(*size)) + ")");
-			_file->setSize(*size);
-			_objs->setFont({});
-			_size->setFont({});
-			delete size;
-			delete objs;
-		});
 	}
 	if (!_file->getRemoteInfo()->isLocal() and _file->getSize() <= 0 and _file->isDir())
 	{
-		auto parser = ir::parser::size_parser::create(new ir::parser::size_parser([this](const ire::size& size)
+		auto parser = ir::parser::size_parser::create(new ir::parser::size_parser([this](const ire::size &size)
 		{
 			IridiumApp::runOnMainThread([this,size = std::move(size)]
 			{
@@ -205,11 +201,9 @@ void ItemInfoDialog::initSize()
 
 				_size->setText(
 					QString::fromStdString(Utility::numberToString(size.total_size)) + " octets" + " (" +
-					std::to_string(size.total_size).c_str() +
+					Utility::sizeToString(size.total_size).c_str() +
 					")");
 				_objs->setText(QString::fromStdString(Utility::numberToString(size.total_objects)));
-				_objs->setFont({});
-				_size->setFont({});
 			});
 		}));
 		_process.size(*_file).on_finish_parser(parser).execute();

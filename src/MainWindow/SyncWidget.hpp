@@ -15,21 +15,26 @@
 #include <LinearProgressBar.hpp>
 #include <SyncTableView.hpp>
 
+#include "FilterGroupBox.hpp"
+
 class SyncWidget : public QWidget
 {
 Q_OBJECT
 
     QVBoxLayout *_layout{};
     SyncTableView *_view{};
-    QComboBox *_src_comboBox{}, *_dst_comboBox{};
+    QComboBox *_src_comboBox{}, *_dst_comboBox{}, *_types_sync_comboBox{};
     LinearProgressBar *_sync_progressBar{};
     QPushButton *_sync_button{}, *_stop{};
+    FilterGroupBox *_filter_group_box{};
 
     enum State
     {
         None,
-        Analyse,
-        Sync
+        Analysing,
+        Analysed,
+        Syncing,
+        Synced
     };
 
     State _state{None};

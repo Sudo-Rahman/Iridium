@@ -72,8 +72,11 @@ void RcloneFileModelDistant::addItemDynamic(const RcloneFilePtr &file, TreeFileI
 		auto parser = ir::parser::file_parser::create(
 			new ir::parser::file_parser(file.get(), [=](const ire::file &f)
 			{
-				auto *item = new TreeFileItemDistant(RcloneFile(f));
-				tree_item->appendRow(getItemList(item));
+				IridiumApp::runOnMainThread([=]
+				{
+					tree_item->appendRow(
+						getItemList(new TreeFileItemDistant(RcloneFile(f))));
+				});
 			}));
 		rclone->lsjson(*file).every_line_parser(parser);
 		connectProcess(rclone.get(), tree_item);
@@ -97,10 +100,13 @@ void RcloneFileModelDistant::addItemStatic(const RcloneFilePtr &file, TreeFileIt
 		auto parser = ir::parser::file_parser::create(
 			new ir::parser::file_parser(file.get(), [=](const ire::file &f)
 			{
-				auto *item = new TreeFileItemDistant(RcloneFile(f));
-				tree_item->appendRow(getItemList(item));
-				if (item->getFile()->isDir() and not _stop)
-					addItemStatic(item->getFile(), item, depth - 1);
+				IridiumApp::runOnMainThread([=]
+				{
+					auto *item = new TreeFileItemDistant(RcloneFile(f));
+					tree_item->appendRow(getItemList(item));
+					if (item->getFile()->isDir() and not _stop)
+						addItemStatic(item->getFile(), item, depth - 1);
+				});
 			}));
 		rclone->lsjson(*file).every_line_parser(parser);
 		connectProcess(rclone.get(), tree_item);
@@ -121,6 +127,8 @@ void RcloneFileModelDistant::addItemStatic(const RcloneFilePtr &file, TreeFileIt
 
 void RcloneFileModelDistant::reload(TreeFileItem *parent)
 {
+	std::lock_guard lock(_mutex);
+
 	if (parent->state() == TreeFileItem::Loading)
 		return;
 	auto *tree_item = parent->siblingAtFirstColumn();
@@ -149,14 +157,21 @@ void RcloneFileModelDistant::reload(TreeFileItem *parent)
 
 	auto on_finish = [items, files_ptr, tree_item, this](auto)
 	{
-		for (const auto &file: *files_ptr)
-			tree_item->removeRow(getTreeFileItem(file, tree_item)->row());
-		for (const auto &item: *items)
-			tree_item->appendRow(item);
-		items->clear();
-		delete items;
-		delete files_ptr;
-		tree_item->setState(TreeFileItem::Loaded);
+		IridiumApp::runOnMainThread([=]
+		{
+			for (const auto &file: *files_ptr)
+			{
+				auto tmp = getTreeFileItem(file, tree_item);
+				if (tmp != nullptr)
+					tree_item->removeRow(tmp->index().row());
+			}
+			for (const auto &item: *items)
+				tree_item->appendRow(item);
+			items->clear();
+			delete items;
+			delete files_ptr;
+			tree_item->setState(TreeFileItem::Loaded);
+		});
 	};
 	connectProcess(rclone.get(), tree_item);
 	rclone->every_line_parser(std::move(parser)).on_finish(std::move(on_finish));

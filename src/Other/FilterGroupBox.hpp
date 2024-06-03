@@ -6,7 +6,7 @@
 #include <QPushButton>
 #include <iridium/options.hpp>
 
-class FilterSearchGroupBox : public QGroupBox
+class FilterGroupBox : public QGroupBox
 {
 Q_OBJECT
 
@@ -23,7 +23,9 @@ Q_OBJECT
     friend class FilterItem;
 
 public:
-    explicit FilterSearchGroupBox(QWidget *parent = nullptr);
+    explicit FilterGroupBox(QWidget *parent = nullptr);
+
+    explicit FilterGroupBox(const QString &title ,QWidget *parent = nullptr);
 
     [[nodiscard]] ir::option::basic_opt_uptr getFilters();
 

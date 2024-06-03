@@ -114,7 +114,7 @@ void LinearProgressBar::paintEvent(QPaintEvent *event)
 	painter.setClipPath(clipPath);
 
 	// Draw progress bar
-	QRect progressRect(rect.x(), rect.y(), progressWidth, rect.height());
+	QRect progressRect(rect.x(), rect.y(), m_state == Error ? rect.width() : progressWidth, rect.height());
 	painter.setBrush(currentColor());
 
 	if (m_min == 0 && m_max == 0)

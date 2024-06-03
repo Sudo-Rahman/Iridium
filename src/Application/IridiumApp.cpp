@@ -1,6 +1,7 @@
 #include "IridiumApp.hpp"
 #include <memory>
 #include <QPalette>
+#include <QThread>
 
 boost::signals2::signal<void()> IridiumApp::onThemeChange;
 
@@ -10,9 +11,22 @@ IridiumApp::IridiumApp(int &argc, char **argv) : QApplication(argc, argv)
 		setProperty("dark", true);
 }
 
-void IridiumApp::runOnMainThread(std::function<void()> f)
+// void IridiumApp::runOnMainThread(std::function<void()> f)
+// {
+// 	if (QThread::currentThread() != instance()->thread())
+// 	{
+// 		QMetaObject::invokeMethod(instance(), f, Qt::QueuedConnection);
+// 	}
+// 	else { f(); }
+// }
+
+void IridiumApp::runOnMainThread(std::function<void()> &&f)
 {
-	QMetaObject::invokeMethod(qGuiApp, [func = std::move(f)]() { func(); });
+	if (QThread::currentThread() != instance()->thread())
+	{
+		QMetaObject::invokeMethod(instance(), std::move(f), Qt::QueuedConnection);
+	}
+	else { f(); }
 }
 
 bool IridiumApp::event(QEvent *event)

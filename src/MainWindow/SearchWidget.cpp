@@ -32,13 +32,13 @@ protected:
 
 SearchWidget::SearchWidget(QWidget *parent) : QWidget(parent)
 {
-	_filter_search = new FilterSearchGroupBox(this);
+	_filter_search = new FilterGroupBox(tr("Filtres (non disponible pour la recherche locale)"),this);
 
 	_progressBar = new LinearProgressBar( this);
 	setFocusPolicy(Qt::StrongFocus);
 	_progressBar->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 	_progressBar->setStyleSheet("padding: 0 15px;");
-	_progressBar->setFixedHeight(13);
+	_progressBar->setFixedHeight(10);
 	_progressBar->hide();
 
 	auto model = new QStandardItemModel(this);
@@ -100,7 +100,7 @@ SearchWidget::SearchWidget(QWidget *parent) : QWidget(parent)
 
 void SearchWidget::connectSignals()
 {
-	connect(_filter_search, &FilterSearchGroupBox::clicked, this, [this](const bool &checked)
+	connect(_filter_search, &FilterGroupBox::clicked, this, [this](const bool &checked)
 	{
 		_search->setEnabled(not checked);
 	});

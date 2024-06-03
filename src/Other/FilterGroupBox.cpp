@@ -2,7 +2,7 @@
 // Created by sr-71 on 10/05/2023.
 //
 
-#include "FilterSearchGroupBox.hpp"
+#include "FilterGroupBox.hpp"
 #include <QStringListModel>
 #include <QLabel>
 #include <QLineEdit>
@@ -13,19 +13,19 @@ using namespace ir;
 class FilterItem : public QStandardItem
 {
 	std::string _filter{};
-	FilterSearchGroupBox::FilterType _type;
+	FilterGroupBox::FilterType _type;
 
 public:
-	explicit FilterItem(const FilterSearchGroupBox::FilterType& type, const QString& text) : QStandardItem(text),
+	explicit FilterItem(const FilterGroupBox::FilterType& type, const QString& text) : QStandardItem(text),
 		_type(type)
 	{
 		setFlags(flags() & ~Qt::ItemIsDropEnabled);
 		switch (type)
 		{
-			case FilterSearchGroupBox::FilterType::Include:
+			case FilterGroupBox::FilterType::Include:
 				setIcon(QIcon(":/resources/add.png"));
 				break;
-			case FilterSearchGroupBox::FilterType::Exclude:
+			case FilterGroupBox::FilterType::Exclude:
 				setIcon(QIcon(":/resources/remove.png"));
 				break;
 		}
@@ -34,7 +34,7 @@ public:
 	void setData(const QVariant& value, int role) override
 	{
 		QStandardItem::setData(value, role);
-		if (_type == FilterSearchGroupBox::FilterType::Include)
+		if (_type == FilterGroupBox::FilterType::Include)
 			_filter = std::string("+ " + value.toString().toStdString());
 		else
 			_filter = std::string("- " + value.toString().toStdString());
@@ -44,9 +44,8 @@ public:
 };
 
 
-FilterSearchGroupBox::FilterSearchGroupBox(QWidget * parent) : QGroupBox(parent)
+FilterGroupBox::FilterGroupBox(QWidget * parent) : QGroupBox(parent)
 {
-	setTitle(tr("Filtres (non disponible pour la recherche locale)"));
 	setCheckable(true);
 	setChecked(false);
 
@@ -105,7 +104,12 @@ FilterSearchGroupBox::FilterSearchGroupBox(QWidget * parent) : QGroupBox(parent)
 	connectSignals();
 }
 
-void FilterSearchGroupBox::connectSignals()
+FilterGroupBox::FilterGroupBox(const QString &title, QWidget *parent): FilterGroupBox(parent)
+{
+	setTitle(title);
+}
+
+void FilterGroupBox::connectSignals()
 {
 	auto func = [this](QStandardItem * item, QStandardItemModel * model)
 	{
@@ -202,7 +206,7 @@ void FilterSearchGroupBox::connectSignals()
  * @brief get filters from listview
  * @return filters
  */
-option::basic_opt_uptr FilterSearchGroupBox::getFilters()
+option::basic_opt_uptr FilterGroupBox::getFilters()
 {
 	auto filters = option::filter::filter_file::uptr();
 	auto model = dynamic_cast<QStandardItemModel *>(m_listView->model());

@@ -33,6 +33,6 @@ namespace Iridium
             copy_files.swap(const_cast<std::vector<RcloneFilePtr> &>(files));
         }
 
-        static void add_process(ir::process_uptr &process);
+        static void add_process(ir::process_uptr &&process,ir::process_pool::priority priority = ir::process_pool::normal);
     };
 };
