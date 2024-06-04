@@ -61,6 +61,7 @@ void RcloneFileModel::addProgressBar(const QModelIndex &index)
 	else
 	{
 		progressBar = new LinearProgressBar(container);
+		dynamic_cast<LinearProgressBar *>(progressBar)->infinite();
 		progressBar->setFixedSize(100, 12);
 	}
 	layout->setAlignment(Qt::AlignLeft);

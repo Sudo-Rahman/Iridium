@@ -32,14 +32,12 @@ protected:
 
 SearchWidget::SearchWidget(QWidget *parent) : QWidget(parent)
 {
-	_filter_search = new FilterGroupBox(tr("Filtres (non disponible pour la recherche locale)"),this);
+	_filter_search = new FilterGroupBox(tr("Filtres (non disponible pour la recherche locale)"), this);
 
-	_progressBar = new LinearProgressBar( this);
+	_progressBar = new LinearProgressBar(this);
 	setFocusPolicy(Qt::StrongFocus);
 	_progressBar->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-	_progressBar->setStyleSheet("padding: 0 15px;");
-	_progressBar->setFixedHeight(10);
-	_progressBar->hide();
+	_progressBar->setFixedHeight(12);
 
 	auto model = new QStandardItemModel(this);
 	_remotes_comboBox = new QComboBox(this);
@@ -62,7 +60,7 @@ SearchWidget::SearchWidget(QWidget *parent) : QWidget(parent)
 	connect(_search, &QLineEdit::returnPressed, _start, &QPushButton::click);
 	_stop = new QPushButton(tr("Arrêter"), this);
 	_stop->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
-	_stop->hide();
+	_stop->setEnabled(false);
 
 	_layout = new QVBoxLayout(this);
 	_layout->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
@@ -105,10 +103,12 @@ void SearchWidget::connectSignals()
 		_search->setEnabled(not checked);
 	});
 
-	connect(_stop, &QPushButton::clicked, this, [this]()
+	connect(_stop, &QPushButton::clicked, this, [this]
 	{
 		_search_view->stopAllSearch();
-		_progressBar->hide();
+		_progressBar->reset();
+		_stop->setEnabled(false);
+		_start->setEnabled(true);
 	});
 
 	connect(_start, &QPushButton::clicked, this, [this]()
@@ -139,15 +139,18 @@ void SearchWidget::connectSignals()
 
 	connect(_search_view, &SearchTableView::searchStarted, this, [this]()
 	{
-		_progressBar->show();
-		_stop->show();
+		_progressBar->infinite();
+		_stop->setEnabled(true);
+		_start->setEnabled(false);
 	});
 
 	connect(_search_view, &SearchTableView::searchFinished, this, [this]()
 	{
-		_progressBar->hide();
-		_stop->hide();
+		_progressBar->reset();
+		_stop->setEnabled(false);
+		_start->setEnabled(true);
 	});
+
 }
 
 bool SearchWidget::event(QEvent *event)

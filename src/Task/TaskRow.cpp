@@ -67,7 +67,7 @@ void TaskRow::connectTimer()
 void TaskRow::init()
 {
 	_progressBar = new LinearProgressBar();
-	_progressBar->setRange(0, 1);
+	_progressBar->setRange(0, 1.0);
 	_progressBar->setProgress(0);
 	_progressBar->showPercentText(true);
 	_progressBar->setFixedHeight(20);

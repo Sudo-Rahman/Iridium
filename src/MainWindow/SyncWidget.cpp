@@ -47,15 +47,18 @@ SyncWidget::SyncWidget(QWidget *parent) : QWidget(parent)
 	_sync_button->setDefault(true);
 	_stop = new QPushButton(tr("Annuler"), this);
 	_stop->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-	_stop->hide();
+	_stop->setEnabled(false);
 	_sync_progressBar = new LinearProgressBar(this);
-	_sync_progressBar->setMinimumHeight(15);
-	_sync_progressBar->hide();
+	_sync_progressBar->setMinimumHeight(12);
+
+	auto btn_layout = new QHBoxLayout();
+	btn_layout->setAlignment(Qt::AlignCenter);
+	btn_layout->addWidget(_sync_button);
+	btn_layout->addWidget(_stop);
 
 	top_left_layout->addLayout(combo_layout);
 
-	top_left_layout->addWidget(_sync_button, 0, Qt::AlignCenter);
-	top_left_layout->addWidget(_stop, 0, Qt::AlignCenter);
+	top_left_layout->addLayout(btn_layout);
 	top_left_layout->addWidget(_sync_progressBar);
 
 	top_right_layout->addWidget(_filter_group_box = new FilterGroupBox(this));
@@ -73,12 +76,18 @@ void SyncWidget::connectSignals()
 		switch (_state)
 		{
 			case None:
-				_state = Analysing;
-				_sync_progressBar->setState(LinearProgressBar::Progress);
-				_view->clear();
-				_view->setFiles(_src_comboBox->currentData().value<RcloneFilePtr>(),
-				                _dst_comboBox->currentData().value<RcloneFilePtr>());
-				_view->analyse(_src_comboBox->currentData().value<SyncType>(), _filter_group_box->getFilters());
+				{
+					auto src = _src_comboBox->currentData().value<RcloneFilePtr>();
+					auto dst = _dst_comboBox->currentData().value<RcloneFilePtr>();
+					if (src != dst and (src == nullptr or dst == nullptr))
+					{
+						_state = Analysing;
+						_sync_progressBar->setState(LinearProgressBar::Progress);
+						_view->clear();
+						_view->setFiles(std::move(src), std::move(dst));
+						_view->analyse(_src_comboBox->currentData().value<SyncType>(), _filter_group_box->getFilters());
+					}
+				}
 				break;
 			case Analysed:
 				_view->sync(_src_comboBox->currentData().value<SyncType>(), _filter_group_box->getFilters());
@@ -89,29 +98,47 @@ void SyncWidget::connectSignals()
 				_sync_progressBar->hide();
 				_sync_button->setText(tr("Verification"));
 				_state = None;
-			default: break;
+			break;
+			default:
+				break;
 		}
 	});
 
 	connect(_stop, &QPushButton::clicked, this, [this]
 	{
-		_stop->hide();
-		_sync_button->show();
-		_view->stop();
-		if (_state == Analysing)
+		switch (_state)
 		{
-			_state = None;
-			_view->reset();
+			case Analysing:
+				_state = None;
+				_view->clear();
+				_sync_button->setEnabled(true);
+				_view->stop();
+				break;
+			case Syncing:
+				_state = Analysed;
+				_sync_button->setEnabled(true);
+				_view->stop();
+				break;
+			case Synced:
+				_state = None;
+				_view->clear();
+				_sync_button->setEnabled(true);
+				break;
+			case Analysed:
+				_state = None;
+				_view->clear();
+				_sync_button->setEnabled(true);
+				break;
+			default:
+				break;
 		}
-		else if (_state == Syncing) { _state = Analysed; }
 	});
 
 	connect(_view, &SyncTableView::analyseStarted, this, [this]
 	{
-		_sync_progressBar->show();
-		_sync_progressBar->setRange(0, 0);
-		_sync_button->hide();
-		_stop->show();
+		_sync_progressBar->infinite();
+		_sync_button->setEnabled(false);
+		_stop->setEnabled(true);
 		_state = Analysing;
 	});
 
@@ -119,26 +146,24 @@ void SyncWidget::connectSignals()
 	{
 		_sync_progressBar->setRange(0, 1.0);
 		_sync_progressBar->setProgress(0);
-		_sync_button->show();
-		_stop->hide();
+		_sync_button->setEnabled(true);
+		_stop->setEnabled(false);
 		_state = Analysed;
-		_sync_button->setText(tr("Synchroniser"));
+		_sync_button->setText(tr("synchroniser"));
 	});
 
 	connect(_view, &SyncTableView::syncStarted, this, [this]
 	{
-		_sync_button->hide();
-		_stop->show();
+		_sync_button->setEnabled(false);
+		_stop->setEnabled(true);
 		_state = Syncing;
 	});
 
 	connect(_view, &SyncTableView::syncFinished, this, [this]
 	{
 		_sync_progressBar->setProgress(1.0);
-		_sync_button->show();
-		_stop->hide();
+		_stop->setText(tr("effacer"));
 		_state = Synced;
-		_sync_button->setText(tr("effacer"));
 	});
 
 	connect(_view, &SyncTableView::progress, this, [this](float progress)
@@ -149,18 +174,14 @@ void SyncWidget::connectSignals()
 	connect(_view, &SyncTableView::errorCheck, this, [this]
 	{
 		QMessageBox::critical(this, tr("Erreur"), tr("Une erreur est survenue lors de l'analyse"));
-		_sync_progressBar->hide();
-		_sync_button->show();
-		_stop->hide();
+		_sync_progressBar->setRange(0, 1.0);
 		_state = None;
 	});
 
 	connect(_view, &SyncTableView::errorSync, this, [this]
 	{
 		QMessageBox::critical(this, tr("Erreur"), tr("Une erreur est survenue lors de la synchronisation"));
-		_sync_progressBar->hide();
-		_sync_button->show();
-		_stop->hide();
+		_sync_progressBar->setRange(0, 1.0);
 		_state = Analysed;
 	});
 }

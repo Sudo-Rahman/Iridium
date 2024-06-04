@@ -9,6 +9,7 @@
 #include <QStandardItem>
 
 using namespace ir;
+using namespace iro;
 
 class FilterItem : public QStandardItem
 {
@@ -16,7 +17,7 @@ class FilterItem : public QStandardItem
 	FilterGroupBox::FilterType _type;
 
 public:
-	explicit FilterItem(const FilterGroupBox::FilterType& type, const QString& text) : QStandardItem(text),
+	explicit FilterItem(const FilterGroupBox::FilterType &type, const QString &text) : QStandardItem(text),
 		_type(type)
 	{
 		setFlags(flags() & ~Qt::ItemIsDropEnabled);
@@ -31,7 +32,7 @@ public:
 		}
 	}
 
-	void setData(const QVariant& value, int role) override
+	void setData(const QVariant &value, int role) override
 	{
 		QStandardItem::setData(value, role);
 		if (_type == FilterGroupBox::FilterType::Include)
@@ -43,8 +44,7 @@ public:
 	[[nodiscard]] std::string getFilter() const { return _filter; }
 };
 
-
-FilterGroupBox::FilterGroupBox(QWidget * parent) : QGroupBox(parent)
+FilterGroupBox::FilterGroupBox(QWidget *parent) : QGroupBox(parent)
 {
 	setCheckable(true);
 	setChecked(false);
@@ -72,7 +72,6 @@ FilterGroupBox::FilterGroupBox(QWidget * parent) : QGroupBox(parent)
 	m_edit = new QPushButton(QIcon(":/resources/edit.png").pixmap(20, 20), "", this);
 	m_down = new QPushButton(QIcon(":/resources/arrow-down.png").pixmap(20, 20), "", this);
 
-
 	m_up->setFixedWidth(30);
 	m_edit->setFixedWidth(30);
 	m_down->setFixedWidth(30);
@@ -94,7 +93,6 @@ FilterGroupBox::FilterGroupBox(QWidget * parent) : QGroupBox(parent)
 	up_down_btn_layout->addWidget(m_edit);
 	up_down_btn_layout->addWidget(m_down);
 
-
 	up_down_listView_layout->addLayout(up_down_btn_layout);
 	up_down_listView_layout->addWidget(m_listView);
 
@@ -104,20 +102,17 @@ FilterGroupBox::FilterGroupBox(QWidget * parent) : QGroupBox(parent)
 	connectSignals();
 }
 
-FilterGroupBox::FilterGroupBox(const QString &title, QWidget *parent): FilterGroupBox(parent)
-{
-	setTitle(title);
-}
+FilterGroupBox::FilterGroupBox(const QString &title, QWidget *parent): FilterGroupBox(parent) { setTitle(title); }
 
 void FilterGroupBox::connectSignals()
 {
-	auto func = [this](QStandardItem * item, QStandardItemModel * model)
+	auto func = [this](QStandardItem *item, QStandardItemModel *model)
 	{
 		m_listView->openPersistentEditor(model->index(0, 0));
 
 		// check input
 		auto editor = dynamic_cast<QLineEdit *>(m_listView->indexWidget(model->index(0, 0)));
-		auto * validator = new QRegularExpressionValidator(QRegularExpression(R"([^\/:?"<>|]*)"));
+		auto *validator = new QRegularExpressionValidator(QRegularExpression(R"([^\/:?"<>|]*)"));
 		editor->setFocus();
 		editor->setValidator(validator);
 
@@ -134,6 +129,7 @@ void FilterGroupBox::connectSignals()
 			{
 				m_listView->closePersistentEditor(model->index(0, 0));
 				item->setText(editor->text());
+				emit filterAdded();
 			}
 		});
 	};
@@ -158,7 +154,11 @@ void FilterGroupBox::connectSignals()
 	{
 		auto model = dynamic_cast<QStandardItemModel *>(m_listView->model());
 		auto index = m_listView->currentIndex();
-		model->removeRow(index.row());
+		if(index.isValid())
+		{
+			model->removeRow(index.row());
+			emit filterRemoved();
+		}
 	});
 
 	connect(m_up, &QPushButton::clicked, this, [this]

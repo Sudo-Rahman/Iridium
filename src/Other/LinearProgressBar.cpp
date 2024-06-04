@@ -6,7 +6,7 @@
 #include <QResizeEvent>
 
 LinearProgressBar::LinearProgressBar(QWidget *parent)
-	: QWidget(parent), m_progress(0), m_min(0), m_max(0), m_state(Progress)
+	: QWidget(parent), m_progress(0), m_min(0), m_max(1.0), m_state(Progress)
 {
 	m_timer = new QTimer(this);
 	m_timer->setInterval(10);
@@ -63,6 +63,8 @@ void LinearProgressBar::setState(LinearProgressBar::State state)
 
 void LinearProgressBar::showPercentText(bool show) { m_show_percent = show; }
 void LinearProgressBar::error() { setState(Error); }
+void LinearProgressBar::infinite() { setRange(0, 0); }
+void LinearProgressBar::reset() { setRange(0, 1.0); }
 
 void LinearProgressBar::updateAnimation() const
 {

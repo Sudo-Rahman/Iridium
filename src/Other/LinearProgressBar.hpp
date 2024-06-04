@@ -34,6 +34,10 @@ public:
 
     void error();
 
+    void infinite();
+
+    void reset();
+
     signals:
         void progressChanged();
 
