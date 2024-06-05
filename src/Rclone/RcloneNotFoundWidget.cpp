@@ -68,7 +68,6 @@ void RcloneNotFoundWidget::downloadRclone()
 	layout->addWidget(label);
 	auto progressBar = new CircularProgressBar(dialog);
 	progressBar->setSize(100);
-	progressBar->setRange(0, 1.0);
 	layout->addWidget(progressBar, 0, Qt::AlignCenter);
 	dialog->open();
 

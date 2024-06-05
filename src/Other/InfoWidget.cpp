@@ -16,6 +16,7 @@ InfoWidget::InfoWidget(QWidget *parent) : QWidget(parent)
 	_label->setFont(QFont("Arial", 10));
 
 	_progress_bar = new CircularProgressBar(this);
+	_progress_bar->infinite();
 	_progress_bar->setSize(20);
 
 	_button = new RoundedButton(tr("Tout afficher"), this);

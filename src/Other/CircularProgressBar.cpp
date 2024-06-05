@@ -4,7 +4,7 @@
 #include <QApplication>
 
 CircularProgressBar::CircularProgressBar(QWidget *parent)
-	: QWidget(parent), m_progress(0), m_min(0), m_max(0), m_state(Progress)
+	: QWidget(parent), m_progress(0), m_min(0), m_max(1.0), m_state(Progress)
 {
 	m_timer = new QTimer(this);
 	m_timer->setInterval(10);
@@ -71,6 +71,16 @@ void CircularProgressBar::setSize(const int &size)
 }
 
 void CircularProgressBar::showPercentText(bool show) { m_show_percent = show; }
+void CircularProgressBar::infinite()
+{
+	setRange(0, 0);
+}
+void CircularProgressBar::reset()
+{
+	m_state = Progress;
+	m_progress = 0;
+	setRange(0, 1.0);
+}
 
 void CircularProgressBar::updateAnimation() const
 {

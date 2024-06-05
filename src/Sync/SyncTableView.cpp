@@ -84,7 +84,6 @@ void SyncTableView::analyse(SyncType type, const iro::basic_opt_uptr &filter)
 					                                             _dst->getRemoteInfo());
 					auto hash = std::hash<std::string>{}(
 						std::string(src_file->absolute_path() + dst_file->absolute_path()));
-					std::cout <<std::string(src_file->absolute_path() + dst_file->absolute_path() )<< std::endl;
 					auto row = std::make_unique<SyncRow>(src_file, dst_file);
 					_model->appendRow(*row);
 					setIndexWidget(row->progressBarIndex(), row->progressBar());
@@ -97,10 +96,13 @@ void SyncTableView::analyse(SyncType type, const iro::basic_opt_uptr &filter)
 	process->check(*_src, *_dst)
 			.on_start([this] { emit analyseStarted(); })
 			.every_line_parser(std::move(parser))
+			.on_stop([this] { emit stopped(); })
 			.on_finish([this](auto exit)
 			{
 				if (exit not_eq 0 and _rows.empty())
-					emit errorCheck();
+					emit errorCheck(_process->get_error().empty()
+						                ? "Error"
+						                : QString::fromStdString(_process->get_error().back()));
 				else
 					emit analyseFinished();
 			});
@@ -112,6 +114,7 @@ void SyncTableView::clear()
 {
 	_model->clear();
 	_rows.clear();
+	_errors.clear();
 }
 
 void SyncTableView::sync(SyncType type, const iro::basic_opt_uptr &filters)
@@ -136,6 +139,7 @@ void SyncTableView::sync(SyncType type, const iro::basic_opt_uptr &filters)
 				                                {
 					                                return acc + (row.second->state() == SyncRow::Finished ? 1 : 0);
 				                                });
+
 				emit progress(finished / static_cast<float>(_rows.size()));
 
 				auto hashList = std::vector<std::string>{};
@@ -144,13 +148,12 @@ void SyncTableView::sync(SyncType type, const iro::basic_opt_uptr &filters)
 					auto hash = std::hash<std::string>{}(std::string(
 						transfer.src_fs.value_or("") + "/" + transfer.name +
 						transfer.dst_fs.value_or("") + "/" + transfer.name));
-					std::cout <<std::string(
-						transfer.src_fs.value_or("") + "/" + transfer.name +
-						transfer.dst_fs.value_or("") + "/" + transfer.name)<< std::endl;
 					hashList.push_back(std::to_string(hash));
 					IridiumApp::runOnMainThread([this,transfer = std::move(transfer), hash]
 					{
-						if(_rows.contains(std::to_string(hash)))
+						if (_rows.contains(std::to_string(hash)) and
+						    std::ranges::none_of(_errors, [&hash](const auto &h) { return h == std::to_string(hash); })
+							)
 							_rows[std::to_string(hash)]->setTransferData(transfer);
 					});
 				}
@@ -165,16 +168,36 @@ void SyncTableView::sync(SyncType type, const iro::basic_opt_uptr &filters)
 				}
 			}
 		}
+		else if (log.level() == ire::json_log::log_level::error)
+		{
+			auto hash = std::hash<std::string>{}(
+				_src->absolute_path() + "/" + log.object() + _dst->absolute_path() + "/" + log.object());
+			if (_rows.contains(std::to_string(hash)) and
+			    std::ranges::none_of(_errors, [&hash](const auto &h) { return h == std::to_string(hash); })
+				)
+			{
+				emit progress(finished / static_cast<float>(_rows.size()));
+				
+				IridiumApp::runOnMainThread([this, hash, log = std::move(log)]
+				{
+					_rows[std::to_string(hash)]->error(log.message());
+					_errors.push_back(std::to_string(hash));
+				});
+			}
+		}
 	});
 
 	process->every_line_parser(std::move(parser))
 			.on_start([this] { emit syncStarted(); })
+			.on_stop([this] { emit stopped(); })
 			.on_finish([this](auto exit)
 			{
 				if (exit == 0)
 					emit syncFinished();
 				else
-					emit errorSync();
+					emit errorSync(_process->get_error().empty()
+						               ? "Error"
+						               : QString::fromStdString(_process->get_error().back()));
 			});
 
 	_process = process.get();
@@ -183,7 +206,7 @@ void SyncTableView::sync(SyncType type, const iro::basic_opt_uptr &filters)
 
 void SyncTableView::stop() const
 {
-	if(_process and _process->is_running())
+	if (_process and _process->is_running())
 		_process->stop();
 }
 

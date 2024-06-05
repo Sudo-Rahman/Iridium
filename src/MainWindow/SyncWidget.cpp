@@ -9,6 +9,9 @@
 #include <QMessageBox>
 #include <Sync.hpp>
 
+#include "CircularProgressBar.hpp"
+#include "IridiumApp.hpp"
+
 SyncWidget::SyncWidget(QWidget *parent) : QWidget(parent)
 {
 	_layout = new QVBoxLayout(this);
@@ -42,10 +45,10 @@ SyncWidget::SyncWidget(QWidget *parent) : QWidget(parent)
 
 	combo_layout->addRow(new QLabel(tr("Type de Synchronisation"), this), _types_sync_comboBox);
 
-	_sync_button = new QPushButton(tr("Verification"), this);
+	_sync_button = new QPushButton(tr("Vérifier"), this);
 	_sync_button->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	_sync_button->setDefault(true);
-	_stop = new QPushButton(tr("Annuler"), this);
+	_stop = new QPushButton(tr("Arrêter"), this);
 	_stop->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	_stop->setEnabled(false);
 	_sync_progressBar = new LinearProgressBar(this);
@@ -69,6 +72,8 @@ SyncWidget::SyncWidget(QWidget *parent) : QWidget(parent)
 	connectSignals();
 }
 
+QWidget *infoWidget(uint8_t type);
+
 void SyncWidget::connectSignals()
 {
 	connect(_sync_button, &QPushButton::clicked, this, [this]
@@ -79,26 +84,20 @@ void SyncWidget::connectSignals()
 				{
 					auto src = _src_comboBox->currentData().value<RcloneFilePtr>();
 					auto dst = _dst_comboBox->currentData().value<RcloneFilePtr>();
-					if (src != dst and (src == nullptr or dst == nullptr))
+					if (src != dst and !(src == nullptr or dst == nullptr))
 					{
-						_state = Analysing;
-						_sync_progressBar->setState(LinearProgressBar::Progress);
+						_sync_progressBar->reset();
 						_view->clear();
 						_view->setFiles(std::move(src), std::move(dst));
 						_view->analyse(_src_comboBox->currentData().value<SyncType>(), _filter_group_box->getFilters());
+						_types_sync_comboBox->setEnabled(false);
+						_filter_group_box->setEnabled(false);
 					}
 				}
 				break;
 			case Analysed:
 				_view->sync(_src_comboBox->currentData().value<SyncType>(), _filter_group_box->getFilters());
-				_state = Syncing;
 				break;
-			case Synced:
-				_view->clear();
-				_sync_progressBar->hide();
-				_sync_button->setText(tr("Verification"));
-				_state = None;
-			break;
 			default:
 				break;
 		}
@@ -108,30 +107,40 @@ void SyncWidget::connectSignals()
 	{
 		switch (_state)
 		{
+			case None:
+				_types_sync_comboBox->setEnabled(true);
+				_filter_group_box->setEnabled(true);
+				_sync_progressBar->reset();
+				_view->clear();
+				break;
 			case Analysing:
 				_state = None;
-				_view->clear();
-				_sync_button->setEnabled(true);
 				_view->stop();
 				break;
 			case Syncing:
 				_state = Analysed;
-				_sync_button->setEnabled(true);
 				_view->stop();
 				break;
 			case Synced:
 				_state = None;
 				_view->clear();
+				_sync_button->setText(tr("Vérifier"));
 				_sync_button->setEnabled(true);
 				break;
 			case Analysed:
 				_state = None;
 				_view->clear();
 				_sync_button->setEnabled(true);
+				_sync_button->setText(tr("Vérifier"));
+				_types_sync_comboBox->setEnabled(true);
+				_filter_group_box->setEnabled(true);
+				_sync_progressBar->reset();
+				_state = None;
 				break;
 			default:
 				break;
 		}
+		_stop->setEnabled(false);
 	});
 
 	connect(_view, &SyncTableView::analyseStarted, this, [this]
@@ -139,50 +148,72 @@ void SyncWidget::connectSignals()
 		_sync_progressBar->infinite();
 		_sync_button->setEnabled(false);
 		_stop->setEnabled(true);
+		_stop->setText(tr("Arrêter"));
 		_state = Analysing;
+		_info_widget = infoWidget(0);
+		Iridium::Global::signal_add_info(_info_widget);
 	});
 
 	connect(_view, &SyncTableView::analyseFinished, this, [this]
 	{
-		_sync_progressBar->setRange(0, 1.0);
-		_sync_progressBar->setProgress(0);
+		_sync_progressBar->reset();
 		_sync_button->setEnabled(true);
 		_stop->setEnabled(false);
+		_stop->setText(tr("Arrêter"));
 		_state = Analysed;
-		_sync_button->setText(tr("synchroniser"));
+		_sync_button->setText(tr("Synchroniser"));
+		Iridium::Global::signal_remove_info(_info_widget);
 	});
 
 	connect(_view, &SyncTableView::syncStarted, this, [this]
 	{
 		_sync_button->setEnabled(false);
 		_stop->setEnabled(true);
+		_stop->setText(tr("Arrêter"));
 		_state = Syncing;
+		_info_widget = infoWidget(1);
+		Iridium::Global::signal_add_info(_info_widget);
 	});
 
 	connect(_view, &SyncTableView::syncFinished, this, [this]
 	{
 		_sync_progressBar->setProgress(1.0);
-		_stop->setText(tr("effacer"));
+		_stop->setText(tr("Effacer"));
+		_stop->setEnabled(true);
 		_state = Synced;
+		Iridium::Global::signal_remove_info(_info_widget);
 	});
 
 	connect(_view, &SyncTableView::progress, this, [this](float progress)
 	{
 		_sync_progressBar->setProgress(progress);
+		_info_widget->findChild<CircularProgressBar *>()->setProgress(progress);
 	});
 
-	connect(_view, &SyncTableView::errorCheck, this, [this]
+	connect(_view, &SyncTableView::stopped, this, [this]
 	{
-		QMessageBox::critical(this, tr("Erreur"), tr("Une erreur est survenue lors de l'analyse"));
-		_sync_progressBar->setRange(0, 1.0);
+		_sync_progressBar->reset();
+		_sync_button->setEnabled(true);
+		_stop->setEnabled(true);
+		_stop->setText(tr("Effacer"));
+		Iridium::Global::signal_remove_info(_info_widget);
+	});
+
+	connect(_view, &SyncTableView::errorCheck, this, [this](const QString &error)
+	{
+		QMessageBox::critical(this, tr("Erreur"), tr("Une erreur est survenue lors de l'analyse") + "\n" + error);
+		_sync_progressBar->error();
 		_state = None;
+		Iridium::Global::signal_remove_info(_info_widget);
 	});
 
-	connect(_view, &SyncTableView::errorSync, this, [this]
+	connect(_view, &SyncTableView::errorSync, this, [this](const QString &error)
 	{
-		QMessageBox::critical(this, tr("Erreur"), tr("Une erreur est survenue lors de la synchronisation"));
-		_sync_progressBar->setRange(0, 1.0);
+		QMessageBox::critical(this, tr("Erreur"),
+		                      tr("Une erreur est survenue lors de la synchronisation") + "\n" + error);
+		_sync_progressBar->error();
 		_state = Analysed;
+		Iridium::Global::signal_remove_info(_info_widget);
 	});
 }
 
@@ -203,4 +234,26 @@ bool SyncWidget::event(QEvent *event)
 		}
 	}
 	return QWidget::event(event);
+}
+
+QWidget *infoWidget(uint8_t type)
+{
+	auto widget = new QWidget();
+	auto layout = new QHBoxLayout(widget);
+	auto progressBar = new CircularProgressBar(widget);
+	progressBar->setSize(20);
+	layout->addWidget(progressBar);
+	layout->addWidget(new QLabel("", widget));
+	switch (type)
+	{
+		case 0:
+			widget->findChild<QLabel *>()->setText(QObject::tr("Analyse en cours"));
+			break;
+		case 1:
+			widget->findChild<QLabel *>()->setText(QObject::tr("Synchronisation en cours"));
+			break;
+		default:
+			break;
+	}
+	return widget;
 }

@@ -64,7 +64,12 @@ void LinearProgressBar::setState(LinearProgressBar::State state)
 void LinearProgressBar::showPercentText(bool show) { m_show_percent = show; }
 void LinearProgressBar::error() { setState(Error); }
 void LinearProgressBar::infinite() { setRange(0, 0); }
-void LinearProgressBar::reset() { setRange(0, 1.0); }
+void LinearProgressBar::reset()
+{
+	m_state = Progress;
+	m_progress = 0;
+	setRange(0, 1.0);
+}
 
 void LinearProgressBar::updateAnimation() const
 {

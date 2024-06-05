@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.25)
 project(Iridium)
 
-set(Iridium_VERSION_MAJOR 0)
-set(Iridium_VERSION_MINOR 9)
-set(Iridium_VERSION_PATCH 1)
+set(Iridium_VERSION_MAJOR 1)
+set(Iridium_VERSION_MINOR 0)
+set(Iridium_VERSION_PATCH 0)
 set(Iridium_VERSION "${Iridium_VERSION_MAJOR}.${Iridium_VERSION_MINOR}.${Iridium_VERSION_PATCH}")
 
 configure_file(src/Config/Version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/src/Config/Version.h @ONLY)

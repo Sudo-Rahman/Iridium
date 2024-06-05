@@ -27,6 +27,7 @@ Q_OBJECT
     LinearProgressBar *_sync_progressBar{};
     QPushButton *_sync_button{}, *_stop{};
     FilterGroupBox *_filter_group_box{};
+    QWidget *_info_widget{};
 
     enum State
     {
@@ -34,7 +35,7 @@ Q_OBJECT
         Analysing,
         Analysed,
         Syncing,
-        Synced
+        Synced,
     };
 
     State _state{None};

@@ -267,6 +267,7 @@ auto SearchTableView::searchInfoWidget(const QString &remoteName) -> QWidget *
 	auto layout = new QHBoxLayout(infoWidget);
 	auto *progressBar = new CircularProgressBar(infoWidget);
 	progressBar->setSize(20);
+	progressBar->infinite();
 	layout->addWidget(new QLabel("Recherche dans " + remoteName + "..."));
 	infoWidget->findChild<QLabel *>()->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum);
 	layout->addWidget(progressBar);

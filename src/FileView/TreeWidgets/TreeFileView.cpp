@@ -373,6 +373,7 @@ void TreeFileView::showContextMenu()
 				auto layout = new QVBoxLayout(diag);
 				auto progress = new CircularProgressBar(diag);
 				progress->setSize(200);
+				progress->infinite();
 				layout->addWidget(progress, 0, Qt::AlignCenter);
 				auto rclone = process_uptr(new process());
 				rclone->add_option(option::basic_option::uptr("--color", "NEVER"));
@@ -1122,6 +1123,7 @@ void TreeFileView::preview(const TreeFileItem *item)
 	auto layout = new QHBoxLayout(infoWidget);
 	auto *progressBar = new CircularProgressBar(infoWidget);
 	progressBar->setSize(20);
+	progressBar->infinite();
 	layout->addWidget(new QLabel(tr("Aperçu..."), infoWidget));
 	infoWidget->findChild<QLabel *>()->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum);
 	layout->addWidget(progressBar);

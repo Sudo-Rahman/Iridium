@@ -20,6 +20,7 @@ class SyncTableView : public QTableView
 	QStandardItemModel *_model{};
 	RcloneFilePtr _src{}, _dst{};
 	std::map<std::string, std::unique_ptr<SyncRow>> _rows{};
+	std::vector<std::string> _errors{};
 
 	ir::process *_process{nullptr};
 
@@ -48,9 +49,11 @@ signals:
 
 	void syncFinished() const;
 
+	void stopped() const;
+
 	void progress(float value) const;
 
-	void errorSync();
+	void errorSync(QString error) const;
 
-	void errorCheck();
+	void errorCheck(QString error) const;
 };

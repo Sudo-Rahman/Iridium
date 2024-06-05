@@ -36,6 +36,9 @@ public:
 
 	void showPercentText(bool show);
 
+	void infinite();
+
+	void reset();
 
 	signals:
 		void progressChanged();

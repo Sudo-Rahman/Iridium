@@ -57,6 +57,7 @@ void RcloneFileModel::addProgressBar(const QModelIndex &index)
 	{
 		progressBar = new CircularProgressBar(container);
 		dynamic_cast<CircularProgressBar*>(progressBar)->setSize(25);
+		dynamic_cast<CircularProgressBar*>(progressBar)->infinite();
 	}
 	else
 	{

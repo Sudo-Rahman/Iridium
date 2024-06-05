@@ -45,6 +45,7 @@ ItemInfoDialog::ItemInfoDialog(TreeFileItem *item, QWidget *parent) : QDialog(pa
 		_name->setText(_file->getRemoteInfo()->name().c_str());
 		_mod_time->hide();
 		_loading1 = new CircularProgressBar(this);
+		_loading1->infinite();
 		_loading1->setSize(100);
 		_layout->addWidget(_loading1, _row, 0, 1, 3, Qt::AlignCenter);
 
@@ -99,10 +100,11 @@ ItemInfoDialog::ItemInfoDialog(TreeFileItem *item, QWidget *parent) : QDialog(pa
 		_size->hide();
 		_loading1 = new CircularProgressBar(this);
 		_loading1->setSize(30);
+		_loading1->infinite();
 		_layout->addWidget(_loading1, 5, 1, 1, 1, Qt::AlignLeft);
 		_loading2 = new CircularProgressBar(this);
-		_loading2->setRange(0, 0);
 		_loading2->setSize(30);
+		_loading2->infinite();
 		_layout->addWidget(_loading2, 7, 1, 1, 1, Qt::AlignLeft);
 	}
 
