@@ -89,14 +89,16 @@ void SyncWidget::connectSignals()
 						_sync_progressBar->reset();
 						_view->clear();
 						_view->setFiles(std::move(src), std::move(dst));
-						_view->analyse(_src_comboBox->currentData().value<SyncType>(), _filter_group_box->getFilters());
+						_view->analyse(_src_comboBox->currentData().value<SyncType>(),
+						               _filter_group_box->isEnabled() ? _filter_group_box->getFilters() : nullptr);
 						_types_sync_comboBox->setEnabled(false);
 						_filter_group_box->setEnabled(false);
 					}
 				}
 				break;
 			case Analysed:
-				_view->sync(_src_comboBox->currentData().value<SyncType>(), _filter_group_box->getFilters());
+				_view->sync(_src_comboBox->currentData().value<SyncType>(),
+				            _filter_group_box->isEnabled() ? _filter_group_box->getFilters() : nullptr);
 				break;
 			default:
 				break;
@@ -115,6 +117,7 @@ void SyncWidget::connectSignals()
 				break;
 			case Analysing:
 				_state = None;
+				_stop->setEnabled(false);
 				_view->stop();
 				break;
 			case Syncing:
@@ -126,6 +129,7 @@ void SyncWidget::connectSignals()
 				_view->clear();
 				_sync_button->setText(tr("Vérifier"));
 				_sync_button->setEnabled(true);
+				_stop->setEnabled(false);
 				break;
 			case Analysed:
 				_state = None;
@@ -134,13 +138,13 @@ void SyncWidget::connectSignals()
 				_sync_button->setText(tr("Vérifier"));
 				_types_sync_comboBox->setEnabled(true);
 				_filter_group_box->setEnabled(true);
+				_stop->setEnabled(false);
 				_sync_progressBar->reset();
 				_state = None;
 				break;
 			default:
 				break;
 		}
-		_stop->setEnabled(false);
 	});
 
 	connect(_view, &SyncTableView::analyseStarted, this, [this]
@@ -158,8 +162,7 @@ void SyncWidget::connectSignals()
 	{
 		_sync_progressBar->reset();
 		_sync_button->setEnabled(true);
-		_stop->setEnabled(false);
-		_stop->setText(tr("Arrêter"));
+		_stop->setText(tr("Effacer"));
 		_state = Analysed;
 		_sync_button->setText(tr("Synchroniser"));
 		Iridium::Global::signal_remove_info(_info_widget);

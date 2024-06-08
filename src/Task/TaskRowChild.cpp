@@ -29,10 +29,6 @@ void TaskRowChild::updateDataChild()
 	_size = _data.size;
 	at(2)->setText(Iridium::Utility::sizeToString(_size).c_str());
 
-	setSpeed();
-
-	at(9)->setText(Iridium::Utility::sizeToString(_data.speed_avg).c_str());
-
 	_progressBar->setProgress(_data.percentage / 100.0);
 
 	if (_data.speed == 0)
@@ -52,7 +48,8 @@ void TaskRowChild::updateDataChild()
 		.arg(seconds, 2, 10, QChar('0')));
 
 	this->at(8)->setText((Iridium::Utility::sizeToString(_data.speed) + "/s").c_str());
-	this->at(9)->setText((Iridium::Utility::sizeToString(_data.speed) + "/s").c_str());
+	this->at(9)->setText(Iridium::Utility::sizeToString(_data.speed_avg).c_str());
+
 }
 
 
@@ -66,11 +63,6 @@ void TaskRowChild::updateData(const variant<ire::json_log, ire::json_log::stats:
 	catch (const bad_variant_access& e) { throw std::runtime_error("TaskRowParent::updateData: bad_variant_access"); }
 }
 
-/**
- * @brief set speed text on the item
- */
-void TaskRowChild::setSpeed() const { at(8)->setText((Iridium::Utility::sizeToString(_data.speed) + "/s").c_str()); }
-
 
 /**
  * @brief if the task is finished
@@ -81,7 +73,7 @@ void TaskRowChild::finished()
 
 	at(2)->setText(Iridium::Utility::sizeToString(_size).c_str());
 
-	setSpeed();
+	this->at(8)->setText((Iridium::Utility::sizeToString(_data.speed) + "/s").c_str());
 
 	terminate();
 }

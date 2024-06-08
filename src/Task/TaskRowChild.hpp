@@ -29,7 +29,5 @@ private:
 
 	void init() override;
 
-	void setSpeed() const;
-
 	void updateDataChild();
 };

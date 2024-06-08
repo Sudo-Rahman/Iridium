@@ -45,4 +45,7 @@ private:
 	RcloneFilePtr _dst;
 	State _state{None};
 
+	QTimer _elapsed_time{};
+	uint64_t _elapsed_time_count{};
+
 };

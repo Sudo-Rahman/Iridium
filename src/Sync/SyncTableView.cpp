@@ -7,8 +7,7 @@
 #include <Settings.hpp>
 #include <QFontMetrics>
 #include <QMessageBox>
-#include <boost/process/io.hpp>
-
+#include <thread>
 #include "IridiumApp.hpp"
 #include "SyncRow.hpp"
 
@@ -16,17 +15,18 @@ using namespace std::chrono;
 
 SyncTableView::SyncTableView(QWidget *parent) : QTableView(parent)
 {
-	_model = new QStandardItemModel(0, 3, this);
+	_model = new QStandardItemModel(0, 8, this);
 
-	_model->setHorizontalHeaderLabels(
-		{tr("Source"), tr("État"), tr("Destination")});
+	_model->setHorizontalHeaderLabels({
+				tr("Source"), tr("État"), tr("Destination"), tr("Taille"), tr("Temps restant"),
+				tr("Temps écoulé"), tr("Vitesse"), tr("Vitesse moyenne")
+		});
 
 	QTableView::setModel(_model);
-	QTableView::setSelectionBehavior(QAbstractItemView::SelectRows);
-	QTableView::setSelectionMode(QAbstractItemView::ContiguousSelection);
+	QTableView::setSelectionMode(QAbstractItemView::NoSelection);
 	QTableView::setEditTriggers(QAbstractItemView::NoEditTriggers);
 	QTableView::setContextMenuPolicy(Qt::CustomContextMenu);
-	horizontalHeader()->setMinimumSectionSize(120);
+	horizontalHeader()->setMinimumSectionSize(100);
 
 	QTableView::setSortingEnabled(true);
 
@@ -34,8 +34,8 @@ SyncTableView::SyncTableView(QWidget *parent) : QTableView(parent)
 
 	connect(horizontalHeader(), &QHeaderView::sectionResized, this, [this](int logicalIndex, int oldSize, int newSize)
 	{
-		if (logicalIndex == 0 and newSize < QWidget::width() * .4)
-			setColumnWidth(0, QWidget::width() * .4);
+		if (logicalIndex == 0 and newSize < QWidget::width() * .3)
+			setColumnWidth(0, QWidget::width() * .3);
 		// get size of all columns
 		int size = 0;
 		for (int i = 0; i < horizontalHeader()->count(); i++)
@@ -57,7 +57,7 @@ void SyncTableView::setFiles(const RcloneFilePtr &src, const RcloneFilePtr &dst)
 	_dst = dst;
 }
 
-void SyncTableView::analyse(SyncType type, const iro::basic_opt_uptr &filter)
+void SyncTableView::analyse(SyncType type, const iro::basic_opt_uptr &filters)
 {
 	_rows.clear();
 	auto process = std::make_unique<ir::process>();
@@ -65,10 +65,11 @@ void SyncTableView::analyse(SyncType type, const iro::basic_opt_uptr &filter)
 	if (type == Sync)
 		process->add_option(iro::basic_option::uptr("--one-way"));
 
-	process->add_option(filter->copy_uptr());
+	if (filters) process->add_option(filters->copy_uptr());
 
 	auto parser = irp::json_log_parser::ptr([this](const ire::json_log &log)
 	{
+		std::this_thread::sleep_for(milliseconds(10));
 		if (log.level() == ire::json_log::log_level::error)
 		{
 			if (log.message().contains("'" + _src->name() + "'")) {}
@@ -112,7 +113,7 @@ void SyncTableView::analyse(SyncType type, const iro::basic_opt_uptr &filter)
 
 void SyncTableView::clear()
 {
-	_model->clear();
+	_model->removeRows(0, _model->rowCount());
 	_rows.clear();
 	_errors.clear();
 }
@@ -120,7 +121,9 @@ void SyncTableView::clear()
 void SyncTableView::sync(SyncType type, const iro::basic_opt_uptr &filters)
 {
 	auto process = std::make_unique<ir::process>();
-	process->add_option(filters->copy_uptr(), iro::logging::stats("200ms"), iro::logging::use_json_log(),
+
+	if (filters) process->add_option(filters->copy_uptr());
+	process->add_option(iro::logging::stats("200ms"), iro::logging::use_json_log(),
 	                    iro::logging::verbose());
 
 	if (type == Sync)
@@ -176,8 +179,8 @@ void SyncTableView::sync(SyncType type, const iro::basic_opt_uptr &filters)
 			    std::ranges::none_of(_errors, [&hash](const auto &h) { return h == std::to_string(hash); })
 				)
 			{
-				emit progress(finished / static_cast<float>(_rows.size()));
-				
+				// emit progress(finished / static_cast<float>(_rows.size()));
+
 				IridiumApp::runOnMainThread([this, hash, log = std::move(log)]
 				{
 					_rows[std::to_string(hash)]->error(log.message());

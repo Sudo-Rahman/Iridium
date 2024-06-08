@@ -84,9 +84,7 @@ void TaskRowParent::init()
 void TaskRowParent::setSpeed()
 {
 	if (_data.get_stats() == nullptr) return;
-	double64_t speedValue;
-	speedValue = _data.get_stats()->speed;
-	at(8)->setText((Iridium::Utility::sizeToString(speedValue) + "/s").c_str());
+	at(8)->setText((Iridium::Utility::sizeToString(_data.get_stats()->speed) + "/s").c_str());
 }
 
 void TaskRowParent::updateData(const variant<ire::json_log, ire::json_log::stats::transfer>& variant)
@@ -106,7 +104,7 @@ void TaskRowParent::updateData()
 	_size = _data.get_stats()->total_bytes;
 	at(2)->setText(Iridium::Utility::sizeToString(_size).c_str());
 	if (_size not_eq 0)
-		_progressBar->setProgress(double_t(_data.get_stats()->bytes) / double_t(_size));
+		_progressBar->setProgress(_data.get_stats()->bytes / static_cast<double_t>(_size));
 	setSpeed();
 	auto averageSpeedValue = _data.get_stats()->speed;
 
@@ -130,7 +128,7 @@ void TaskRowParent::updateData()
 
 
 	// time remaining with avg speed
-	auto remainingTime = double64_t(_size - _data.get_stats()->bytes) / avg;
+	auto remainingTime = static_cast<double_t>(_size - _data.get_stats()->bytes) / avg;
 
 	auto seconds = (uint64_t)remainingTime % 60;
 	auto minutes = ((uint64_t)remainingTime / 60) % 60;
