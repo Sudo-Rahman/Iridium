@@ -8,19 +8,16 @@
 #include <QFontMetrics>
 #include <QMessageBox>
 #include <thread>
+#include <QStyledItemDelegate>
 #include "IridiumApp.hpp"
 #include "SyncRow.hpp"
+#include "SyncTableModel.hpp"
 
 using namespace std::chrono;
 
 SyncTableView::SyncTableView(QWidget *parent) : QTableView(parent)
 {
-	_model = new QStandardItemModel(0, 8, this);
-
-	_model->setHorizontalHeaderLabels({
-				tr("Source"), tr("État"), tr("Destination"), tr("Taille"), tr("Temps restant"),
-				tr("Temps écoulé"), tr("Vitesse"), tr("Vitesse moyenne")
-		});
+	_model = new SyncTableModel(this);
 
 	QTableView::setModel(_model);
 	QTableView::setSelectionMode(QAbstractItemView::NoSelection);
@@ -30,7 +27,8 @@ SyncTableView::SyncTableView(QWidget *parent) : QTableView(parent)
 
 	QTableView::setSortingEnabled(true);
 
-	_model->setSortRole(Qt::UserRole + 1);
+	SyncProgressBarDelegate *delegate = new SyncProgressBarDelegate(this);
+	setItemDelegateForColumn(1, delegate);
 
 	connect(horizontalHeader(), &QHeaderView::sectionResized, this, [this](int logicalIndex, int oldSize, int newSize)
 	{
@@ -45,7 +43,6 @@ SyncTableView::SyncTableView(QWidget *parent) : QTableView(parent)
 			                                                horizontalHeader()->sectionSize(
 				                                                horizontalHeader()->count() - 1));
 	});
-	setColumnWidth(0, 0);
 
 	setFrameStyle(QFrame::NoFrame);
 	setShowGrid(false);
@@ -69,27 +66,17 @@ void SyncTableView::analyse(SyncType type, const iro::basic_opt_uptr &filters)
 
 	auto parser = irp::json_log_parser::ptr([this](const ire::json_log &log)
 	{
-		std::this_thread::sleep_for(milliseconds(10));
 		if (log.level() == ire::json_log::log_level::error)
 		{
 			if (log.message().contains("'" + _src->name() + "'")) {}
 			else if (log.message().contains("'" + _dst->name() + "'"))
 			{
-				IridiumApp::runOnMainThread([this, log = std::move(log)]
-				{
-					auto src_file = std::make_shared<RcloneFile>(_src.get(), log.object().c_str(), 0, false,
-					                                             QDateTime(),
-					                                             _src->getRemoteInfo());
-					auto dst_file = std::make_shared<RcloneFile>(_dst.get(), log.object().c_str(), 0, false,
-					                                             QDateTime(),
-					                                             _dst->getRemoteInfo());
-					auto hash = std::hash<std::string>{}(
-						std::string(src_file->absolute_path() + dst_file->absolute_path()));
-					auto row = std::make_unique<SyncRow>(src_file, dst_file);
-					_model->appendRow(*row);
-					setIndexWidget(row->progressBarIndex(), row->progressBar());
-					_rows[std::to_string(hash)] = std::move(row);
-				});
+				auto src_file = _src->absolute_path() + "/" + log.object();
+				auto dst_file = _dst->absolute_path() + "/" + log.object();
+				auto hash = std::hash<std::string>{}(std::string(src_file + dst_file));
+				auto row = new SyncRow(src_file, dst_file, _data.size());
+				_data.push_back(row);
+				_rows[std::to_string(hash)] = row;
 			}
 		}
 	});
@@ -100,6 +87,7 @@ void SyncTableView::analyse(SyncType type, const iro::basic_opt_uptr &filters)
 			.on_stop([this] { emit stopped(); })
 			.on_finish([this](auto exit)
 			{
+				_model->setData(&_data);
 				if (exit not_eq 0 and _rows.empty())
 					emit errorCheck(_process->get_error().empty()
 						                ? "Error"
@@ -113,9 +101,12 @@ void SyncTableView::analyse(SyncType type, const iro::basic_opt_uptr &filters)
 
 void SyncTableView::clear()
 {
-	_model->removeRows(0, _model->rowCount());
 	_rows.clear();
+	for (auto &row: _data)
+		delete row;
+	_data.clear();
 	_errors.clear();
+	_model->clear();
 }
 
 void SyncTableView::sync(SyncType type, const iro::basic_opt_uptr &filters)
@@ -137,14 +128,6 @@ void SyncTableView::sync(SyncType type, const iro::basic_opt_uptr &filters)
 		{
 			if (log.get_stats() not_eq nullptr)
 			{
-				auto finished = std::accumulate(_rows.begin(), _rows.end(), 0,
-				                                [](auto acc, const auto &row)
-				                                {
-					                                return acc + (row.second->state() == SyncRow::Finished ? 1 : 0);
-				                                });
-
-				emit progress(finished / static_cast<float>(_rows.size()));
-
 				auto hashList = std::vector<std::string>{};
 				for (const auto &transfer: log.get_stats()->transferring)
 				{
@@ -152,13 +135,15 @@ void SyncTableView::sync(SyncType type, const iro::basic_opt_uptr &filters)
 						transfer.src_fs.value_or("") + "/" + transfer.name +
 						transfer.dst_fs.value_or("") + "/" + transfer.name));
 					hashList.push_back(std::to_string(hash));
-					IridiumApp::runOnMainThread([this,transfer = std::move(transfer), hash]
+
+					if (_rows.contains(std::to_string(hash)) and
+					    std::ranges::none_of(_errors, [&hash](const auto &h) { return h == std::to_string(hash); })
+						)
 					{
-						if (_rows.contains(std::to_string(hash)) and
-						    std::ranges::none_of(_errors, [&hash](const auto &h) { return h == std::to_string(hash); })
-							)
-							_rows[std::to_string(hash)]->setTransferData(transfer);
-					});
+						auto ref = _rows[std::to_string(hash)];
+						ref->setTransferData(transfer);
+						_model->updateRowData(ref->row());
+					}
 				}
 
 				for (const auto &[hash, row]: _rows)
@@ -166,7 +151,13 @@ void SyncTableView::sync(SyncType type, const iro::basic_opt_uptr &filters)
 					if (!std::ranges::any_of(hashList, [&hash](const auto &h) { return h == hash; }))
 					{
 						if (row->state() == SyncRow::Syncing)
-							IridiumApp::runOnMainThread([this, hash] { _rows[hash]->finish(); });
+						{
+							auto ref = _rows[hash];
+							ref->finish();
+							_model->updateRowData(ref->row());
+							progress_counter++;
+							emit progress(progress_counter / static_cast<float>(_rows.size()));
+						}
 					}
 				}
 			}
@@ -179,13 +170,12 @@ void SyncTableView::sync(SyncType type, const iro::basic_opt_uptr &filters)
 			    std::ranges::none_of(_errors, [&hash](const auto &h) { return h == std::to_string(hash); })
 				)
 			{
-				// emit progress(finished / static_cast<float>(_rows.size()));
-
-				IridiumApp::runOnMainThread([this, hash, log = std::move(log)]
-				{
-					_rows[std::to_string(hash)]->error(log.message());
-					_errors.push_back(std::to_string(hash));
-				});
+				auto ref = _rows[std::to_string(hash)];
+				ref->error(log.message());
+				_model->updateRowData(ref->row());
+				_errors.push_back(std::to_string(hash));
+				progress_counter++;
+				emit progress(progress_counter / static_cast<float>(_rows.size()));
 			}
 		}
 	});

@@ -7,25 +7,18 @@
 #include <QStandardItem>
 #include <RcloneFile.hpp>
 
-class SyncRow : public QList<QStandardItem *>
+class SyncRow : public std::vector<QVariant>
 {
-
 public:
-	explicit SyncRow(const RcloneFilePtr &file_src, const RcloneFilePtr &file_dst);
-
-	QModelIndex progressBarIndex() const;
-
-	QWidget *progressBar() const;
-
-	RcloneFilePtr src() const;
-
-	RcloneFilePtr dst() const;
+	explicit SyncRow(const std::string &src, const std::string &dst, uint32_t row);
 
 	void setTransferData(const ire::json_log::stats::transfer &transfer);
 
 	void finish();
 
 	void error(const std::string &message);
+
+	uint32_t row() const;
 
 	enum State
 	{
@@ -38,14 +31,7 @@ public:
 	State state() const;
 
 private:
-
-	LinearProgressBar *_progressBar;
-	QWidget *_widget;
-	RcloneFilePtr _src;
-	RcloneFilePtr _dst;
 	State _state{None};
-
-	QTimer _elapsed_time{};
-	uint64_t _elapsed_time_count{};
-
+	uint32_t _row;
+	uint64_t _start_time{0};
 };

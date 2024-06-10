@@ -5,22 +5,23 @@
 #pragma once
 
 #include <QTableView>
-#include <QStandardItemModel>
 #include <iridium/rclone.hpp>
 #include <Sync.hpp>
 
 #include "RcloneFile.hpp"
 #include "SyncRow.hpp"
-
+#include "SyncTableModel.hpp"
 
 class SyncTableView : public QTableView
 {
 	Q_OBJECT
 
-	QStandardItemModel *_model{};
+	SyncTableModel *_model{};
 	RcloneFilePtr _src{}, _dst{};
-	std::map<std::string, std::unique_ptr<SyncRow>> _rows{};
+	std::vector<SyncRow *> _data{};
+	std::map<std::string, SyncRow*> _rows{};
 	std::vector<std::string> _errors{};
+	uint64_t progress_counter{0};
 
 	ir::process *_process{nullptr};
 
