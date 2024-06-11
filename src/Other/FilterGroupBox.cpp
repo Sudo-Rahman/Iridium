@@ -154,7 +154,7 @@ void FilterGroupBox::connectSignals()
 	{
 		auto model = dynamic_cast<QStandardItemModel *>(m_listView->model());
 		auto index = m_listView->currentIndex();
-		if(index.isValid())
+		if (index.isValid())
 		{
 			model->removeRow(index.row());
 			emit filterRemoved();
@@ -208,6 +208,7 @@ void FilterGroupBox::connectSignals()
  */
 option::basic_opt_uptr FilterGroupBox::getFilters()
 {
+	if (!isChecked()) return nullptr;
 	auto filters = option::filter::filter_file::uptr();
 	auto model = dynamic_cast<QStandardItemModel *>(m_listView->model());
 	for (int i = 0; i < model->rowCount(); ++i)

@@ -8,10 +8,52 @@
 #include <QFontMetrics>
 #include <QMessageBox>
 #include <thread>
-#include <QStyledItemDelegate>
+#include <SyncProgressBarDelegate.hpp>
 #include "IridiumApp.hpp"
 #include "SyncRow.hpp"
 #include "SyncTableModel.hpp"
+
+class CustomSyncItemDelegate : public QStyledItemDelegate
+{
+public:
+	CustomSyncItemDelegate(QObject *parent = nullptr) : QStyledItemDelegate(parent) {}
+
+	void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override
+	{
+		// Supposons que les données du modèle contiennent le chemin de l'icône
+		QString path = index.data().toString();
+		QIcon icon(RcloneFile::getIcon(path));
+		if (!icon.isNull())
+		{
+			QSize size(16, 16);
+
+			QRect iconRect = option.rect;
+			int yOffset = (iconRect.height() - size.height()) / 2;
+			QPoint topLeft(iconRect.left() + 5, iconRect.top() + yOffset);
+			QRect targetRect(topLeft, size);
+
+			icon.paint(painter, targetRect, Qt::AlignLeft | Qt::AlignVCenter);
+
+			QRect textRect = option.rect;
+			textRect.setLeft(targetRect.right() + 5); // Laisser un espace de 5 pixels entre l'icône et le texte
+
+			QString text = index.data(Qt::DisplayRole).toString();
+			QFontMetrics fontMetrics(option.font);
+			QString elidedText = fontMetrics.elidedText(text, Qt::ElideRight, textRect.width());
+
+			painter->drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, elidedText);
+		} else {
+			// Si pas d'icône, dessiner normalement avec l'effet ellipse pour le texte
+			QString text = index.data(Qt::DisplayRole).toString();
+			QFontMetrics fontMetrics(option.font);
+			QString elidedText = fontMetrics.elidedText(text, Qt::ElideRight, option.rect.width());
+			painter->drawText(option.rect, Qt::AlignLeft | Qt::AlignVCenter, elidedText);
+		}
+	}
+
+private:
+	QColor currentColor(int progress) const;
+};
 
 using namespace std::chrono;
 
@@ -25,10 +67,14 @@ SyncTableView::SyncTableView(QWidget *parent) : QTableView(parent)
 	QTableView::setContextMenuPolicy(Qt::CustomContextMenu);
 	horizontalHeader()->setMinimumSectionSize(100);
 
+	verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+
 	QTableView::setSortingEnabled(true);
 
 	SyncProgressBarDelegate *delegate = new SyncProgressBarDelegate(this);
 	setItemDelegateForColumn(1, delegate);
+	auto customDelegate = new CustomSyncItemDelegate(this);
+	setItemDelegateForColumn(0, customDelegate);
 
 	connect(horizontalHeader(), &QHeaderView::sectionResized, this, [this](int logicalIndex, int oldSize, int newSize)
 	{
@@ -68,7 +114,15 @@ void SyncTableView::analyse(SyncType type, const iro::basic_opt_uptr &filters)
 	{
 		if (log.level() == ire::json_log::log_level::error)
 		{
-			if (log.message().contains("'" + _src->name() + "'")) {}
+			if (log.message().contains("'" + _src->name() + "'"))
+			{
+				auto src_file = _dst->absolute_path() + "/" + log.object();
+				auto dst_file = _src->absolute_path() + "/" + log.object();
+				auto hash = std::hash<std::string>{}(std::string(src_file + dst_file));
+				auto row = new SyncRow(src_file, dst_file, _data.size());
+				_data.push_back(row);
+				_rows[std::to_string(hash)] = row;
+			}
 			else if (log.message().contains("'" + _dst->name() + "'"))
 			{
 				auto src_file = _src->absolute_path() + "/" + log.object();
@@ -85,15 +139,16 @@ void SyncTableView::analyse(SyncType type, const iro::basic_opt_uptr &filters)
 			.on_start([this] { emit analyseStarted(); })
 			.every_line_parser(std::move(parser))
 			.on_stop([this] { emit stopped(); })
-			.on_finish([this](auto exit)
+			.on_finish([this](auto exit, auto *p)
 			{
-				_model->setData(&_data);
+				_model->setData(_data);
 				if (exit not_eq 0 and _rows.empty())
-					emit errorCheck(_process->get_error().empty()
+					emit errorCheck(p->get_error().empty()
 						                ? "Error"
 						                : QString::fromStdString(_process->get_error().back()));
 				else
 					emit analyseFinished();
+				p->clean_data();
 			});
 	_process = process.get();
 	Iridium::Global::add_process(std::move(process));
@@ -101,12 +156,12 @@ void SyncTableView::analyse(SyncType type, const iro::basic_opt_uptr &filters)
 
 void SyncTableView::clear()
 {
-	_rows.clear();
+	_model->clear();
 	for (auto &row: _data)
 		delete row;
 	_data.clear();
+	_rows.clear();
 	_errors.clear();
-	_model->clear();
 }
 
 void SyncTableView::sync(SyncType type, const iro::basic_opt_uptr &filters)
@@ -183,14 +238,15 @@ void SyncTableView::sync(SyncType type, const iro::basic_opt_uptr &filters)
 	process->every_line_parser(std::move(parser))
 			.on_start([this] { emit syncStarted(); })
 			.on_stop([this] { emit stopped(); })
-			.on_finish([this](auto exit)
+			.on_finish([this](auto exit, auto *p)
 			{
 				if (exit == 0)
 					emit syncFinished();
 				else
-					emit errorSync(_process->get_error().empty()
+					emit errorSync(p->get_error().empty()
 						               ? "Error"
 						               : QString::fromStdString(_process->get_error().back()));
+				p->clean_data();
 			});
 
 	_process = process.get();

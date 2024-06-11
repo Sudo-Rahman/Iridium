@@ -51,6 +51,7 @@ public:
     [[nodiscard]] QString getFileType() const;
 
     [[nodiscard]] QIcon getIcon() const;
+    [[nodiscard]] static QIcon getIcon(const QString &path);
 
     [[nodiscard]]  QList<QMimeType> mimeTypes() const;
 };

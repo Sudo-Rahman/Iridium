@@ -32,7 +32,7 @@ SyncWidget::SyncWidget(QWidget *parent) : QWidget(parent)
 	_types_sync_comboBox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	_types_sync_comboBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
 	_types_sync_comboBox->addItem(tr("Sync"), QVariant::fromValue(Sync));
-	_types_sync_comboBox->addItem(tr("Bisync"), QVariant::fromValue(Bisync));
+	// _types_sync_comboBox->addItem(tr("Bisync"), QVariant::fromValue(Bisync));
 	_dst_comboBox = new QComboBox(this);
 	_dst_comboBox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	_dst_comboBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
@@ -89,16 +89,15 @@ void SyncWidget::connectSignals()
 						_sync_progressBar->reset();
 						_view->clear();
 						_view->setFiles(std::move(src), std::move(dst));
-						_view->analyse(_src_comboBox->currentData().value<SyncType>(),
-						               _filter_group_box->isEnabled() ? _filter_group_box->getFilters() : nullptr);
+						_view->analyse(_types_sync_comboBox->currentData().value<SyncType>(),
+						               _filter_group_box->getFilters());
 						_types_sync_comboBox->setEnabled(false);
 						_filter_group_box->setEnabled(false);
 					}
 				}
 				break;
 			case Analysed:
-				_view->sync(_src_comboBox->currentData().value<SyncType>(),
-				            _filter_group_box->isEnabled() ? _filter_group_box->getFilters() : nullptr);
+				_view->sync(_types_sync_comboBox->currentData().value<SyncType>(), _filter_group_box->getFilters());
 				break;
 			default:
 				break;
@@ -113,6 +112,7 @@ void SyncWidget::connectSignals()
 				_types_sync_comboBox->setEnabled(true);
 				_filter_group_box->setEnabled(true);
 				_sync_progressBar->reset();
+				_sync_button->setEnabled(true);
 				_view->clear();
 				break;
 			case Analysing:
@@ -127,6 +127,7 @@ void SyncWidget::connectSignals()
 			case Synced:
 				_state = None;
 				_view->clear();
+				_sync_progressBar->reset();
 				_sync_button->setText(tr("Vérifier"));
 				_sync_button->setEnabled(true);
 				_stop->setEnabled(false);
@@ -207,6 +208,8 @@ void SyncWidget::connectSignals()
 		QMessageBox::critical(this, tr("Erreur"), tr("Une erreur est survenue lors de l'analyse") + "\n" + error);
 		_sync_progressBar->error();
 		_state = None;
+		_stop->setText(tr("Effacer"));
+		_sync_button->setEnabled(true);
 		Iridium::Global::signal_remove_info(_info_widget);
 	});
 
@@ -216,6 +219,9 @@ void SyncWidget::connectSignals()
 		                      tr("Une erreur est survenue lors de la synchronisation") + "\n" + error);
 		_sync_progressBar->error();
 		_state = Analysed;
+		_stop->setText(tr("Effacer"));
+		_stop->setEnabled(true);
+		_sync_button->setEnabled(true);
 		Iridium::Global::signal_remove_info(_info_widget);
 	});
 }
@@ -224,6 +230,8 @@ bool SyncWidget::event(QEvent *event)
 {
 	if (event->type() == QEvent::ShowToParent)
 	{
+		auto selected_src = _src_comboBox->currentData().value<RcloneFilePtr>();
+		auto selected_dst = _dst_comboBox->currentData().value<RcloneFilePtr>();
 		_src_comboBox->clear();
 		_dst_comboBox->clear();
 		for (auto &dir: Iridium::Global::sync_dirs)
@@ -234,6 +242,18 @@ bool SyncWidget::event(QEvent *event)
 			_dst_comboBox->addItem(dir->getName());
 			_dst_comboBox->setItemData(_dst_comboBox->count() - 1, QVariant::fromValue(dir), Qt::UserRole);
 			_dst_comboBox->setItemIcon(_dst_comboBox->count() - 1, dir->getIcon());
+		}
+		if (selected_src)
+		{
+			auto index = _src_comboBox->findData(QVariant::fromValue(selected_src));
+			if (index != -1)
+				_src_comboBox->setCurrentIndex(index);
+		}
+		if (selected_dst)
+		{
+			auto index = _dst_comboBox->findData(QVariant::fromValue(selected_dst));
+			if (index != -1)
+				_dst_comboBox->setCurrentIndex(index);
 		}
 	}
 	return QWidget::event(event);
