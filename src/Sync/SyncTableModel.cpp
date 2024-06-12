@@ -13,7 +13,7 @@ int SyncTableModel::columnCount(const QModelIndex &parent) const { return _heade
 
 QVariant SyncTableModel::data(const QModelIndex &index, int role) const
 {
-	if (role == Qt::DisplayRole) { return _data[index.row()]->operator[](index.column()); }
+	if (role == Qt::DisplayRole) { return _data[index.row()]->operator[](index.column()).second; }
 	return QVariant();
 }
 
@@ -30,7 +30,7 @@ QVariant SyncTableModel::headerData(int section, Qt::Orientation orientation, in
 		return QVariant();
 
 	if (orientation == Qt::Horizontal) { return _headers[section]; }
-	return QString::number(section + 1); // Afficher les numéros de ligne
+	return QString::number(section + 1);
 }
 
 void SyncTableModel::setData(const std::vector<SyncRow *> &rows)
@@ -43,12 +43,19 @@ void SyncTableModel::setData(const std::vector<SyncRow *> &rows)
 void SyncTableModel::updateRowData(int row)
 {
 	if (row < 0 || row >= rowCount())
-	{
-		return; // Vérifiez que la ligne est valide
-	}
+		return;
 
-	// Notifiez la vue que les données ont changé
+
 	QModelIndex topLeft = index(row, 0);
 	QModelIndex bottomRight = index(row, columnCount() - 1);
 	emit dataChanged(topLeft, bottomRight);
+}
+
+void SyncTableModel::sort(int column, Qt::SortOrder order)
+{
+	std::sort(_data.begin(), _data.end(), [column, order](SyncRow *a, SyncRow *b)
+	{
+		return a->compare(column, order, *b);
+	});
+	emit layoutChanged();
 }

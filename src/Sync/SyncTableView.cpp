@@ -25,7 +25,7 @@ public:
 		QIcon icon(RcloneFile::getIcon(path));
 		if (!icon.isNull())
 		{
-			QSize size(16, 16);
+			QSize size(20, 20);
 
 			QRect iconRect = option.rect;
 			int yOffset = (iconRect.height() - size.height()) / 2;
@@ -50,9 +50,6 @@ public:
 			painter->drawText(option.rect, Qt::AlignLeft | Qt::AlignVCenter, elidedText);
 		}
 	}
-
-private:
-	QColor currentColor(int progress) const;
 };
 
 using namespace std::chrono;
@@ -71,10 +68,8 @@ SyncTableView::SyncTableView(QWidget *parent) : QTableView(parent)
 
 	QTableView::setSortingEnabled(true);
 
-	SyncProgressBarDelegate *delegate = new SyncProgressBarDelegate(this);
-	setItemDelegateForColumn(1, delegate);
-	auto customDelegate = new CustomSyncItemDelegate(this);
-	setItemDelegateForColumn(0, customDelegate);
+	setItemDelegateForColumn(1, new SyncProgressBarDelegate(this));
+	setItemDelegateForColumn(0, new CustomSyncItemDelegate(this));
 
 	connect(horizontalHeader(), &QHeaderView::sectionResized, this, [this](int logicalIndex, int oldSize, int newSize)
 	{

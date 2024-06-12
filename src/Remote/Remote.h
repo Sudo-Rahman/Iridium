@@ -6,7 +6,6 @@
 #include <map>
 #include <iridium/entities.hpp>
 
-
 const std::string DRIVEICON = ":/resources/google-drive.png";
 const std::string SFTPICON = ":/resources/sftp.png";
 const std::string ONEDRIVEICON = ":/resources/one-drive.png";
@@ -20,7 +19,6 @@ const std::string SMB = ":/resources/smb.png";
 const std::string CMD = ":/resources/cmd.png";
 
 const std::string HARDDRIVEICON = ":/resources/drive-harddisk-solidstate.svg";
-
 
 const std::map<ire::remote::remote_type, std::string> remoteIco = {
 				{ire::remote::google_drive, DRIVEICON},
@@ -38,14 +36,14 @@ const std::map<ire::remote::remote_type, std::string> remoteIco = {
 
 		};
 
-
 class RemoteInfo : public ire::remote
 {
 public:
-	RemoteInfo(const std::string &name,remote_type type,const std::string& path) : remote(name, type, path)
-	{}
+	RemoteInfo(const std::string &name, remote_type type, const std::string &path) : remote(name, type, path) {}
 
 	auto icon() const -> std::string { return remoteIco.at(type()); }
+
+	auto getIcon() const -> QIcon { return QIcon(icon().c_str()); }
 
 	[[nodiscard]] bool isLocal() const { return type() == none; }
 

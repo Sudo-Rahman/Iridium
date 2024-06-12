@@ -1,18 +1,17 @@
 #pragma once
 
-#include <QList>
 #include <QStyledItemDelegate>
 #include <QVariant>
 #include <QPainterPath>
-#include <SyncRow.hpp>
+#include <SearchRow.hpp>
 #include <QPainter>
 
-class SyncTableModel : public QAbstractTableModel
+class SearchTableModel : public QAbstractTableModel
 {
 	Q_OBJECT
 
 public:
-	SyncTableModel(QObject *parent = nullptr);
+	SearchTableModel(QObject *parent = nullptr);
 
 	int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 
@@ -24,13 +23,15 @@ public:
 
 	QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
 
-	void setData(const std::vector<SyncRow *> &rows);
-
-	void updateRowData(int row);
+	void setData(std::vector<SearchRow *> *rows);
 
 	void sort(int column, Qt::SortOrder order) override;
 
+	auto data(const QModelIndex &index) const -> SearchRow *;
+
+	auto rowsAppened() -> void;
+
 private:
-	std::vector<SyncRow *> _data;
+	std::vector<SearchRow *> *_data;
 	QStringList _headers;
 };

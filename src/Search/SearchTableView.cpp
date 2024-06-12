@@ -4,26 +4,72 @@
 
 #include "SearchTableView.hpp"
 #include <QHeaderView>
-#include <SearchTableItem.hpp>
 #include <QMenu>
 #include <Global.hpp>
 #include <QDirIterator>
 #include <Settings.hpp>
-#include <iostream>
 #include <QHBoxLayout>
 #include <QLabel>
 
 #include "CircularProgressBar.hpp"
 #include "IridiumApp.hpp"
 
+class CustomSearchItemDelegate : public QStyledItemDelegate
+{
+public:
+	CustomSearchItemDelegate(SearchTableModel *model, uint8_t collumn, QObject *parent = nullptr) : _model(model),
+		_collumn(collumn),
+		QStyledItemDelegate(parent) {}
+
+	void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override
+	{
+		QIcon icon;
+		if (_collumn == 0)
+			icon = _model->data(index)->file()->getIcon();
+		else if (_collumn == 1)
+			icon = _model->data(index)->file()->getRemoteInfo()->getIcon();
+		if (!icon.isNull())
+		{
+			QSize size(20, 20);
+
+			QRect iconRect = option.rect;
+			int yOffset = (iconRect.height() - size.height()) / 2;
+			QPoint topLeft(iconRect.left() + 5, iconRect.top() + yOffset);
+			QRect targetRect(topLeft, size);
+
+			icon.paint(painter, targetRect, Qt::AlignLeft | Qt::AlignVCenter);
+
+			QRect textRect = option.rect;
+			textRect.setLeft(targetRect.right() + 5); // Laisser un espace de 5 pixels entre l'icône et le texte
+
+			QString text = index.data(Qt::DisplayRole).toString();
+			QFontMetrics fontMetrics(option.font);
+			QString elidedText = fontMetrics.elidedText(text, Qt::ElideRight, textRect.width());
+
+			painter->drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, elidedText);
+		}
+		else
+		{
+			// Si pas d'icône, dessiner normalement avec l'effet ellipse pour le texte
+			QString text = index.data(Qt::DisplayRole).toString();
+			QFontMetrics fontMetrics(option.font);
+			QString elidedText = fontMetrics.elidedText(text, Qt::ElideRight, option.rect.width());
+			painter->drawText(option.rect, Qt::AlignLeft | Qt::AlignVCenter, elidedText);
+		}
+	}
+
+private:
+	SearchTableModel *_model{};
+	uint8_t _collumn{};
+};
+
 using namespace iridium::rclone;
 
 SearchTableView::SearchTableView(QWidget *parent) : QTableView(parent)
 {
-	_model = new QStandardItemModel(0, 6, this);
+	_model = new SearchTableModel(this);
 
-	_model->setHorizontalHeaderLabels(
-		{tr("Nom"), tr("Remote"), tr("Chemin"), tr("Taille"), tr("Date de modification"), tr("Type")});
+	_model->setData(&_data);
 
 	QTableView::setModel(_model);
 	QTableView::setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -32,11 +78,12 @@ SearchTableView::SearchTableView(QWidget *parent) : QTableView(parent)
 	QTableView::setContextMenuPolicy(Qt::CustomContextMenu);
 	horizontalHeader()->setMinimumSectionSize(120);
 
+	setItemDelegateForColumn(0, new CustomSearchItemDelegate(_model, 0, this));
+	setItemDelegateForColumn(1, new CustomSearchItemDelegate(_model, 1, this));
+
 	setColumnWidth(0, 0);
 
 	QTableView::setSortingEnabled(true);
-
-	_model->setSortRole(Qt::UserRole + 1);
 
 	connect(this, &QTableView::customContextMenuRequested, this, &SearchTableView::showCustomContextMenu);
 
@@ -80,9 +127,9 @@ void SearchTableView::showCustomContextMenu()
 				copie->setText(tr("Copier le fichier"));
 				connect(parent, &QAction::triggered, this, [this, items]()
 				{
-					auto item = dynamic_cast<SearchTableItem *>(_model->itemFromIndex(items[0]));
+					auto row = _model->data(items[0]);
 					Iridium::Global::clear_and_swap_copy_files(
-						{std::make_shared<RcloneFile>(*item->getFile()->parent())});
+						{std::make_shared<RcloneFile>(*row->file()->parent())});
 				});
 			}
 			break;
@@ -96,32 +143,32 @@ void SearchTableView::showCustomContextMenu()
 		std::vector<RcloneFilePtr> files;
 		for (auto &item: items)
 		{
-			auto item_cast = dynamic_cast<SearchTableItem *>(_model->itemFromIndex(item));
+			auto row = _model->data(item);
 
 			auto file_not_exist = std::ranges::find_if(files.begin(), files.end(),
-			                                           [item_cast](const RcloneFilePtr &file)
+			                                           [row](const RcloneFilePtr &file)
 			                                           {
-				                                           return file.get() == item_cast->getFile().get();
+				                                           return file.get() == row->file().get();
 			                                           }) == files.end();
 
-			if (item_cast and file_not_exist)
-				files.push_back(item_cast->getFile());
+			if (row and file_not_exist)
+				files.push_back(row->file());
 		}
 		Iridium::Global::clear_and_swap_copy_files(files);
 	}
 }
 
-void SearchTableView::addFile(const RcloneFilePtr &file) const
+void SearchTableView::addFile(const RcloneFilePtr &file)
 {
-	QList<QStandardItem *> row = {
-					new SearchTableItem(0, file),
-					new SearchTableItem(1, file),
-					new SearchTableItem(2, file),
-					new SearchTableItem(3, file),
-					new SearchTableItem(4, file),
-					new SearchTableItem(5, file)
-			};
-	_model->appendRow(row);
+	std::lock_guard lock(_mutex);
+	_data.push_back(new SearchRow(file));
+	if (_data.size() < 100)
+		_model->rowsAppened();
+	else if (((_data.size()-100) / 100 - 1) == _refresh_model)
+	{
+		_model->rowsAppened();
+		_refresh_model++;
+	}
 }
 
 void SearchTableView::searchLocal(const QString &text, const RemoteInfoPtr &remoteInfo)
@@ -147,7 +194,7 @@ void SearchTableView::searchLocal(const QString &text, const RemoteInfoPtr &remo
 					it.next();
 					if (it.fileName().contains(text, Qt::CaseInsensitive))
 					{
-						auto root_file = _remote_to_root_file[remoteInfo.get()];
+						auto root_file = &_remote_to_root_file[remoteInfo.get()];
 
 						auto parent_info = QFileInfo(it.filePath());
 						auto parent = std::make_shared<RcloneFile>(
@@ -159,7 +206,7 @@ void SearchTableView::searchLocal(const QString &text, const RemoteInfoPtr &remo
 								remoteInfo
 							);
 
-						root_file.add_child_if_not_exist(parent);
+						root_file->add_child(parent);
 
 						auto rcloneFile = std::make_shared<RcloneFile>(
 								parent.get(),
@@ -199,7 +246,6 @@ void SearchTableView::searchDistant(option::basic_opt_uptr &&filters, const Remo
 					new parser::file_parser(&_remote_to_root_file[remoteInfo.get()],
 					                        [this](const ire::file &file)
 					                        {
-						                        // thread safe
 						                        addFile(std::make_shared<RcloneFile>(file));
 					                        },
 					                        parser::file_parser::lsl)))
@@ -225,7 +271,10 @@ void SearchTableView::searchDistant(option::basic_opt_uptr &&filters, const Remo
 void SearchTableView::terminateSearch()
 {
 	if ((_searching--) == 1)
+	{
 		emit searchFinished();
+		_model->rowsAppened();
+	}
 }
 
 /**
@@ -240,8 +289,10 @@ void SearchTableView::stopAllSearch()
 		th.interrupt();
 	_threads.clear();
 	_searching = 0;
+	_model->clear();
+	_data.clear();
 
-	for(const auto &widget : _search_info_widgets)
+	for (const auto &widget: _search_info_widgets)
 		Iridium::Global::signal_remove_info(widget);
 	_search_info_widgets.clear();
 }

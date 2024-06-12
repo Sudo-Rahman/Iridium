@@ -3,11 +3,12 @@
 //
 
 #pragma once
+#include <any>
 #include <LinearProgressBar.hpp>
 #include <QStandardItem>
 #include <RcloneFile.hpp>
 
-class SyncRow : public std::vector<QVariant>
+class SyncRow : public std::vector<std::pair<std::any,QVariant>>
 {
 public:
 	explicit SyncRow(const std::string &src, const std::string &dst, uint32_t row);
@@ -29,6 +30,8 @@ public:
 	};
 
 	State state() const;
+
+	bool compare(int collumn, Qt::SortOrder order,const SyncRow& other) const;
 
 private:
 	State _state{None};

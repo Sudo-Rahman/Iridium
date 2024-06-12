@@ -6,10 +6,11 @@
 
 
 #include <QTableView>
-#include <TreeFileItem.hpp>
+#include <thread>
 #include <boost/json.hpp>
 #include <boost/thread.hpp>
 #include <QThreadPool>
+#include <SearchTableModel.hpp>
 #include <iridium/process.hpp>
 
 
@@ -17,17 +18,14 @@ class SearchTableView : public QTableView
 {
 Q_OBJECT
 
-    struct Row
-    {
-        boost::json::object file;
-        RemoteInfoPtr remoteInfo;
-    };
-
-    QStandardItemModel *_model{};
+    SearchTableModel *_model{};
+    std::vector<SearchRow *> _data{};
+    uint32_t _refresh_model = false;
     iridium::rclone::process_pool _pool{10};
     std::vector<boost::thread> _threads{};
     std::map<RemoteInfo *, RcloneFile> _remote_to_root_file{};
     std::atomic_uint8_t _searching = 0;
+    std::mutex _mutex;
 
     std::vector<QWidget *> _search_info_widgets{};
 
@@ -46,7 +44,7 @@ public :
     }
 
 private:
-    void addFile(const RcloneFilePtr &file) const;
+    void addFile(const RcloneFilePtr &file);
 
     void showCustomContextMenu();
 
