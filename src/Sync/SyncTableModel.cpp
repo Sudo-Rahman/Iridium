@@ -13,7 +13,7 @@ int SyncTableModel::columnCount(const QModelIndex &parent) const { return _heade
 
 QVariant SyncTableModel::data(const QModelIndex &index, int role) const
 {
-	if (role == Qt::DisplayRole) { return _data[index.row()]->operator[](index.column()).second; }
+	if (role == Qt::DisplayRole) { return _data[index.row()]->data(index.column()); }
 	return QVariant();
 }
 

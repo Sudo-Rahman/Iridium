@@ -8,7 +8,7 @@
 #include <QStandardItem>
 #include <RcloneFile.hpp>
 
-class SyncRow : public std::vector<std::pair<std::any,QVariant>>
+class SyncRow
 {
 public:
 	explicit SyncRow(const std::string &src, const std::string &dst, uint32_t row);
@@ -33,8 +33,20 @@ public:
 
 	bool compare(int collumn, Qt::SortOrder order,const SyncRow& other) const;
 
+	QVariant data(int column) const;
+
 private:
 	State _state{None};
 	uint32_t _row;
 	uint64_t _start_time{0};
+
+	QString _src;
+	char _progress;
+	QString _dst;
+	uint64_t _size;
+	uint64_t _remainingTime;
+	uint64_t _ellapsedTime;
+	uint64_t _speed;
+	uint64_t _speed_avg;
+
 };

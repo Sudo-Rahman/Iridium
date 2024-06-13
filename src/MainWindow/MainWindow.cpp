@@ -82,6 +82,15 @@ void MainWindow::connectSignals()
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
+	if(_info_widget->taskInProgress())
+	{
+		QMessageBox::StandardButton reply = QMessageBox::question(this, tr("Quitter"), tr("Des taches sont en cours, voulez-vous vraiment quitter ?"), QMessageBox::Yes | QMessageBox::No);
+		if(reply == QMessageBox::No)
+		{
+			event->ignore();
+			return;
+		}
+	}
 	Settings::setValue(std::pair(Settings::Width, width()), std::pair(Settings::Height, height()));
 	Settings::saveSettings();
 	Settings::deleteAllTempFiles();

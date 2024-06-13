@@ -57,3 +57,8 @@ void InfoWidget::removeInfoWidget(QWidget *widget)
 	if (_infos_widgets.empty())
 		hide();
 }
+
+bool InfoWidget::taskInProgress() const
+{
+	return !_infos_widgets.empty();
+}

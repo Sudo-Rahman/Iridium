@@ -30,9 +30,10 @@ public:
 			icon = _model->data(index)->file()->getRemoteInfo()->getIcon();
 		if (!icon.isNull())
 		{
-			QSize size(20, 20);
-
 			QRect iconRect = option.rect;
+
+			QSize size(static_cast<int>(option.rect.height()/1.5), static_cast<int>(option.rect.height()/1.5));
+
 			int yOffset = (iconRect.height() - size.height()) / 2;
 			QPoint topLeft(iconRect.left() + 5, iconRect.top() + yOffset);
 			QRect targetRect(topLeft, size);

@@ -21,6 +21,8 @@ public:
 
 	void removeInfoWidget(QWidget *widget);
 
+	bool taskInProgress() const;
+
 private:
 	QHBoxLayout *_layout{};
 	CircularProgressBar *_progress_bar{};
