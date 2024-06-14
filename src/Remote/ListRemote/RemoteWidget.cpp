@@ -30,7 +30,7 @@ void RemoteWidget::paintEvent(QPaintEvent *event)
         painter.setBrush(painter.brush().color().darker(140));
 
     // draw rounded rect
-    QRect rect = this->rect().marginsRemoved(QMargins(5, 5, 5, 5));
+    QRect rect = this->rect();
     rect.setWidth(rect.width() - 1);
     rect.setHeight(rect.height() - 1);
     painter.drawRoundedRect(rect, 10, 10);

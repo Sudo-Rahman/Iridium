@@ -10,6 +10,13 @@ using namespace std;
 
 SyncRow::SyncRow(const std::string &src, const std::string &dst, uint32_t row) : _row(row)
 {
+	_size = 0;
+	_progress = 0;
+	_state = None;
+	_speed = 0;
+	_speed_avg = 0;
+	_remainingTime = 0;
+	_ellapsedTime = 0;
 	_src = QString::fromStdString(src);
 	_dst = QString::fromStdString(dst);
 }

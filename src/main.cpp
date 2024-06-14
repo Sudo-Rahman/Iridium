@@ -11,14 +11,6 @@ int main(int argc, char *argv[])
 	IridiumApp::setApplicationVersion(IRIDIUM_VERSION.c_str());
 	QGuiApplication::setWindowIcon(QIcon(":/resources/Iridium.svg"));
 
-	if (QSysInfo::productType() == "windows")
-	{
-		QApplication::setStyle("fusion");
-		app.setStyleSheet("QTableView { outline:none; }"
-			"QTableView::item:selected:focus { background: palette(highlight); }"
-			"QTableView::item:!selected:focus { background:transparent; }");
-	}
-
 	Settings::init();
 	Settings::initRlclone([](bool ok)
 	{

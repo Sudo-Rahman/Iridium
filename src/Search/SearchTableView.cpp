@@ -78,6 +78,7 @@ SearchTableView::SearchTableView(QWidget *parent) : QTableView(parent)
 	QTableView::setEditTriggers(QAbstractItemView::NoEditTriggers);
 	QTableView::setContextMenuPolicy(Qt::CustomContextMenu);
 	horizontalHeader()->setMinimumSectionSize(120);
+	verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
 
 	setItemDelegateForColumn(0, new CustomSearchItemDelegate(_model, 0, this));
 	setItemDelegateForColumn(1, new CustomSearchItemDelegate(_model, 1, this));
