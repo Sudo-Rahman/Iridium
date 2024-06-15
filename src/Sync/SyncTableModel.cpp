@@ -40,15 +40,10 @@ void SyncTableModel::setData(const std::vector<SyncRow *> &rows)
 	endInsertRows();
 }
 
-void SyncTableModel::updateRowData(int row)
+void SyncTableModel::updateRowData()
 {
-	if (row < 0 || row >= rowCount())
-		return;
-
-
-	QModelIndex topLeft = index(row, 0);
-	QModelIndex bottomRight = index(row, columnCount() - 1);
-	emit dataChanged(topLeft, bottomRight);
+	// sort the data
+	emit layoutChanged();
 }
 
 void SyncTableModel::sort(int column, Qt::SortOrder order)

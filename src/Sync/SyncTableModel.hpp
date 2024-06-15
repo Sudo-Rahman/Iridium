@@ -26,7 +26,7 @@ public:
 
 	void setData(const std::vector<SyncRow *> &rows);
 
-	void updateRowData(int row);
+	void updateRowData();
 
 	void sort(int column, Qt::SortOrder order) override;
 

@@ -10,26 +10,40 @@
     </message>
 </context>
 <context>
-    <name>FilterSearchGroupBox</name>
+    <name>FilterGroupBox</name>
     <message>
-        <location filename="../src/Search/FilterSearchGroupBox.cpp" line="49"/>
-        <source>Filtres (non disponible pour la recherche locale)</source>
-        <translation>Filters (not available for local search)</translation>
-    </message>
-    <message>
-        <location filename="../src/Search/FilterSearchGroupBox.cpp" line="68"/>
+        <location filename="../src/Other/FilterGroupBox.cpp" line="67"/>
         <source>Inclure</source>
         <translation>Include</translation>
     </message>
     <message>
-        <location filename="../src/Search/FilterSearchGroupBox.cpp" line="69"/>
+        <location filename="../src/Other/FilterGroupBox.cpp" line="68"/>
         <source>Exclure</source>
         <translation>Exclude</translation>
     </message>
     <message>
-        <location filename="../src/Search/FilterSearchGroupBox.cpp" line="70"/>
+        <location filename="../src/Other/FilterGroupBox.cpp" line="69"/>
         <source>Retirer</source>
         <translation>Remove</translation>
+    </message>
+</context>
+<context>
+    <name>FilterSearchGroupBox</name>
+    <message>
+        <source>Filtres (non disponible pour la recherche locale)</source>
+        <translation type="vanished">Filters (not available for local search)</translation>
+    </message>
+    <message>
+        <source>Inclure</source>
+        <translation type="vanished">Include</translation>
+    </message>
+    <message>
+        <source>Exclure</source>
+        <translation type="vanished">Exclude</translation>
+    </message>
+    <message>
+        <source>Retirer</source>
+        <translation type="vanished">Remove</translation>
     </message>
 </context>
 <context>
@@ -103,17 +117,17 @@
         <translation type="vanished">Reset</translation>
     </message>
     <message>
-        <location filename="../src/MainWindow/Menu/Settings/GeneralFrame.cpp" line="20"/>
+        <location filename="../src/MainWindow/Menu/Settings/GeneralFrame.cpp" line="22"/>
         <source>Le changement de langue nécessite un redémarrage de l’application.</source>
         <translation>Changing the language requires restarting the application.</translation>
     </message>
     <message>
-        <location filename="../src/MainWindow/Menu/Settings/GeneralFrame.cpp" line="36"/>
+        <location filename="../src/MainWindow/Menu/Settings/GeneralFrame.cpp" line="42"/>
         <source>Langue : </source>
         <translation>Language : </translation>
     </message>
     <message>
-        <location filename="../src/MainWindow/Menu/Settings/GeneralFrame.cpp" line="46"/>
+        <location filename="../src/MainWindow/Menu/Settings/GeneralFrame.cpp" line="52"/>
         <source>Temps de rafraîchissement automatique du dossier courant&#xa0;: </source>
         <translation>Current folder automatic refresh time :</translation>
     </message>
@@ -127,6 +141,27 @@
     </message>
 </context>
 <context>
+    <name>InfoWidget</name>
+    <message>
+        <location filename="../src/Other/InfoWidget.cpp" line="14"/>
+        <source>Tache en cours...</source>
+        <translation>Task in progress...</translation>
+    </message>
+    <message>
+        <location filename="../src/Other/InfoWidget.cpp" line="22"/>
+        <source>Tout afficher</source>
+        <translation>Show all</translation>
+    </message>
+</context>
+<context>
+    <name>InfoWidgetsDialog</name>
+    <message>
+        <location filename="../src/Other/InfoWidgetsDialog.cpp" line="12"/>
+        <source>Tache en cours</source>
+        <translation>Task in progress</translation>
+    </message>
+</context>
+<context>
     <name>ItemInfoDialog</name>
     <message>
         <location filename="../src/FileView/TreeWidgets/ItemInfoDialog.cpp" line="20"/>
@@ -134,47 +169,47 @@
         <translation>Information</translation>
     </message>
     <message>
-        <location filename="../src/FileView/TreeWidgets/ItemInfoDialog.cpp" line="36"/>
+        <location filename="../src/FileView/TreeWidgets/ItemInfoDialog.cpp" line="35"/>
         <source>Chemin Absolu: </source>
         <translation>Absolute Path: </translation>
     </message>
     <message>
-        <location filename="../src/FileView/TreeWidgets/ItemInfoDialog.cpp" line="40"/>
+        <location filename="../src/FileView/TreeWidgets/ItemInfoDialog.cpp" line="39"/>
         <source>Nom: </source>
         <translation>Name: </translation>
     </message>
     <message>
-        <location filename="../src/FileView/TreeWidgets/ItemInfoDialog.cpp" line="61"/>
+        <location filename="../src/FileView/TreeWidgets/ItemInfoDialog.cpp" line="59"/>
         <source>Total : </source>
         <translation>Total : </translation>
     </message>
     <message>
-        <location filename="../src/FileView/TreeWidgets/ItemInfoDialog.cpp" line="68"/>
+        <location filename="../src/FileView/TreeWidgets/ItemInfoDialog.cpp" line="66"/>
         <source>Utilisé : </source>
         <translation>Used : </translation>
     </message>
     <message>
-        <location filename="../src/FileView/TreeWidgets/ItemInfoDialog.cpp" line="75"/>
+        <location filename="../src/FileView/TreeWidgets/ItemInfoDialog.cpp" line="73"/>
         <source>Libre : </source>
         <translation>Free : </translation>
     </message>
     <message>
-        <location filename="../src/FileView/TreeWidgets/ItemInfoDialog.cpp" line="95"/>
+        <location filename="../src/FileView/TreeWidgets/ItemInfoDialog.cpp" line="92"/>
         <source>Date de modification: </source>
         <translation>Modification date : </translation>
     </message>
     <message>
-        <location filename="../src/FileView/TreeWidgets/ItemInfoDialog.cpp" line="101"/>
+        <location filename="../src/FileView/TreeWidgets/ItemInfoDialog.cpp" line="98"/>
         <source>Nombre d&apos;objets: </source>
         <translation>Number of objects: </translation>
     </message>
     <message>
-        <location filename="../src/FileView/TreeWidgets/ItemInfoDialog.cpp" line="156"/>
+        <location filename="../src/FileView/TreeWidgets/ItemInfoDialog.cpp" line="145"/>
         <source>Taille: </source>
         <translation>Size: </translation>
     </message>
     <message>
-        <location filename="../src/FileView/TreeWidgets/ItemInfoDialog.cpp" line="243"/>
+        <location filename="../src/FileView/TreeWidgets/ItemInfoDialog.cpp" line="230"/>
         <source>Type: </source>
         <translation>Type: </translation>
     </message>
@@ -212,23 +247,23 @@
         <translation>Tree</translation>
     </message>
     <message>
-        <location filename="../src/FileView/TreeWidgets/ItemMenu.cpp" line="50"/>
         <source>Aperçu</source>
-        <translation>Preview</translation>
+        <translation type="vanished">Preview</translation>
     </message>
     <message>
         <source>Tree</source>
         <translation type="vanished">Tree</translation>
     </message>
     <message>
+        <location filename="../src/FileView/TreeWidgets/ItemMenu.cpp" line="45"/>
         <source>Synchroniser</source>
-        <translation type="vanished">Synchronize</translation>
+        <translation>Synchronize</translation>
     </message>
 </context>
 <context>
     <name>ListRemoteWidget</name>
     <message>
-        <location filename="../src/Remote/ListRemote/ListRemoteWidget.cpp" line="69"/>
+        <location filename="../src/Remote/ListRemote/ListRemoteWidget.cpp" line="70"/>
         <source>Rechercher</source>
         <translation>Search</translation>
     </message>
@@ -270,14 +305,29 @@
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../src/MainWindow/MainWindow.cpp" line="30"/>
+        <location filename="../src/MainWindow/MainWindow.cpp" line="36"/>
         <source>Explorateur</source>
         <translation>Explorer</translation>
     </message>
     <message>
-        <location filename="../src/MainWindow/MainWindow.cpp" line="31"/>
+        <location filename="../src/MainWindow/MainWindow.cpp" line="37"/>
         <source>Recherche</source>
         <translation>Research</translation>
+    </message>
+    <message>
+        <location filename="../src/MainWindow/MainWindow.cpp" line="38"/>
+        <source>Synchronisation</source>
+        <translation>Synchronization</translation>
+    </message>
+    <message>
+        <location filename="../src/MainWindow/MainWindow.cpp" line="87"/>
+        <source>Quitter</source>
+        <translation>Exit</translation>
+    </message>
+    <message>
+        <location filename="../src/MainWindow/MainWindow.cpp" line="87"/>
+        <source>Des taches sont en cours, voulez-vous vraiment quitter ?</source>
+        <translation>Tasks are in progress, do you really want to quit?</translation>
     </message>
     <message>
         <source>Rclone n’a pas été trouvé !!</source>
@@ -423,9 +473,16 @@
         <translation>00:00:00</translation>
     </message>
     <message>
-        <location filename="../src/Task/TaskRow.cpp" line="129"/>
+        <location filename="../src/Other/Preview.cpp" line="54"/>
+        <location filename="../src/Other/Preview.cpp" line="56"/>
+        <location filename="../src/Task/TaskRow.cpp" line="127"/>
         <source>Erreur</source>
         <translation>Error</translation>
+    </message>
+    <message>
+        <location filename="../src/Other/Preview.cpp" line="55"/>
+        <source>Impossible d&apos;ouvrir le fichier : </source>
+        <translation>Impossible to open the file : </translation>
     </message>
     <message>
         <location filename="../src/Task/TaskRow.cpp" line="112"/>
@@ -442,44 +499,53 @@
         <translation type="vanished">Delete</translation>
     </message>
     <message>
-        <location filename="../src/Task/TaskTreeView.cpp" line="86"/>
+        <location filename="../src/Task/TaskTreeView.cpp" line="87"/>
         <source>Annuler les %1 tâches</source>
         <translation>Cancel %1 tasks</translation>
     </message>
     <message>
-        <location filename="../src/Task/TaskTreeView.cpp" line="86"/>
+        <location filename="../src/Task/TaskTreeView.cpp" line="87"/>
         <source>Annuler la tâche</source>
         <translation>Cancel task</translation>
     </message>
     <message>
-        <location filename="../src/Task/TaskTreeView.cpp" line="90"/>
+        <location filename="../src/Task/TaskTreeView.cpp" line="91"/>
         <source>Supprimer les %1 tâches</source>
         <translation>Delete %1 tasks</translation>
     </message>
     <message>
-        <location filename="../src/Task/TaskTreeView.cpp" line="90"/>
+        <location filename="../src/Task/TaskTreeView.cpp" line="91"/>
         <source>Supprimer la tâche</source>
         <translation>Delete Task</translation>
     </message>
     <message>
-        <location filename="../src/Sync/SyncTableItem.cpp" line="20"/>
         <source>Oui</source>
-        <translation>Yes</translation>
+        <translation type="vanished">Yes</translation>
     </message>
     <message>
-        <location filename="../src/Rclone/RcloneFile.cpp" line="89"/>
+        <location filename="../src/Rclone/RcloneFile.cpp" line="65"/>
         <source>dd MMM yyyy - hh:mm:ss</source>
         <translation>MMM dd yyyy - hh:mm:ss</translation>
     </message>
     <message>
-        <location filename="../src/Rclone/RcloneFile.cpp" line="105"/>
+        <location filename="../src/Rclone/RcloneFile.cpp" line="75"/>
         <source>Dossier</source>
         <translation>Folder</translation>
     </message>
     <message>
-        <location filename="../src/Rclone/RcloneFile.cpp" line="113"/>
+        <location filename="../src/Rclone/RcloneFile.cpp" line="83"/>
         <source>Document </source>
         <translation>Document </translation>
+    </message>
+    <message>
+        <location filename="../src/MainWindow/SyncWidget.cpp" line="273"/>
+        <source>Analyse en cours</source>
+        <translation>Analysis in progress</translation>
+    </message>
+    <message>
+        <location filename="../src/MainWindow/SyncWidget.cpp" line="276"/>
+        <source>Synchronisation en cours</source>
+        <translation>Synchronisation en cours</translation>
     </message>
 </context>
 <context>
@@ -500,26 +566,26 @@
 <context>
     <name>RcloneFileModel</name>
     <message>
-        <location filename="../src/FileView/TreeWidgets/RcloneFileModel.cpp" line="22"/>
-        <location filename="../src/FileView/TreeWidgets/RcloneFileModel.cpp" line="76"/>
+        <location filename="../src/FileView/TreeWidgets/RcloneFileModel.cpp" line="24"/>
+        <location filename="../src/FileView/TreeWidgets/RcloneFileModel.cpp" line="78"/>
         <source>Nom</source>
         <translation>Name</translation>
     </message>
     <message>
-        <location filename="../src/FileView/TreeWidgets/RcloneFileModel.cpp" line="22"/>
-        <location filename="../src/FileView/TreeWidgets/RcloneFileModel.cpp" line="76"/>
+        <location filename="../src/FileView/TreeWidgets/RcloneFileModel.cpp" line="24"/>
+        <location filename="../src/FileView/TreeWidgets/RcloneFileModel.cpp" line="78"/>
         <source>Taille</source>
         <translation>Size</translation>
     </message>
     <message>
-        <location filename="../src/FileView/TreeWidgets/RcloneFileModel.cpp" line="22"/>
-        <location filename="../src/FileView/TreeWidgets/RcloneFileModel.cpp" line="76"/>
+        <location filename="../src/FileView/TreeWidgets/RcloneFileModel.cpp" line="24"/>
+        <location filename="../src/FileView/TreeWidgets/RcloneFileModel.cpp" line="78"/>
         <source>Date de modification</source>
         <translation>Modification date</translation>
     </message>
     <message>
-        <location filename="../src/FileView/TreeWidgets/RcloneFileModel.cpp" line="22"/>
-        <location filename="../src/FileView/TreeWidgets/RcloneFileModel.cpp" line="76"/>
+        <location filename="../src/FileView/TreeWidgets/RcloneFileModel.cpp" line="24"/>
+        <location filename="../src/FileView/TreeWidgets/RcloneFileModel.cpp" line="78"/>
         <source>Type</source>
         <translation>Type</translation>
     </message>
@@ -593,22 +659,22 @@
 <context>
     <name>RcloneNotFoundWidget</name>
     <message>
-        <location filename="../src/Rclone/RcloneNotFoundWidget.cpp" line="14"/>
+        <location filename="../src/Rclone/RcloneNotFoundWidget.cpp" line="16"/>
         <source>Rclone introuvable</source>
         <translation>Rclone not found</translation>
     </message>
     <message>
-        <location filename="../src/Rclone/RcloneNotFoundWidget.cpp" line="20"/>
+        <location filename="../src/Rclone/RcloneNotFoundWidget.cpp" line="22"/>
         <source>Ok</source>
         <translation>Ok</translation>
     </message>
     <message>
-        <location filename="../src/Rclone/RcloneNotFoundWidget.cpp" line="25"/>
+        <location filename="../src/Rclone/RcloneNotFoundWidget.cpp" line="27"/>
         <source>Télécharger rclone</source>
         <translation>Download rclone</translation>
     </message>
     <message>
-        <location filename="../src/Rclone/RcloneNotFoundWidget.cpp" line="68"/>
+        <location filename="../src/Rclone/RcloneNotFoundWidget.cpp" line="66"/>
         <source>Téléchargement en cours...</source>
         <translation>Downloading...</translation>
     </message>
@@ -667,39 +733,39 @@
 <context>
     <name>RemoteWidget</name>
     <message>
-        <location filename="../src/Remote/ListRemote/RemoteWidget.cpp" line="141"/>
+        <location filename="../src/Remote/ListRemote/RemoteWidget.cpp" line="135"/>
         <source>Supprimer</source>
         <translation>Delete</translation>
     </message>
     <message>
-        <location filename="../src/Remote/ListRemote/RemoteWidget.cpp" line="152"/>
-        <location filename="../src/Remote/ListRemote/RemoteWidget.cpp" line="155"/>
-        <location filename="../src/Remote/ListRemote/RemoteWidget.cpp" line="175"/>
+        <location filename="../src/Remote/ListRemote/RemoteWidget.cpp" line="146"/>
+        <location filename="../src/Remote/ListRemote/RemoteWidget.cpp" line="149"/>
+        <location filename="../src/Remote/ListRemote/RemoteWidget.cpp" line="169"/>
         <source>Suppression</source>
         <translation>Deletion</translation>
     </message>
     <message>
-        <location filename="../src/Remote/ListRemote/RemoteWidget.cpp" line="152"/>
+        <location filename="../src/Remote/ListRemote/RemoteWidget.cpp" line="146"/>
         <source>Vous ne pouvez pas supprimer ce remote.</source>
         <translation>You cannot delete this remote.</translation>
     </message>
     <message>
-        <location filename="../src/Remote/ListRemote/RemoteWidget.cpp" line="156"/>
+        <location filename="../src/Remote/ListRemote/RemoteWidget.cpp" line="150"/>
         <source>Êtes-vous sûr de vouloir supprimer ce remote ?</source>
         <translation>Are you sure you want to delete this remote ?</translation>
     </message>
     <message>
-        <location filename="../src/Remote/ListRemote/RemoteWidget.cpp" line="157"/>
+        <location filename="../src/Remote/ListRemote/RemoteWidget.cpp" line="151"/>
         <source>Oui</source>
         <translation>Yes</translation>
     </message>
     <message>
-        <location filename="../src/Remote/ListRemote/RemoteWidget.cpp" line="158"/>
+        <location filename="../src/Remote/ListRemote/RemoteWidget.cpp" line="152"/>
         <source>Non</source>
         <translation>No</translation>
     </message>
     <message>
-        <location filename="../src/Remote/ListRemote/RemoteWidget.cpp" line="176"/>
+        <location filename="../src/Remote/ListRemote/RemoteWidget.cpp" line="170"/>
         <source>Une erreur est survenue lors de la suppression du remote</source>
         <translation>An error occurred while deleting the remote</translation>
     </message>
@@ -713,49 +779,76 @@
     </message>
 </context>
 <context>
-    <name>SearchTableView</name>
+    <name>SearchTableModel</name>
     <message>
-        <location filename="../src/Search/SearchTableView.cpp" line="23"/>
+        <location filename="../src/Search/SearchTableModel.cpp" line="9"/>
         <source>Nom</source>
         <translation>Name</translation>
     </message>
     <message>
-        <location filename="../src/Search/SearchTableView.cpp" line="23"/>
+        <location filename="../src/Search/SearchTableModel.cpp" line="9"/>
         <source>Remote</source>
         <translation>Remote</translation>
     </message>
     <message>
-        <location filename="../src/Search/SearchTableView.cpp" line="23"/>
+        <location filename="../src/Search/SearchTableModel.cpp" line="9"/>
         <source>Chemin</source>
         <translation>Path</translation>
     </message>
     <message>
-        <location filename="../src/Search/SearchTableView.cpp" line="23"/>
+        <location filename="../src/Search/SearchTableModel.cpp" line="9"/>
         <source>Taille</source>
         <translation>Size</translation>
     </message>
     <message>
-        <location filename="../src/Search/SearchTableView.cpp" line="23"/>
+        <location filename="../src/Search/SearchTableModel.cpp" line="9"/>
         <source>Date de modification</source>
         <translation>Modification date</translation>
     </message>
     <message>
-        <location filename="../src/Search/SearchTableView.cpp" line="23"/>
+        <location filename="../src/Search/SearchTableModel.cpp" line="9"/>
         <source>Type</source>
         <translation>Type</translation>
     </message>
+</context>
+<context>
+    <name>SearchTableView</name>
     <message>
-        <location filename="../src/Search/SearchTableView.cpp" line="73"/>
+        <source>Nom</source>
+        <translation type="vanished">Name</translation>
+    </message>
+    <message>
+        <source>Remote</source>
+        <translation type="vanished">Remote</translation>
+    </message>
+    <message>
+        <source>Chemin</source>
+        <translation type="vanished">Path</translation>
+    </message>
+    <message>
+        <source>Taille</source>
+        <translation type="vanished">Size</translation>
+    </message>
+    <message>
+        <source>Date de modification</source>
+        <translation type="vanished">Modification date</translation>
+    </message>
+    <message>
+        <source>Type</source>
+        <translation type="vanished">Type</translation>
+    </message>
+    <message>
+        <location filename="../src/Search/SearchTableView.cpp" line="121"/>
         <source>Copier les fichiers</source>
         <translation>Copy files</translation>
     </message>
     <message>
-        <location filename="../src/Search/SearchTableView.cpp" line="79"/>
+        <location filename="../src/Search/SearchTableView.cpp" line="127"/>
         <source>Copier le dossier parent</source>
         <translation>Copy parent folder</translation>
     </message>
     <message>
-        <location filename="../src/Search/SearchTableView.cpp" line="81"/>
+        <location filename="../src/Search/SearchTableView.cpp" line="129"/>
         <source>Copier le fichier</source>
         <translation>Copy file</translation>
     </message>
@@ -763,22 +856,27 @@
 <context>
     <name>SearchWidget</name>
     <message>
-        <location filename="../src/MainWindow/SearchWidget.cpp" line="53"/>
+        <location filename="../src/MainWindow/SearchWidget.cpp" line="19"/>
+        <source>Filtres (non disponible pour la recherche locale)</source>
+        <translation>Filters (not available for local search)</translation>
+    </message>
+    <message>
+        <location filename="../src/MainWindow/SearchWidget.cpp" line="36"/>
         <source>Rechercher</source>
         <translation>Search</translation>
     </message>
     <message>
-        <location filename="../src/MainWindow/SearchWidget.cpp" line="60"/>
+        <location filename="../src/MainWindow/SearchWidget.cpp" line="43"/>
         <source>Arrêter</source>
         <translation>Stop</translation>
     </message>
     <message>
-        <location filename="../src/MainWindow/SearchWidget.cpp" line="77"/>
+        <location filename="../src/MainWindow/SearchWidget.cpp" line="60"/>
         <source>Chercher dans&#xa0;: </source>
         <translation>Search in:</translation>
     </message>
     <message>
-        <location filename="../src/MainWindow/SearchWidget.cpp" line="78"/>
+        <location filename="../src/MainWindow/SearchWidget.cpp" line="61"/>
         <source>Nom du Fichier&#xa0;: </source>
         <translation>File name :</translation>
     </message>
@@ -881,120 +979,176 @@
     </message>
 </context>
 <context>
+    <name>SyncProgressBarDelegate</name>
+    <message>
+        <location filename="../src/Other/SyncProgressBarDelegate.cpp" line="41"/>
+        <source>erreur</source>
+        <translation>error</translation>
+    </message>
+</context>
+<context>
     <name>SyncTableView</name>
     <message>
-        <location filename="../src/Sync/SyncTableView.cpp" line="15"/>
         <source>Source</source>
-        <translation>Source</translation>
+        <translation type="vanished">Source</translation>
     </message>
     <message>
-        <location filename="../src/Sync/SyncTableView.cpp" line="15"/>
         <source>Filtre</source>
-        <translation>Filter</translation>
+        <translation type="vanished">Filter</translation>
     </message>
     <message>
-        <location filename="../src/Sync/SyncTableView.cpp" line="15"/>
         <source>Progression</source>
-        <translation>Progress</translation>
+        <translation type="vanished">Progress</translation>
     </message>
     <message>
-        <location filename="../src/Sync/SyncTableView.cpp" line="15"/>
         <source>Destination</source>
-        <translation>Destination</translation>
+        <translation type="vanished">Destination</translation>
     </message>
 </context>
 <context>
     <name>SyncWidget</name>
     <message>
-        <location filename="../src/MainWindow/SyncWidget.cpp" line="32"/>
+        <location filename="../src/MainWindow/SyncWidget.cpp" line="34"/>
+        <source>Sync</source>
+        <translation>Sync</translation>
+    </message>
+    <message>
+        <location filename="../src/MainWindow/SyncWidget.cpp" line="43"/>
         <source>Source</source>
         <translation>Source</translation>
     </message>
     <message>
-        <location filename="../src/MainWindow/SyncWidget.cpp" line="35"/>
+        <location filename="../src/MainWindow/SyncWidget.cpp" line="44"/>
         <source>Destination</source>
         <translation>Destination</translation>
     </message>
     <message>
-        <location filename="../src/MainWindow/SyncWidget.cpp" line="38"/>
-        <source>Verification</source>
-        <translation>Verification</translation>
+        <location filename="../src/MainWindow/SyncWidget.cpp" line="46"/>
+        <source>Type de Synchronisation</source>
+        <translation>Sync Type</translation>
     </message>
     <message>
-        <location filename="../src/MainWindow/SyncWidget.cpp" line="40"/>
+        <location filename="../src/MainWindow/SyncWidget.cpp" line="48"/>
+        <location filename="../src/MainWindow/SyncWidget.cpp" line="131"/>
+        <location filename="../src/MainWindow/SyncWidget.cpp" line="139"/>
+        <source>Vérifier</source>
+        <translation>Check</translation>
+    </message>
+    <message>
+        <location filename="../src/MainWindow/SyncWidget.cpp" line="51"/>
+        <location filename="../src/MainWindow/SyncWidget.cpp" line="156"/>
+        <location filename="../src/MainWindow/SyncWidget.cpp" line="176"/>
+        <source>Arrêter</source>
+        <translation>Stop</translation>
+    </message>
+    <message>
+        <location filename="../src/MainWindow/SyncWidget.cpp" line="166"/>
+        <location filename="../src/MainWindow/SyncWidget.cpp" line="185"/>
+        <location filename="../src/MainWindow/SyncWidget.cpp" line="202"/>
+        <location filename="../src/MainWindow/SyncWidget.cpp" line="211"/>
+        <location filename="../src/MainWindow/SyncWidget.cpp" line="222"/>
+        <source>Effacer</source>
+        <translation>Clear</translation>
+    </message>
+    <message>
+        <location filename="../src/MainWindow/SyncWidget.cpp" line="168"/>
+        <source>Synchroniser</source>
+        <translation>Synchronize</translation>
+    </message>
+    <message>
+        <location filename="../src/MainWindow/SyncWidget.cpp" line="208"/>
+        <location filename="../src/MainWindow/SyncWidget.cpp" line="218"/>
+        <source>Erreur</source>
+        <translation>Error</translation>
+    </message>
+    <message>
+        <location filename="../src/MainWindow/SyncWidget.cpp" line="208"/>
+        <source>Une erreur est survenue lors de l&apos;analyse</source>
+        <translation>An error occurred during analysis</translation>
+    </message>
+    <message>
+        <location filename="../src/MainWindow/SyncWidget.cpp" line="219"/>
+        <source>Une erreur est survenue lors de la synchronisation</source>
+        <translation>An error occurred during synchronization</translation>
+    </message>
+    <message>
+        <source>Verification</source>
+        <translation type="vanished">Verification</translation>
+    </message>
+    <message>
         <source>Annuler</source>
-        <translation>Cancel</translation>
+        <translation type="vanished">Cancel</translation>
     </message>
 </context>
 <context>
     <name>TaskTreeView</name>
     <message>
-        <location filename="../src/Task/TaskTreeView.cpp" line="63"/>
+        <location filename="../src/Task/TaskTreeView.cpp" line="64"/>
         <source>Source</source>
         <translation>Source</translation>
     </message>
     <message>
-        <location filename="../src/Task/TaskTreeView.cpp" line="63"/>
+        <location filename="../src/Task/TaskTreeView.cpp" line="64"/>
         <source>Destination</source>
         <translation>Destination</translation>
     </message>
     <message>
-        <location filename="../src/Task/TaskTreeView.cpp" line="63"/>
+        <location filename="../src/Task/TaskTreeView.cpp" line="64"/>
         <source>Taille</source>
         <translation>Size</translation>
     </message>
     <message>
-        <location filename="../src/Task/TaskTreeView.cpp" line="63"/>
+        <location filename="../src/Task/TaskTreeView.cpp" line="64"/>
         <source>Type</source>
         <translation>Type</translation>
     </message>
     <message>
-        <location filename="../src/Task/TaskTreeView.cpp" line="63"/>
+        <location filename="../src/Task/TaskTreeView.cpp" line="64"/>
         <source>Progression</source>
         <translation>progress</translation>
     </message>
     <message>
-        <location filename="../src/Task/TaskTreeView.cpp" line="64"/>
+        <location filename="../src/Task/TaskTreeView.cpp" line="65"/>
         <source>Statut</source>
         <translation>Status</translation>
     </message>
     <message>
-        <location filename="../src/Task/TaskTreeView.cpp" line="64"/>
+        <location filename="../src/Task/TaskTreeView.cpp" line="65"/>
         <source>Temps restant</source>
         <translation>Remaining time</translation>
     </message>
     <message>
-        <location filename="../src/Task/TaskTreeView.cpp" line="65"/>
+        <location filename="../src/Task/TaskTreeView.cpp" line="66"/>
         <source>Temps écoulé</source>
         <translation>Time elapsed</translation>
     </message>
     <message>
-        <location filename="../src/Task/TaskTreeView.cpp" line="65"/>
+        <location filename="../src/Task/TaskTreeView.cpp" line="66"/>
         <source>Vitesse</source>
         <translation>Speed</translation>
     </message>
     <message>
-        <location filename="../src/Task/TaskTreeView.cpp" line="65"/>
+        <location filename="../src/Task/TaskTreeView.cpp" line="66"/>
         <source>Vitesse moyenne</source>
         <translation>Average Speed</translation>
     </message>
     <message>
-        <location filename="../src/Task/TaskTreeView.cpp" line="113"/>
+        <location filename="../src/Task/TaskTreeView.cpp" line="114"/>
         <source>Annuler la tâche</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/Task/TaskTreeView.cpp" line="114"/>
+        <location filename="../src/Task/TaskTreeView.cpp" line="115"/>
         <source>Voulez-vous vraiment annuler la tâche ?</source>
         <translation>Are you sure you want to cancel the task?</translation>
     </message>
     <message>
-        <location filename="../src/Task/TaskTreeView.cpp" line="115"/>
+        <location filename="../src/Task/TaskTreeView.cpp" line="116"/>
         <source>Oui</source>
         <translation>Yes</translation>
     </message>
     <message>
-        <location filename="../src/Task/TaskTreeView.cpp" line="116"/>
+        <location filename="../src/Task/TaskTreeView.cpp" line="117"/>
         <source>Non</source>
         <translation>No</translation>
     </message>
@@ -1002,100 +1156,105 @@
 <context>
     <name>TreeFileView</name>
     <message>
-        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="369"/>
+        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="372"/>
         <source>Arborescence</source>
         <translation>Tree structure</translation>
     </message>
     <message>
-        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="421"/>
+        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="423"/>
         <source>Nom</source>
         <translation>Name</translation>
     </message>
     <message>
-        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="421"/>
+        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="423"/>
         <source>Taille</source>
         <translation>Size</translation>
     </message>
     <message>
-        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="421"/>
+        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="423"/>
         <source>Date de modification</source>
         <translation>Modification date</translation>
     </message>
     <message>
-        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="421"/>
+        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="423"/>
         <source>Type</source>
         <translation>Type</translation>
     </message>
     <message>
-        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="603"/>
+        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="611"/>
         <source>Suppression</source>
         <translation>Deletion</translation>
     </message>
     <message>
-        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="604"/>
+        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="612"/>
         <source>Suppression de </source>
         <translation>Removal of </translation>
     </message>
     <message>
-        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="605"/>
+        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="613"/>
         <source> fichiers</source>
         <translation> Files</translation>
     </message>
     <message>
-        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="605"/>
+        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="613"/>
         <source> fichier</source>
         <translation> file</translation>
     </message>
     <message>
-        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="607"/>
+        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="615"/>
         <source>Supprimer</source>
         <translation>Delete</translation>
     </message>
     <message>
-        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="608"/>
+        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="616"/>
         <source>Annuler</source>
         <translation>Cancel</translation>
     </message>
     <message>
-        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="610"/>
+        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="618"/>
         <source>Cette action est irréversible.</source>
         <translation>This action is irreversible.</translation>
     </message>
     <message>
-        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="667"/>
+        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="678"/>
         <source>Création de dossier</source>
         <translation>Folder creation</translation>
     </message>
     <message>
-        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="676"/>
+        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="687"/>
         <source>Nom du dossier</source>
         <translation>Folder name</translation>
     </message>
     <message>
-        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="712"/>
-        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="729"/>
+        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="724"/>
+        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="741"/>
         <source>Création</source>
         <translation>Creation</translation>
     </message>
     <message>
-        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="712"/>
+        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="724"/>
         <source>Le dossier existe déjà</source>
         <translation>Folder already exists</translation>
     </message>
     <message>
-        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="729"/>
+        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="741"/>
         <source>Le dossier n’a pas pu être créé</source>
         <translation>Folder could not be created</translation>
     </message>
     <message>
-        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="780"/>
+        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="792"/>
         <source>Renommage</source>
         <translation>Renaming</translation>
     </message>
     <message>
-        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="780"/>
+        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="792"/>
         <source>Le fichier existe déjà</source>
         <translation>The file already exists</translation>
+    </message>
+    <message>
+        <location filename="../src/FileView/TreeWidgets/TreeFileView.cpp" line="1127"/>
+        <source>Aperçu...</source>
+        <translation>Preview...</translation>
     </message>
 </context>
 </TS>

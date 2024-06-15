@@ -115,7 +115,7 @@ void SyncTableView::analyse(SyncType type, const iro::basic_opt_uptr &filters)
 				auto src_file = _dst->absolute_path() + "/" + log.object();
 				auto dst_file = _src->absolute_path() + "/" + log.object();
 				auto hash = std::hash<std::string>{}(std::string(src_file + dst_file));
-				auto row = new SyncRow(src_file, dst_file, _data.size());
+				auto row = new SyncRow(src_file, dst_file);
 				_data.push_back(row);
 				_rows[std::to_string(hash)] = row;
 			}
@@ -124,7 +124,7 @@ void SyncTableView::analyse(SyncType type, const iro::basic_opt_uptr &filters)
 				auto src_file = _src->absolute_path() + "/" + log.object();
 				auto dst_file = _dst->absolute_path() + "/" + log.object();
 				auto hash = std::hash<std::string>{}(std::string(src_file + dst_file));
-				auto row = new SyncRow(src_file, dst_file, _data.size());
+				auto row = new SyncRow(src_file, dst_file);
 				_data.push_back(row);
 				_rows[std::to_string(hash)] = row;
 			}
@@ -193,7 +193,6 @@ void SyncTableView::sync(SyncType type, const iro::basic_opt_uptr &filters)
 					{
 						auto ref = _rows[std::to_string(hash)];
 						ref->setTransferData(transfer);
-						_model->updateRowData(ref->row());
 					}
 				}
 
@@ -205,12 +204,12 @@ void SyncTableView::sync(SyncType type, const iro::basic_opt_uptr &filters)
 						{
 							auto ref = _rows[hash];
 							ref->finish();
-							_model->updateRowData(ref->row());
 							progress_counter++;
 							emit progress(progress_counter / static_cast<float>(_rows.size()));
 						}
 					}
 				}
+				_model->updateRowData();
 			}
 		}
 		else if (log.level() == ire::json_log::log_level::error)
@@ -223,7 +222,7 @@ void SyncTableView::sync(SyncType type, const iro::basic_opt_uptr &filters)
 			{
 				auto ref = _rows[std::to_string(hash)];
 				ref->error(log.message());
-				_model->updateRowData(ref->row());
+				_model->updateRowData();
 				_errors.push_back(std::to_string(hash));
 				progress_counter++;
 				emit progress(progress_counter / static_cast<float>(_rows.size()));

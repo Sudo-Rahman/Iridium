@@ -5,10 +5,8 @@
 
 #include "SearchWidget.hpp"
 #include "Config/Settings.hpp"
-#include <QPainter>
 #include <QEvent>
 #include <QLabel>
-#include <QStyledItemDelegate>
 #include <QListView>
 #include <iridium/options.hpp>
 
@@ -16,34 +14,18 @@
 
 using namespace iridium::rclone::option;
 
-class CustomStyledItemDelegate : public QStyledItemDelegate
-{
-protected:
-	void paint(QPainter *painter, const QStyleOptionViewItem &option,
-	           const QModelIndex &index) const override
-	{
-		auto &refToNonConstOption = const_cast<QStyleOptionViewItem &>(option);
-		refToNonConstOption.showDecorationSelected = false;
-		//refToNonConstOption.state &= ~QStyle::State_HasFocus & ~QStyle::State_MouseOver;
-
-		QStyledItemDelegate::paint(painter, refToNonConstOption, index);
-	}
-};
-
 SearchWidget::SearchWidget(QWidget *parent) : QWidget(parent)
 {
 	_filter_search = new FilterGroupBox(tr("Filtres (non disponible pour la recherche locale)"), this);
 
 	_progressBar = new LinearProgressBar(this);
 	setFocusPolicy(Qt::StrongFocus);
-	_progressBar->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 	_progressBar->setFixedHeight(12);
 
 	auto model = new QStandardItemModel(this);
 	_remotes_comboBox = new QComboBox(this);
 	_remotes_comboBox->setModel(model);
-	_remotes_comboBox->setItemDelegate(new CustomStyledItemDelegate());
-	// set 5 items visible
+
 	auto view = new QListView();
 	_remotes_comboBox->setView(view);
 	view->setMinimumWidth(150);

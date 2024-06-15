@@ -8,7 +8,7 @@
 
 using namespace std;
 
-SyncRow::SyncRow(const std::string &src, const std::string &dst, uint32_t row) : _row(row)
+SyncRow::SyncRow(const std::string &src, const std::string &dst)
 {
 	_size = 0;
 	_progress = 0;
@@ -54,7 +54,6 @@ void SyncRow::error(const std::string &message)
 	_progress = -1;
 }
 
-uint32_t SyncRow::row() const { return _row; }
 
 SyncRow::State SyncRow::state() const { return _state; }
 
