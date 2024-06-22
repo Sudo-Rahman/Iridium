@@ -317,7 +317,7 @@ void Settings::initSettings()
 	_settings.put(_nodes.at(TempFiles), "");
 
 	pt::ptree remote, ptree_path;
-	RemoteInfo remoteInfo = {"Local", remote::none, "/"};
+	RemoteInfo remoteInfo = {"Local", remote::none, getSystem().os == Os::Windows ? "C:\\" : "/"};
 	ptree_path.put("", remoteInfo.full_path());
 	remote.add_child("path", ptree_path);
 

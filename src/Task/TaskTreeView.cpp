@@ -11,6 +11,7 @@
 #include "TaskTreeView.hpp"
 
 #include "IridiumApp.hpp"
+#include "Settings.hpp"
 #include "TaskRowChild.hpp"
 #include "TaskRowParent.hpp"
 
@@ -278,6 +279,9 @@ void TaskTreeView::addTask(const RcloneFile &src, const RcloneFile &dst, const p
 				it->second.parent->terminate();
 		});
 	});
-	rclone->add_option(option::logging::use_json_log(),option::logging::verbose());
+	rclone->add_option(option::logging::use_json_log(),
+		option::logging::verbose(),
+		Settings::getProcessOptions(Settings::Stats).copy_uptr(),
+		Settings::getProcessOptions(Settings::Transfers).copy_uptr());
 	rclone->execute();
 }

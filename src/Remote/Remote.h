@@ -16,6 +16,8 @@ const std::string OPENDRIVE = ":/resources/open-drive.png";
 const std::string PCLOUD = ":/resources/pcloud.png";
 const std::string BOX = ":/resources/box.png";
 const std::string SMB = ":/resources/smb.png";
+const std::string CRYPT = ":/resources/crypt.png";
+const std::string ALIAS = ":/resources/alias.png";
 const std::string CMD = ":/resources/cmd.png";
 
 const std::string HARDDRIVEICON = ":/resources/drive-harddisk-solidstate.svg";
@@ -32,8 +34,10 @@ const std::map<ire::remote::remote_type, std::string> remoteIco = {
 				{ire::remote::pcloud, PCLOUD},
 				{ire::remote::box, BOX},
 				{ire::remote::smb, SMB},
-				{ire::remote::cmd, CMD}
-
+				{ire::remote::crypt, CRYPT},
+				{ire::remote::alias, ALIAS},
+				{ire::remote::cmd, CMD},
+				{ire::remote::other, CMD},
 		};
 
 class RemoteInfo : public ire::remote
@@ -41,7 +45,12 @@ class RemoteInfo : public ire::remote
 public:
 	RemoteInfo(const std::string &name, remote_type type, const std::string &path) : remote(name, type, path) {}
 
-	auto icon() const -> std::string { return remoteIco.at(type()); }
+	auto icon() const -> std::string
+	{
+		if (remoteIco.contains(type()))
+			return remoteIco.at(type());
+		return CMD;
+	}
 
 	auto getIcon() const -> QIcon { return QIcon(icon().c_str()); }
 

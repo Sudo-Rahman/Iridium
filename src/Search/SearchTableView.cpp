@@ -32,7 +32,7 @@ public:
 		{
 			QRect iconRect = option.rect;
 
-			QSize size(static_cast<int>(option.rect.height()/1.5), static_cast<int>(option.rect.height()/1.5));
+			QSize size(static_cast<int>(option.rect.height() / 1.5), static_cast<int>(option.rect.height() / 1.5));
 
 			int yOffset = (iconRect.height() - size.height()) / 2;
 			QPoint topLeft(iconRect.left() + 5, iconRect.top() + yOffset);
@@ -166,7 +166,7 @@ void SearchTableView::addFile(const RcloneFilePtr &file)
 	_data.push_back(new SearchRow(file));
 	if (_data.size() < 100)
 		_model->rowsAppened();
-	else if (((_data.size()-100) / 100 - 1) == _refresh_model)
+	else if (((_data.size() - 100) / 100 - 1) == _refresh_model)
 	{
 		_model->rowsAppened();
 		_refresh_model++;

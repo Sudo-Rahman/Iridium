@@ -98,6 +98,7 @@ ItemInfoDialog::ItemInfoDialog(TreeFileItem *item, QWidget *parent) : QDialog(pa
 		_layout->addWidget(new QLabel(tr("Nombre d'objets: ")), _row, 0, 1, 1);
 		_layout->addWidget(_objs, _row, 1, 1, 1);
 		_size->hide();
+		_objs->hide();
 		_loading1 = new CircularProgressBar(this);
 		_loading1->setSize(30);
 		_loading1->infinite();

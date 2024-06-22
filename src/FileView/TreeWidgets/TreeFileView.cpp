@@ -80,7 +80,6 @@ void TreeFileView::initUI()
 	header()->setSectionsClickable(true);
 	header()->setStretchLastSection(false);
 	setContextMenuPolicy(Qt::CustomContextMenu);
-	header()->verticalScrollBar()->setStyleSheet("background-color: transparent;");
 
 	_search_line_edit = new RoundedLineEdit(this);
 	_search_line_edit->setClearButtonEnabled(false);
@@ -110,12 +109,12 @@ void TreeFileView::initUI()
 	setDragDropMode(DragDrop);
 	setDropIndicatorShown(true);
 
-	auto p = palette();
-	// p.setColor(QPalette::HighlightedText, palette().color(QPalette::Text));
-	// if other than macos change alternate base color
-	if (QSysInfo::productType() not_eq "macos")
-		p.setColor(QPalette::AlternateBase, palette().color(QPalette::Midlight));
-	setPalette(p);
+	// auto p = palette();
+	// // p.setColor(QPalette::HighlightedText, palette().color(QPalette::Text));
+	// // if other than macos change alternate base color
+	// if (QSysInfo::productType() not_eq "macos")
+	// 	p.setColor(QPalette::AlternateBase, palette().color(QPalette::Midlight));
+	// setPalette(p);
 }
 
 TreeFileView::TreeFileView(QWidget *parent) : QTreeView(parent) { initUI(); }

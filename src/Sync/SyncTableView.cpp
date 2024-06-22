@@ -27,7 +27,7 @@ public:
 		{
 			QRect iconRect = option.rect;
 
-			QSize size(static_cast<int>(option.rect.height()/1.5), static_cast<int>(option.rect.height()/1.5));
+			QSize size(static_cast<int>(option.rect.height() / 1.5), static_cast<int>(option.rect.height() / 1.5));
 
 			int yOffset = (iconRect.height() - size.height()) / 2;
 			QPoint topLeft(iconRect.left() + 5, iconRect.top() + yOffset);
@@ -43,7 +43,9 @@ public:
 			QString elidedText = fontMetrics.elidedText(text, Qt::ElideRight, textRect.width());
 
 			painter->drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, elidedText);
-		} else {
+		}
+		else
+		{
 			// Si pas d'icône, dessiner normalement avec l'effet ellipse pour le texte
 			QString text = index.data(Qt::DisplayRole).toString();
 			QFontMetrics fontMetrics(option.font);
@@ -165,8 +167,10 @@ void SyncTableView::sync(SyncType type, const iro::basic_opt_uptr &filters)
 	auto process = std::make_unique<ir::process>();
 
 	if (filters) process->add_option(filters->copy_uptr());
-	process->add_option(iro::logging::stats("200ms"), iro::logging::use_json_log(),
-	                    iro::logging::verbose());
+	process->add_option(iro::logging::use_json_log(),
+	                    iro::logging::verbose(),
+	                    Settings::getProcessOptions(Settings::Stats).copy_uptr(),
+	                    Settings::getProcessOptions(Settings::Transfers).copy_uptr());
 
 	if (type == Sync)
 		process->sync(*_src, *_dst);

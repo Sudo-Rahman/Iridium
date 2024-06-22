@@ -38,6 +38,8 @@
         <file>resources/front_browser_arrow.png</file>
         <file>resources/back_browser_arrow.png</file>
         <file>resources/reload_browser.png</file>
+        <file>resources/alias.png</file>
+        <file>resources/crypt.png</file>
         <file>icons/fluent/index.theme</file>
         <file>icons/fluent/scalable/places</file>
         <file>icons/fluent/scalable/mimetypes</file>
