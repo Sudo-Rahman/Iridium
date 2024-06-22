@@ -36,7 +36,7 @@ ListRemoteWidget::ListRemoteWidget(QWidget * parent) : QScrollArea(parent)
 	_layout->setSpacing(10);
 	setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum);
 
-	_layout->setContentsMargins(5, 10, 5, 10);
+	_layout->setContentsMargins(10, 10, 15, 10);
 
 	_expand = new QPushButton(this);
 	_expand->setCheckable(true);

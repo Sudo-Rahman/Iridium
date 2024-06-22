@@ -32,7 +32,7 @@ void MegaRemoteConfigParamsFrame::addRemote()
 	if (not checkFields())
 		return;
 	using iridium::rclone::entity;
-	iridium::rclone::process().config_create().name(_remote_name->text().toStdString())
+	_process->config_create().name(_remote_name->text().toStdString())
 			.type(ire::remote::remote_type_to_string(ire::remote::mega))
 			.add_param(
 				"user=" + _user->text().toStdString(),

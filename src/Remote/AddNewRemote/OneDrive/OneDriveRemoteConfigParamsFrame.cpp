@@ -17,17 +17,12 @@ void OneDriveRemoteConfigParamsFrame::addRemote()
         return;
 
     using iridium::rclone::entity;
-    iridium::rclone::process().config_create().name(_remote_name->text().toStdString())
+    _process->config_create().name(_remote_name->text().toStdString())
             .type(ire::remote::remote_type_to_string(ire::remote::onedrive))
             .execute();
 
 }
 
-
-void OneDriveRemoteConfigParamsFrame::createUi()
-{
-    RemoteConfigParamsFrame::createUi();
-}
 
 bool OneDriveRemoteConfigParamsFrame::checkFields()
 {

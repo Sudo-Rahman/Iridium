@@ -78,7 +78,7 @@ void RemoteWidget::addBlur()
     }
     // resize effect
     auto effect = new QGraphicsDropShadowEffect(this);
-    effect->setBlurRadius(20);
+    effect->setBlurRadius(10);
     effect->setOffset(0, 0);
     effect->setColor(QApplication::palette().color(QPalette::Dark));
     this->setGraphicsEffect(effect);

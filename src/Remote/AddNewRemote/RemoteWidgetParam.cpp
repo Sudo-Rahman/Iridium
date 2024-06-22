@@ -17,6 +17,8 @@
 #include "Box/BoxRemoteConfigParamsFrame.hpp"
 #include "Smb/SmbRemoteConfigParamsFrame.hpp"
 #include "Cmd/CmdRemoteConfigParamsFrame.hpp"
+#include "Alias/AliasRemoteConfigParamsFrame.hpp"
+#include "Crypt/CryptRemoteConfigParamsFrame.hpp"
 #include <Settings.hpp>
 
 #include <QLayout>
@@ -79,6 +81,12 @@ RemoteWidgetParam::RemoteWidgetParam(ire::remote::remote_type type, QWidget *par
             break;
         case ire::remote::smb:
             labelRemoteName->setText("Smb");
+            break;
+        case ire::remote::crypt:
+            labelRemoteName->setText("Crypt");
+        break;
+        case ire::remote::alias:
+            labelRemoteName->setText("Alias");
             break;
         case ire::remote::cmd:
             labelRemoteName->setText(tr("Manuel"));
@@ -150,6 +158,12 @@ void RemoteWidgetParam::initParamsFrame()
             break;
         case ire::remote::smb:
             _paramsFrame = new SmbRemoteConfigParamsFrame();
+            break;
+        case ire::remote::alias:
+            _paramsFrame = new AliasRemoteConfigParamsFrame();
+            break;
+        case ire::remote::crypt:
+            _paramsFrame = new CryptRemoteConfigParamsFrame();
             break;
         case ire::remote::cmd:
             _paramsFrame = new CmdRemoteConfigParamsFrame();

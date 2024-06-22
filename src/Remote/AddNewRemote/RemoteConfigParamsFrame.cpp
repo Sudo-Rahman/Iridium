@@ -5,15 +5,17 @@
 #include <QPainter>
 #include <QMessageBox>
 #include <QIterator>
+#include <ranges>
 #include <IridiumApp.hpp>
 
 #include "RemoteConfigParamsFrame.hpp"
 
 using namespace std;
 
-RemoteConfigParamsFrame::RemoteConfigParamsFrame(QWidget * parent) : QFrame(parent)
+RemoteConfigParamsFrame::RemoteConfigParamsFrame(QWidget *parent) : QFrame(parent)
 {
 	_layout = new QVBoxLayout(this);
+	_layout->setSpacing(10);
 }
 
 /**
@@ -30,23 +32,25 @@ void RemoteConfigParamsFrame::createUi()
 	_remote_name = new RoundedLineEdit(this);
 	_form_layout->addRow(tr("Nom : "), _remote_name);
 
-
-	auto * tmpwidlay = new QHBoxLayout;
+	auto *vertlay = new QVBoxLayout;
+	vertlay->setAlignment(Qt::AlignTop | Qt::AlignCenter);
+	vertlay->setContentsMargins(0, 0, 0, 0);
+	vertlay->setSpacing(0);
+	auto *horlayout = new QHBoxLayout;
+	vertlay->addLayout(horlayout);
 
 	_login = new QPushButton(tr("Se connecter"), this);
 	_login->setDefault(true);
 	_login->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
-	tmpwidlay->addWidget(_login, Qt::AlignTop);
-	tmpwidlay->setAlignment(_login, Qt::AlignTop);
+	horlayout->addWidget(_login, 0, Qt::AlignTop);
 
 	_cancel = new QPushButton(tr("Annuler"), this);
 	_cancel->hide();
 	_cancel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-	tmpwidlay->addWidget(_cancel, Qt::AlignTop);
-	tmpwidlay->setAlignment(_cancel, Qt::AlignTop);
+	horlayout->addWidget(_cancel, 0, Qt::AlignTop);
 
-	_layout->addLayout(tmpwidlay);
+	_layout->addLayout(vertlay);
 
 	connect(_login, &QPushButton::clicked, this, &RemoteConfigParamsFrame::addRemote);
 
@@ -60,14 +64,14 @@ void RemoteConfigParamsFrame::createUi()
 	_mess_label = new QLabel(this);
 	_mess_label->setText(tr("Les champs en rouge sont obligatoires !"));
 	_mess_label->hide();
+	_mess_label->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 	_mess_label->setAutoFillBackground(true);
 	QPalette p;
 	p.setColor(QPalette::WindowText, Qt::red);
 	_mess_label->setPalette(p);
-	_layout->addWidget(_mess_label, Qt::AlignTop);
-	_layout->setAlignment(_mess_label, Qt::AlignTop);
+	vertlay->addWidget(_mess_label, 0, Qt::AlignTop);
 
-	for (auto& field: findChildren<RoundedLineEdit *>())
+	for (auto &field: findChildren<RoundedLineEdit *>())
 	{
 		connect(field, &QLineEdit::textChanged, this, [this, field]()
 		{
@@ -82,7 +86,7 @@ void RemoteConfigParamsFrame::createUi()
  */
 void RemoteConfigParamsFrame::addRemote()
 {
-	_process	= std::make_unique<ir::process>();
+	_process = std::make_unique<ir::process>();
 
 	if (_remote_name->text().isEmpty())
 	{
@@ -123,10 +127,10 @@ void RemoteConfigParamsFrame::addRemote()
 			});
 
 	std::vector<RemoteInfoPtr> rclone_liste_remote;
-	iridium::rclone::process().list_remotes([this](const std::vector<ire::remote_ptr> & remotes)
+	iridium::rclone::process().list_remotes([this](const std::vector<ire::remote_ptr> &remotes)
 	{
 		_remotes.clear();
-		for (const auto & remote : remotes)
+		for (const auto &remote: remotes)
 		{
 			_remotes.push_back(std::make_shared<RemoteInfo>(remote->name(), remote->type(), remote->path()));
 		}
@@ -140,7 +144,7 @@ void RemoteConfigParamsFrame::addRemote()
 bool RemoteConfigParamsFrame::checkFields()
 {
 	bool ok = true;
-	for (auto& remote: _remotes)
+	for (auto &remote: _remotes)
 	{
 		if (_remote_name->text().toStdString() == remote->name())
 		{
@@ -148,7 +152,9 @@ bool RemoteConfigParamsFrame::checkFields()
 			return false;
 		}
 	}
-	for (auto& field: findChildren<RoundedLineEdit *>())
+	for (auto &field: findChildren<RoundedLineEdit *>()
+	                  | std::views::filter([](auto field) { return field->accessibleName() != "noCheck"; })
+		)
 	{
 		if (field->text().isEmpty())
 		{

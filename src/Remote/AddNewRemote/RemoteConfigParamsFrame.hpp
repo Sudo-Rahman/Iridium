@@ -38,6 +38,8 @@ public:
 
     void focusLineEdit() { if (_remote_name)_remote_name->setFocus(); }
 
+    const char *noCheck = "noCheck";
+
 protected:
     virtual void addRemote();
 

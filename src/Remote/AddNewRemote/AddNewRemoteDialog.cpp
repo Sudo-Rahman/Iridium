@@ -39,7 +39,7 @@ AddNewRemoteDialog::AddNewRemoteDialog(QWidget *parent) : QDialog(parent)
     });
     scrollWidgetLayout->addWidget(local);
 
-    for (int t = 0; t != ire::remote::remote_type::none; t++)
+    for (int t = 0; t != ire::remote::remote_type::other; t++)
     {
         auto type = static_cast<ire::remote::remote_type>(t);
         auto *widget = new RemoteWidgetParam(type,this);
