@@ -490,14 +490,13 @@ void TreeFileView::copyto(const std::vector<RcloneFilePtr> &files, TreeFileItem 
 				_remote_info
 			);
 		auto process = process_ptr(new ir::process());
-		if(move) process->move_to(*file, *newFile);
+		if (move) process->move_to(*file, *newFile);
 		else process->copy_to(*file, *newFile);
-		process->on_finish([this,item = getRootItem(),treePaste,move](int exit)
+		process->on_finish([this,treePaste](int exit)
 		{
 			if (exit == 0)
 			{
 				reload(treePaste);
-				if(move) reload(item);
 			}
 		});
 		process->on_stop([this,treePaste] { IridiumApp::runOnMainThread([this,treePaste] { reload(treePaste); }); });
@@ -533,6 +532,7 @@ void TreeFileView::keyPressEvent(QKeyEvent *event)
 	if (event->modifiers() == Qt::ControlModifier && event->key() == Qt::Key_F)
 	{
 		showSearchLine();
+		event->accept();
 		return;
 	}
 
@@ -540,12 +540,14 @@ void TreeFileView::keyPressEvent(QKeyEvent *event)
 	if (event->modifiers() == Qt::ControlModifier && event->key() == Qt::Key_R)
 	{
 		reloadRoot();
+		event->accept();
 		return;
 	}
 
 	if (event->modifiers() == Qt::ControlModifier && event->key() == Qt::Key_A)
 	{
 		QTreeView::selectAll();
+		event->accept();
 		return;
 	}
 
@@ -562,37 +564,47 @@ void TreeFileView::keyPressEvent(QKeyEvent *event)
 			}());
 	if (event->modifiers() == Qt::ControlModifier && event->key() == Qt::Key_V)
 		copyto(Iridium::Global::copy_files);
+
+	if (event->modifiers() & Qt::ControlModifier &&
+	    event->modifiers() & Qt::ShiftModifier &&
+	    event->key() == Qt::Key_V)
+		copyto(Iridium::Global::copy_files, nullptr, true);
+
 	if (event->modifiers() == Qt::ControlModifier && event->key() == Qt::Key_Backspace and !lisItem.empty())
 		if (rootIndex().isValid())
 			deleteFile(lisItem);
 	if (event->modifiers() == Qt::ControlModifier && event->key() == Qt::Key_N)
 		mkdir();
 
-	switch (event->key())
+	if (!event->isAccepted())
 	{
-		case Qt::Key_Space:
-			{
-				for (auto item: getSelectedItems())
+		switch (event->key())
+		{
+			case Qt::Key_Space:
 				{
-					auto *info = new ItemInfoDialog(item, this);
-					info->move(QCursor::pos());
-					info->show();
+					for (auto item: getSelectedItems())
+					{
+						auto *info = new ItemInfoDialog(item, this);
+						info->move(QCursor::pos());
+						info->show();
+					}
 				}
-			}
-			break;
-		case Qt::Key_Left:
-			back();
-			break;
-		case Qt::Key_Right:
-			front();
-			break;
-		case Qt::Key_F2:
-			if (_clickIndex not_eq _model->index(0, 0))
-				editItem(_clickIndex);
-			break;
-		default:
-			break;
+				break;
+			case Qt::Key_Left:
+				back();
+				break;
+			case Qt::Key_Right:
+				front();
+				break;
+			case Qt::Key_F2:
+				if (_clickIndex not_eq _model->index(0, 0))
+					editItem(_clickIndex);
+				break;
+			default:
+				break;
+		}
 	}
+	event->accept();
 }
 
 void TreeFileView::keyReleaseEvent(QKeyEvent *event) { QTreeView::keyReleaseEvent(event); }
@@ -962,7 +974,7 @@ void TreeFileView::dropEvent(QDropEvent *event)
 	{
 		if (not tree->_dragable)
 		{
-			event->ignore();
+			event->accept();
 			return;
 		}
 
@@ -997,14 +1009,14 @@ void TreeFileView::dropEvent(QDropEvent *event)
 		tree = dynamic_cast<TreeFileView *>(event->source());
 		if (not tree->_dragable)
 		{
-			event->ignore();
+			event->accept();
 			return;
 		}
 		// get items to drop
 		auto lst = qobject_cast<const TreeMimeData *>(event->mimeData())->items();
 		if (lst.isEmpty())
 		{
-			event->ignore();
+			event->accept();
 			return;
 		}
 
@@ -1015,7 +1027,7 @@ void TreeFileView::dropEvent(QDropEvent *event)
 
 	_drag_sys_files = false;
 	_drop_destination = nullptr;
-	copyto(files, destination_item,_remote_info.get() == files.front()->remote().get());
+	copyto(files, destination_item, _remote_info.get() == files.front()->remote().get());
 	event->acceptProposedAction();
 }
 

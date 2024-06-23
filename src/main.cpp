@@ -8,7 +8,7 @@ int main(int argc, char *argv[])
 {
 	IridiumApp app(argc, argv);
 	IridiumApp::setApplicationName("Iridium");
-	IridiumApp::setApplicationVersion(IRIDIUM_VERSION.c_str());
+	IridiumApp::setApplicationVersion(IRIDIUM_VERSION);
 	QGuiApplication::setWindowIcon(QIcon(":/resources/Iridium.svg"));
 
 	Settings::init();

@@ -3,8 +3,9 @@
 SyncTableModel::SyncTableModel(QObject *parent) : QAbstractTableModel(parent)
 {
 	_headers = {
-					"Source", "État", "Destination", "Taille", "Temps restant", "Temps écoulé", "Vitesse",
-					"Vitesse moyenne"
+					tr("Source"), tr("État"), tr("Destination"), tr("Taille"), tr("Temps restant"), tr("Temps écoulé"),
+					tr("Vitesse"),
+					tr("Vitesse moyenne")
 			};
 }
 

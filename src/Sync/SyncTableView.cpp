@@ -8,6 +8,7 @@
 #include <QFontMetrics>
 #include <QMessageBox>
 #include <thread>
+#include <QCache>
 #include <SyncProgressBarDelegate.hpp>
 #include "IridiumApp.hpp"
 #include "SyncRow.hpp"
@@ -16,43 +17,59 @@
 class CustomSyncItemDelegate : public QStyledItemDelegate
 {
 public:
-	CustomSyncItemDelegate(QObject *parent = nullptr) : QStyledItemDelegate(parent) {}
+    CustomSyncItemDelegate(QObject *parent = nullptr)
+        : QStyledItemDelegate(parent)
+    {
+        _iconCache.setMaxCost(10000);  // limit size of cache
+    }
 
-	void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override
-	{
-		// Supposons que les données du modèle contiennent le chemin de l'icône
-		QString path = index.data().toString();
-		QIcon icon(RcloneFile::getIcon(path));
-		if (!icon.isNull())
-		{
-			QRect iconRect = option.rect;
+    void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override
+    {
+        painter->save();
 
-			QSize size(static_cast<int>(option.rect.height() / 1.5), static_cast<int>(option.rect.height() / 1.5));
+        QIcon icon = getIconForIndex(index);
+        if (!icon.isNull()) {
+            QRect iconRect = option.rect;
+            QSize size(static_cast<int>(option.rect.height() / 1.5), static_cast<int>(option.rect.height() / 1.5));
+            int yOffset = (iconRect.height() - size.height()) / 2;
+            QPoint topLeft(iconRect.left() + 5, iconRect.top() + yOffset);
+            QRect targetRect(topLeft, size);
 
-			int yOffset = (iconRect.height() - size.height()) / 2;
-			QPoint topLeft(iconRect.left() + 5, iconRect.top() + yOffset);
-			QRect targetRect(topLeft, size);
+            icon.paint(painter, targetRect, Qt::AlignLeft | Qt::AlignVCenter);
 
-			icon.paint(painter, targetRect, Qt::AlignLeft | Qt::AlignVCenter);
+            QRect textRect = option.rect;
+            textRect.setLeft(targetRect.right() + 5);
 
-			QRect textRect = option.rect;
-			textRect.setLeft(targetRect.right() + 5); // Laisser un espace de 5 pixels entre l'icône et le texte
+            drawElidedText(painter, textRect, index.data(Qt::DisplayRole).toString(), option.font);
+        } else {
+            drawElidedText(painter, option.rect, index.data(Qt::DisplayRole).toString(), option.font);
+        }
 
-			QString text = index.data(Qt::DisplayRole).toString();
-			QFontMetrics fontMetrics(option.font);
-			QString elidedText = fontMetrics.elidedText(text, Qt::ElideRight, textRect.width());
+        painter->restore();
+    }
 
-			painter->drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, elidedText);
-		}
-		else
-		{
-			// Si pas d'icône, dessiner normalement avec l'effet ellipse pour le texte
-			QString text = index.data(Qt::DisplayRole).toString();
-			QFontMetrics fontMetrics(option.font);
-			QString elidedText = fontMetrics.elidedText(text, Qt::ElideRight, option.rect.width());
-			painter->drawText(option.rect, Qt::AlignLeft | Qt::AlignVCenter, elidedText);
-		}
-	}
+    QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override
+    {
+        QSize size = QStyledItemDelegate::sizeHint(option, index);
+        return QSize(size.width(), qMax(size.height(), 30));  // Hauteur minimale de 30 pixels
+    }
+
+private:
+    mutable QCache<QString, QIcon> _iconCache;
+
+    QIcon &getIconForIndex(const QModelIndex &index) const {
+        QString path = index.data().toString();
+        if (!_iconCache.contains(path)) {
+            _iconCache.insert(path, new QIcon(RcloneFile::getIcon(path)));
+        }
+        return *_iconCache[path];
+    }
+
+    void drawElidedText(QPainter *painter, const QRect &rect, const QString &text, const QFont &font) const {
+        QFontMetrics fontMetrics(font);
+        QString elidedText = fontMetrics.elidedText(text, Qt::ElideRight, rect.width());
+        painter->drawText(rect, Qt::AlignLeft | Qt::AlignVCenter, elidedText);
+    }
 };
 
 using namespace std::chrono;
@@ -112,7 +129,8 @@ void SyncTableView::analyse(SyncType type, const iro::basic_opt_uptr &filters)
 	{
 		if (log.level() == ire::json_log::log_level::error)
 		{
-			if (log.message().contains("'" + _src->name() + "'"))
+			if (log.message().contains("'" + _src->name() + "'") or
+				log.message().contains("file not in ") and log.message().contains(_dst->path()))
 			{
 				auto src_file = _dst->absolute_path() + "/" + log.object();
 				auto dst_file = _src->absolute_path() + "/" + log.object();
@@ -121,7 +139,9 @@ void SyncTableView::analyse(SyncType type, const iro::basic_opt_uptr &filters)
 				_data.push_back(row);
 				_rows[std::to_string(hash)] = row;
 			}
-			else if (log.message().contains("'" + _dst->name() + "'"))
+			// for bisync
+			else if (log.message().contains("'" + _dst->name() + "'") or
+			log.message().contains("file not in ") and log.message().contains(_src->path()))
 			{
 				auto src_file = _src->absolute_path() + "/" + log.object();
 				auto dst_file = _dst->absolute_path() + "/" + log.object();

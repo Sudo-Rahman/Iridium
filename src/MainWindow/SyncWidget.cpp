@@ -4,10 +4,10 @@
 
 #include "SyncWidget.hpp"
 #include <Global.hpp>
-#include <QEvent>
 #include <QFormLayout>
 #include <QMessageBox>
 #include <Sync.hpp>
+#include <iridium/rclone.hpp>
 
 #include "CircularProgressBar.hpp"
 #include "IridiumApp.hpp"
@@ -64,7 +64,7 @@ SyncWidget::SyncWidget(QWidget *parent) : QWidget(parent)
 	top_left_layout->addLayout(btn_layout);
 	top_left_layout->addWidget(_sync_progressBar);
 
-	top_right_layout->addWidget(_filter_group_box = new FilterGroupBox(this));
+	top_right_layout->addWidget(_filter_group_box = new FilterGroupBox(tr("Filtres"),this));
 
 	_view = new SyncTableView(this);
 	_layout->addWidget(_view);
@@ -236,12 +236,12 @@ bool SyncWidget::event(QEvent *event)
 		_dst_comboBox->clear();
 		for (auto &dir: Iridium::Global::sync_dirs)
 		{
-			_src_comboBox->addItem(dir->getName());
+			_src_comboBox->addItem(dir->parent() != nullptr ? dir->getName() : QString(dir->getRemoteInfo()->full_path().c_str()));
 			_src_comboBox->setItemData(_src_comboBox->count() - 1, QVariant::fromValue(dir), Qt::UserRole);
-			_src_comboBox->setItemIcon(_src_comboBox->count() - 1, dir->getIcon());
-			_dst_comboBox->addItem(dir->getName());
+			_src_comboBox->setItemIcon(_src_comboBox->count() - 1, dir->getRemoteInfo()->getIcon());
+			_dst_comboBox->addItem(dir->parent() != nullptr ? dir->getName() : QString(dir->getRemoteInfo()->full_path().c_str()));
 			_dst_comboBox->setItemData(_dst_comboBox->count() - 1, QVariant::fromValue(dir), Qt::UserRole);
-			_dst_comboBox->setItemIcon(_dst_comboBox->count() - 1, dir->getIcon());
+			_dst_comboBox->setItemIcon(_dst_comboBox->count() - 1, dir->getRemoteInfo()->getIcon());
 		}
 		if (selected_src)
 		{

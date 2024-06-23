@@ -10,58 +10,73 @@
 #include <Settings.hpp>
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QCache>
 
 #include "CircularProgressBar.hpp"
 #include "IridiumApp.hpp"
-
 class CustomSearchItemDelegate : public QStyledItemDelegate
 {
 public:
-	CustomSearchItemDelegate(SearchTableModel *model, uint8_t collumn, QObject *parent = nullptr) : _model(model),
-		_collumn(collumn),
-		QStyledItemDelegate(parent) {}
+    CustomSearchItemDelegate(SearchTableModel *model, QObject *parent = nullptr)
+        : QStyledItemDelegate(parent), _model(model)
+    {
+        _iconCache.setMaxCost(1000);  // limit size of the cache
+    }
 
-	void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override
-	{
-		QIcon icon;
-		if (_collumn == 0)
-			icon = _model->data(index)->file()->getIcon();
-		else if (_collumn == 1)
-			icon = _model->data(index)->file()->getRemoteInfo()->getIcon();
-		if (!icon.isNull())
-		{
-			QRect iconRect = option.rect;
+    void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override
+    {
 
-			QSize size(static_cast<int>(option.rect.height() / 1.5), static_cast<int>(option.rect.height() / 1.5));
+    	painter->save();
 
-			int yOffset = (iconRect.height() - size.height()) / 2;
-			QPoint topLeft(iconRect.left() + 5, iconRect.top() + yOffset);
-			QRect targetRect(topLeft, size);
+        auto icon = getIconForIndex(index);
+        if (!icon.isNull()) {
+            QRect iconRect = option.rect;
+            QSize size(static_cast<int>(option.rect.height() / 1.5), static_cast<int>(option.rect.height() / 1.5));
+            int yOffset = (iconRect.height() - size.height()) / 2;
+            QPoint topLeft(iconRect.left() + 5, iconRect.top() + yOffset);
+            QRect targetRect(topLeft, size);
 
-			icon.paint(painter, targetRect, Qt::AlignLeft | Qt::AlignVCenter);
+            icon.paint(painter, targetRect, Qt::AlignLeft | Qt::AlignVCenter);
 
-			QRect textRect = option.rect;
-			textRect.setLeft(targetRect.right() + 5); // Laisser un espace de 5 pixels entre l'icône et le texte
+            QRect textRect = option.rect;
+            textRect.setLeft(targetRect.right() + 5);
 
-			QString text = index.data(Qt::DisplayRole).toString();
-			QFontMetrics fontMetrics(option.font);
-			QString elidedText = fontMetrics.elidedText(text, Qt::ElideRight, textRect.width());
+            drawElidedText(painter, textRect, index.data(Qt::DisplayRole).toString(), option.font);
+        } else {
+            drawElidedText(painter, option.rect, index.data(Qt::DisplayRole).toString(), option.font);
+        }
 
-			painter->drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, elidedText);
-		}
-		else
-		{
-			// Si pas d'icône, dessiner normalement avec l'effet ellipse pour le texte
-			QString text = index.data(Qt::DisplayRole).toString();
-			QFontMetrics fontMetrics(option.font);
-			QString elidedText = fontMetrics.elidedText(text, Qt::ElideRight, option.rect.width());
-			painter->drawText(option.rect, Qt::AlignLeft | Qt::AlignVCenter, elidedText);
-		}
-	}
+    	painter->restore();
+    }
+
+    QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override
+    {
+        QSize size = QStyledItemDelegate::sizeHint(option, index);
+        return QSize(size.width(), qMax(size.height(), 30));  // Hauteur minimale de 30 pixels
+    }
 
 private:
-	SearchTableModel *_model{};
-	uint8_t _collumn{};
+    SearchTableModel *_model;
+    mutable QCache<std::pair<int, int>, QIcon> _iconCache;
+
+    QIcon &getIconForIndex(const QModelIndex &index) const {
+        std::pair key(index.row(), index.column());
+        if (!_iconCache.contains(key)) {
+            QIcon *icon = new QIcon;
+            if (index.column() == 0)
+                *icon = _model->data(index)->file()->getIcon();
+            else if (index.column() == 1)
+                *icon = _model->data(index)->file()->getRemoteInfo()->getIcon();
+            _iconCache.insert(key, icon);
+        }
+        return *_iconCache[key];
+    }
+
+    void drawElidedText(QPainter *painter, const QRect &rect, const QString &text, const QFont &font) const {
+        QFontMetrics fontMetrics(font);
+        QString elidedText = fontMetrics.elidedText(text, Qt::ElideRight, rect.width());
+        painter->drawText(rect, Qt::AlignLeft | Qt::AlignVCenter, elidedText);
+    }
 };
 
 using namespace iridium::rclone;
@@ -80,8 +95,7 @@ SearchTableView::SearchTableView(QWidget *parent) : QTableView(parent)
 	horizontalHeader()->setMinimumSectionSize(120);
 	verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
 
-	setItemDelegateForColumn(0, new CustomSearchItemDelegate(_model, 0, this));
-	setItemDelegateForColumn(1, new CustomSearchItemDelegate(_model, 1, this));
+	setItemDelegate(new CustomSearchItemDelegate(_model,  this));
 
 	setColumnWidth(0, 0);
 

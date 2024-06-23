@@ -31,6 +31,7 @@ void MenuBar::connectSignals()
 	connect(_about_action, &QAction::triggered, this, [this]()
 	{
 		auto dialog = QDialog(this);
+		dialog.setWindowFlags(Qt::Dialog | Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
 		dialog.setWindowTitle(tr("À propos d'Iridium"));
 		dialog.setModal(true);
 
@@ -49,7 +50,7 @@ void MenuBar::connectSignals()
 		formLayout.addRow(&icon);
 
 		auto version = QLabel(
-			"<a href=\"https://github.com/Sudo-Rahman/Iridium/releases/\">" + QString::fromStdString(IRIDIUM_VERSION) + "</a>");
+			"<a href=\"https://github.com/Sudo-Rahman/Iridium/releases/\">" + QString(IRIDIUM_VERSION) + "</a>");
 		version.setOpenExternalLinks(true);
 		formLayout.addRow(new QLabel(tr("Version d'Iridium : ")), &version);
 
@@ -57,12 +58,12 @@ void MenuBar::connectSignals()
 		cppVersion.setOpenExternalLinks(true);
 		formLayout.addRow(new QLabel(tr("C++ Version : ")), &cppVersion);
 
-		auto qtVersion = QLabel("<a href=\"https://www.qt.io/\">" + QString::fromStdString(QT_VERSION_STR) + "</a>");
+		auto qtVersion = QLabel("<a href=\"https://www.qt.io/\">" + QString(QT_VERSION_STR) + "</a>");
 		qtVersion.setOpenExternalLinks(true);
 		formLayout.addRow(new QLabel(tr("Qt Version : ")), &qtVersion);
 
 		auto boostVersion = QLabel(
-			"<a href=\"https://www.boost.org/\">" + QString::fromStdString(BOOST_LIB_VERSION) + "</a>");
+			"<a href=\"https://www.boost.org/\">" + QString(BOOST_LIB_VERSION) + "</a>");
 		boostVersion.setOpenExternalLinks(true);
 		formLayout.addRow(new QLabel(tr("Boost Version : ")), &boostVersion);
 
@@ -86,7 +87,7 @@ void MenuBar::connectSignals()
 		formLayout.addRow(new QLabel(tr("Rclone Version : ")), &rcloneVersion);
 
 
-		auto auteur = QLabel("<a href=\"https://github.com/Sudo-Rahman\">" + QString::fromStdString(AUTHOR) + "</a>");
+		auto auteur = QLabel("<a href=\"https://github.com/Sudo-Rahman\">" + QString(AUTHOR) + "</a>");
 		auteur.setOpenExternalLinks(true);
 		formLayout.addRow(new QLabel(tr("Auteur : ")), &auteur);
 
@@ -94,18 +95,6 @@ void MenuBar::connectSignals()
 		licence.setOpenExternalLinks(true);
 		formLayout.addRow(new QLabel(tr("Licence : ")), &licence);
 
-		auto text = []
-		{
-			QString text;
-			for (auto const& ressource: OTHER_RESSOURCES_AUHTOR)
-				text += "<a href=\"" + QString::fromStdString(ressource) + "\">" + QString::fromStdString(ressource) +
-						"</a><br>";
-			return text;
-		}();
-		auto otherRessources = QLabel(text);
-		otherRessources.setWordWrap(true);
-		otherRessources.setOpenExternalLinks(true);
-		formLayout.addRow(new QLabel(tr("Autres ressources : ")), &otherRessources);
 		dialog.exec();
 	});
 

@@ -64,16 +64,14 @@ ItemMenu::ItemMenu(const QList<TreeFileItem *> &files, QWidget *parent) : QMenu(
 				// if root file
 				copy_ = delete_ = false;
 			}
-			else
+
+			_sync = new QAction(tr("Synchroniser"), this);
+			connect(_sync, &QAction::triggered, this, [this]
 			{
-				_sync = new QAction(tr("Synchroniser"), this);
-				connect(_sync, &QAction::triggered, this, [this]
-				{
-					_action = Sync;
-					emit sync();
-				});
-				_sync->setIcon(QIcon(":/resources/sync-cloud.png"));
-			}
+				_action = Sync;
+				emit sync();
+			});
+			_sync->setIcon(QIcon(":/resources/sync-cloud.png"));
 		}
 	}
 	if (!files.empty())
