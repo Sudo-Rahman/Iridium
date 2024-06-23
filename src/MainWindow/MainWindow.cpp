@@ -28,7 +28,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	auto centralWidget = new QWidget(this);
 	auto layout = new QVBoxLayout(centralWidget);
 	layout->setSpacing(0);
-	layout->setContentsMargins(5, 0, 5, 0);
+	layout->setContentsMargins(0, 0, 0, 0);
 
 	_tabWidget = new QTabWidget(this);
 	setCentralWidget(centralWidget);
@@ -82,10 +82,13 @@ void MainWindow::connectSignals()
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-	if(_info_widget->taskInProgress())
+	if (_info_widget->taskInProgress())
 	{
-		QMessageBox::StandardButton reply = QMessageBox::question(this, tr("Quitter"), tr("Des taches sont en cours, voulez-vous vraiment quitter ?"), QMessageBox::Yes | QMessageBox::No);
-		if(reply == QMessageBox::No)
+		QMessageBox::StandardButton reply = QMessageBox::question(this, tr("Quitter"),
+		                                                          tr(
+			                                                          "Des taches sont en cours, voulez-vous vraiment quitter ?"),
+		                                                          QMessageBox::Yes | QMessageBox::No);
+		if (reply == QMessageBox::No)
 		{
 			event->ignore();
 			return;

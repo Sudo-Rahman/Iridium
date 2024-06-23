@@ -8,98 +8,150 @@
 #include "ItemMenu.hpp"
 #include "ItemInfoDialog.hpp"
 
-ItemMenu::ItemMenu(QWidget *parent) : QMenu(parent)
+ItemMenu::ItemMenu(const QList<TreeFileItem *> &files, QWidget *parent) : QMenu(parent)
 {
+	bool copy_, delete_;
+	copy_ = delete_ = true;
+	if (files.size() == 1)
+	{
+		if (files.first() == nullptr)
+			return;
 
-    _info = addAction(tr("Information"), this, [this]
-    {
-        _action = Info;
-        emit info();
-    });
-    _copy = addAction(tr("Copier"), this, [this]
-    {
-        _action = Copy;
-        emit copyed();
-    });
-    _paste = addAction(tr("Coller"), this, [this]
-    {
-        _action = Paste;
-        emit pasted();
-    });
-    _delete = addAction(tr("Supprimer"), this, [this]
-    {
-        _action = Delete;
-        emit deleted();
-    });
-    _new_folder = addAction(tr("Nouveau dossier"), this, [this]
-    {
-        _action = NewFolder;
-        emit newFolder();
-    });
-    _tree = addAction(tr("Arbre"), this, [this]
-    {
-        _action = Tree;
-        emit tree();
-    });
+		auto file = files.first()->getFile();
 
-    _sync = addAction(tr("Synchroniser"), this, [this]
-    {
-        _action = Sync;
-        emit sync();
-    });
+		if (file->is_dir())
+		{
+			_paste = new QAction(tr("Coller"), this);
+			connect(_paste, &QAction::triggered, this, [this]
+			{
+				_action = Paste;
+				emit pasted();
+			});
+			_paste->setIcon(QIcon(":/resources/paste.png"));
+			_paste->setShortcut(QKeySequence::Paste);
 
-    // add icons
-    _info->setIcon(QIcon(":/resources/information.png"));
-    _copy->setIcon(QIcon(":/resources/copy.png"));
-    _paste->setIcon(QIcon(":/resources/paste.png"));
-    _delete->setIcon(QIcon(":/resources/delete.png"));
-    _new_folder->setIcon(QIcon(":/resources/new-folder.png"));
-    _tree->setIcon(QIcon(":/resources/tree.png"));
-    _sync->setIcon(QIcon(":/resources/sync-cloud.png"));
+			_new_folder = new QAction(tr("Nouveau dossier"), this);
+			connect(_new_folder, &QAction::triggered, this, [this]
+			{
+				_action = NewFolder;
+				emit newFolder();
+			});
+			_new_folder->setIcon(QIcon(":/resources/new-folder.png"));
+			_new_folder->setShortcut(QKeySequence::New);
 
-    // show shortcuts
-    _info->setShortcut(Qt::Key_Space);
-    _info->setShortcutVisibleInContextMenu(true);
-    _copy->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_C));
-    _copy->setShortcutVisibleInContextMenu(true);
-    _paste->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_V));
-    _paste->setShortcutVisibleInContextMenu(true);
-    _delete->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Delete));
-    _delete->setShortcutVisibleInContextMenu(true);
-    _new_folder->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_N));
-    _new_folder->setShortcutVisibleInContextMenu(true);
-    _tree->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_T));
+			_tree = new QAction(tr("Arbre"), this);
+			connect(_tree, &QAction::triggered, this, [this]
+			{
+				_action = Tree;
+				emit tree();
+			});
+			_tree->setIcon(QIcon(":/resources/tree.png"));
+			_tree->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_T));
 
+			if (file->parent() == nullptr)
+			{
+				if (!file->getRemoteInfo()->isLocal())
+				{
+					_clean_trash = new QAction(tr("Vider la corbeille"), this);
+					connect(_clean_trash, &QAction::triggered, this, [this]
+					{
+						_action = CleanTrash;
+						emit trashCleaned();
+					});
+					_clean_trash->setIcon(QIcon(":/resources/clean.png"));
+				}
+
+				// if root file
+				copy_ = delete_ = false;
+			}
+			else
+			{
+				_sync = new QAction(tr("Synchroniser"), this);
+				connect(_sync, &QAction::triggered, this, [this]
+				{
+					_action = Sync;
+					emit sync();
+				});
+				_sync->setIcon(QIcon(":/resources/sync-cloud.png"));
+			}
+		}
+	}
+	if (!files.empty())
+	{
+		_info = new QAction(tr("Information"), this);
+		connect(_info, &QAction::triggered, this, [this]
+		{
+			_action = Info;
+			emit info();
+		});
+		_info->setIcon(QIcon(":/resources/information.png"));
+		_info->setShortcut(Qt::Key_Space);
+
+		if (copy_)
+		{
+			_copy = new QAction(tr("Copier"), this);
+			connect(_copy, &QAction::triggered, this, [this]
+			{
+				_action = Copy;
+				emit copied();
+			});
+			_copy->setIcon(QIcon(":/resources/copy.png"));
+			_copy->setShortcut(QKeySequence::Copy);
+		}
+
+		if (delete_)
+		{
+			_delete = new QAction(tr("Supprimer"), this);
+			connect(_delete, &QAction::triggered, this, [this]
+			{
+				_action = Delete;
+				emit deleted();
+			});
+			_delete->setIcon(QIcon(":/resources/delete.png"));
+			_delete->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_Delete));
+		}
+	}
+
+	for (const auto &action: {_info, _copy, _paste, _delete, _new_folder, _tree, _sync, _clean_trash})
+	{
+		if (action)
+		{
+			addAction(action);
+			action->setShortcutVisibleInContextMenu(true);
+		}
+	}
 }
 
-
-void ItemMenu::setActionEnabled(const ItemMenu::Action &action, bool enabled)
+void ItemMenu::setActionEnabled(const Action &action, bool enabled)
 {
-    switch (action)
-    {
-        case Copy:
-            _copy->setEnabled(enabled);
-            break;
-        case Paste:
-            _paste->setEnabled(enabled);
-            break;
-        case Info:
-            _info->setEnabled(enabled);
-            break;
-        case Delete:
-            _delete->setEnabled(enabled);
-            break;
-        case NewFolder:
-            _new_folder->setEnabled(enabled);
-            break;
-        case Tree:
-            _tree->setEnabled(enabled);
-            break;
-        case Sync:
-            _sync->setEnabled(enabled);
-            break;
-        case None:
-        default:
-            break;
-    }
+	switch (action)
+	{
+		case Copy:
+			if (!enabled) removeAction(_copy);
+			break;
+		case Paste:
+			if (!enabled) removeAction(_paste);
+			break;
+		case Info:
+			if (!enabled) removeAction(_info);
+			break;
+		case Delete:
+			if (!enabled) removeAction(_delete);
+			break;
+		case NewFolder:
+			if (!enabled) removeAction(_new_folder);
+			break;
+		case Tree:
+			if (!enabled) removeAction(_tree);
+			break;
+		case Sync:
+			if (!enabled) removeAction(_sync);
+			break;
+		case CleanTrash:
+			if (!enabled) removeAction(_clean_trash);
+			break;
+		case None:
+		default:
+			break;
+	}
 }

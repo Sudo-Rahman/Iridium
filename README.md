@@ -41,8 +41,7 @@ Graphical application for managing remote storage services such as Google Drive,
   - [x] Search
   - [x] Sort by name, size, date, type
   - [x] Tree view on folder
-  - [ ] sync
-  - [ ] ...
+  - [x] sync
 
 <br>
 

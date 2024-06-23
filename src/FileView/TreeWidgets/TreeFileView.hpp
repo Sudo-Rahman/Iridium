@@ -50,7 +50,7 @@ public:
 
 	void changeRemote(const RemoteInfoPtr& info);
 
-	void copyto(const std::vector<RcloneFilePtr>&, TreeFileItem * item = nullptr);
+	void copyto(const std::vector<RcloneFilePtr>&, TreeFileItem * item = nullptr, bool move = false);
 
 	void reload(TreeFileItem * item = nullptr);
 

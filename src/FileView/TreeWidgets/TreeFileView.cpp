@@ -75,11 +75,13 @@ void TreeFileView::initUI()
 	setFocusPolicy(Qt::StrongFocus);
 
 	header()->setSectionsMovable(true);
-	header()->setFont(QFont("Arial", 11, QFont::Bold));
 	header()->setSortIndicatorShown(true);
 	header()->setSectionsClickable(true);
 	header()->setStretchLastSection(false);
 	setContextMenuPolicy(Qt::CustomContextMenu);
+
+	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 
 	_search_line_edit = new RoundedLineEdit(this);
 	_search_line_edit->setClearButtonEnabled(false);
@@ -298,7 +300,6 @@ void TreeFileView::doubleClick(const QModelIndex &index)
 	QTreeView::setRootIndex(item->siblingAtFirstColumn()->index());
 	emit pathChanged(getPath());
 	selectionModel()->clearSelection();
-	// verticalScrollBar()->setValue(0);
 }
 
 /**
@@ -308,28 +309,8 @@ void TreeFileView::showContextMenu()
 {
 	if (_model == nullptr)
 		return;
-	ItemMenu menu(this);
 	auto lisItem = getSelectedItems().empty() ? QList{getRootItem()} : getSelectedItems();
-	if (not rootIndex().isValid())
-	{
-		if (QTreeView::selectedIndexes().isEmpty())
-			return;
-
-		menu.setActionEnabled(ItemMenu::Action::Copy, false,
-		                      ItemMenu::Action::Delete, false,
-		                      ItemMenu::Action::Sync, false);
-	}
-
-	if (QTreeView::selectedIndexes().isEmpty())
-		menu.setActionEnabled(ItemMenu::Action::Copy, false,
-		                      ItemMenu::Action::Delete, false,
-		                      ItemMenu::Action::Tree, false,
-		                      ItemMenu::Action::Sync, false);
-
-	if (lisItem.size() > 1 or not lisItem.first()->getFile()->isDir())
-		menu.setActionEnabled(ItemMenu::Action::Paste, false,
-		                      ItemMenu::Tree, false,
-		                      ItemMenu::Sync, false);
+	ItemMenu menu(lisItem, this);
 
 	if (Iridium::Global::copy_files.empty())
 		menu.setActionEnabled(ItemMenu::Paste, false);
@@ -404,6 +385,26 @@ void TreeFileView::showContextMenu()
 			if (lisItem.size() == 1)
 				Iridium::Global::sync_dirs.push_back(lisItem.front()->getFile());
 			break;
+		case ItemMenu::Action::CleanTrash:
+			{
+				auto process = std::make_unique<ir::process>();
+				connectProcessreloadable(process.get());
+				process->clean_up(*_remote_info);
+				process->on_finish([this](int exit)
+				{
+					IridiumApp::runOnMainThread([this,exit]
+					{
+						if (exit == 0)
+							QMessageBox::information(this, tr("Corbeille vidée"),
+							                         tr("La corbeille a été vidée avec succès"));
+						else
+							QMessageBox::warning(this, tr("Erreur"),
+							                     tr("Une erreur est survenue lors de la suppression des fichiers"));
+					});
+				});
+				Iridium::Global::add_process(std::move(process));
+			}
+			break;
 		default:
 			break;
 	}
@@ -470,7 +471,7 @@ QString TreeFileView::getPath() const
  * @param files
  * @param paste
  */
-void TreeFileView::copyto(const std::vector<RcloneFilePtr> &files, TreeFileItem *paste)
+void TreeFileView::copyto(const std::vector<RcloneFilePtr> &files, TreeFileItem *paste, bool move)
 {
 	auto treePaste = paste == nullptr ? getRootItem() : paste;
 	if (not treePaste->getFile()->isDir())
@@ -489,15 +490,19 @@ void TreeFileView::copyto(const std::vector<RcloneFilePtr> &files, TreeFileItem 
 				_remote_info
 			);
 		auto process = process_ptr(new ir::process());
-		process->copy_to(*file, *newFile);
-		process->on_finish([this, treePaste](int exit)
+		if(move) process->move_to(*file, *newFile);
+		else process->copy_to(*file, *newFile);
+		process->on_finish([this,item = getRootItem(),treePaste,move](int exit)
 		{
 			if (exit == 0)
+			{
 				reload(treePaste);
+				if(move) reload(item);
+			}
 		});
 		process->on_stop([this,treePaste] { IridiumApp::runOnMainThread([this,treePaste] { reload(treePaste); }); });
 		connectProcessreloadable(process.get());
-		emit taskAdded(*file, *newFile, std::move(process), TaskRowParent::Copy);
+		emit taskAdded(*file, *newFile, std::move(process), move ? TaskRowParent::Move : TaskRowParent::Copy);
 	}
 }
 
@@ -1010,7 +1015,7 @@ void TreeFileView::dropEvent(QDropEvent *event)
 
 	_drag_sys_files = false;
 	_drop_destination = nullptr;
-	copyto(files, destination_item);
+	copyto(files, destination_item,_remote_info.get() == files.front()->remote().get());
 	event->acceptProposedAction();
 }
 
