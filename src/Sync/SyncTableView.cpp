@@ -130,7 +130,7 @@ void SyncTableView::analyse(SyncType type, const iro::basic_opt_uptr &filters)
 		if (log.level() == ire::json_log::log_level::error)
 		{
 			if (log.message().contains("'" + _src->name() + "'") or
-				log.message().contains("file not in ") and log.message().contains(_dst->path()))
+				log.message().contains("file not in ") and log.message().contains(_src->name()))
 			{
 				auto src_file = _dst->absolute_path() + "/" + log.object();
 				auto dst_file = _src->absolute_path() + "/" + log.object();
@@ -141,7 +141,7 @@ void SyncTableView::analyse(SyncType type, const iro::basic_opt_uptr &filters)
 			}
 			// for bisync
 			else if (log.message().contains("'" + _dst->name() + "'") or
-			log.message().contains("file not in ") and log.message().contains(_src->path()))
+			log.message().contains("file not in ") and log.message().contains(_dst->name()))
 			{
 				auto src_file = _src->absolute_path() + "/" + log.object();
 				auto dst_file = _dst->absolute_path() + "/" + log.object();

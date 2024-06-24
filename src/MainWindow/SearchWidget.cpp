@@ -145,21 +145,14 @@ void SearchWidget::fillRemotesComboBox()
 {
 	auto model = dynamic_cast<QStandardItemModel *>(_remotes_comboBox->model());
 	model->clear();
-	auto it = _remotes.begin();
-	auto *item = new QStandardItem(it->get()->name().c_str());
-	item->setIcon(QIcon(it->get()->icon().c_str()));
-	item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
-	item->setData(Qt::Checked, Qt::CheckStateRole);
-	model->appendRow(item);
-	it++;
-	for (; it not_eq _remotes.end(); it++)
+	for (const auto & remote : _remotes)
 	{
-		auto *item = new QStandardItem(it->get()->name().c_str());
-		item->setToolTip(it->get()->name().c_str());
-		item->setIcon(QIcon(it->get()->icon().c_str()));
+		auto *item = new QStandardItem(remote->name().c_str());
+		item->setToolTip(remote->name().c_str());
+		item->setIcon(QIcon(remote->icon().c_str()));
 		item->setData(Qt::Unchecked, Qt::CheckStateRole);
 		item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
-		item->setCheckState(_remotes_status[*it] ? Qt::Checked : Qt::Unchecked);
+		item->setCheckState(_remotes_status[remote] ? Qt::Checked : Qt::Unchecked);
 		model->appendRow(item);
 	}
 }

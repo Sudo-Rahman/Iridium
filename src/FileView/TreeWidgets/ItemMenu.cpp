@@ -72,6 +72,8 @@ ItemMenu::ItemMenu(const QList<TreeFileItem *> &files, QWidget *parent) : QMenu(
 				emit sync();
 			});
 			_sync->setIcon(QIcon(":/resources/sync-cloud.png"));
+			if(file->remote()->type() == ire::remote::alias or file->remote()->type() == ire::remote::crypt)
+				_sync->setEnabled(false);
 		}
 	}
 	if (!files.empty())

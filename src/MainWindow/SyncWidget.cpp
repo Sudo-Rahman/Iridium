@@ -7,6 +7,7 @@
 #include <QFormLayout>
 #include <QMessageBox>
 #include <Sync.hpp>
+#include <ranges>
 #include <iridium/rclone.hpp>
 
 #include "CircularProgressBar.hpp"
@@ -32,7 +33,7 @@ SyncWidget::SyncWidget(QWidget *parent) : QWidget(parent)
 	_types_sync_comboBox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	_types_sync_comboBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
 	_types_sync_comboBox->addItem(tr("Sync"), QVariant::fromValue(Sync));
-	// _types_sync_comboBox->addItem(tr("Bisync"), QVariant::fromValue(Bisync));
+	_types_sync_comboBox->addItem(tr("Bisync"), QVariant::fromValue(Bisync));
 	_dst_comboBox = new QComboBox(this);
 	_dst_comboBox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	_dst_comboBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
@@ -64,7 +65,7 @@ SyncWidget::SyncWidget(QWidget *parent) : QWidget(parent)
 	top_left_layout->addLayout(btn_layout);
 	top_left_layout->addWidget(_sync_progressBar);
 
-	top_right_layout->addWidget(_filter_group_box = new FilterGroupBox(tr("Filtres"),this));
+	top_right_layout->addWidget(_filter_group_box = new FilterGroupBox(tr("Filtres"), this));
 
 	_view = new SyncTableView(this);
 	_layout->addWidget(_view);
@@ -92,7 +93,9 @@ void SyncWidget::connectSignals()
 						_view->analyse(_types_sync_comboBox->currentData().value<SyncType>(),
 						               _filter_group_box->getFilters());
 						_types_sync_comboBox->setEnabled(false);
-						_filter_group_box->setEnabled(false);
+						_filter_group_box->setEnabled(true);
+						_dst_comboBox->setEnabled(true);
+						_src_comboBox->setEnabled(true);
 					}
 				}
 				break;
@@ -111,6 +114,8 @@ void SyncWidget::connectSignals()
 			case None:
 				_types_sync_comboBox->setEnabled(true);
 				_filter_group_box->setEnabled(true);
+				_dst_comboBox->setEnabled(true);
+				_src_comboBox->setEnabled(true);
 				_sync_progressBar->reset();
 				_sync_button->setEnabled(true);
 				_view->clear();
@@ -130,6 +135,9 @@ void SyncWidget::connectSignals()
 				_sync_progressBar->reset();
 				_sync_button->setText(tr("Vérifier"));
 				_sync_button->setEnabled(true);
+				_filter_group_box->setEnabled(true);
+				_dst_comboBox->setEnabled(true);
+				_src_comboBox->setEnabled(true);
 				_stop->setEnabled(false);
 				break;
 			case Analysed:
@@ -138,9 +146,11 @@ void SyncWidget::connectSignals()
 				_sync_button->setEnabled(true);
 				_sync_button->setText(tr("Vérifier"));
 				_types_sync_comboBox->setEnabled(true);
-				_filter_group_box->setEnabled(true);
 				_stop->setEnabled(false);
 				_sync_progressBar->reset();
+				_filter_group_box->setEnabled(true);
+				_dst_comboBox->setEnabled(true);
+				_src_comboBox->setEnabled(true);
 				_state = None;
 				break;
 			default:
@@ -165,6 +175,8 @@ void SyncWidget::connectSignals()
 		_sync_button->setEnabled(true);
 		_stop->setText(tr("Effacer"));
 		_state = Analysed;
+		_dst_comboBox->setEnabled(false);
+		_src_comboBox->setEnabled(false);
 		_sync_button->setText(tr("Synchroniser"));
 		Iridium::Global::signal_remove_info(_info_widget);
 	});
@@ -234,12 +246,16 @@ bool SyncWidget::event(QEvent *event)
 		auto selected_dst = _dst_comboBox->currentData().value<RcloneFilePtr>();
 		_src_comboBox->clear();
 		_dst_comboBox->clear();
-		for (auto &dir: Iridium::Global::sync_dirs)
+		for (const auto &dir: Iridium::Global::sync_dirs)
 		{
-			_src_comboBox->addItem(dir->parent() != nullptr ? dir->getName() : QString(dir->getRemoteInfo()->full_path().c_str()));
+			_src_comboBox->addItem(dir->parent() != nullptr
+				                       ? dir->getName()
+				                       : QString(dir->getRemoteInfo()->full_path().c_str()));
 			_src_comboBox->setItemData(_src_comboBox->count() - 1, QVariant::fromValue(dir), Qt::UserRole);
 			_src_comboBox->setItemIcon(_src_comboBox->count() - 1, dir->getRemoteInfo()->getIcon());
-			_dst_comboBox->addItem(dir->parent() != nullptr ? dir->getName() : QString(dir->getRemoteInfo()->full_path().c_str()));
+			_dst_comboBox->addItem(dir->parent() != nullptr
+				                       ? dir->getName()
+				                       : QString(dir->getRemoteInfo()->full_path().c_str()));
 			_dst_comboBox->setItemData(_dst_comboBox->count() - 1, QVariant::fromValue(dir), Qt::UserRole);
 			_dst_comboBox->setItemIcon(_dst_comboBox->count() - 1, dir->getRemoteInfo()->getIcon());
 		}

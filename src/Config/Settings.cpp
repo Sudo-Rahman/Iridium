@@ -49,14 +49,14 @@ const map<Settings::Node, string> Settings::_nodes = {
 		};
 
 const map<Settings::ProcessOptions, string> Settings::_nodes_options = {
-				{Transfers, _nodes.at(Flags)+".transfers"},
-				{Stats, _nodes.at(Flags)+".stats"},
+				{Transfers, _nodes.at(Flags) + ".transfers"},
+				{Stats, _nodes.at(Flags) + ".stats"},
 		};
 
 const map<std::string, QLocale::Language> Settings::languages = {
-	{"English", QLocale::English},
-	{"Français", QLocale::French}};
-
+				{"English", QLocale::English},
+				{"Français", QLocale::French}
+		};
 
 /**
  * @brief change the color of the directory icon
@@ -149,7 +149,15 @@ void Settings::refreshRemotesList()
 		{
 			return *r == *remote;
 		}))
-			std::erase_if(remotes, [remote](const RemoteInfoPtr &r) { return *r == *remote; });
+			std::erase_if(remotes, [remote](const RemoteInfoPtr &r)
+			{
+				if (*r == *remote)
+				{
+					erase_if(Global::remote_model, [remote](const auto &pair) { return *pair.first == *remote; });
+					return true;
+				}
+				return false;
+			});
 	}
 	// add remotes in new_remotes but not in remotes
 	for (const auto &remote: new_remotes)
@@ -230,7 +238,7 @@ void Settings::initRlclone(std::function<void(bool)> &&rclone_init_ok)
 	// init rclone path
 
 	bf::path rclonePath;
-	if(not _settings.get<string>(_nodes.at(RclonePath)).empty())
+	if (not _settings.get<string>(_nodes.at(RclonePath)).empty())
 		rclonePath = _settings.get<string>(_nodes.at(RclonePath));
 	else rclonePath = boost::process::search_path(rcloneBaseName().toStdString());
 
@@ -242,10 +250,7 @@ void Settings::initRlclone(std::function<void(bool)> &&rclone_init_ok)
 	_settings.put(_nodes.at(RclonePath), Global::path_rclone);
 }
 
-auto Settings::rcloneBaseName() -> QString
-{
-	return QSysInfo::productType() == "windows" ? "rclone.exe" : "rclone";
-}
+auto Settings::rcloneBaseName() -> QString { return QSysInfo::productType() == "windows" ? "rclone.exe" : "rclone"; }
 
 /**
  * @brief load all app settings
@@ -328,7 +333,6 @@ void Settings::initSettings()
 	_settings.put_child(_nodes_options.at(Transfers), pt::ptree{"4"});
 	_settings.put_child(_nodes_options.at(Stats), pt::ptree{"0.5s"});
 
-
 	_default = _settings;
 }
 
@@ -364,8 +368,9 @@ void Settings::loadValues()
 	}
 	try
 	{
-		_options_process[Transfers] = option::performance::transfers(_settings.get<int>(_nodes_options.at(Transfers),4));
-		_options_process[Stats] = option::logging::stats(_settings.get<std::string>(_nodes_options.at(Stats),"0.5"));
+		_options_process[Transfers] = option::performance::transfers(
+			_settings.get<int>(_nodes_options.at(Transfers), 4));
+		_options_process[Stats] = option::logging::stats(_settings.get<std::string>(_nodes_options.at(Stats), "0.5"));
 		for (const auto &option: _options_process)
 			ir::process::add_global_option(std::make_unique<iro::basic_option>(*option.second));
 		Global::load_type = static_cast<Iridium::Load>(getValue<uint8_t>(LoadType));
@@ -391,14 +396,14 @@ void Settings::setProcessOptions(const ProcessOptions &option, iro::basic_opt_up
 
 void Settings::setProcessOptions(const ProcessOptions &option, const iro::basic_option &value)
 {
-	setProcessOptions(option,std::make_unique<iro::basic_option>(value));
+	setProcessOptions(option, std::make_unique<iro::basic_option>(value));
 }
 
 QFile Settings::saveFileToTemp(const QByteArray &data, const QString &name)
 {
 	auto path = bf::temp_directory_path().append(name.toStdString());
 	// check if file already exists and compare data
-	if(bf::exists(path) and bf::is_regular_file(path))
+	if (bf::exists(path) and bf::is_regular_file(path))
 		bf::remove(path);
 	ofstream ofs(path.string(), ios::out | ios::binary);
 	ofs.write(data.data(), data.size());

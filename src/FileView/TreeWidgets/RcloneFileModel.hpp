@@ -76,4 +76,6 @@ public:
 	TreeFileItem *getTreeFileItem(const RcloneFilePtr &file, TreeFileItem *parent);
 
 	virtual void stop() = 0;
+
+	RemoteInfoPtr getRemoteInfo() const { return _remote_info; }
 };
