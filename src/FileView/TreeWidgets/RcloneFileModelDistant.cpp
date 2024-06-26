@@ -30,7 +30,7 @@ void RcloneFileModelDistant::stop()
 	_stop = true;
 	_process_pool.stop_all_processes_and_clear();
 	for (const auto &item: _items_static_load)
-		if (item->state() == TreeFileItem::Loading)
+		if (item not_eq nullptr and item->state() == TreeFileItem::Loading)
 		{
 			item->setState(TreeFileItem::NotLoaded);
 			item->removeRow(0);
@@ -56,6 +56,8 @@ void RcloneFileModelDistant::init()
 
 void RcloneFileModelDistant::addItem(const RcloneFilePtr &file, TreeFileItem *parent)
 {
+	std::lock_guard lock(_mutex);
+
 	RcloneFileModel::addItem(file, parent);
 	if (loadType() == Iridium::Load::Dynamic)
 		addItemDynamic(file, parent);
@@ -69,17 +71,26 @@ void RcloneFileModelDistant::addItemDynamic(const RcloneFilePtr &file, TreeFileI
 	if (tree_item->state() == TreeFileItem::NotLoaded)
 	{
 		auto rclone = std::make_unique<ir::process>();
+		auto *items = new std::vector<QList<QStandardItem *>>;
 		auto parser = ir::parser::file_parser::create(
 			new ir::parser::file_parser(file.get(), [=](const ire::file &f)
 			{
-				IridiumApp::runOnMainThread([=]
-				{
-					tree_item->appendRow(
-						getItemList(new TreeFileItemDistant(RcloneFile(f))));
-				});
+				items->push_back(getItemList(new TreeFileItemDistant(RcloneFile(f))));
 			}));
-		rclone->lsjson(*file).every_line_parser(parser);
+
 		connectProcess(rclone.get(), tree_item);
+
+		rclone->on_finish([=]
+		{
+			IridiumApp::runOnMainThread([=]
+			{
+				for (const auto &item: *items)
+					tree_item->appendRow(item);
+				delete items;
+			});
+		});
+
+		rclone->lsjson(*file).every_line_parser(parser);
 		_process_pool.add_process(std::move(rclone));
 	}
 }
@@ -92,24 +103,36 @@ void RcloneFileModelDistant::addItemStatic(const RcloneFilePtr &file, TreeFileIt
 		stop();
 
 	auto *tree_item = parent->siblingAtFirstColumn();
-	_items_static_load.push_back(tree_item);
 	if (tree_item == nullptr)return;
+	_items_static_load.push_back(tree_item);
 	if (tree_item->state() == TreeFileItem::NotLoaded)
 	{
 		auto rclone = ir::process_uptr(new ir::process());
+		auto *items = new std::vector<QList<QStandardItem *>>;
 		auto parser = ir::parser::file_parser::create(
 			new ir::parser::file_parser(file.get(), [=](const ire::file &f)
 			{
-				IridiumApp::runOnMainThread([=]
-				{
-					auto *item = new TreeFileItemDistant(RcloneFile(f));
-					tree_item->appendRow(getItemList(item));
-					if (item->getFile()->isDir() and not _stop)
-						addItemStatic(item->getFile(), item, depth - 1);
-				});
+				auto *item = new TreeFileItemDistant(RcloneFile(f));
+				items->push_back(getItemList(item));
 			}));
-		rclone->lsjson(*file).every_line_parser(parser);
+
 		connectProcess(rclone.get(), tree_item);
+
+		rclone->on_finish([this,items,depth,tree_item]
+		{
+			IridiumApp::runOnMainThread([=]
+			{
+				for (const auto &item: *items)
+				{
+					tree_item->appendRow(item);
+					auto item_cast = dynamic_cast<TreeFileItem *>(item.first());
+					if (item_cast != nullptr and item_cast->getFile()->isDir() and not _stop)
+						addItemStatic(item_cast->getFile(), item_cast, depth - 1);
+				}
+				delete items;
+			});
+		});
+		rclone->lsjson(*file).every_line_parser(parser);
 		_process_pool.add_process(std::move(rclone));
 	}
 	else
@@ -155,6 +178,8 @@ void RcloneFileModelDistant::reload(TreeFileItem *parent)
 				delete item;
 		}));
 
+	connectProcess(rclone.get(), tree_item);
+
 	auto on_finish = [items, files_ptr, tree_item, this](auto)
 	{
 		IridiumApp::runOnMainThread([=]
@@ -173,7 +198,6 @@ void RcloneFileModelDistant::reload(TreeFileItem *parent)
 			tree_item->setState(TreeFileItem::Loaded);
 		});
 	};
-	connectProcess(rclone.get(), tree_item);
 	rclone->every_line_parser(std::move(parser)).on_finish(std::move(on_finish));
 	rclone->lsjson(*tree_item->getFile());
 	_process_pool.add_process(std::move(rclone));

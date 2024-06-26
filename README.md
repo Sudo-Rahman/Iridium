@@ -28,12 +28,15 @@ Graphical application for managing remote storage services such as Google Drive,
     - [x] SMB
     - [x] PCloud
     - [x] Box
+    - [x] Alias
+    - [x] Crypt
     - [x] ...
 - Manage remote :
   - [x] Copy
   - [x] Paste
   - [x] Rename
   - [x] Delete
+  - [x] Move
   - [x] Create new folder
   - [x] View file properties
   - [x] View Transfer progress
@@ -56,6 +59,8 @@ Graphical application for managing remote storage services such as Google Drive,
 <img src="https://github.com/Sudo-Rahman/Iridium/blob/main/screen/screen4.png" width="500" height="auto" align="center" />
 <br>
 <img src="https://github.com/Sudo-Rahman/Iridium/blob/main/screen/screen5.png" width="500" height="auto" align="center" />
+<br>
+<img src="https://github.com/Sudo-Rahman/Iridium/blob/main/screen/screen6.png" width="500" height="auto" align="center" />
 <br>
 <img src="https://github.com/Sudo-Rahman/Iridium/blob/main/screen/screen6.png" width="500" height="auto" align="center" />
 

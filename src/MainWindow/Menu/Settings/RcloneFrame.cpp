@@ -59,11 +59,16 @@ RcloneFrame::RcloneFrame(QWidget *parent) : QFrame(parent)
 	_load_type->addItem(tr("Dynamic"));
 	_load_type->addItem(tr("Static"));
 	_load_type->setCurrentIndex(Settings::getValue<uint8_t>(Settings::LoadType));
-	_max_depth = new QSpinBox(this);
-	_max_depth->setRange(2, 10);
+	auto depth_layout = new QHBoxLayout;
+	_max_depth = new QSlider(this);
+	_max_depth->setOrientation(Qt::Horizontal);
+	_max_depth->setRange(2, 5);
 	_max_depth->setValue(Settings::getValue<uint8_t>(Settings::MaxDepth));
+	_depth_label = new QLabel(QString::number(_max_depth->value()), this);
+	depth_layout->addWidget(_max_depth,0, Qt::AlignVCenter);
+	depth_layout->addWidget(_depth_label, 0, Qt::AlignVCenter);
 	group2Layout->addRow(tr("Type de chargement : "), _load_type);
-	group2Layout->addRow(tr("Profondeur : "), _max_depth);
+	group2Layout->addRow(tr("Profondeur : "), depth_layout);
 	if (Iridium::Global::load_type == Iridium::Load::Dynamic)
 		_max_depth->setEnabled(false);
 
@@ -142,8 +147,9 @@ void RcloneFrame::connectSignals()
 		RcloneFileModelDistant::setLoadType(static_cast<Iridium::Load>(index));
 		Settings::setValue(std::pair(Settings::LoadType, index));
 	});
-	connect(_max_depth, &QSpinBox::valueChanged, [=](int value)
+	connect(_max_depth, &QSlider::valueChanged, [=](int value)
 	{
+		_depth_label->setText(QString::number(value));
 		RcloneFileModelDistant::setMaxDepth(value);
 		Settings::setValue(std::pair(Settings::MaxDepth, value));
 	});

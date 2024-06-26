@@ -41,7 +41,7 @@ void CryptRemoteConfigParamsFrame::createUi()
 	_path->setAccessibleName(noCheck);
 	_login->setText(tr("Ajouter"));
 	_form_layout->addRow(tr("Remote"), _remote_combo);
-	_form_layout->addRow(tr("Path"), _path);
+	_form_layout->addRow(tr("Chemin"), _path);
 	_form_layout->addRow(tr("Mot de passe 1"), _password_1);
 	_form_layout->addRow(tr("Mot de passe 2"), _password_2);
 	for (const auto &remote: Iridium::Global::remotes | std::views::filter([](const auto &remote)

@@ -33,7 +33,7 @@ SyncWidget::SyncWidget(QWidget *parent) : QWidget(parent)
 	_types_sync_comboBox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	_types_sync_comboBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
 	_types_sync_comboBox->addItem(tr("Sync"), QVariant::fromValue(Sync));
-	_types_sync_comboBox->addItem(tr("Bisync"), QVariant::fromValue(Bisync));
+	// _types_sync_comboBox->addItem(tr("Bisync"), QVariant::fromValue(Bisync));
 	_dst_comboBox = new QComboBox(this);
 	_dst_comboBox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	_dst_comboBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
@@ -130,18 +130,7 @@ void SyncWidget::connectSignals()
 				_view->stop();
 				break;
 			case Synced:
-				_state = None;
-				_view->clear();
-				_sync_progressBar->reset();
-				_sync_button->setText(tr("Vérifier"));
-				_sync_button->setEnabled(true);
-				_filter_group_box->setEnabled(true);
-				_dst_comboBox->setEnabled(true);
-				_src_comboBox->setEnabled(true);
-				_stop->setEnabled(false);
-				break;
 			case Analysed:
-				_state = None;
 				_view->clear();
 				_sync_button->setEnabled(true);
 				_sync_button->setText(tr("Vérifier"));
@@ -163,6 +152,9 @@ void SyncWidget::connectSignals()
 		_sync_progressBar->infinite();
 		_sync_button->setEnabled(false);
 		_stop->setEnabled(true);
+		_filter_group_box->setEnabled(false);
+		_dst_comboBox->setEnabled(false);
+		_src_comboBox->setEnabled(false);
 		_stop->setText(tr("Arrêter"));
 		_state = Analysing;
 		_info_widget = infoWidget(0);
@@ -175,8 +167,6 @@ void SyncWidget::connectSignals()
 		_sync_button->setEnabled(true);
 		_stop->setText(tr("Effacer"));
 		_state = Analysed;
-		_dst_comboBox->setEnabled(false);
-		_src_comboBox->setEnabled(false);
 		_sync_button->setText(tr("Synchroniser"));
 		Iridium::Global::signal_remove_info(_info_widget);
 	});

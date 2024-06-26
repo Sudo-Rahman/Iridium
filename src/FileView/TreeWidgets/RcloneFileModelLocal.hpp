@@ -13,6 +13,7 @@ class RcloneFileModelLocal : public RcloneFileModel
 Q_OBJECT
 
     std::unique_ptr<boost::thread> _thread{};
+    TreeFileItem *_current_item{};
 
 public:
     explicit RcloneFileModelLocal(const RemoteInfoPtr &remoteInfo, QTreeView *View);

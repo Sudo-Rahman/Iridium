@@ -15,7 +15,6 @@
 #include <QDropEvent>
 #include <QDrag>
 #include <QMimeData>
-#include <QSysInfo>
 #include <QTextEdit>
 #include <QThread>
 #include <QScrollBar>
@@ -31,6 +30,7 @@
 
 using namespace iridium::rclone;
 
+boost::signals2::signal<void(const RcloneFilePtr &)> TreeFileView::_moved_file_signals;
 /**
  * @brief Classe permettant de définir la taille des items
  */
@@ -194,6 +194,23 @@ void TreeFileView::connectSignals()
 	connect(this, &TreeFileView::previewed, this, [this](const QByteArray &data, const QString &name)
 	{
 		Preview preview(name, data);
+	});
+
+	_moved_file_signals.connect([this](const RcloneFilePtr &file)
+	{
+		std::lock_guard lock(_mutex);
+		auto it = std::ranges::find_if(_moved_files, [file](const auto &item)
+		{
+			if (item->getFile() == file)
+				return true;
+			return false;
+		});
+		if (it != _moved_files.end())
+		{
+			_moved_files.removeOne(*it);
+			file->parent()->remove_child(file);
+			(*it)->parent()->removeRow((*it)->row());
+		}
 	});
 }
 
@@ -395,8 +412,8 @@ void TreeFileView::showContextMenu()
 					IridiumApp::runOnMainThread([this,exit]
 					{
 						if (exit == 0)
-							QMessageBox::information(this, tr("Corbeille vidée"),
-							                         tr("La corbeille a été vidée avec succès"));
+							QMessageBox::information(this, tr("Corbeille vidé"),
+							                         tr("La corbeille a été vidé avec succès"));
 						else
 							QMessageBox::warning(this, tr("Erreur"),
 							                     tr("Une erreur est survenue lors de la suppression des fichiers"));
@@ -473,7 +490,15 @@ QString TreeFileView::getPath() const
  */
 void TreeFileView::copyto(const std::vector<RcloneFilePtr> &files, TreeFileItem *paste, bool move)
 {
-	auto treePaste = paste == nullptr ? getRootItem() : paste;
+	TreeFileItem *treePaste;
+	if (paste == nullptr)
+	{
+		if (getSelectedItems().empty())
+			treePaste = getRootItem();
+		else
+			treePaste = getSelectedItems().front();
+	}
+	else treePaste = paste;
 	if (not treePaste->getFile()->isDir())
 		return;
 	for (const auto &file: files)
@@ -492,12 +517,11 @@ void TreeFileView::copyto(const std::vector<RcloneFilePtr> &files, TreeFileItem 
 		auto process = process_ptr(new ir::process());
 		if (move) process->move_to(*file, *newFile);
 		else process->copy_to(*file, *newFile);
-		process->on_finish([this,treePaste](int exit)
+		process->on_finish([this,move,treePaste,file](int exit)
 		{
 			if (exit == 0)
-			{
 				reload(treePaste);
-			}
+			if (move) { _moved_file_signals(file); }
 		});
 		process->on_stop([this,treePaste] { IridiumApp::runOnMainThread([this,treePaste] { reload(treePaste); }); });
 		connectProcessreloadable(process.get());
@@ -554,6 +578,8 @@ void TreeFileView::keyPressEvent(QKeyEvent *event)
 	auto lisItem = getSelectedItems();
 
 	if (event->modifiers() == Qt::ControlModifier && event->key() == Qt::Key_C and !lisItem.empty())
+	{
+		_moved_files.append(lisItem);
 		Iridium::Global::clear_and_swap_copy_files(
 			[lisItem]
 			{
@@ -562,6 +588,7 @@ void TreeFileView::keyPressEvent(QKeyEvent *event)
 					files.push_back(item->getFile());
 				return files;
 			}());
+	}
 	if (event->modifiers() == Qt::ControlModifier && event->key() == Qt::Key_V)
 		copyto(Iridium::Global::copy_files);
 
@@ -863,6 +890,7 @@ void TreeFileView::dragEnterEvent(QDragEnterEvent *event)
 		event->acceptProposedAction();
 		_drag_sys_files = true;
 	}
+	else _moved_files.append(getSelectedItems());
 	event->accept();
 }
 

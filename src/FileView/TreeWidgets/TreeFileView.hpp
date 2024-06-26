@@ -9,6 +9,8 @@
 #include <QTreeWidgetItem>
 #include <QMessageBox>
 #include <RoundedLineEdit.hpp>
+#include <boost/signals2/signal.hpp>
+
 #include "TaskRowParent.hpp"
 
 class TreeFileView : public QTreeView
@@ -35,6 +37,12 @@ private:
 	std::map<std::string, bool> _operations{};
 
 	RoundedLineEdit * _search_line_edit{};
+
+	QList<TreeFileItem *>_moved_files{};
+
+	static boost::signals2::signal<void(const RcloneFilePtr &)> _moved_file_signals;
+	std::mutex _mutex;
+
 
 
 public:
