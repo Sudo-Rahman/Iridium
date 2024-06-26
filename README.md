@@ -62,7 +62,7 @@ Graphical application for managing remote storage services such as Google Drive,
 <br>
 <img src="https://github.com/Sudo-Rahman/Iridium/blob/main/screen/screen6.png" width="500" height="auto" align="center" />
 <br>
-<img src="https://github.com/Sudo-Rahman/Iridium/blob/main/screen/screen6.png" width="500" height="auto" align="center" />
+<img src="https://github.com/Sudo-Rahman/Iridium/blob/main/screen/screen7.png" width="500" height="auto" align="center" />
 
 ## Installation
 
