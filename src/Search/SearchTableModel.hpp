@@ -11,7 +11,7 @@ class SearchTableModel : public QAbstractTableModel
 	Q_OBJECT
 
 public:
-	SearchTableModel(QObject *parent = nullptr);
+	SearchTableModel(std::vector<SearchRow *> *rows,QObject *parent = nullptr);
 
 	int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 
@@ -22,8 +22,6 @@ public:
 	void clear();
 
 	QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
-
-	void setData(std::vector<SearchRow *> *rows);
 
 	void sort(int column, Qt::SortOrder order) override;
 

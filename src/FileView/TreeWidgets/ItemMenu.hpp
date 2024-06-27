@@ -8,6 +8,30 @@
 #include <QMenu>
 #include "TreeFileItem.hpp"
 
+// Forward declaration of Action type
+struct Action;
+
+template<class T>
+struct is_action : std::is_same<Action, std::decay_t<T>> {};
+
+template<class T>
+struct is_bool : std::is_same<bool, std::decay_t<T>> {};
+
+template<class T1, class T2>
+struct is_action_bool_pair : std::conjunction<is_action<T1>, is_bool<T2>> {};
+
+template<class ...Args>
+struct are_valid_pairs;
+
+template<>
+struct are_valid_pairs<> : std::true_type {};
+
+template<class T1, class T2, class ...Rest>
+struct are_valid_pairs<T1, T2, Rest...> : std::conjunction<is_action_bool_pair<T1, T2>, are_valid_pairs<Rest...>> {};
+
+template<class ...Args>
+static constexpr bool are_valid_pairs_v = are_valid_pairs<Args...>::value;
+
 class ItemMenu : public QMenu
 {
 	Q_OBJECT
@@ -34,37 +58,6 @@ public:
 	explicit ItemMenu(const QList<TreeFileItem *> &files, QWidget *parent = nullptr);
 
 	void setActionEnabled(const Action &action, bool enabled);
-
-	template<class T>
-	struct is_action : std::is_same<Action, std::decay_t<T>> {};
-
-	template<class T>
-	struct is_bool : std::is_same<bool, std::decay_t<T>> {};
-
-	template<class T1, class T2>
-	struct is_action_bool_pair : std::conjunction<is_action<T1>, is_bool<T2>> {};
-
-	template<class ...Args>
-	struct are_valid_pairs;
-
-	template< >
-	struct are_valid_pairs<> : std::true_type {};
-
-	template<class T1, class T2, class ...Rest>
-	struct are_valid_pairs<T1, T2, Rest
-				...> : std::conjunction<is_action_bool_pair<T1, T2>, are_valid_pairs<Rest ...>> {};
-
-	template<class ...Args>
-	static constexpr bool are_valid_pairs_v = are_valid_pairs<Args ...>::value;
-
-	template<class ...Args>
-	void setActionsEnabled(const Action &action, bool enabled,Args && ...args) requires(
-		sizeof...(Args) % 2 == 0 && are_valid_pairs_v<Args ...>
-	)
-	{
-		setActionEnabled(action, enabled);
-		if constexpr (sizeof...(Args) > 0) { setActionsEnabled(std::forward<Args>(args) ...); }
-	}
 
 	// override exec and return action clicked
 	Action exec(const QPoint &pos)

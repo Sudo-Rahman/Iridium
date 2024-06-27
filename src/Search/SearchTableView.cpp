@@ -86,9 +86,7 @@ using namespace iridium::rclone;
 
 SearchTableView::SearchTableView(QWidget *parent) : QTableView(parent)
 {
-	_model = new SearchTableModel(this);
-
-	_model->setData(&_data);
+	_model = new SearchTableModel(&_data,this);
 
 	QTableView::setModel(_model);
 	QTableView::setSelectionBehavior(QAbstractItemView::SelectRows);

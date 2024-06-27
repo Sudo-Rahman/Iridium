@@ -6,6 +6,9 @@
 #include <QMessageBox>
 #include <QIterator>
 #include <ranges>
+#include <ranges>
+#include <vector>
+#include <algorithm>
 #include <IridiumApp.hpp>
 
 #include "RemoteConfigParamsFrame.hpp"
@@ -152,9 +155,17 @@ bool RemoteConfigParamsFrame::checkFields()
 			return false;
 		}
 	}
-	for (auto &field: findChildren<RoundedLineEdit *>()
-	                  | std::views::filter([](auto field) { return field->accessibleName() != "noCheck"; })
-		)
+    auto fields = findChildren<RoundedLineEdit *>();
+
+    QList<RoundedLineEdit *> filteredFields;
+
+    // Use std::copy_if to copy elements that match the predicate to filteredFields
+    std::copy_if(fields.begin(), fields.end(), std::back_inserter(filteredFields),
+                 [](RoundedLineEdit *field) {
+                     return field->accessibleName() != "noCheck";
+                 });
+
+    for (auto &field:  filteredFields)
 	{
 		if (field->text().isEmpty())
 		{
