@@ -98,11 +98,11 @@ jobs:
           custom_tag: ${{ github.event.inputs.iridium_version }}
 
       - name: Creating pre-release
-        uses: actions/create-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.event.inputs.iridium_version }}
-          release_name: ${{ github.event.inputs.iridium_version }}
+          name: ${{ github.event.inputs.iridium_version }}
           draft: false
           prerelease: true
-          artifacts: cache/package/linux/*
+          files: cache/package/linux/*
           token: ${{ secrets.GITHUB_TOKEN }}
