@@ -1,0 +1,109 @@
+name: Iridium Build And Package
+
+on:
+  workflow_dispatch:
+    inputs:
+      iridium_version:
+        description: 'Version du build'
+        required: true
+        default: 'v0.0.1'
+      rclone_cpp_version:
+        description: 'Version de rclone_cpp'
+        required: true
+        default: 'v0.6.1'
+      qt_version:
+        description: 'Version de Qt'
+        required: true
+        default: '6.5.2'
+
+jobs:
+  linux-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        working-directory: .
+        run: |
+          sudo apt-get update &&\
+          DEBIAN_FRONTEND=noninteractive sudo apt-get install -y --no-install-recommends tzdata &&\
+          sudo apt-get install -y python3 python3-venv python3-pip libxcb-xkb-dev libxkbcommon-dev libvulkan-dev libgl-dev libopengl-dev libgl1-mesa-dev libboost-all-dev libcurlpp-dev libzip-dev rpm cmake &&\
+          sudo -v ; curl https://rclone.org/install.sh | sudo bash &&\
+          python3 -m venv ./venv &&\
+          ./venv/bin/pip install conan &&\
+          ./venv/bin/conan profile detect &&\
+          git clone https://github.com/Sudo-Rahman/rclone_cpp.git
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          version: ${{ github.event.inputs.qt_version }}
+          modules: qtbase,qttools
+
+      - name: Build rclone_cpp
+        working-directory: ./rclone_cpp
+        run: |
+          git checkout ${{ github.event.inputs.rclone_cpp_version }} &&\
+          ../venv/bin/conan install . --build=missing &&\
+          ../venv/bin/conan create . --build=missing
+
+      - name: Build Iridium
+        working-directory: .
+        run: |
+          ./venv/bin/conan install . --build=missing &&\
+          cmake --preset conan-release -DCMAKE_PREFIX_PATH="${{ env.QT_INSTALL_DIR }}/lib/cmake/Qt6" &&\
+          cmake --build --parallel --preset conan-release
+
+#      - name: Package
+#        run: |
+#          echo "Packaging"
+
+#      - name: Caching package
+#        uses: actions/upload-artifact@v2
+#        with:
+#          name: iridium-linux-package
+#          path: cache/package/linux
+#          retention-days: 1
+
+#  windows-build:
+#    runs-on: windows-latest
+#    steps:
+#      - name: Todo
+#        run: echo "TODO"
+#
+#  macos-build:
+#    runs-on: macos-latest
+#    steps:
+#      - name: Todo
+#        run: echo "TODO"
+
+#  tag:
+#    needs: [ linux-build, windows-build, macos-build ]
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@v4
+#
+#      - name: Push tag
+#        uses: mathieudutour/github-tag-action@v6.2
+#        with:
+#          github_token: ${{ secrets.GITHUB_TOKEN }}
+#          custom_tag: ${{ github.event.inputs.iridium_version }}
+#
+#      - name: Retrieve cached linux package
+#        uses: actions/download-artifact@v2
+#        with:
+#          name: iridium-linux-package
+#          path: cache/package/linux
+#
+#
+#      - name: Creating pre-release
+#        uses: actions/create-release@v1
+#        with:
+#          tag_name: ${{ github.event.inputs.iridium_version }}
+#          release_name: ${{ github.event.inputs.iridium_version }}
+#          draft: false
+#          prerelease: true
+#          artifacts: cache/package/linux/*
+#          token: ${{ secrets.GITHUB_TOKEN }}
