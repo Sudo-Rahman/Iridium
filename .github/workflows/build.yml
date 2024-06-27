@@ -28,7 +28,8 @@ jobs:
         run: |
           sudo apt-get update &&\
           DEBIAN_FRONTEND=noninteractive sudo apt-get install -y --no-install-recommends tzdata &&\
-          sudo apt-get install -y python3 python3-venv python3-pip libxcb-xkb-dev libxkbcommon-dev libvulkan-dev libgl-dev libopengl-dev libgl1-mesa-dev libboost-all-dev libcurlpp-dev libzip-dev rpm cmake &&\
+          sudo apt-get install -y python3 python3-venv python3-pip libxcb-xkb-dev libxkbcommon-dev libvulkan-dev libgl-dev libopengl-dev libgl1-mesa-dev libboost-all-dev libcurlpp-dev libzip-dev rpm cmake ruby ruby-dev build-essential &&\
+          sudo gem install --no-document fpm &&\
           sudo -v ; curl https://rclone.org/install.sh | sudo bash &&\
           python3 -m venv ./venv &&\
           ./venv/bin/pip install conan &&\
@@ -55,16 +56,17 @@ jobs:
           cmake --preset conan-release -DCMAKE_PREFIX_PATH="${{ env.QT_INSTALL_DIR }}/lib/cmake/Qt6" &&\
           cmake --build --parallel --preset conan-release
 
-#      - name: Package
-#        run: |
-#          echo "Packaging"
+      - name: Package
+        run: |
+          mkdir -p package &&\
+          fpm -s dir -t rpm -n iridium -v ${{ github.event.inputs.iridium_version }} --prefix /usr/local -C build .
 
-#      - name: Caching package
-#        uses: actions/upload-artifact@v2
-#        with:
-#          name: iridium-linux-package
-#          path: cache/package/linux
-#          retention-days: 1
+      - name: Caching package
+        uses: actions/upload-artifact@v2
+        with:
+          name: iridium-linux-package
+          path: package/*.rpm
+          retention-days: 1
 
 #  windows-build:
 #    runs-on: windows-latest
@@ -78,32 +80,32 @@ jobs:
 #      - name: Todo
 #        run: echo "TODO"
 
-#  tag:
+  tag:
 #    needs: [ linux-build, windows-build, macos-build ]
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: Checkout
-#        uses: actions/checkout@v4
-#
-#      - name: Push tag
-#        uses: mathieudutour/github-tag-action@v6.2
-#        with:
-#          github_token: ${{ secrets.GITHUB_TOKEN }}
-#          custom_tag: ${{ github.event.inputs.iridium_version }}
-#
-#      - name: Retrieve cached linux package
-#        uses: actions/download-artifact@v2
-#        with:
-#          name: iridium-linux-package
-#          path: cache/package/linux
-#
-#
-#      - name: Creating pre-release
-#        uses: actions/create-release@v1
-#        with:
-#          tag_name: ${{ github.event.inputs.iridium_version }}
-#          release_name: ${{ github.event.inputs.iridium_version }}
-#          draft: false
-#          prerelease: true
-#          artifacts: cache/package/linux/*
-#          token: ${{ secrets.GITHUB_TOKEN }}
+    needs: linux-build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Push tag
+        uses: mathieudutour/github-tag-action@v6.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          custom_tag: ${{ github.event.inputs.iridium_version }}
+
+      - name: Retrieve cached linux package
+        uses: actions/download-artifact@v2
+        with:
+          name: iridium-linux-package
+          path: package/
+
+      - name: Creating pre-release
+        uses: actions/create-release@v1
+        with:
+          tag_name: ${{ github.event.inputs.iridium_version }}
+          release_name: ${{ github.event.inputs.iridium_version }}
+          draft: false
+          prerelease: true
+          artifacts: cache/package/linux/*
+          token: ${{ secrets.GITHUB_TOKEN }}
