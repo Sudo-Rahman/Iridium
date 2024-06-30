@@ -30,7 +30,8 @@ jobs:
           python3 -m venv ./venv &&\
           ./venv/bin/pip install conan &&\
           ./venv/bin/conan profile detect &&\
-          git clone https://github.com/Sudo-Rahman/rclone_cpp.git
+          git clone https://github.com/Sudo-Rahman/rclone_cpp.git &&\
+          mkdir qt
 
       - name: Build Qt 6.7.0
         working-directory: ${{ github.workspace }}/qt
