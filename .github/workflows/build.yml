@@ -32,11 +32,16 @@ jobs:
           ./venv/bin/conan profile detect &&\
           git clone https://github.com/Sudo-Rahman/rclone_cpp.git
 
-      - name: Install Qt
-        uses: jurplel/install-qt-action@v2
-        with:
-          version: "6.5.2"
-          modules: qtbase,qttools
+      - name: Build Qt 6.7.0
+        working-directory: ./qt
+        run: |
+          curl -o qt-everywhere-src-6.7.0.tar.xz https://mirror.netcologne.de/qtproject/archive/qt/6.7/6.7.0/single/qt-everywhere-src-6.7.0.tar.xz &&/
+          mkdir src &&\
+          tar -xf qt-everywhere-src-6.7.0.tar.xz -C src &&\
+          mkdir build &&\
+          cd build &&\
+          ../src/qt-everywhere-src-6.7.0/configure -prefix . -opensource -confirm-license -release -nomake examples -nomake tests -skip qtwebengine -skip qtwebview -skip qtwebglplugin -skip qtwebchannel -skip qtwebsockets &&\
+          cmake --build . --parallel
 
       - name: Build rclone_cpp
         working-directory: ./rclone_cpp
@@ -49,13 +54,13 @@ jobs:
         working-directory: .
         run: |
           ./venv/bin/conan install . --build=missing &&\
-          cmake --preset conan-release -DCMAKE_PREFIX_PATH="${{ env.QT_INSTALL_DIR }}/lib/cmake/Qt6" &&\
+          cmake --preset conan-release -DCMAKE_PREFIX_PATH="${{ github.workspace }}/qt/build"  &&\
           cmake --build --parallel --preset conan-release
 
       - name: Package
         run: |
           mkdir -p package &&\
-          fpm -s dir -t rpm -n iridium -v ${{ github.event.inputs.iridium_version }} -p package/iridium-${{ github.event.inputs.iridium_version }}.rpm --prefix /usr/local -C build .
+          fpm -s dir -t deb -n iridium -v ${{ github.event.inputs.iridium_version }} -p package/iridium-${{ github.event.inputs.iridium_version }}.deb --prefix /usr/local -C build .
 
       - name: Caching package
         uses: actions/upload-artifact@v2
