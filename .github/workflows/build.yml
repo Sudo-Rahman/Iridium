@@ -36,7 +36,7 @@ jobs:
       - name: Build Qt 6.7.0
         working-directory: ${{ github.workspace }}/qt
         run: |
-          curl -o qt-everywhere-src-6.7.0.tar.xz https://mirror.netcologne.de/qtproject/archive/qt/6.7/6.7.0/single/qt-everywhere-src-6.7.0.tar.xz &&/
+          curl -o qt-everywhere-src-6.7.0.tar.xz https://mirror.netcologne.de/qtproject/archive/qt/6.7/6.7.0/single/qt-everywhere-src-6.7.0.tar.xz &&\
           mkdir src &&\
           tar -xf qt-everywhere-src-6.7.0.tar.xz -C src &&\
           mkdir build &&\
