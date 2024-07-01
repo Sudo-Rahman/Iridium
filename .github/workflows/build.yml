@@ -24,7 +24,7 @@ jobs:
         run: |
           sudo apt-get update &&\
           DEBIAN_FRONTEND=noninteractive sudo apt-get install -y --no-install-recommends tzdata &&\
-          sudo apt-get install -y python3 python3-venv python3-pip libclang-13-dev libclang-cpp13-dev llvm-13-dev libxcb-xkb-dev libxkbcommon-dev libvulkan-dev libgl-dev libopengl-dev libgl1-mesa-dev libglu1-mesa-dev libboost-all-dev libcurlpp-dev libzip-dev rpm cmake ruby ruby-dev build-essential &&\
+          sudo apt-get install -y python3 python3-venv python3-pip libxcb-xkb-dev libxkbcommon-dev libvulkan-dev libgl-dev libopengl-dev libgl1-mesa-dev libboost-all-dev libcurlpp-dev libzip-dev rpm cmake ruby ruby-dev build-essential &&\
           sudo gem install --no-document fpm &&\
           sudo -v ; curl https://rclone.org/install.sh | sudo bash &&\
           python3 -m venv ./venv &&\
@@ -33,16 +33,11 @@ jobs:
           git clone https://github.com/Sudo-Rahman/rclone_cpp.git &&\
           mkdir qt
 
-      - name: Build Qt 6.7.0
-        working-directory: ${{ github.workspace }}/qt
-        run: |
-          curl -o qt-everywhere-src-6.7.0.tar.xz https://mirror.netcologne.de/qtproject/archive/qt/6.7/6.7.0/single/qt-everywhere-src-6.7.0.tar.xz &&\
-          mkdir src &&\
-          tar -xf qt-everywhere-src-6.7.0.tar.xz -C src &&\
-          mkdir build &&\
-          cd build &&\
-          ../src/qt-everywhere-src-6.7.0/configure -prefix ${{ github.workspace }}/qt/build -opensource -confirm-license -release -nomake examples -nomake tests &&\
-          cmake --build . --parallel
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          version: "6.5.2"
+          modules: qtbase,qttools
 
       - name: Build rclone_cpp
         working-directory: ${{ github.workspace }}/rclone_cpp
@@ -55,7 +50,7 @@ jobs:
         working-directory: ${{ github.workspace }}
         run: |
           ./venv/bin/conan install . --build=missing &&\
-          cmake --preset conan-release -DCMAKE_PREFIX_PATH="${{ github.workspace }}/qt/build"  &&\
+          cmake --preset conan-release -DCMAKE_PREFIX_PATH="${{ env.QT_INSTALL_DIR }}/lib/cmake/Qt6" &&\
           cmake --build --parallel --preset conan-release
 
       - name: Package
