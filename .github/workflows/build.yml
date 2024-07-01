@@ -24,7 +24,7 @@ jobs:
         run: |
           sudo apt-get update &&\
           DEBIAN_FRONTEND=noninteractive sudo apt-get install -y --no-install-recommends tzdata &&\
-          sudo apt-get install -y python3 python3-venv python3-pip libxcb-xkb-dev libxkbcommon-dev libvulkan-dev libgl-dev libopengl-dev libgl1-mesa-dev libglu1-mesa-dev libboost-all-dev libcurlpp-dev libzip-dev rpm cmake ruby ruby-dev build-essential &&\
+          sudo apt-get install -y python3 python3-venv python3-pip libclang-dev llvm-dev libxcb-xkb-dev libxkbcommon-dev libvulkan-dev libgl-dev libopengl-dev libgl1-mesa-dev libglu1-mesa-dev libboost-all-dev libcurlpp-dev libzip-dev rpm cmake ruby ruby-dev build-essential &&\
           sudo gem install --no-document fpm &&\
           sudo -v ; curl https://rclone.org/install.sh | sudo bash &&\
           python3 -m venv ./venv &&\
