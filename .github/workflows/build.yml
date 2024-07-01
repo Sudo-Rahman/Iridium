@@ -60,7 +60,7 @@ jobs:
           fpm -s dir -t deb -n iridium -v ${{ github.event.inputs.iridium_version }} -p package/iridium-${{ github.event.inputs.iridium_version }}.deb --prefix /usr/local -C build .
 
       - name: Caching package
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: iridium-linux-package
           path: package/*.deb
@@ -87,7 +87,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Retrieve cached linux package
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: iridium-linux-package
           path: package/linux/
