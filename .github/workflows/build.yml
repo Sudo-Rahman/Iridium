@@ -41,7 +41,7 @@ jobs:
           tar -xf qt-everywhere-src-6.7.0.tar.xz -C src &&\
           mkdir build &&\
           cd build &&\
-          ../src/qt-everywhere-src-6.7.0/configure -prefix ${{ github.workspace }}/qt/build -opensource -confirm-license -release -nomake examples -nomake tests -skip qtwebengine -skip qtwebview -skip qtwebglplugin -skip qtwebchannel -skip qtwebsockets &&\
+          ../src/qt-everywhere-src-6.7.0/configure -prefix ${{ github.workspace }}/qt/build -opensource -confirm-license -release -nomake examples -nomake tests &&\
           cmake --build . --parallel
 
       - name: Build rclone_cpp
@@ -68,7 +68,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: iridium-linux-package
-          path: package/*.rpm
+          path: package/*.deb
           retention-days: 1
 
 #  windows-build:
