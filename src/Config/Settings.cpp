@@ -246,8 +246,15 @@ void Settings::initRlclone(std::function<void(bool)> &&rclone_init_ok)
 		rclonePath = dll::program_location().parent_path().append(rcloneBaseName().toStdString());
 
 	Global::path_rclone = rclonePath.string();
-	rclone_init_ok(ir::process::initialize(Global::path_rclone));
-	_settings.put(_nodes.at(RclonePath), Global::path_rclone);
+	try
+	{
+		rclone_init_ok(ir::process::initialize(Global::path_rclone));
+		_settings.put(_nodes.at(RclonePath), Global::path_rclone);
+	}
+	catch (initialize_error &)
+	{
+		rclone_init_ok(false);
+	}
 }
 
 auto Settings::rcloneBaseName() -> QString { return QSysInfo::productType() == "windows" ? "rclone.exe" : "rclone"; }
