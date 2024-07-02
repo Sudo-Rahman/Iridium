@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
 			auto not_found = RcloneNotFoundWidget();
 			not_found.exec();
 			if (not not_found.rcloneInstalled())
-				exit(1);
+				exit(0);
 		}
 	});
 
