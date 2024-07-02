@@ -10,7 +10,7 @@ on:
       rclone_cpp_version:
         description: 'Version de rclone_cpp'
         required: true
-        default: 'v0.6.1'
+        default: 'v0.6.2'
 
 jobs:
   linux-build:
@@ -57,7 +57,9 @@ jobs:
         working-directory: ${{ github.workspace }}
         run: |
           mkdir -p package &&\
-          fpm -s dir -t deb -n iridium -v ${{ github.event.inputs.iridium_version }} -p package/iridium-${{ github.event.inputs.iridium_version }}.deb --prefix /usr/local -C build .
+          fpm -s dir -t deb -n iridium -v ${{ github.event.inputs.iridium_version }} -p package/iridium-${{ github.event.inputs.iridium_version }}.deb \
+          --depends qt6-base \
+          --prefix /usr/local -C build . \
 
       - name: Caching package
         uses: actions/upload-artifact@v4
