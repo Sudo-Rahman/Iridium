@@ -70,7 +70,6 @@ endif ()
 qt_add_translation(QM_FILES ${TRANSLATION})
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    set(CMAKE_OSX_DEPLOYMENT_TARGET "13.0" CACHE STRING "Minimum OS X deployment version")
     set_source_files_properties("${QM_FILES}" PROPERTIES MACOSX_PACKAGE_LOCATION "Translations")
     set(MACOSX_BUNDLE_ICON_FILE Iridium.icns)
     set(myApp_ICON resources/Iridium.icns)
@@ -92,9 +91,19 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
         CURL::libcurl libzip::zip
 )
 
+
+function(set_min_macos_version target version)
+    if (APPLE)
+        set_target_properties(${target} PROPERTIES XCODE_ATTRIBUTE_MACOSX_DEPLOYMENT_TARGET ${version})
+        target_compile_options(${target} PUBLIC "-mmacosx-version-min=${version}")
+        target_link_options(${target} PUBLIC "-mmacosx-version-min=${version}")
+    endif ()
+endfunction()
+
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     target_link_libraries(Iridium)
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    set_min_macos_version(${PROJECT_NAME} 12.0)
     find_library(COCOA Cocoa)
     target_link_libraries(${PROJECT_NAME} PRIVATE ${COCOA})
     set_target_properties(${PROJECT_NAME} PROPERTIES

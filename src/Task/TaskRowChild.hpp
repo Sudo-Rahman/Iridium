@@ -25,7 +25,7 @@ private:
 
 	ire::json_log::stats::transfer _data{};
 
-	std::vector<double_t> _avg{};
+	long long _elapsed_time{0};
 
 	void init() override;
 
