@@ -77,7 +77,7 @@ void CmdTextEdit::keyPressEvent(QKeyEvent *event)
         if (not _cmd.isEmpty())
         {
             cursorPosition();
-            _cmd.removeLast();
+            _cmd.remove(QRegExp("\S$"));
         } else
             return;
     }
