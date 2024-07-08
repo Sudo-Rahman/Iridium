@@ -6,7 +6,7 @@
 #include <Global.hpp>
 #include <QTextBlock>
 #include <QTextCursor>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <Settings.hpp>
 
 
@@ -78,7 +78,7 @@ void CmdTextEdit::keyPressEvent(QKeyEvent *event)
         if (not _cmd.isEmpty())
         {
             cursorPosition();
-            _cmd.remove(QRegExp("\\S$"));
+            _cmd.remove(QRegularExpression("\\S$"));
         } else
             return;
     }
