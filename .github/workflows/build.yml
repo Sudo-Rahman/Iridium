@@ -59,7 +59,7 @@ jobs:
           mkdir -p package &&\
           fpm -s dir -t deb -n iridium -v ${{ github.event.inputs.iridium_version }} -p package/iridium-${{ github.event.inputs.iridium_version }}.deb \
           --depends qt6-base-dev \
-          --prefix /usr/local -C build/Release Iridium \
+          --prefix /usr/bin -C build/Release Iridium \
 
       - name: Caching package
         uses: actions/upload-artifact@v4
