@@ -36,7 +36,7 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
         with:
-          version: "6.5.2"
+          version: "6.4.2"
           modules: qtbase,qttools
 
       - name: Build rclone_cpp
