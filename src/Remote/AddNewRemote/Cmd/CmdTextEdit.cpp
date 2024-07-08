@@ -72,7 +72,7 @@ void CmdTextEdit::keyPressEvent(QKeyEvent *event)
         writeCmdInput();
         _cmd.clear();
     } else
-        _cmd += event->text().toStdString();
+        _cmd += event->text();
     if (event->key() == Qt::Key_Backspace)
     {
         if (not _cmd.isEmpty())
