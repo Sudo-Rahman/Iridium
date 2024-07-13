@@ -74,8 +74,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-#      - name: Installing winget
-#        uses: Cyberboss/install-winget@v1
+      - name: Installing winget
+        uses: Cyberboss/install-winget@v1
 
       - name: Install Python
         uses: actions/setup-python@v5
