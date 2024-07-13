@@ -68,11 +68,58 @@ jobs:
           path: package/*.deb
           retention-days: 1
 
-#  windows-build:
-#    runs-on: windows-latest
-#    steps:
-#      - name: Todo
-#        run: echo "TODO"
+  windows-build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+#      - name: Installing winget
+#        uses: Cyberboss/install-winget@v1
+
+      - name: Installing Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Installing cmake
+        uses: Symbitic/install-cmake@v0.1.1
+
+      - name: Setting up Conan
+        run: |
+          python -m venv .\\venv
+          .\\venv\\Scripts\\pip install conan
+          .\\venv\\Scripts\\conan profile detect
+          git clone https://github.com/Sudo-Rahman/rclone_cpp.git
+          mkdir qt
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          version: "6.4.2"
+          modules: qtbase,qttools
+
+      - name: Build rclone_cpp
+        working-directory: ${{ github.workspace }}\\rclone_cpp
+        run: |
+          git checkout ${{ github.event.inputs.rclone_cpp_version }}
+          ..\\venv\\Scripts\\conan install . --build=missing
+          ..\\venv\\Scripts\\conan create . --build=missing
+
+      - name: Build Iridium
+        working-directory: ${{ github.workspace }}
+        run: |
+          .\\venv\\Scripts\\conan install . --build=missing
+          cmake --preset conan-release -DCMAKE_PREFIX_PATH="${{ env.QT_INSTALL_DIR }}\\lib\\cmake\\Qt6"
+          cmake --build --parallel --preset conan-release
+
+      - name: Caching package
+        uses: actions/upload-artifact@v4
+        with:
+          name: iridium-windows-package
+          path: package\\*.zip
+          retention-days: 1
+
 #
 #  macos-build:
 #    runs-on: macos-latest
@@ -82,7 +129,7 @@ jobs:
 
   tag:
 #    needs: [ linux-build, windows-build, macos-build ]
-    needs: linux-build
+    needs: [ linux-build, windows-build ]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
