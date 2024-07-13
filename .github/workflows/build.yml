@@ -89,11 +89,21 @@ jobs:
         run: |
           python -m venv .\\venv
           .\\venv\\Scripts\\pip install conan
-          .\\venv\\Scripts\\conan profile new default --detect
-          .\\venv\\Scripts\\conan profile update settings.compiler.cppstd=17 default
-          .\\venv\\Scripts\\conan profile detect
+          .\\venv\\Scripts\\conan profile detect  
           git clone https://github.com/Sudo-Rahman/rclone_cpp.git
           mkdir qt
+
+      - name: Update Conan profile to use C++17
+        shell: pwsh
+        run: |
+          $PROFILE_PATH = "$env:USERPROFILE\.conan\profiles\default"
+          $CPPSTD_SETTING = "compiler.cppstd=17"
+          if (Get-Content $PROFILE_PATH | Select-String -Pattern "compiler.cppstd=") {
+            (Get-Content $PROFILE_PATH) -replace "compiler.cppstd=.*", $CPPSTD_SETTING | Set-Content $PROFILE_PATH
+          } else {
+            Add-Content -Path $PROFILE_PATH -Value $CPPSTD_SETTING
+          }
+          Write-Host "Conan profile updated successfully"
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
