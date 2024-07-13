@@ -77,18 +77,20 @@ jobs:
 #      - name: Installing winget
 #        uses: Cyberboss/install-winget@v1
 
-      - name: Installing Python
+      - name: Install Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.x'
 
-      - name: Installing cmake
-        uses: Symbitic/install-cmake@v0.1.1
+      - name: Install CMake
+        uses: jwlawson/actions-setup-cmake@v2.0.2
 
-      - name: Setting up Conan
+      - name: Install Conan
         run: |
           python -m venv .\\venv
           .\\venv\\Scripts\\pip install conan
+          .\\venv\\Scripts\\conan profile new default --detect
+          .\\venv\\Scripts\\conan profile update settings.compiler.cppstd=17 default
           .\\venv\\Scripts\\conan profile detect
           git clone https://github.com/Sudo-Rahman/rclone_cpp.git
           mkdir qt
@@ -98,6 +100,11 @@ jobs:
         with:
           version: "6.4.2"
           modules: qtbase,qttools
+
+      - name: Install Rclone
+        run: |
+          winget install Rclone.Rclone
+          rclone version
 
       - name: Build rclone_cpp
         working-directory: ${{ github.workspace }}\\rclone_cpp
@@ -110,7 +117,7 @@ jobs:
         working-directory: ${{ github.workspace }}
         run: |
           .\\venv\\Scripts\\conan install . --build=missing
-          cmake --preset conan-release -DCMAKE_PREFIX_PATH="${{ env.QT_INSTALL_DIR }}\\lib\\cmake\\Qt6"
+          cmake --preset conan-release -DCMAKE_CXX_STANDARD=17 -DCMAKE_PREFIX_PATH="${{ env.QT_INSTALL_DIR }}\\lib\\cmake\\Qt6"
           cmake --build --parallel --preset conan-release
 
       - name: Caching package
