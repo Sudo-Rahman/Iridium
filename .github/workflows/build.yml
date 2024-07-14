@@ -96,7 +96,7 @@ jobs:
       - name: Update Conan profile to use C++17
         shell: pwsh
         run: |
-          $PROFILE_PATH = "$env:USERPROFILE\.conan\profiles\default"
+          $PROFILE_PATH = .\\venv\\Scripts\\conan profile path default
           $CPPSTD_SETTING = "compiler.cppstd=17"
           if (Get-Content $PROFILE_PATH | Select-String -Pattern "compiler.cppstd=") {
             (Get-Content $PROFILE_PATH) -replace "compiler.cppstd=.*", $CPPSTD_SETTING | Set-Content $PROFILE_PATH
