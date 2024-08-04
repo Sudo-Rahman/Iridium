@@ -68,11 +68,74 @@ jobs:
           path: package/*.deb
           retention-days: 1
 
-#  windows-build:
-#    runs-on: windows-latest
-#    steps:
-#      - name: Todo
-#        run: echo "TODO"
+  windows-build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Installing winget
+        uses: Cyberboss/install-winget@v1
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install CMake
+        uses: jwlawson/actions-setup-cmake@v2.0.2
+
+      - name: Install Conan
+        run: |
+          python -m venv .\\venv
+          .\\venv\\Scripts\\pip install conan
+          .\\venv\\Scripts\\conan profile detect  
+          git clone https://github.com/Sudo-Rahman/rclone_cpp.git
+          mkdir qt
+
+      - name: Update Conan profile to use C++17
+        shell: pwsh
+        run: |
+          $PROFILE_PATH = .\\venv\\Scripts\\conan profile path default
+          $CPPSTD_SETTING = "compiler.cppstd=17"
+          if (Get-Content $PROFILE_PATH | Select-String -Pattern "compiler.cppstd=") {
+            (Get-Content $PROFILE_PATH) -replace "compiler.cppstd=.*", $CPPSTD_SETTING | Set-Content $PROFILE_PATH
+          } else {
+            Add-Content -Path $PROFILE_PATH -Value $CPPSTD_SETTING
+          }
+          Write-Host "Conan profile updated successfully"
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          version: "6.4.2"
+          modules: qtbase,qttools
+
+      - name: Install Rclone
+        run: |
+          winget install Rclone.Rclone --disable-interactivity --accept-source-agreements
+
+      - name: Build rclone_cpp
+        working-directory: ${{ github.workspace }}\\rclone_cpp
+        run: |
+          git checkout ${{ github.event.inputs.rclone_cpp_version }}
+          ..\\venv\\Scripts\\conan install . --build=missing
+          ..\\venv\\Scripts\\conan create . --build=missing
+
+      - name: Build Iridium
+        working-directory: ${{ github.workspace }}
+        run: |
+          .\\venv\\Scripts\\conan install . --build=missing
+          cmake --preset conan-release -DCMAKE_CXX_STANDARD=17 -DCMAKE_PREFIX_PATH="${{ env.QT_INSTALL_DIR }}\\lib\\cmake\\Qt6"
+          cmake --build --parallel --preset conan-release
+
+      - name: Caching executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: iridium-windows-package
+          path: build\\Release\\Iridium.exe
+          retention-days: 1
+
 #
 #  macos-build:
 #    runs-on: macos-latest
@@ -82,7 +145,7 @@ jobs:
 
   tag:
 #    needs: [ linux-build, windows-build, macos-build ]
-    needs: linux-build
+    needs: [ linux-build, windows-build ]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -93,6 +156,12 @@ jobs:
         with:
           name: iridium-linux-package
           path: package/linux/
+
+      - name: Retrieve cached windows package
+        uses: actions/download-artifact@v4
+        with:
+          name: iridium-windows-package
+          path: package/windows/
 
       - name: Push tag
         uses: mathieudutour/github-tag-action@v6.2
@@ -108,5 +177,7 @@ jobs:
           name: ${{ github.event.inputs.iridium_version }}
           draft: false
           prerelease: true
-          files: package/linux/*
+          files: |
+            package/linux/*
+            package/windows/*
           token: ${{ secrets.GITHUB_TOKEN }}
